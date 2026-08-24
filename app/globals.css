@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+/*
+ * Reps Club — tokens de design.
+ * Fonte: handoff_claude_code/04-design-tokens.md
+ * Regra: nenhum hex solto em componente. Sempre um token daqui.
+ *
+ * Mapeamento doc → token (onde o nome mudou para caber no Tailwind):
+ *   text-2..text-5 → ink-2..ink-5   ·   bg → canvas   ·   bg-sunken → canvas-sunken
+ */
+@theme {
+  /* ---- Marca e ação ---------------------------------------------------- */
+  /* O painel e a landing usavam #F23030 nos protótipos. Unificado em #FF2A2A. */
+  --color-brand: #ff2a2a;
+  --color-brand-hover: #c92323;
+  --color-brand-soft: #fff3f3;
+  --color-brand-tint: rgba(255, 42, 42, 0.08);
+
+  /* ---- Tema claro ------------------------------------------------------ */
+  --color-ink: #0a0a0a;
+  --color-ink-2: #54544f;
+  --color-ink-3: #6e6e69;
+  --color-ink-4: #84847f;
+  --color-ink-5: #9a9a95;
+  --color-surface: #ffffff;
+  --color-canvas: #f4f4f2;
+  --color-canvas-sunken: #ededea;
+  --color-border: #e2e2de;
+  --color-border-soft: #e7e7e2;
+  --color-border-strong: #d8d8d2;
+
+  /* ---- Tema escuro (execução, splash, boas-vindas) --------------------- */
+  --color-dark-bg: #0a0a0a;
+  --color-dark-surface: #161616;
+  --color-dark-surface-2: #141414;
+  --color-dark-elev: #232323;
+  --color-dark-border: #2a2a2a;
+  --color-dark-border-2: #3a3a3a;
+  --color-dark-text: #fafafa;
+  --color-dark-text-2: #e8e8e3;
+  --color-dark-muted: #4a4a4a;
+
+  /* ---- Semânticas ------------------------------------------------------ */
+  --color-success: #1f9d57;
+  --color-success-dark: #1f6d45;
+  --color-warning: #c79a13;
+  --color-warning-bg: #fdf6e8;
+  --color-danger: #ff2a2a;
+  --color-danger-bg: #ffecec;
+  /* Fundo do badge neutro (doc 04, seção "Componentes base"). */
+  --color-badge-neutral: #f2f2ef;
+
+  /* ---- Tipografia ------------------------------------------------------ */
+  /* Inter em toda a UI. JetBrains Mono só para eyebrow, label, badge, timer. */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  /* ---- Raios ----------------------------------------------------------- */
+  --radius-pill: 6px;
+  --radius-input: 12px;
+  --radius-button: 12px;
+  --radius-card: 14px;
+  --radius-card-lg: 16px;
+  --radius-sheet: 22px;
+
+  /* ---- Sombras --------------------------------------------------------- */
+  /* Sombra é exceção, não padrão. Card comum se separa por borda ou fundo. */
+  --shadow-brand: 0 8px 20px rgba(255, 42, 42, 0.4);
+  --shadow-cta: 0 10px 22px rgba(255, 42, 42, 0.28);
+  --shadow-halo: 0 12px 40px rgba(255, 42, 42, 0.4);
+  --shadow-toast: 0 12px 30px rgba(0, 0, 0, 0.25);
+
+  /* ---- Transições ------------------------------------------------------ */
+  /* 150ms para cor e fundo. Nada acima de 250ms na UI. */
+  --default-transition-duration: 150ms;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  /* Foco visível em tudo que recebe teclado — requisito de acessibilidade. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+}
+
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
