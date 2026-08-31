@@ -157,6 +157,44 @@ export async function enviarLinkDeRecuperacao(
   return { sucesso: "link-enviado", campos: bruto };
 }
 
+/**
+ * Link mágico do aluno (`/acesso`).
+ *
+ * Difere da recuperação de senha em dois pontos: o destino é `/app`, e
+ * `shouldCreateUser: false` — sem isso, digitar um e-mail qualquer criaria uma
+ * conta órfã, sem personal e sem treino.
+ */
+export async function enviarLinkDeAcesso(
+  _anterior: EstadoAuth,
+  formData: FormData,
+): Promise<EstadoAuth> {
+  const bruto = { email: String(formData.get("email") ?? "") };
+
+  const analise = esquemaEmail.safeParse(bruto);
+  if (!analise.success) {
+    return { errosPorCampo: errosDe(analise.error), campos: bruto };
+  }
+
+  const supabase = await createClient();
+  const origem = await getSiteOrigin();
+
+  const { error } = await supabase.auth.signInWithOtp({
+    email: analise.data.email,
+    options: {
+      shouldCreateUser: false,
+      emailRedirectTo: `${origem}/auth/confirmar?proximo=/app`,
+    },
+  });
+
+  // Mesma regra do `enviarLinkDeRecuperacao`: limite de envio o usuário precisa
+  // ver; "esse e-mail não existe", não.
+  if (error && /rate limit|for security purposes/i.test(error.message)) {
+    return { erro: traduzErro(error.message), campos: bruto };
+  }
+
+  return { sucesso: "link-enviado", campos: bruto };
+}
+
 export async function definirNovaSenha(
   _anterior: EstadoAuth,
   formData: FormData,

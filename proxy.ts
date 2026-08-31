@@ -7,11 +7,13 @@ import { updateSession } from "@/lib/supabase/proxy";
  *
  * 1. Renova a sessão do Supabase (obrigatório — ver lib/supabase/proxy.ts).
  * 2. Desvia quem não está logado para o login, antes de renderizar qualquer
- *    coisa. É uma checagem *otimista*: a autorização de verdade acontece em
- *    app/(personal)/painel/layout.tsx, que confirma a linha em `trainers`.
- *    Proxy não é lugar de decidir permissão — é lugar de evitar render à toa.
+ *    coisa. É uma checagem *otimista*: a autorização de verdade acontece nos
+ *    layouts, com `requireTrainer()` e `requireStudent()`, que confirmam a
+ *    linha em `trainers` / `students`. Proxy não é lugar de decidir permissão —
+ *    é lugar de evitar render à toa.
  *
- * Fase 1: acrescentar `/app/*` (área do aluno) aqui, desviando para `/acesso`.
+ * `/convite/[token]` fica de fora de propósito: quem abre o link ainda não tem
+ * conta. A validade do token é checada na página.
  */
 export async function proxy(request: NextRequest) {
   const { response, user } = await updateSession(request);
@@ -24,8 +26,17 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(login);
   }
 
-  // Já logado não precisa ver o login de novo.
-  if (user && (pathname === "/entrar" || pathname === "/cadastro")) {
+  if (pathname.startsWith("/app") && !user) {
+    const acesso = new URL("/acesso", request.url);
+    if (pathname !== "/app") acesso.searchParams.set("proximo", pathname + search);
+    return NextResponse.redirect(acesso);
+  }
+
+  // Já logado não precisa ver as telas de entrada de novo. Para onde mandar
+  // depende do papel, e o proxy não consulta o banco — `/painel` decide: se
+  // for aluno, `requireTrainer()` desvia para `/app`.
+  const telasDeEntrada = ["/entrar", "/cadastro", "/acesso"];
+  if (user && telasDeEntrada.includes(pathname)) {
     return NextResponse.redirect(new URL("/painel", request.url));
   }
 

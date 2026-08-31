@@ -240,11 +240,13 @@ export type Database = {
             | Database["public"]["Enums"]["experience_level"]
             | null
           goal: Database["public"]["Enums"]["student_goal"] | null
+          height_cm: number | null
           id: string
           name: string
           onboarded_at: string | null
           status: Database["public"]["Enums"]["student_status"]
           trainer_id: string
+          weight_kg: number | null
         }
         Insert: {
           avatar_url?: string | null
@@ -255,11 +257,13 @@ export type Database = {
             | Database["public"]["Enums"]["experience_level"]
             | null
           goal?: Database["public"]["Enums"]["student_goal"] | null
+          height_cm?: number | null
           id: string
           name: string
           onboarded_at?: string | null
           status?: Database["public"]["Enums"]["student_status"]
           trainer_id: string
+          weight_kg?: number | null
         }
         Update: {
           avatar_url?: string | null
@@ -270,11 +274,13 @@ export type Database = {
             | Database["public"]["Enums"]["experience_level"]
             | null
           goal?: Database["public"]["Enums"]["student_goal"] | null
+          height_cm?: number | null
           id?: string
           name?: string
           onboarded_at?: string | null
           status?: Database["public"]["Enums"]["student_status"]
           trainer_id?: string
+          weight_kg?: number | null
         }
         Relationships: [
           {
@@ -451,17 +457,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      can_read_mesocycle: { Args: { p_mesocycle_id: string }; Returns: boolean }
-      can_read_session: { Args: { p_session_id: string }; Returns: boolean }
-      can_read_workout: { Args: { p_workout_id: string }; Returns: boolean }
-      can_write_mesocycle: {
-        Args: { p_mesocycle_id: string }
-        Returns: boolean
+      convite_por_token: {
+        Args: { p_token: string }
+        Returns: {
+          email: string
+          nome: string
+          personal: string
+        }[]
       }
-      can_write_workout: { Args: { p_workout_id: string }; Returns: boolean }
-      my_trainer_id: { Args: never; Returns: string }
-      owns_session: { Args: { p_session_id: string }; Returns: boolean }
-      trainer_of: { Args: { p_student_id: string }; Returns: boolean }
     }
     Enums: {
       equipment:
