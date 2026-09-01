@@ -91,7 +91,9 @@ export function EditorDeTreino({
   const [buscaAberta, setBuscaAberta] = useState(false);
 
   const programa = programaPorAluno[alunoId];
-  const precisaPrograma = Boolean(alunoId) && !programa;
+  // Treino salvo já pendura num macrotreino: perguntar o programa na edição não
+  // faria sentido, e a Server Action nem olharia a resposta.
+  const precisaPrograma = !treino && Boolean(alunoId) && !programa;
 
   const resumo = useMemo(() => {
     const parametros = itens.map((item) => ({
@@ -160,6 +162,9 @@ export function EditorDeTreino({
       {/* `excluirTreino` lê este campo: o botão de excluir usa `formAction`
           neste mesmo formulário, porque <form> dentro de <form> é inválido. */}
       {treino && <input type="hidden" name="id" value={treino.id} />}
+      {/* O select de aluno fica desabilitado na edição e, desabilitado, não é
+          enviado: sem este hidden o `alunoId` chegaria vazio na Server Action. */}
+      {treino && <input type="hidden" name="alunoId" value={treino.alunoId} />}
       <input type="hidden" name="exercicios" value={payload} />
 
       {salvo && (
@@ -175,7 +180,10 @@ export function EditorDeTreino({
         <div className="grid gap-4 sm:grid-cols-[1fr_100px]">
           <Select
             label="Aluno"
-            name="alunoId"
+            // Campo desabilitado não entra no FormData. Na edição o valor vai
+            // pelo hidden acima, e o select fica só como leitura — sem `name`,
+            // senão o navegador mandaria dois campos com o mesmo nome.
+            name={treino ? undefined : "alunoId"}
             value={alunoId}
             onChange={(e) => setAlunoId(e.target.value)}
             error={estado.errosPorCampo?.aluno}
@@ -574,7 +582,17 @@ function BuscaDeExercicios({
       descricao="Busque pelo nome ou filtre por grupo e equipamento."
       className="max-w-[560px]"
     >
-      <div className="space-y-4">
+      {/* O <dialog> nativo não usa portal: este bloco continua dentro do <form>
+          do treino. Sem isto, Enter no campo de busca dispara o envio implícito
+          e salva o treino no meio da escolha do exercício. */}
+      <div
+        className="space-y-4"
+        onKeyDown={(evento) => {
+          const alvo = evento.target as HTMLElement;
+          const ehCampo = alvo.tagName === "INPUT" || alvo.tagName === "SELECT";
+          if (evento.key === "Enter" && ehCampo) evento.preventDefault();
+        }}
+      >
         <div className="relative">
           <Search
             size={16}

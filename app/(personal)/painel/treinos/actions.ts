@@ -263,8 +263,13 @@ async function gravarPrescricao(
   // Um id que não pertence a este treino é tratado como linha nova. Sem isso,
   // uma requisição forjada poderia sequestrar a linha de outro treino do mesmo
   // personal — o RLS deixaria passar, porque os dois são dele.
+  // Um id repetido na mesma lista faria o upsert tocar a mesma linha duas
+  // vezes, e o Postgres recusa o lote inteiro ("cannot affect row a second
+  // time"). A segunda ocorrência vira linha nova, que é o que o personal viu
+  // na tela: dois exercícios.
+  const jaUsados = new Set<string>();
   const linhas: TablesInsert<"workout_exercises">[] = exercicios.map((e, indice) => ({
-    id: e.id && idsAtuais.has(e.id) ? e.id : randomUUID(),
+    id: e.id && idsAtuais.has(e.id) && !jaUsados.has(e.id) ? aoUsar(jaUsados, e.id) : randomUUID(),
     workout_id: treinoId,
     exercise_id: e.exerciseId,
     exercise_source: e.source,
@@ -307,6 +312,12 @@ export async function excluirTreino(formData: FormData): Promise<void> {
 }
 
 // --------------------------------------------------------------- ajuda -----
+
+/** Marca o id como consumido e devolve ele, para caber numa expressão só. */
+function aoUsar(usados: Set<string>, id: string): string {
+  usados.add(id);
+  return id;
+}
 
 function texto(formData: FormData, campo: string): string {
   return String(formData.get(campo) ?? "").trim();

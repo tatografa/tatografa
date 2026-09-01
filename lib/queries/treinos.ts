@@ -107,32 +107,43 @@ export async function listarTreinosPorAluno(): Promise<TreinosDoAluno[]> {
   const idsDeMacro = (macros ?? []).map((m) => m.id);
   const alunoPorMacro = new Map((macros ?? []).map((m) => [m.id, m.student_id]));
 
-  const { data: treinos } = idsDeMacro.length
-    ? await supabase
-        .from("workouts")
-        .select("id, mesocycle_id, label, name, position")
-        .in("mesocycle_id", idsDeMacro)
-        .order("position")
-    : { data: [] as Tables<"workouts">[] };
+  // Erro aqui não pode virar lista vazia: "nenhum treino ainda" para um
+  // personal que tem treinos o faria remontar tudo por cima.
+  let treinos: Pick<Tables<"workouts">, "id" | "mesocycle_id" | "label" | "name" | "position">[] = [];
+  if (idsDeMacro.length) {
+    const { data, error } = await supabase
+      .from("workouts")
+      .select("id, mesocycle_id, label, name, position")
+      .in("mesocycle_id", idsDeMacro)
+      .order("position");
+    if (error) throw error;
+    treinos = data ?? [];
+  }
 
-  const idsDeTreino = (treinos ?? []).map((t) => t.id);
+  const idsDeTreino = treinos.map((t) => t.id);
 
-  const { data: prescricoes } = idsDeTreino.length
-    ? await supabase
-        .from("workout_exercises")
-        .select("workout_id, sets, rest_seconds")
-        .in("workout_id", idsDeTreino)
-    : { data: [] as Pick<Tables<"workout_exercises">, "workout_id" | "sets" | "rest_seconds">[] };
+  let prescricoes: Pick<
+    Tables<"workout_exercises">,
+    "workout_id" | "sets" | "rest_seconds"
+  >[] = [];
+  if (idsDeTreino.length) {
+    const { data, error } = await supabase
+      .from("workout_exercises")
+      .select("workout_id, sets, rest_seconds")
+      .in("workout_id", idsDeTreino);
+    if (error) throw error;
+    prescricoes = data ?? [];
+  }
 
   const porTreino = new Map<string, { sets: number; rest_seconds: number }[]>();
-  for (const linha of prescricoes ?? []) {
+  for (const linha of prescricoes) {
     const lista = porTreino.get(linha.workout_id) ?? [];
     lista.push({ sets: linha.sets, rest_seconds: linha.rest_seconds });
     porTreino.set(linha.workout_id, lista);
   }
 
   const treinosPorAluno = new Map<string, TreinoResumido[]>();
-  for (const treino of treinos ?? []) {
+  for (const treino of treinos) {
     const alunoId = alunoPorMacro.get(treino.mesocycle_id);
     if (!alunoId) continue;
     const exercicios = porTreino.get(treino.id) ?? [];
@@ -213,7 +224,7 @@ export async function lerTreino(treinoId: string): Promise<TreinoCompleto | null
   const linhas = prescricoes ?? [];
   const [porReferencia, executadas] = await Promise.all([
     exerciciosPorReferencia(linhas),
-    seriesRegistradas(linhas.map((l) => l.id)),
+    seriesRegistradas(treinoId),
   ]);
 
   const exercicios: ExercicioPrescrito[] = [];
@@ -224,7 +235,10 @@ export async function lerTreino(treinoId: string): Promise<TreinoCompleto | null
     if (!exercicio) continue;
     exercicios.push({
       id: linha.id,
-      position: linha.position,
+      // A posição é renumerada sobre o que sobrou, não copiada do banco: pular
+      // uma linha órfã deixaria buraco (0, 2), e a tela do aluno conta em cima
+      // disto ("exercício 3 de 5"). A ordem relativa vem do `order` acima.
+      position: exercicios.length,
       sets: linha.sets,
       reps_target: linha.reps_target,
       rest_seconds: linha.rest_seconds,
@@ -259,22 +273,28 @@ export async function lerTreino(treinoId: string): Promise<TreinoCompleto | null
  *
  * O editor usa isso para avisar antes de remover um exercício que o aluno já
  * executou: apagar a linha levaria o histórico junto, por cascata.
+ *
+ * A contagem é agregada no banco, não em memória. Trazer as linhas de
+ * `session_sets` para contar aqui significaria milhares de registros por
+ * abertura do editor com histórico real — e, pior, o corte de página do
+ * PostgREST é silencioso: a contagem voltaria menor, e uma contagem que chega
+ * a zero faz o editor remover sem confirmar exatamente o exercício cujo
+ * histórico a confirmação existe para proteger.
  */
-async function seriesRegistradas(ids: string[]): Promise<Map<string, number>> {
-  const contagem = new Map<string, number>();
-  if (ids.length === 0) return contagem;
-
+async function seriesRegistradas(treinoId: string): Promise<Map<string, number>> {
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("session_sets")
-    .select("workout_exercise_id")
-    .in("workout_exercise_id", ids);
+  const contagem = new Map<string, number>();
+
+  const { data, error } = await supabase.rpc("series_por_exercicio", {
+    p_workout_id: treinoId,
+  });
+
+  // Uma contagem que falhou não pode passar por "nunca treinado": nesse caso o
+  // editor removeria sem avisar. Estourar deixa o erro visível.
+  if (error) throw error;
 
   for (const linha of data ?? []) {
-    contagem.set(
-      linha.workout_exercise_id,
-      (contagem.get(linha.workout_exercise_id) ?? 0) + 1,
-    );
+    contagem.set(linha.workout_exercise_id, Number(linha.total));
   }
   return contagem;
 }

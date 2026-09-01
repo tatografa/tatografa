@@ -33,7 +33,7 @@ type TreinoCompleto = {
 
 type ExercicioPrescrito = {
   id: string;            // workout_exercises.id — É A CHAVE DE session_sets
-  position: number;      // 0, 1, 2… sem buracos
+  position: number;      // 0, 1, 2… sem buracos, renumerado na leitura
   sets: number;
   reps_target: string;   // "12" ou "8-10" — TEXTO, nunca número
   rest_seconds: number;
@@ -66,10 +66,14 @@ resposta contaria a um estranho que aquele id existe.
    aluno realizou vai em `session_sets.reps`, que é número.
 3. **`is_bodyweight` muda a tela:** exercício de peso corporal não pede carga, e
    `volumeDaSessao` já ignora carga nula.
-4. **`position` é a ordem.** Sempre de 0 em diante, sem buracos, renumerada a cada
-   salvamento. Não reordene por outro critério.
+4. **`position` é a ordem, e é índice confiável.** Vem sempre de 0 em diante e sem
+   buracos: a gravação renumera, e a leitura renumera de novo sobre as linhas que
+   sobraram. Pode indexar por ela ("exercício 3 de 5"). Não reordene por outro
+   critério.
 5. **Uma linha órfã é pulada, não quebra a tela.** `exercise_id` não tem fk; se um
-   exercício próprio for apagado, `lerTreino` omite a linha em vez de estourar.
+   exercício próprio for apagado, `lerTreino` omite a linha em vez de estourar — e
+   é por isso que a posição é renumerada na leitura, senão a linha pulada deixaria
+   um buraco (0, 2) para quem conta em cima dela.
 
 ## Decisões deste card
 
@@ -138,3 +142,12 @@ a lista filtrada cabe folgada numa página. Quando o catálogo crescer, isso vir
   A Server Action faz em statements separados de propósito.
 - **Dono da linha não é o mesmo que dono do relacionamento.** Uma policy que só
   confere o `trainer_id` da própria linha deixa passar `student_id` alheio.
+- **Campo desabilitado não entra no `FormData`.** O select de aluno fica travado na
+  edição; sem um `hidden` com o mesmo valor, a Server Action recebia `alunoId`
+  vazio e reprovava num campo que o personal não consegue mexer.
+- **`z.string().uuid()` do zod v4 é estrito.** Ele confere os bits de versão e
+  variante do RFC, então uuid "bonito" de fixture (`1111...`) é recusado enquanto
+  o `gen_random_uuid()` do Postgres (v4) passa. Ao montar dado de teste para as
+  telas do aluno, gere uuid de verdade.
+- **Contar em memória o que o banco pode agregar esconde truncamento.** O corte de
+  página do PostgREST não avisa; a contagem só volta menor.

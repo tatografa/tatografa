@@ -45,9 +45,12 @@ export function normalizarRepeticoes(bruto: string): string | null {
     const de = Number(faixa[1]);
     const ate = Number(faixa[2]);
     if (!dentroDaFaixa(de) || !dentroDaFaixa(ate)) return null;
-    // "10-8" seria uma faixa invertida; o personal quase certamente digitou
-    // errado, e deixar passar viraria um intervalo vazio na tela do aluno.
-    if (de >= ate) return null;
+    // "8-8" é uma faixa de um valor só: vale, e vira "8". Recusar seria
+    // implicância com quem digitou o mesmo número duas vezes.
+    if (de === ate) return String(de);
+    // "10-8" é faixa invertida; o personal quase certamente digitou errado, e
+    // deixar passar viraria um intervalo vazio na tela do aluno.
+    if (de > ate) return null;
     return `${de}-${ate}`;
   }
 
@@ -60,17 +63,6 @@ function dentroDaFaixa(valor: number): boolean {
     valor >= LIMITES.repeticoesMin &&
     valor <= LIMITES.repeticoesMax
   );
-}
-
-/**
- * Renumera as posições a partir de 0, na ordem em que os itens chegaram.
- *
- * A posição é a fonte da ordem para a tela de execução. Confiar no número que
- * veio do cliente deixaria buracos depois de remover um exercício, e um
- * buraco vira ordem imprevisível quando dois itens empatam.
- */
-export function comPosicoes<T>(itens: T[]): (T & { position: number })[] {
-  return itens.map((item, indice) => ({ ...item, position: indice }));
 }
 
 /**

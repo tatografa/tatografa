@@ -465,6 +465,13 @@ export type Database = {
           personal: string
         }[]
       }
+      series_por_exercicio: {
+        Args: { p_workout_id: string }
+        Returns: {
+          total: number
+          workout_exercise_id: string
+        }[]
+      }
     }
     Enums: {
       equipment:
