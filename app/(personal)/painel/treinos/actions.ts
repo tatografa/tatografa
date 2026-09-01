@@ -1,0 +1,375 @@
+"use server";
+
+import { randomUUID } from "node:crypto";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { z } from "zod";
+
+import { requireTrainer } from "@/lib/auth/session";
+import { LIMITES, normalizarRepeticoes, repeticoesValidas } from "@/lib/domain/prescricao";
+import {
+  buscarExercicios,
+  type ExercicioDisponivel,
+  type FiltroDeExercicio,
+} from "@/lib/queries/exercicios";
+import { createClient } from "@/lib/supabase/server";
+import type { TablesInsert } from "@/types/database";
+
+export type CampoDoEditor =
+  | "aluno"
+  | "label"
+  | "nome"
+  | "observacao"
+  | "programaNome"
+  | "programaSemanas"
+  | "exercicios";
+
+export type ErroDeExercicio = Partial<Record<"sets" | "reps" | "descanso", string>>;
+
+export type EstadoDoEditor = {
+  erro?: string;
+  errosPorCampo?: Partial<Record<CampoDoEditor, string>>;
+  /** Erros por posição na lista — a linha do editor destaca o próprio campo. */
+  errosPorExercicio?: Record<number, ErroDeExercicio>;
+};
+
+const MENSAGEM_REPS = "Use um número (12) ou uma faixa (8-10).";
+
+const esquemaExercicio = z.object({
+  /** Presente só quando a linha já existe no banco. */
+  id: z.string().uuid().optional(),
+  exerciseId: z.string().uuid("Exercício inválido."),
+  source: z.enum(["catalog", "custom"], { error: "Origem do exercício inválida." }),
+  sets: z
+    .number({ error: "Informe as séries." })
+    .int("Séries em número inteiro.")
+    .min(LIMITES.seriesMin, `No mínimo ${LIMITES.seriesMin} série.`)
+    .max(LIMITES.seriesMax, `No máximo ${LIMITES.seriesMax} séries.`),
+  reps: z
+    .string({ error: "Informe as repetições." })
+    .trim()
+    .min(1, "Informe as repetições.")
+    .refine(repeticoesValidas, MENSAGEM_REPS)
+    // O banco guarda texto de propósito: "8-10" é prescrição, não número.
+    .transform((valor) => normalizarRepeticoes(valor) as string),
+  rest: z
+    .number({ error: "Informe o descanso." })
+    .int("Descanso em segundos inteiros.")
+    .min(LIMITES.descansoMin, "Descanso não pode ser negativo.")
+    .max(LIMITES.descansoMax, "Descanso longo demais."),
+  technique: z.string().trim().max(60, "Técnica muito longa.").nullish(),
+  notes: z.string().trim().max(280, "Observação muito longa.").nullish(),
+});
+
+const esquemaTreino = z.object({
+  alunoId: z.string().uuid("Escolha um aluno."),
+  treinoId: z.string().uuid().optional(),
+  label: z
+    .string()
+    .trim()
+    .min(1, "Informe a letra do treino.")
+    .max(4, "No máximo 4 caracteres.")
+    .transform((valor) => valor.toUpperCase()),
+  nome: z.string().trim().min(2, "Dê um nome ao treino.").max(80, "Nome muito longo."),
+  observacao: z.string().trim().max(500, "Observação muito longa.").nullish(),
+  exercicios: z
+    .array(esquemaExercicio)
+    .min(1, "Adicione pelo menos um exercício.")
+    .max(30, "No máximo 30 exercícios num treino."),
+});
+
+/**
+ * O macrotreino só é perguntado no primeiro treino do aluno. Nos seguintes o
+ * editor nem mostra os campos, e o servidor reusa o programa ativo.
+ */
+const esquemaPrograma = z.object({
+  programaNome: z
+    .string()
+    .trim()
+    .min(2, "Dê um nome ao programa.")
+    .max(80, "Nome muito longo."),
+  programaSemanas: z
+    .number({ error: "Informe a duração em semanas." })
+    .int("Semanas em número inteiro.")
+    .min(1, "No mínimo 1 semana.")
+    .max(52, "No máximo 52 semanas."),
+});
+
+/**
+ * Busca do catálogo chamada pelo editor (componente cliente).
+ *
+ * Roda no servidor mesmo sendo lista pequena: o dia em que o personal tiver
+ * exercícios próprios, a consulta já está do lado certo, e a lista inteira
+ * nunca precisa viajar para o navegador.
+ */
+export async function buscarExerciciosAction(
+  filtro: FiltroDeExercicio,
+): Promise<ExercicioDisponivel[]> {
+  await requireTrainer();
+  return buscarExercicios(filtro);
+}
+
+export async function salvarTreino(
+  _anterior: EstadoDoEditor,
+  formData: FormData,
+): Promise<EstadoDoEditor> {
+  const { trainer } = await requireTrainer();
+  const supabase = await createClient();
+
+  const bruto = {
+    alunoId: texto(formData, "alunoId"),
+    treinoId: texto(formData, "treinoId") || undefined,
+    label: texto(formData, "label"),
+    nome: texto(formData, "nome"),
+    observacao: texto(formData, "observacao") || null,
+    exercicios: leJson(formData, "exercicios"),
+  };
+
+  const analise = esquemaTreino.safeParse(bruto);
+  if (!analise.success) return comErros(analise.error);
+
+  const dados = analise.data;
+
+  // O RLS de `students` já restringe à carteira do personal; a checagem aqui
+  // é para devolver mensagem em vez de estourar no insert.
+  const { data: aluno } = await supabase
+    .from("students")
+    .select("id")
+    .eq("id", dados.alunoId)
+    .eq("trainer_id", trainer.id)
+    .maybeSingle();
+
+  if (!aluno) {
+    return { errosPorCampo: { aluno: "Esse aluno não é seu." } };
+  }
+
+  const { data: macroAtivo } = await supabase
+    .from("mesocycles")
+    .select("id")
+    .eq("student_id", dados.alunoId)
+    .eq("status", "ativo")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  let mesocycleId = macroAtivo?.id ?? null;
+
+  if (!mesocycleId) {
+    // Primeiro treino deste aluno: o personal nomeia o programa agora. O M2
+    // substitui isto por gestão de macrotreino de verdade.
+    const programa = esquemaPrograma.safeParse({
+      programaNome: texto(formData, "programaNome"),
+      programaSemanas: numero(formData, "programaSemanas"),
+    });
+    if (!programa.success) return comErros(programa.error);
+
+    const { data: criado, error } = await supabase
+      .from("mesocycles")
+      .insert({
+        student_id: dados.alunoId,
+        trainer_id: trainer.id,
+        name: programa.data.programaNome,
+        total_weeks: programa.data.programaSemanas,
+      })
+      .select("id")
+      .single();
+
+    if (error || !criado) {
+      return { erro: "Não deu para criar o programa. Tente de novo." };
+    }
+    mesocycleId = criado.id;
+  }
+
+  let treinoId = dados.treinoId ?? null;
+
+  if (treinoId) {
+    // Confirma que o treino é deste macrotreino antes de atualizar: um id
+    // trocado na requisição não pode mover treino de um aluno para outro.
+    const { data: existente } = await supabase
+      .from("workouts")
+      .select("id")
+      .eq("id", treinoId)
+      .eq("mesocycle_id", mesocycleId)
+      .maybeSingle();
+
+    if (!existente) {
+      return { erro: "Treino não encontrado. Recarregue a página." };
+    }
+
+    const { error } = await supabase
+      .from("workouts")
+      .update({ label: dados.label, name: dados.nome, notes: dados.observacao })
+      .eq("id", treinoId);
+
+    if (error) return { erro: "Não deu para salvar o treino. Tente de novo." };
+  } else {
+    const { count } = await supabase
+      .from("workouts")
+      .select("id", { count: "exact", head: true })
+      .eq("mesocycle_id", mesocycleId);
+
+    const { data: criado, error } = await supabase
+      .from("workouts")
+      .insert({
+        mesocycle_id: mesocycleId,
+        label: dados.label,
+        name: dados.nome,
+        notes: dados.observacao,
+        position: count ?? 0,
+      })
+      .select("id")
+      .single();
+
+    if (error || !criado) {
+      return { erro: "Não deu para criar o treino. Tente de novo." };
+    }
+    treinoId = criado.id;
+  }
+
+  const erroPrescricao = await gravarPrescricao(treinoId, dados.exercicios);
+  if (erroPrescricao) return { erro: erroPrescricao };
+
+  revalidatePath("/painel/treinos");
+  revalidatePath(`/painel/treinos/${treinoId}`);
+  redirect(`/painel/treinos/${treinoId}?salvo=1`);
+}
+
+type ExercicioValidado = z.infer<typeof esquemaExercicio>;
+
+/**
+ * Grava a lista de exercícios do treino preservando as linhas que continuam.
+ *
+ * Apagar tudo e recriar seria mais simples e destruiria o histórico: as séries
+ * executadas em `session_sets` apontam para `workout_exercises.id` com
+ * `on delete cascade`. Então a linha que permanece é *atualizada* com o mesmo
+ * id, e só o que o personal removeu de fato é apagado.
+ */
+async function gravarPrescricao(
+  treinoId: string,
+  exercicios: ExercicioValidado[],
+): Promise<string | null> {
+  const supabase = await createClient();
+
+  const { data: atuais, error: erroLeitura } = await supabase
+    .from("workout_exercises")
+    .select("id")
+    .eq("workout_id", treinoId);
+
+  if (erroLeitura) return "Não deu para ler a prescrição atual. Tente de novo.";
+
+  const idsAtuais = new Set((atuais ?? []).map((linha) => linha.id));
+
+  // Um id que não pertence a este treino é tratado como linha nova. Sem isso,
+  // uma requisição forjada poderia sequestrar a linha de outro treino do mesmo
+  // personal — o RLS deixaria passar, porque os dois são dele.
+  const linhas: TablesInsert<"workout_exercises">[] = exercicios.map((e, indice) => ({
+    id: e.id && idsAtuais.has(e.id) ? e.id : randomUUID(),
+    workout_id: treinoId,
+    exercise_id: e.exerciseId,
+    exercise_source: e.source,
+    position: indice,
+    sets: e.sets,
+    reps_target: e.reps,
+    rest_seconds: e.rest,
+    technique: e.technique?.trim() ? e.technique.trim() : null,
+    notes: e.notes?.trim() ? e.notes.trim() : null,
+  }));
+
+  // Grava antes de apagar: se o upsert falhar, o treino continua inteiro.
+  const { error: erroUpsert } = await supabase.from("workout_exercises").upsert(linhas);
+  if (erroUpsert) return "Não deu para salvar os exercícios. Tente de novo.";
+
+  const mantidos = new Set(linhas.map((linha) => linha.id as string));
+  const remover = [...idsAtuais].filter((id) => !mantidos.has(id));
+
+  if (remover.length > 0) {
+    const { error } = await supabase.from("workout_exercises").delete().in("id", remover);
+    if (error) return "Os exercícios foram salvos, mas não deu para remover os apagados.";
+  }
+
+  return null;
+}
+
+/** Exclui o treino inteiro. O banco leva a prescrição junto, por cascata. */
+export async function excluirTreino(formData: FormData): Promise<void> {
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  await requireTrainer();
+  const supabase = await createClient();
+
+  // O RLS de `workouts` já exige ser o personal dono do macrotreino.
+  await supabase.from("workouts").delete().eq("id", id);
+
+  revalidatePath("/painel/treinos");
+  redirect("/painel/treinos");
+}
+
+// --------------------------------------------------------------- ajuda -----
+
+function texto(formData: FormData, campo: string): string {
+  return String(formData.get(campo) ?? "").trim();
+}
+
+function numero(formData: FormData, campo: string): number | undefined {
+  const bruto = texto(formData, campo);
+  if (bruto === "") return undefined;
+  const valor = Number(bruto);
+  return Number.isFinite(valor) ? valor : undefined;
+}
+
+/**
+ * A lista de exercícios chega como JSON num campo escondido: é uma estrutura
+ * aninhada, e `FormData` plano viraria `exercicios[0][sets]` na mão.
+ */
+function leJson(formData: FormData, campo: string): unknown {
+  try {
+    return JSON.parse(String(formData.get(campo) ?? "[]"));
+  } catch {
+    return [];
+  }
+}
+
+/** Espalha os problemas do zod entre campos do formulário e linhas da lista. */
+function comErros(erro: z.ZodError): EstadoDoEditor {
+  const errosPorCampo: EstadoDoEditor["errosPorCampo"] = {};
+  const errosPorExercicio: Record<number, ErroDeExercicio> = {};
+
+  for (const problema of erro.issues) {
+    const [primeiro, indice, subcampo] = problema.path;
+
+    if (primeiro === "exercicios" && typeof indice === "number") {
+      const linha = errosPorExercicio[indice] ?? {};
+      const chave =
+        subcampo === "sets" ? "sets" : subcampo === "reps" ? "reps" : subcampo === "rest" ? "descanso" : null;
+      if (chave && !linha[chave]) linha[chave] = problema.message;
+      // Erro sem campo conhecido (exercício ou origem inválidos) vira erro da
+      // lista: o personal não digitou isso, então não há campo para destacar.
+      if (!chave && !errosPorCampo.exercicios) {
+        errosPorCampo.exercicios = problema.message;
+      }
+      errosPorExercicio[indice] = linha;
+      continue;
+    }
+
+    const campo = mapaDeCampos[String(primeiro)];
+    if (campo && !errosPorCampo[campo]) errosPorCampo[campo] = problema.message;
+  }
+
+  return {
+    errosPorCampo: Object.keys(errosPorCampo).length ? errosPorCampo : undefined,
+    errosPorExercicio: Object.keys(errosPorExercicio).length ? errosPorExercicio : undefined,
+  };
+}
+
+const mapaDeCampos: Record<string, CampoDoEditor | undefined> = {
+  alunoId: "aluno",
+  treinoId: "aluno",
+  label: "label",
+  nome: "nome",
+  observacao: "observacao",
+  exercicios: "exercicios",
+  programaNome: "programaNome",
+  programaSemanas: "programaSemanas",
+};

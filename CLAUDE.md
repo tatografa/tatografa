@@ -142,3 +142,13 @@ Provar que funciona sem o Otávio ler código:
 - **[2026-08-31]** Leitura do convite sem sessão usa a função estreita
   `convite_por_token`, não a chave de serviço: a chave ignoraria o RLS do banco inteiro
   se vazasse do ambiente.
+- **[2026-09-01]** Policy de escrita confere o **relacionamento**, não só o dono da linha.
+  `mesocycles_write` exigia apenas `trainer_id = auth.uid()`, e isso deixava um personal
+  qualquer criar macrotreino para aluno alheio — e empurrar treino que o aluno via.
+  Migration `0007` acrescentou `private.trainer_of(student_id)`.
+- **[2026-09-01]** No M1, o macrotreino é **nomeado pelo personal** ao salvar o primeiro
+  treino do aluno (nome + total de semanas); os treinos seguintes reusam o programa
+  `ativo`. Nada é inventado pelo sistema. O M2 substitui por gestão de macrotreino.
+- **[2026-09-01]** Editar a prescrição **atualiza** as linhas que continuam em vez de
+  apagar e recriar: `session_sets` referencia `workout_exercises.id` com cascata, e
+  recriar levaria o histórico do aluno junto.

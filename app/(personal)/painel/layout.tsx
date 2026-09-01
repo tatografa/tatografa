@@ -27,6 +27,21 @@ export default async function PainelLayout({
             <Logo size={26} />
           </Link>
 
+          <nav className="flex items-center gap-1" aria-label="Seções do painel">
+            <Link
+              href="/painel"
+              className="rounded-[9px] px-3 py-1.5 text-[13px] font-semibold text-ink-3 transition hover:bg-canvas-sunken hover:text-ink"
+            >
+              Alunos
+            </Link>
+            <Link
+              href="/painel/treinos"
+              className="rounded-[9px] px-3 py-1.5 text-[13px] font-semibold text-ink-3 transition hover:bg-canvas-sunken hover:text-ink"
+            >
+              Treinos
+            </Link>
+          </nav>
+
           <div className="flex items-center gap-3">
             <span className="hidden text-[13px] font-medium text-ink-2 sm:block">
               {trainer.name}

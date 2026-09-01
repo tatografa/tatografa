@@ -1,0 +1,280 @@
+import "server-only";
+
+import { duracaoEstimadaMin, totalDeSeries } from "@/lib/domain/treino";
+import { createClient } from "@/lib/supabase/server";
+import type { Tables } from "@/types/database";
+
+import {
+  chaveDoExercicio,
+  exerciciosPorReferencia,
+  type ExercicioDisponivel,
+} from "./exercicios";
+
+export type AlunoDoTreino = Pick<Tables<"students">, "id" | "name">;
+
+export type MacrotreinoAtivo = Pick<
+  Tables<"mesocycles">,
+  "id" | "name" | "total_weeks" | "started_at" | "student_id"
+>;
+
+/** Uma linha da prescrição, já com o exercício resolvido. */
+export type ExercicioPrescrito = {
+  /** `workout_exercises.id` — é a chave que `session_sets` referencia. */
+  id: string;
+  position: number;
+  sets: number;
+  reps_target: string;
+  rest_seconds: number;
+  technique: string | null;
+  notes: string | null;
+  exercicio: ExercicioDisponivel;
+  /** Séries já executadas por qualquer sessão do aluno. 0 = nunca treinado. */
+  series_registradas: number;
+};
+
+export type TreinoCompleto = {
+  id: string;
+  label: string;
+  name: string;
+  notes: string | null;
+  position: number;
+  aluno: AlunoDoTreino;
+  macrotreino: Omit<MacrotreinoAtivo, "student_id">;
+  exercicios: ExercicioPrescrito[];
+  total_series: number;
+  duracao_min: number;
+};
+
+export type TreinoResumido = {
+  id: string;
+  label: string;
+  name: string;
+  total_exercicios: number;
+  total_series: number;
+  duracao_min: number;
+};
+
+export type TreinosDoAluno = {
+  aluno: AlunoDoTreino;
+  macrotreino: Omit<MacrotreinoAtivo, "student_id"> | null;
+  treinos: TreinoResumido[];
+};
+
+const COLUNAS_PRESCRICAO =
+  "id, workout_id, exercise_id, exercise_source, position, sets, reps_target, rest_seconds, technique, notes";
+
+/**
+ * Todos os treinos do personal, agrupados por aluno.
+ *
+ * Quatro consultas fixas, não uma por aluno nem uma por treino: alunos,
+ * macrotreinos, treinos e prescrições vêm em lote e o agrupamento acontece em
+ * memória. O RLS já restringe tudo à carteira do personal logado.
+ */
+export async function listarTreinosPorAluno(): Promise<TreinosDoAluno[]> {
+  const supabase = await createClient();
+
+  const { data: alunos, error: erroAlunos } = await supabase
+    .from("students")
+    .select("id, name")
+    .order("name");
+
+  if (erroAlunos) throw erroAlunos;
+  if (!alunos?.length) return [];
+
+  const { data: macros, error: erroMacros } = await supabase
+    .from("mesocycles")
+    .select("id, name, total_weeks, started_at, student_id, status, created_at")
+    .in(
+      "student_id",
+      alunos.map((a) => a.id),
+    )
+    .order("created_at", { ascending: false });
+
+  if (erroMacros) throw erroMacros;
+
+  const macroPorAluno = new Map<string, Omit<MacrotreinoAtivo, "student_id">>();
+  for (const macro of macros ?? []) {
+    if (macro.status === "ativo" && !macroPorAluno.has(macro.student_id)) {
+      macroPorAluno.set(macro.student_id, {
+        id: macro.id,
+        name: macro.name,
+        total_weeks: macro.total_weeks,
+        started_at: macro.started_at,
+      });
+    }
+  }
+
+  const idsDeMacro = (macros ?? []).map((m) => m.id);
+  const alunoPorMacro = new Map((macros ?? []).map((m) => [m.id, m.student_id]));
+
+  const { data: treinos } = idsDeMacro.length
+    ? await supabase
+        .from("workouts")
+        .select("id, mesocycle_id, label, name, position")
+        .in("mesocycle_id", idsDeMacro)
+        .order("position")
+    : { data: [] as Tables<"workouts">[] };
+
+  const idsDeTreino = (treinos ?? []).map((t) => t.id);
+
+  const { data: prescricoes } = idsDeTreino.length
+    ? await supabase
+        .from("workout_exercises")
+        .select("workout_id, sets, rest_seconds")
+        .in("workout_id", idsDeTreino)
+    : { data: [] as Pick<Tables<"workout_exercises">, "workout_id" | "sets" | "rest_seconds">[] };
+
+  const porTreino = new Map<string, { sets: number; rest_seconds: number }[]>();
+  for (const linha of prescricoes ?? []) {
+    const lista = porTreino.get(linha.workout_id) ?? [];
+    lista.push({ sets: linha.sets, rest_seconds: linha.rest_seconds });
+    porTreino.set(linha.workout_id, lista);
+  }
+
+  const treinosPorAluno = new Map<string, TreinoResumido[]>();
+  for (const treino of treinos ?? []) {
+    const alunoId = alunoPorMacro.get(treino.mesocycle_id);
+    if (!alunoId) continue;
+    const exercicios = porTreino.get(treino.id) ?? [];
+    const lista = treinosPorAluno.get(alunoId) ?? [];
+    lista.push({
+      id: treino.id,
+      label: treino.label,
+      name: treino.name,
+      total_exercicios: exercicios.length,
+      total_series: totalDeSeries(exercicios),
+      duracao_min: duracaoEstimadaMin(exercicios),
+    });
+    treinosPorAluno.set(alunoId, lista);
+  }
+
+  return alunos.map((aluno) => ({
+    aluno,
+    macrotreino: macroPorAluno.get(aluno.id) ?? null,
+    treinos: treinosPorAluno.get(aluno.id) ?? [],
+  }));
+}
+
+/**
+ * Macrotreino ativo de cada aluno do personal, numa consulta só.
+ *
+ * O editor usa isto para saber se precisa pedir o nome do programa: só o
+ * primeiro treino de um aluno pergunta.
+ */
+export async function macrotreinosAtivos(): Promise<Map<string, MacrotreinoAtivo>> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("mesocycles")
+    .select("id, name, total_weeks, started_at, student_id")
+    .eq("status", "ativo")
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  const mapa = new Map<string, MacrotreinoAtivo>();
+  for (const macro of data ?? []) {
+    if (!mapa.has(macro.student_id)) mapa.set(macro.student_id, macro);
+  }
+  return mapa;
+}
+
+/**
+ * Um treino com a prescrição inteira, pronto para o editor e para as telas do
+ * aluno. Contrato descrito em `docs/handoffs/prescricao.md`.
+ *
+ * Devolve `null` quando o treino não existe *ou* quando o RLS não deixa ler —
+ * do ponto de vista de quem chama é a mesma coisa, e distinguir os dois casos
+ * na resposta contaria a um estranho que aquele id existe.
+ */
+export async function lerTreino(treinoId: string): Promise<TreinoCompleto | null> {
+  const supabase = await createClient();
+
+  // O aluno e o macrotreino vêm embutidos: um join do PostgREST, não uma
+  // segunda ida ao banco.
+  const { data: treino } = await supabase
+    .from("workouts")
+    .select(
+      "id, label, name, notes, position, mesocycles!inner(id, name, total_weeks, started_at, students!inner(id, name))",
+    )
+    .eq("id", treinoId)
+    .maybeSingle();
+
+  if (!treino) return null;
+
+  const { data: prescricoes, error } = await supabase
+    .from("workout_exercises")
+    .select(COLUNAS_PRESCRICAO)
+    .eq("workout_id", treinoId)
+    .order("position");
+
+  if (error) throw error;
+
+  const linhas = prescricoes ?? [];
+  const [porReferencia, executadas] = await Promise.all([
+    exerciciosPorReferencia(linhas),
+    seriesRegistradas(linhas.map((l) => l.id)),
+  ]);
+
+  const exercicios: ExercicioPrescrito[] = [];
+  for (const linha of linhas) {
+    const exercicio = porReferencia.get(chaveDoExercicio(linha));
+    // `exercise_id` não tem fk: um exercício próprio apagado deixaria a linha
+    // órfã. Pular é melhor que quebrar a tela do aluno na academia.
+    if (!exercicio) continue;
+    exercicios.push({
+      id: linha.id,
+      position: linha.position,
+      sets: linha.sets,
+      reps_target: linha.reps_target,
+      rest_seconds: linha.rest_seconds,
+      technique: linha.technique,
+      notes: linha.notes,
+      exercicio,
+      series_registradas: executadas.get(linha.id) ?? 0,
+    });
+  }
+
+  return {
+    id: treino.id,
+    label: treino.label,
+    name: treino.name,
+    notes: treino.notes,
+    position: treino.position,
+    aluno: treino.mesocycles.students,
+    macrotreino: {
+      id: treino.mesocycles.id,
+      name: treino.mesocycles.name,
+      total_weeks: treino.mesocycles.total_weeks,
+      started_at: treino.mesocycles.started_at,
+    },
+    exercicios,
+    total_series: totalDeSeries(exercicios),
+    duracao_min: duracaoEstimadaMin(exercicios),
+  };
+}
+
+/**
+ * Quantas séries já foram registradas para cada linha da prescrição.
+ *
+ * O editor usa isso para avisar antes de remover um exercício que o aluno já
+ * executou: apagar a linha levaria o histórico junto, por cascata.
+ */
+async function seriesRegistradas(ids: string[]): Promise<Map<string, number>> {
+  const contagem = new Map<string, number>();
+  if (ids.length === 0) return contagem;
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("session_sets")
+    .select("workout_exercise_id")
+    .in("workout_exercise_id", ids);
+
+  for (const linha of data ?? []) {
+    contagem.set(
+      linha.workout_exercise_id,
+      (contagem.get(linha.workout_exercise_id) ?? 0) + 1,
+    );
+  }
+  return contagem;
+}
