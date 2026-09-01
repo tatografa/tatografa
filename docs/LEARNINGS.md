@@ -21,6 +21,16 @@
 - [2026-08-31] [seguranca] Convite lido sem sessão não precisa de chave de serviço → função
   `security definer` estreita (um token exato, três campos) tem raio de dano muito menor
   que uma chave que ignora o RLS inteiro.
+- [2026-09-01] [rls] Policy de escrita que confere só o dono da linha
+  (`trainer_id = auth.uid()`) deixa passar `student_id` alheio → conferir também o
+  relacionamento, com o helper de travessia. Foi assim que um personal qualquer conseguia
+  prescrever para aluno de outro (migration 0007).
+- [2026-09-01] [postgres] Helper de RLS `stable` não enxerga a linha inserida pelo mesmo
+  statement → gravar cadeia `mesocycles → workouts` em statements separados; um
+  `with ... insert` encadeado é recusado.
+- [2026-09-01] [postgres] Contar linhas trazendo-as para a memória trunca em silêncio
+  quando o `db-max-rows` do PostgREST corta a página → agregar no banco. Contagem menor
+  que chega a zero vira "sem histórico" e some com a confirmação que protegia o dado.
 - [2026-08-31] [supabase] Projeto do plano gratuito **pausa sozinho** após ~7 dias sem uso,
   e a primeira query depois disso falha com timeout ou "relation does not exist" → conferir
   `status` do projeto antes de concluir que o schema sumiu.
@@ -52,3 +62,9 @@
   falso negativo → conferir a mensagem real antes de afirmar que há bug no código.
 - [2026-08-31] [npm] `npm install <pkg>` para uso só de teste suja `package.json` →
   `npm install --no-save` quando a dependência não deve ser commitada.
+- [2026-09-01] [html] Campo desabilitado **não é enviado** no formulário → controle que
+  carrega dado obrigatório precisa de hidden separado. Passou pelo SQL e pelo build, e
+  quebrou a edição inteira: o erro aparecia num campo que o usuário não podia mexer.
+- [2026-09-01] [verificacao] Prova por SQL cobre a lógica e deixa o caminho da tela sem
+  prova → card que altera registro existente só fecha depois de exercitar a edição pelo
+  navegador, não só o insert por SQL.

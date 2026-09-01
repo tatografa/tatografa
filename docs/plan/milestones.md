@@ -33,7 +33,7 @@ o celular na mão. É onde os problemas reais aparecem.
 |---|---|---|---|
 | M1-01 | Convite do aluno: personal gera link copiável | pleno | feito |
 | M1-02 | Onboarding do aluno em `/convite/[token]` | pleno | feito |
-| M1-03 | Editor de treino no painel | senior | em andamento |
+| M1-03 | Editor de treino no painel | senior | feito · checkpoint aprovado |
 | M1-04 | App do aluno: home e detalhe do treino | pleno | a fazer |
 | M1-05 | Execução do treino série por série | senior | a fazer |
 | M1-06 | Histórico de sessões | pleno | a fazer |
