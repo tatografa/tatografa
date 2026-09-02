@@ -10,7 +10,7 @@
 | # | Nome | Entrega (linguagem de negócio) | Como o Otávio valida | Status |
 |---|---|---|---|---|
 | M0 | Fundação | Conta de personal, login, painel protegido | Criar conta, entrar, ver `/painel` | validado |
-| M1 | Fatia vertical | Convite → treino → execução → histórico | Roteiro completo com duas contas, treino executado na academia | em andamento |
+| M1 | Fatia vertical | Convite → treino → execução → histórico | Roteiro completo com duas contas, treino executado na academia | construído · aguardando validação do Otávio |
 | M2 | Utilidade contínua | Macrotreino, referência histórica, PRs, progresso, painel | Aluno usa duas semanas seguidas sem faltar nada | planejado |
 | M3 | Social e reavaliação | Feed, foto do treino, reavaliação física | Postar treino, comentar, comparar antes/depois | planejado (cortável) |
 | M4 | Pronto para o piloto | PWA, estados vazios e de erro, e-mails, termos, acessibilidade | Alguém que não conhece o produto usa sem ajuda | planejado |
@@ -36,7 +36,7 @@ o celular na mão. É onde os problemas reais aparecem.
 | M1-03 | Editor de treino no painel | senior | feito · checkpoint aprovado |
 | M1-04 | App do aluno: home e detalhe do treino | pleno | feito |
 | M1-05 | Execução do treino série por série | senior | feito · checkpoint aprovado |
-| M1-06 | Histórico de sessões | pleno | a fazer |
+| M1-06 | Histórico de sessões | pleno | feito |
 
 ### Riscos que exigem checkpoint
 

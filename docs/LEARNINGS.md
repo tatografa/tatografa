@@ -25,6 +25,16 @@
   (`trainer_id = auth.uid()`) deixa passar `student_id` alheio → conferir também o
   relacionamento, com o helper de travessia. Foi assim que um personal qualquer conseguia
   prescrever para aluno de outro (migration 0007).
+- [2026-09-02] [rls] **O mesmo defeito apareceu três vezes** (0007, 0009, 0010), sempre
+  achado por um ataque de cada vez e corrigido só na porta que o ataque usou → ao corrigir
+  uma policy por esse padrão, varrer no mesmo commit **todas** as policies de escrita da
+  tabela e das vizinhas da cadeia. Em especial: se a policy de `insert` confere o
+  relacionamento, a de `update` também precisa — senão o atacante insere legítimo e depois
+  troca a fk, e a checagem seguinte valida contra o dado já adulterado.
+- [2026-09-02] [rls] Policy de `insert` com `or id = auth.uid()` numa tabela de vínculo
+  deixa qualquer autenticado se auto-inserir na carteira alheia, contornando convite,
+  token e gatilho → quem nasce por gatilho `security definer` não precisa de policy
+  permissiva; o `with check` pode exigir só o dono do relacionamento.
 - [2026-09-01] [postgres] Helper de RLS `stable` não enxerga a linha inserida pelo mesmo
   statement → gravar cadeia `mesocycles → workouts` em statements separados; um
   `with ... insert` encadeado é recusado.
@@ -84,3 +94,13 @@
 - [2026-09-01] [offline] Chave global de `localStorage` para dado por sessão é condição de
   apagamento, não economia → chavear por id (`prefixo:<sessionId>`) e nunca remover chave
   que não seja a da sessão montada. Celular emprestado na academia é caso real.
+- [2026-09-02] [coerencia] Número derivado do mesmo dado por duas queries diferentes
+  diverge na tela: a lista do histórico somava todas as linhas da prescrição e o detalhe
+  pulava a órfã, mostrando "12 de 16" e "12/13" para a mesma sessão → denominador e
+  formato saem de **uma função só** em `lib/domain/`; card que exibe número que outra tela
+  já exibe cita a função existente no delta técnico.
+- [2026-09-02] [fuso] Regra de calendário derivada com o relógio do processo vira um dia a
+  mais na Vercel (UTC): `semanaAtual` mostrava "Semana 2 de 8" às 21h do sétimo dia →
+  `lib/domain/fuso.ts` centraliza `FUSO` e `diaLocal`. Cuidado: coluna `date` chega como
+  `"2026-09-01"` e `new Date()` a lê como meia-noite UTC — converter por fuso joga o início
+  para o dia anterior; tratar o texto como dia de calendário.
