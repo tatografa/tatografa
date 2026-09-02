@@ -68,3 +68,9 @@
 - [2026-09-01] [verificacao] Prova por SQL cobre a lógica e deixa o caminho da tela sem
   prova → card que altera registro existente só fecha depois de exercitar a edição pelo
   navegador, não só o insert por SQL.
+- [2026-09-01] [next16] Apagar uma rota deixa o `.next/dev/types/validator.ts` com import
+  da rota que sumiu, e o `typecheck` falha em arquivo gerado, não no seu código →
+  `rm -rf .next` antes do build final depois de apagar a rota descartável.
+- [2026-09-01] [verificacao] Fixture inserida por SQL contorna a validação da Server
+  Action, então o screenshot pode mostrar dado que o app não consegue produzir → conferir
+  se a fixture passaria pelo formulário antes de tratá-la como prova.
