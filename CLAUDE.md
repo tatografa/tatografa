@@ -178,3 +178,8 @@ Provar que funciona sem o Otávio ler código:
 - **[2026-09-01]** Repetições aceitam **só número ou faixa** (`12`, `8-10`). "Até a falha"
   e afins vão no campo de observação do exercício, que já existe. Decisão do Otávio: o
   alvo numérico garante que a tela de execução sempre tem o que mostrar no contador.
+- **[2026-09-01]** Data do histórico é formatada **no servidor com fuso fixo
+  `America/Sao_Paulo`**, não no fuso do aparelho. Formatar no cliente deixaria a data — que
+  é o rótulo da linha — vazia até a hidratação, e a linha sem identidade. O limite aceito:
+  aluno em Manaus ou Rio Branco vê a data no horário de Brasília. Para o piloto serve;
+  quando houver aluno fora do fuso, guardar a preferência no perfil.
