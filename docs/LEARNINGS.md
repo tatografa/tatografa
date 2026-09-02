@@ -76,3 +76,11 @@
 - [2026-09-01] [verificacao] Fixture inserida por SQL contorna a validação da Server
   Action, então o screenshot pode mostrar dado que o app não consegue produzir → conferir
   se a fixture passaria pelo formulário antes de tratá-la como prova.
+- [2026-09-01] [offline] **Ramo destrutivo não pode ser decidido por medida que não enxerga
+  a fila local.** As três perdas do M1-05 tinham a mesma forma: contagem no servidor,
+  `removeItem` de chave compartilhada e "o lote foi aceito" — três jeitos de responder
+  "não há nada aqui" sobre um lugar onde não se olhou. Antes de apagar, consultar o que o
+  aparelho ainda guarda.
+- [2026-09-01] [offline] Chave global de `localStorage` para dado por sessão é condição de
+  apagamento, não economia → chavear por id (`prefixo:<sessionId>`) e nunca remover chave
+  que não seja a da sessão montada. Celular emprestado na academia é caso real.
