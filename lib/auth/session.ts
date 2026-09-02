@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
@@ -46,8 +47,12 @@ export async function requireTrainer(): Promise<{
  *
  * Devolve também o personal, porque quase toda tela do aluno mostra o nome
  * dele ("treinos da Ana", "Semana 3 de 8 · Ana").
+ *
+ * Memoizada por requisição com `cache()`: o layout autoriza e as páginas de
+ * dentro dele precisam do mesmo aluno e do mesmo personal para o cabeçalho.
+ * Sem isso seriam três idas ao Supabase por tela, todas com a mesma resposta.
  */
-export async function requireStudent(): Promise<{
+export const requireStudent = cache(async function requireStudent(): Promise<{
   student: Tables<"students">;
   personal: Pick<Tables<"trainers">, "id" | "name" | "phone" | "avatar_url">;
 }> {
@@ -88,4 +93,4 @@ export async function requireStudent(): Promise<{
   if (!personal) redirect("/acesso?erro=sem-perfil");
 
   return { student, personal };
-}
+});

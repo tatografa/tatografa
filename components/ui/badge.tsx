@@ -2,11 +2,14 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-type Tone = "neutro" | "brand" | "sucesso";
+type Tone = "neutro" | "brand" | "brand-solido" | "sucesso";
 
 const tones: Record<Tone, string> = {
   neutro: "bg-badge-neutral text-ink-2",
   brand: "bg-brand-soft text-brand",
+  // Selo que precisa saltar dentro de um card já discreto (doc 05: "SUGERIDO",
+  // branco sobre a marca).
+  "brand-solido": "bg-brand text-white",
   sucesso: "bg-success/15 text-success",
 };
 

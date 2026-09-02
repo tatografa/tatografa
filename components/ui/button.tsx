@@ -24,6 +24,34 @@ const sizes: Record<Size, string> = {
   lg: "h-[52px] px-5 text-[16px] rounded-[13px]",
 };
 
+/**
+ * As classes do botão, isoladas do `<button>`.
+ *
+ * Existe porque ação que navega deve ser `<a>`, não `<button>` dentro de um
+ * `<Link>` — leitor de tela anuncia o aninhado como dois controles, e o
+ * teclado tropeça nos dois. O link usa a mesma receita visual daqui.
+ */
+export function classesDeBotao({
+  variant = "primary",
+  size = "md",
+  block = false,
+  className,
+}: {
+  variant?: Variant;
+  size?: Size;
+  block?: boolean;
+  className?: string;
+} = {}) {
+  return cn(
+    "inline-flex items-center justify-center gap-2 font-bold whitespace-nowrap transition",
+    "disabled:pointer-events-none disabled:opacity-50",
+    variants[variant],
+    sizes[size],
+    block && "w-full",
+    className,
+  );
+}
+
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
@@ -43,14 +71,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={cn(
-        "inline-flex items-center justify-center gap-2 font-bold whitespace-nowrap transition",
-        "disabled:pointer-events-none disabled:opacity-50",
-        variants[variant],
-        sizes[size],
-        block && "w-full",
-        className,
-      )}
+      className={classesDeBotao({ variant, size, block, className })}
       {...props}
     />
   );
