@@ -152,3 +152,6 @@ Provar que funciona sem o Otávio ler código:
 - **[2026-09-01]** Editar a prescrição **atualiza** as linhas que continuam em vez de
   apagar e recriar: `session_sets` referencia `workout_exercises.id` com cascata, e
   recriar levaria o histórico do aluno junto.
+- **[2026-09-01]** Repetições aceitam **só número ou faixa** (`12`, `8-10`). "Até a falha"
+  e afins vão no campo de observação do exercício, que já existe. Decisão do Otávio: o
+  alvo numérico garante que a tela de execução sempre tem o que mostrar no contador.
