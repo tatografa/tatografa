@@ -60,6 +60,17 @@ export function TelaListaDeTreinos({
           {nomeDoPersonal} ainda não montou nenhum treino para você.
         </p>
       )}
+
+      {/* Rodapé do doc 05, tela 3. Fica fora do `if` de propósito: quem ainda
+          não tem treino montado pode ter histórico de um macrotreino anterior. */}
+      <p className="pt-1 text-center">
+        <Link
+          href="/app/historico"
+          className="text-[12px] font-medium text-ink-4 transition hover:text-ink-2"
+        >
+          Ver histórico completo
+        </Link>
+      </p>
     </div>
   );
 }
