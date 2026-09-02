@@ -70,7 +70,9 @@
   navegador, não só o insert por SQL.
 - [2026-09-01] [next16] Apagar uma rota deixa o `.next/dev/types/validator.ts` com import
   da rota que sumiu, e o `typecheck` falha em arquivo gerado, não no seu código →
-  `rm -rf .next` antes do build final depois de apagar a rota descartável.
+  `rm -rf .next` depois de apagar a rota descartável. **A ordem importa:** `PageProps<"/rota">`
+  também é tipo gerado, então rodar `typecheck` logo após o `rm -rf` acusa
+  "Cannot find name 'PageProps'". O certo é `rm -rf .next && npm run build && npm run typecheck`.
 - [2026-09-01] [verificacao] Fixture inserida por SQL contorna a validação da Server
   Action, então o screenshot pode mostrar dado que o app não consegue produzir → conferir
   se a fixture passaria pelo formulário antes de tratá-la como prova.
