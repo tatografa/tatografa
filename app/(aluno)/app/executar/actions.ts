@@ -22,14 +22,26 @@ const VIOLACAO_DE_UNICO = "23505";
  * enviar" e tenta de novo.
  */
 export type ResultadoDaGravacao =
-  | { ok: true }
+  | {
+      ok: true;
+      /**
+       * Séries que o servidor recusou uma a uma, como `"<workout_exercise_id>#<n>"`.
+       * As demais do mesmo lote **foram gravadas**.
+       *
+       * Existe porque recusar o lote inteiro por causa de uma linha inválida
+       * travava séries legítimas: basta o personal remover um exercício
+       * enquanto o aluno treina para oito séries boas ficarem presas na fila
+       * para sempre.
+       */
+      recusadas?: string[];
+    }
   | {
       ok: false;
       erro: string;
       /**
-       * `true` quando tentar de novo não vai adiantar (sessão já fechada,
-       * série que não pertence ao treino). A fila para de reenviar e mostra o
-       * erro; sem esta distinção ela ficaria batendo no servidor para sempre.
+       * `true` quando tentar de novo não vai adiantar. Hoje só a validação do
+       * payload inteiro cai aqui — a interface deste app não consegue produzir
+       * o caso. Recusa por série vem em `recusadas`, com `ok: true`.
        */
       permanente: boolean;
     };
@@ -65,11 +77,17 @@ const esquemaGravacao = z.object({
 export type EntradaDeGravacao = z.input<typeof esquemaGravacao>;
 
 /**
- * Grava (ou regrava) séries da sessão em andamento.
+ * Grava (ou regrava) séries de uma sessão do aluno.
  *
  * É `upsert` por `(session_id, workout_exercise_id, set_number)` de propósito:
  * o reenvio da fila local e a correção de uma série já feita passam pelo mesmo
  * caminho, e nenhum dos dois pode virar linha duplicada.
+ *
+ * **Aceita sessão já encerrada**, desde que seja do próprio aluno. Recusar
+ * fechava a porta na cara do dado que a fila existe para salvar: uma sessão
+ * encerrada enquanto ainda havia série guardada no aparelho nunca mais
+ * receberia essa série. O volume é calculado na leitura, então o resumo se
+ * corrige sozinho; só `duration_seconds` fica como foi registrado.
  */
 export async function registrarSeries(
   entrada: EntradaDeGravacao,
@@ -83,14 +101,10 @@ export async function registrarSeries(
   const { sessionId, series } = validado.data;
   const supabase = await createClient();
 
-  const sessao = await sessaoEmAndamento(supabase, student.id, sessionId);
-  if (!sessao) {
-    return {
-      ok: false,
-      erro: "Este treino não está mais em andamento.",
-      permanente: true,
-    };
-  }
+  const sessao = await sessaoDoAluno(supabase, student.id, sessionId);
+  // Sessão que não é do aluno (ou não existe) é temporária de propósito: um
+  // erro de leitura não pode fazer a fila jogar fora o treino inteiro.
+  if (!sessao) return { ok: false, erro: ERRO_GENERICO, permanente: false };
 
   // O RLS de `session_sets` confere de quem é a sessão, mas não de quem é a
   // linha da prescrição: sem esta conferência o aluno poderia gravar série
@@ -98,12 +112,19 @@ export async function registrarSeries(
   // A migration 0009 fecha o mesmo furo no banco; aqui a recusa é explícita
   // em vez de virar erro de RLS sem explicação.
   const permitidos = await prescricaoDoTreino(supabase, sessao.workout_id);
-  if (series.some((s) => !permitidos.has(s.workout_exercise_id))) {
-    return { ok: false, erro: "Série fora deste treino.", permanente: true };
-  }
+
+  // Separa em vez de recusar tudo: a linha que sumiu da prescrição é
+  // irrecuperável de qualquer jeito, mas as outras do mesmo lote são séries
+  // que o aluno levantou.
+  const aceitas = series.filter((s) => permitidos.has(s.workout_exercise_id));
+  const recusadas = series
+    .filter((s) => !permitidos.has(s.workout_exercise_id))
+    .map((s) => `${s.workout_exercise_id}#${s.set_number}`);
+
+  if (!aceitas.length) return { ok: true, recusadas };
 
   const { error } = await supabase.from("session_sets").upsert(
-    series.map((serie) => ({
+    aceitas.map((serie) => ({
       session_id: sessionId,
       workout_exercise_id: serie.workout_exercise_id,
       set_number: serie.set_number,
@@ -115,10 +136,9 @@ export async function registrarSeries(
   );
 
   // Erro de rede ou do banco é temporário por padrão: a fila continua
-  // guardando a série e tenta de novo. Só o que já foi diagnosticado acima
-  // como definitivo interrompe o reenvio.
+  // guardando a série e tenta de novo.
   if (error) return { ok: false, erro: ERRO_GENERICO, permanente: false };
-  return { ok: true };
+  return { ok: true, recusadas };
 }
 
 const esquemaConclusao = z.object({ sessionId: z.string().uuid() });
@@ -293,6 +313,22 @@ async function sessaoEmAndamento(
     .eq("id", sessionId)
     .eq("student_id", alunoId)
     .is("finished_at", null)
+    .maybeSingle();
+
+  return data;
+}
+
+/** A sessão do aluno, aberta ou já encerrada. Usada só para gravar série. */
+async function sessaoDoAluno(
+  supabase: Cliente,
+  alunoId: string,
+  sessionId: string,
+) {
+  const { data } = await supabase
+    .from("workout_sessions")
+    .select("id, workout_id, started_at")
+    .eq("id", sessionId)
+    .eq("student_id", alunoId)
     .maybeSingle();
 
   return data;

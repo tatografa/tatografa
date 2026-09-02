@@ -4,7 +4,8 @@ import { HoraLocal } from "@/components/aluno/hora-local";
 import type { SessaoAberta } from "@/lib/queries/execucao";
 import type { TreinoCompleto } from "@/lib/queries/treinos";
 
-import { encerrarPendenteEComecar, iniciarTreino } from "../actions";
+import { iniciarTreino } from "../actions";
+import { ResolucaoDaSessaoPendente } from "./resolucao-pendente";
 
 /**
  * Telas de entrada da execução. São componentes de servidor com formulário:
@@ -53,7 +54,6 @@ export function TelaSessaoPendente({
   treino: TreinoCompleto;
   pendente: SessaoAberta;
 }) {
-  const temSeries = pendente.series_registradas > 0;
   const nomePendente = pendente.treino
     ? `Treino ${pendente.treino.label} · ${pendente.treino.name}`
     : "Um treino";
@@ -64,41 +64,21 @@ export function TelaSessaoPendente({
       titulo={nomePendente}
       voltarPara={`/app/treinos/${treino.id}`}
     >
-      <p className="text-[14px] leading-relaxed text-dark-text-2">
-        {temSeries
-          ? `${pendente.series_registradas} ${pendente.series_registradas === 1 ? "série registrada" : "séries registradas"}.`
-          : "Ainda não tem nenhuma série registrada."}
-      </p>
-      <p className="mt-1 text-[13px] text-ink-4">
+      {/*
+        A decisão sobre encerrar mora no cliente porque depende do que este
+        aparelho ainda guarda — a contagem do servidor não enxerga um treino
+        feito sem sinal.
+      */}
+      <ResolucaoDaSessaoPendente
+        sessaoId={pendente.id}
+        sessaoWorkoutId={pendente.workout_id}
+        seriesNoServidor={pendente.series_registradas}
+        treinoId={treino.id}
+        treinoLabel={treino.label}
+      />
+
+      <p className="mt-3 text-[13px] text-ink-4">
         Começou às <HoraLocal iso={pendente.started_at} />.
-      </p>
-
-      <div className="mt-6 space-y-2.5">
-        <Link
-          href={`/app/executar/${pendente.workout_id}`}
-          className="flex h-[52px] w-full items-center justify-center rounded-[13px] bg-brand text-[16px] font-bold text-white shadow-cta transition active:scale-[0.99]"
-        >
-          Retomar esse treino
-        </Link>
-
-        <form action={encerrarPendenteEComecar}>
-          <input type="hidden" name="sessaoId" value={pendente.id} />
-          <input type="hidden" name="treinoId" value={treino.id} />
-          <button
-            type="submit"
-            className="h-[52px] w-full rounded-[13px] border-[1.5px] border-dark-border-2 text-[15px] font-bold text-dark-text-2 transition active:scale-[0.99]"
-          >
-            {temSeries
-              ? `Encerrar e começar o Treino ${treino.label}`
-              : `Descartar e começar o Treino ${treino.label}`}
-          </button>
-        </form>
-      </div>
-
-      <p className="mt-4 text-[12px] leading-relaxed text-ink-4">
-        {temSeries
-          ? "Encerrar salva o que já foi feito no histórico. Nenhuma série é apagada."
-          : "Sem nenhuma série registrada, não há o que guardar."}
       </p>
     </Moldura>
   );

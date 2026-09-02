@@ -121,6 +121,13 @@ function ExecucaoMontada({
   const confirmar = useCallback(
     (serie: SerieDaExecucao, iniciarDescanso: boolean, descanso: number) => {
       fila.registrar([serie]);
+      // O rascunho do stepper cumpriu o papel: daqui em diante o valor da
+      // série é o registro, não o rascunho.
+      setValores((v) => {
+        const resto = { ...v };
+        delete resto[chaveDaSerie(serie.workout_exercise_id, serie.set_number)];
+        return resto;
+      });
       setEmEdicao(null);
       setAvisoDeEnvio(null);
       // Correção de série antiga não inicia descanso: o aluno está arrumando um
@@ -147,10 +154,11 @@ function ExecucaoMontada({
     setConcluindo(true);
     setAvisoDeEnvio(null);
     try {
-      // A sessão só fecha com a fila vazia. Fechar antes gravaria uma duração
-      // e um volume que não incluem as séries ainda a caminho.
-      const enviou = await fila.esvaziar();
-      if (!enviou) {
+      // `esvaziar` devolve "a fila ficou vazia", não "o lote que enviei foi
+      // aceito". Fechar a sessão antes disso gravaria uma duração e um volume
+      // sem as séries ainda a caminho.
+      const vazia = await fila.esvaziar();
+      if (!vazia) {
         setAvisoDeEnvio(
           "Ainda há séries para enviar. Assim que a internet voltar, toque de novo.",
         );
@@ -163,7 +171,23 @@ function ExecucaoMontada({
         return;
       }
 
-      fila.descartar();
+      /*
+       * Entre o `await` de cima e este ponto o aluno pode ter confirmado ou
+       * corrigido uma série. `descartar` recusa quando a fila não está vazia —
+       * antes disso ele apagava esse item, e como a sessão já fechou não havia
+       * reenvio para recuperá-lo. A gravação aceita sessão encerrada, então a
+       * série tardia ainda entra no histórico.
+       */
+      if (!fila.descartar()) {
+        const tardias = await fila.esvaziar();
+        if (!tardias || !fila.descartar()) {
+          setAvisoDeEnvio(
+            "A última série ainda não foi enviada. Toque em concluir de novo quando a internet voltar.",
+          );
+          return;
+        }
+      }
+
       apagarTela();
       router.replace(`/app/executar/${treino.id}/fim`);
     } catch {
@@ -232,7 +256,21 @@ function ExecucaoMontada({
                         setValores((v) => ({ ...v, [chave]: novos }))
                       }
                       correcao={Boolean(editando && registrada)}
-                      aoCancelar={() => setEmEdicao(null)}
+                      // Confirmar durante a conclusão criaria justamente a
+                      // série que a sessão já fechada não esperaria.
+                      desabilitado={concluindo}
+                      aoCancelar={() => {
+                        // O rascunho do stepper morre com o cancelamento: sem
+                        // isto, reabrir a série mostrava o valor abandonado e
+                        // um toque no ✓ gravava um número que o aluno tinha
+                        // desistido de gravar.
+                        setValores((v) => {
+                          const resto = { ...v };
+                          delete resto[chave];
+                          return resto;
+                        });
+                        setEmEdicao(null);
+                      }}
                       aoConfirmar={(v) =>
                         confirmar(
                           {
@@ -277,12 +315,12 @@ function ExecucaoMontada({
             </p>
           ) : null}
 
-          {fila.erroPermanente ? (
+          {fila.aviso ? (
             <p
               role="alert"
               className="mt-4 rounded-card border border-brand bg-brand-tint p-3 text-[13px] leading-relaxed text-dark-text"
             >
-              {fila.erroPermanente}
+              {fila.aviso}
             </p>
           ) : null}
         </div>
@@ -307,7 +345,10 @@ function ExecucaoMontada({
           <button
             type="button"
             onClick={pularExercicio}
-            disabled={exercicioConcluido(exercicio, series)}
+            // Também trava durante a conclusão: pular enfileira as séries que
+            // faltam, e uma série que entra depois do `await` cai na sessão
+            // que acabou de fechar.
+            disabled={exercicioConcluido(exercicio, series) || concluindo}
             className="h-[52px] flex-1 rounded-[13px] border-[1.5px] border-dark-border-2 text-[14px] font-bold text-dark-text-2 transition disabled:opacity-30 active:scale-[0.99]"
           >
             Pular exercício
@@ -466,6 +507,7 @@ function SerieAtiva({
   exercicio,
   valores,
   correcao,
+  desabilitado,
   aoMudar,
   aoConfirmar,
   aoCancelar,
@@ -474,6 +516,7 @@ function SerieAtiva({
   exercicio: ExercicioPrescrito;
   valores: Valores;
   correcao: boolean;
+  desabilitado: boolean;
   aoMudar: (valores: Valores) => void;
   aoConfirmar: (valores: Valores) => void;
   aoCancelar: () => void;
@@ -535,11 +578,12 @@ function SerieAtiva({
         ) : null}
         <button
           type="button"
+          disabled={desabilitado}
           onClick={() => aoConfirmar(valores)}
           aria-label={
             correcao ? `Salvar correção da série ${numero}` : `Confirmar série ${numero}`
           }
-          className="flex size-11 items-center justify-center rounded-full bg-brand text-white shadow-brand transition active:scale-95"
+          className="flex size-11 items-center justify-center rounded-full bg-brand text-white shadow-brand transition active:scale-95 disabled:pointer-events-none disabled:opacity-40"
         >
           <Check aria-hidden size={18} strokeWidth={3} />
         </button>

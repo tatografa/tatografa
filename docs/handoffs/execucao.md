@@ -73,11 +73,46 @@ o que estava na fila. Por isso o contador "N séries a enviar" fica visível no
 topo o tempo todo — o limite só é aceitável enquanto não for silencioso.
 Também por isso o botão de concluir só fecha a sessão com a fila vazia.
 
-### Erro temporário e erro definitivo são coisas diferentes
+### Recusa é por série, não por lote
 
-`registrarSeries` devolve `permanente: boolean`. Sessão já fechada ou série
-fora do treino não adianta reenviar: a fila para e a tela mostra o motivo. Sem
-essa distinção, a fila bateria no servidor para sempre gastando bateria.
+`registrarSeries` grava o que pode e devolve `recusadas: string[]` com as
+séries que não pertencem mais à prescrição (o personal removeu o exercício
+enquanto o aluno treinava). Recusar o lote inteiro por causa de uma linha
+inválida travava oito séries legítimas na fila para sempre, com a mensagem
+"assim que a internet voltar" e a internet boa.
+
+`permanente: true` sobrou só para o payload inteiro inválido — caso que a
+interface deste app não produz. Ele nunca impede a conclusão do treino.
+
+### A gravação aceita sessão já encerrada
+
+Desde que seja do próprio aluno. Recusar fechava a porta na cara do dado que a
+fila existe para salvar: uma sessão encerrada com série ainda guardada no
+aparelho nunca mais receberia essa série. O volume é calculado na leitura,
+então o resumo se corrige sozinho; só `duration_seconds` fica como registrado.
+
+### Uma chave de `localStorage` por sessão
+
+`repsclub.execucao.fila.v1:<sessionId>`, e nunca uma chave global. Com chave
+única, entrar numa segunda sessão apagava a fila da primeira — o efeito de
+persistência roda na montagem com a fila recém-inicializada, e o `removeItem`
+levava junto o que era da outra. O caso real é celular emprestado na academia.
+
+### Contagem do servidor não é evidência de sessão vazia
+
+A tela de sessão pendente é cliente por causa disto. Um treino feito sem sinal
+tem zero linhas no banco e N na fila do aparelho; decidir por `series === 0`
+**deletava a linha de `workout_sessions`** — o treino inteiro — enquanto a tela
+dizia "ainda não tem nenhuma série". Agora o componente envia o que o aparelho
+guarda daquela sessão antes de oferecer qualquer coisa, e enquanto houver série
+guardada a ação de encerrar não existe na tela.
+
+### Concluir nunca descarta o que está na fila
+
+`esvaziar()` devolve "a fila ficou vazia", não "o lote que enviei foi aceito" —
+a diferença é uma série confirmada entre um `await` e outro. `descartar()`
+recusa quando a fila não está vazia, e os botões que enfileiram (o ✓ e "pular
+exercício") ficam travados enquanto a conclusão viaja.
 
 ### Sessão pendente: encerrar, nunca apagar
 
@@ -112,6 +147,7 @@ olha (Fase 4).
 | Personal gravando/alterando série do aluno | recusado (42501) / 0 linhas |
 | Personal lendo séries do próprio aluno | vê tudo |
 | Aluno fechando ou apagando sessão alheia | 0 linhas |
+| Aluno gravando série na própria sessão já fechada | permitido (é o que salva a série tardia) |
 
 **Furo encontrado e corrigido aqui** (migration `0009`): `session_sets_write`
 exigia só `private.owns_session(session_id)` — conferia de quem era a sessão,
@@ -144,6 +180,18 @@ relacionamento**.
   apareceu no screenshot em viewport real, não no build.
 - **`rm -rf .next` derruba o `typecheck`** porque os tipos de rota são gerados:
   rodar `npm run build` (ou `npx next typegen`) antes do `typecheck`.
+- **Chave de armazenamento compartilhada entre sessões é apagamento disfarçado.**
+  O efeito de persistência roda na montagem com o estado ainda vazio; se a
+  chave for global, ele limpa o que era de outra sessão. Chavear por id.
+- **Contagem do servidor não prova ausência quando existe fila local.** Todo
+  ramo destrutivo decidido por `count === 0` precisa consultar antes o que o
+  aparelho ainda guarda.
+- **`await` no meio de uma conclusão é uma janela de escrita.** Ou se trava o
+  que enfileira, ou se reconfere depois — de preferência os dois. Ler estado de
+  React entre `await`s dá o valor de um render antigo: a verdade tem que estar
+  numa `ref` atualizada de forma síncrona.
+- **Recusar um lote inteiro por causa de um item transforma erro de um em
+  prejuízo de todos.** Validação em lote devolve quais itens recusou.
 
 ## Fora do escopo (confirmado com o PM)
 

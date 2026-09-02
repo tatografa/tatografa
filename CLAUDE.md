@@ -161,8 +161,12 @@ Provar que funciona sem o Otávio ler código:
   e o botão de concluir só fecha a sessão com a fila vazia.
 - **[2026-09-02]** Sessão em andamento de outro treino é **encerrada e salva**, nunca
   apagada: série que o aluno executou é histórico. Só a sessão com zero séries é
-  descartada. Encerrar grava `finished_at` e `duration_seconds`, para não deixar sessão
-  meio-fechada.
+  descartada — e "zero séries" é medido **depois** de enviar a fila que o aparelho
+  guarda daquela sessão, porque a contagem do servidor não enxerga um treino feito sem
+  sinal. Encerrar grava `finished_at` e `duration_seconds`.
+- **[2026-09-02]** Toda chave de `localStorage` que guarda dado de uma sessão é
+  **chaveada pelo id da sessão**. Chave global vira apagamento: o efeito de persistência
+  roda na montagem com o estado vazio e limpa o que era de outra sessão.
 - **[2026-09-02]** Ler `localStorage` no cliente exige separar o **render de hidratação**
   do resto: nele a janela já existe, então `typeof window` não protege. O gate é
   `useMontado()` (`lib/usar-montado.ts`, sobre `useSyncExternalStore`) trocando a `key`

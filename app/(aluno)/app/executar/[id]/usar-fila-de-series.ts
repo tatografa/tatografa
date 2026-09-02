@@ -34,7 +34,20 @@ import { registrarSeries } from "../actions";
  * ele não for silencioso.
  */
 
-const CHAVE = "repsclub.execucao.fila.v1";
+const PREFIXO = "repsclub.execucao.fila.v1";
+
+/**
+ * Uma chave por sessão, e não uma chave global.
+ *
+ * Com chave única, entrar numa segunda sessão apagava a fila da primeira: o
+ * efeito de persistência roda na montagem com a fila recém-inicializada
+ * (vazia), e `removeItem` levava junto o que era da outra sessão. O caso real
+ * é celular emprestado na academia — o aluno B começa a treinar e a fila do
+ * aluno A vai embora.
+ */
+function chaveDoArmazenamento(sessionId: string): string {
+  return `${PREFIXO}:${sessionId}`;
+}
 
 /**
  * A ordem (`seq`) existe para o caso da correção durante um envio: se o aluno
@@ -51,14 +64,18 @@ export type EstadoDaFila = {
   series: Map<string, SerieDaExecucao>;
   pendentes: number;
   enviando: boolean;
-  /** Erro que não adianta tentar de novo. A tela mostra e para de prometer. */
-  erroPermanente: string | null;
+  /** Aviso sobre séries que o servidor recusou de vez. Não trava a conclusão. */
+  aviso: string | null;
   /** Confirma (ou corrige) séries: local na hora, servidor depois. */
   registrar: (series: SerieDaExecucao[]) => void;
-  /** Tenta esvaziar a fila agora. `true` se o servidor tem tudo. */
+  /**
+   * Tenta esvaziar a fila agora. Devolve **`true` só quando a fila ficou
+   * vazia** — não "o lote que enviei foi aceito". A diferença é o que impede
+   * de descartar uma série confirmada durante a conclusão.
+   */
   esvaziar: () => Promise<boolean>;
-  /** Apaga a fila persistida. Só depois que o treino fecha. */
-  descartar: () => void;
+  /** Apaga a fila persistida. Recusa se ainda houver série pendente. */
+  descartar: () => boolean;
 };
 
 export function useFilaDeSeries(
@@ -86,46 +103,60 @@ export function useFilaDeSeries(
   // recusa). Quem garante que isto só roda no cliente é o `useMontado` da tela,
   // que remonta este componente depois da hidratação.
   const [gravadaAoAbrir] = useState(() =>
-    usarArmazenamento ? ler(sessionId) : [],
+    usarArmazenamento ? lerFilaDeSessao(sessionId) : [],
   );
-  const [fila, setFila] = useState<Fila>(() =>
-    Object.fromEntries(gravadaAoAbrir.map((i) => [chave(i.serie), i])),
+  const inicial = useMemo(
+    () => Object.fromEntries(gravadaAoAbrir.map((i) => [chave(i.serie), i])),
+    [gravadaAoAbrir],
   );
+
+  /*
+   * A fila tem duas caras: `filaRef` é a verdade, atualizada de forma síncrona,
+   * e `fila` é o espelho para renderizar. Sem a ref, um `esvaziar()` que envia
+   * em rodadas leria a fila de um render antigo entre um `await` e outro — e
+   * concluiria "vazia" com série dentro.
+   */
+  const filaRef = useRef<Fila>(inicial);
+  const [fila, setFilaEstado] = useState<Fila>(inicial);
+
   const [enviando, setEnviando] = useState(false);
   const [falhas, setFalhas] = useState(0);
-  const [erroPermanente, setErroPermanente] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
   // Continua de onde a fila gravada parou: reiniciar em 0 faria o `seq` de uma
   // série nova empatar com o de uma antiga ainda na fila.
   const proximoSeq = useRef(
     gravadaAoAbrir.reduce((maior, i) => Math.max(maior, i.seq), 0) + 1,
   );
 
+  /** Único ponto de mudança da fila: ref e espelho andam sempre juntos. */
+  const aplicar = useCallback((mudanca: (atual: Fila) => Fila) => {
+    const novo = mudanca(filaRef.current);
+    filaRef.current = novo;
+    setFilaEstado(novo);
+  }, []);
+
   useEffect(() => {
     if (!usarArmazenamento) return;
     gravar(sessionId, Object.values(fila));
   }, [fila, sessionId, usarArmazenamento]);
 
-  const registrar = useCallback((series: SerieDaExecucao[]) => {
-    if (!series.length) return;
-    setFila((anterior) => {
-      const novo = { ...anterior };
-      for (const serie of series) {
-        proximoSeq.current += 1;
-        novo[chave(serie)] = { seq: proximoSeq.current, serie };
-      }
-      return novo;
-    });
-  }, []);
+  const registrar = useCallback(
+    (series: SerieDaExecucao[]) => {
+      if (!series.length) return;
+      aplicar((atual) => {
+        const novo = { ...atual };
+        for (const serie of series) {
+          proximoSeq.current += 1;
+          novo[chave(serie)] = { seq: proximoSeq.current, serie };
+        }
+        return novo;
+      });
+    },
+    [aplicar],
+  );
 
-  // `enviar` lê a fila por ref para não ser recriada a cada confirmação — a
-  // função é dependência do efeito de disparo, e recriá-la reiniciaria a espera
-  // do reenvio a cada tecla.
-  const filaRef = useRef<Fila>(fila);
-  useEffect(() => {
-    filaRef.current = fila;
-  }, [fila]);
-
-  const enviar = useCallback(async (): Promise<boolean> => {
+  /** Envia uma rodada. `true` se o lote foi aceito pelo servidor. */
+  const enviarRodada = useCallback(async (): Promise<boolean> => {
     const foto = filaRef.current;
     const itens = Object.values(foto);
     if (!itens.length) return true;
@@ -137,28 +168,62 @@ export function useFilaDeSeries(
         series: itens.map((i) => i.serie),
       });
 
-      if (resultado.ok) {
-        setConfirmadas((anterior) => {
-          const novo = new Map(anterior);
-          for (const item of itens) novo.set(chave(item.serie), item.serie);
-          return novo;
-        });
-        // Só sai da fila o que foi enviado com este `seq`: uma correção feita
-        // durante o envio tem `seq` maior e continua pendente.
-        setFila((anterior) => {
-          const novo = { ...anterior };
-          for (const [k, item] of Object.entries(foto)) {
-            if (novo[k]?.seq === item.seq) delete novo[k];
-          }
-          return novo;
-        });
-        setFalhas(0);
-        return true;
+      if (!resultado.ok) {
+        if (resultado.permanente) {
+          /*
+           * Payload que o servidor nunca vai aceitar (a validação inteira
+           * falhou). Manter na fila seria prometer um envio que não vem e
+           * travar a conclusão do treino para sempre. Sai da fila com aviso —
+           * a interface deste app não consegue produzir este caso.
+           */
+          aplicar((atual) => {
+            const novo = { ...atual };
+            for (const [k, item] of Object.entries(foto)) {
+              if (novo[k]?.seq === item.seq) delete novo[k];
+            }
+            return novo;
+          });
+          setAviso(resultado.erro);
+          return true;
+        }
+        setFalhas((n) => n + 1);
+        return false;
       }
 
-      if (resultado.permanente) setErroPermanente(resultado.erro);
-      setFalhas((n) => n + 1);
-      return false;
+      // Séries que o servidor recusou uma a uma (o exercício saiu da
+      // prescrição enquanto o aluno treinava). Elas saem da fila; as demais do
+      // mesmo lote foram gravadas. Recusar o lote inteiro travaria séries
+      // legítimas por causa de uma linha que não existe mais.
+      const recusadas = new Set(resultado.recusadas ?? []);
+
+      setConfirmadas((anterior) => {
+        const novo = new Map(anterior);
+        for (const item of itens) {
+          const k = chave(item.serie);
+          if (!recusadas.has(k)) novo.set(k, item.serie);
+        }
+        return novo;
+      });
+
+      // Só sai da fila o que foi enviado com este `seq`: uma correção feita
+      // durante o envio tem `seq` maior e continua pendente.
+      aplicar((atual) => {
+        const novo = { ...atual };
+        for (const [k, item] of Object.entries(foto)) {
+          if (novo[k]?.seq === item.seq) delete novo[k];
+        }
+        return novo;
+      });
+
+      if (recusadas.size) {
+        setAviso(
+          recusadas.size === 1
+            ? "1 série não pôde ser salva: o exercício saiu do treino."
+            : `${recusadas.size} séries não puderam ser salvas: o exercício saiu do treino.`,
+        );
+      }
+      setFalhas(0);
+      return true;
     } catch {
       // Rede caída chega aqui como exceção da Server Action. Nada sai da fila.
       setFalhas((n) => n + 1);
@@ -166,7 +231,24 @@ export function useFilaDeSeries(
     } finally {
       setEnviando(false);
     }
-  }, [sessionId]);
+  }, [aplicar, sessionId]);
+
+  /**
+   * Esvazia a fila de verdade: envia em rodadas enquanto houver item novo.
+   *
+   * Uma rodada só carrega o que existia quando ela começou. Se o aluno
+   * confirmar uma série durante o envio (rede lenta e o dedo rápido), ela
+   * entra depois e precisa de outra rodada. O teto de rodadas evita laço
+   * infinito se algo continuar chegando.
+   */
+  const esvaziar = useCallback(async (): Promise<boolean> => {
+    for (let rodada = 0; rodada < 4; rodada += 1) {
+      if (!Object.keys(filaRef.current).length) return true;
+      const aceitou = await enviarRodada();
+      if (!aceitou) return false;
+    }
+    return Object.keys(filaRef.current).length === 0;
+  }, [enviarRodada]);
 
   const pendentes = Object.keys(fila).length;
 
@@ -174,11 +256,11 @@ export function useFilaDeSeries(
   // falhar, até 15s. Sem o teto, uma academia sem sinal viraria uma sequência
   // infinita de tentativas imediatas gastando bateria.
   useEffect(() => {
-    if (!pendentes || enviando || erroPermanente) return;
+    if (!pendentes || enviando) return;
     const atraso = falhas === 0 ? 250 : Math.min(15_000, 1_000 * 2 ** falhas);
-    const relogio = setTimeout(() => void enviar(), atraso);
+    const relogio = setTimeout(() => void enviarRodada(), atraso);
     return () => clearTimeout(relogio);
-  }, [pendentes, enviando, falhas, erroPermanente, enviar]);
+  }, [pendentes, enviando, falhas, enviarRodada]);
 
   // Voltar a ter internet, ou voltar para a aba, são os dois momentos em que
   // vale tentar na hora em vez de esperar a próxima janela do backoff.
@@ -202,10 +284,14 @@ export function useFilaDeSeries(
     return () => window.removeEventListener("beforeunload", avisar);
   }, [pendentes]);
 
-  const descartar = useCallback(() => {
-    setFila({});
-    apagar();
-  }, []);
+  const descartar = useCallback((): boolean => {
+    // Apagar a fila é a única operação irreversível deste arquivo: sem a
+    // guarda, uma série confirmada entre o `await` da conclusão e este ponto
+    // sumiria sem nunca ter chegado ao servidor.
+    if (Object.keys(filaRef.current).length) return false;
+    apagarFilaDeSessao(sessionId);
+    return true;
+  }, [sessionId]);
 
   const series = useMemo(
     () =>
@@ -220,9 +306,9 @@ export function useFilaDeSeries(
     series,
     pendentes,
     enviando,
-    erroPermanente,
+    aviso,
     registrar,
-    esvaziar: enviar,
+    esvaziar,
     descartar,
   };
 }
@@ -232,20 +318,24 @@ function chave(serie: SerieDaExecucao): string {
 }
 
 /**
+ * A fila guardada para uma sessão. Exportada porque a tela de sessão pendente
+ * precisa saber se o aparelho ainda guarda séries de **outra** sessão antes de
+ * oferecer encerrá-la.
+ *
  * Toda a leitura e escrita do armazenamento é defensiva: modo privado do
  * Safari e cota estourada fazem `localStorage` **lançar exceção**, e uma
  * exceção aqui derrubaria a tela de execução no meio do treino. Perder a
  * persistência é ruim; perder a tela é pior.
  */
-function ler(sessionId: string): ItemDaFila[] {
+export function lerFilaDeSessao(sessionId: string): ItemDaFila[] {
   // O inicializador de estado também roda no servidor, onde não há janela.
   if (typeof window === "undefined") return [];
   try {
-    const bruto = window.localStorage.getItem(CHAVE);
+    const bruto = window.localStorage.getItem(chaveDoArmazenamento(sessionId));
     if (!bruto) return [];
     const gravada = JSON.parse(bruto) as FilaGravada;
-    // Fila de outra sessão não serve para esta: as chaves são por sessão no
-    // banco, e reaproveitar gravaria série de um treino em outro.
+    // Redundância defensiva: a chave já é por sessão, então isto só pega
+    // armazenamento corrompido — não é mais o que separa uma sessão da outra.
     if (gravada?.sessionId !== sessionId) return [];
     return Array.isArray(gravada.itens) ? gravada.itens : [];
   } catch {
@@ -253,23 +343,33 @@ function ler(sessionId: string): ItemDaFila[] {
   }
 }
 
-function gravar(sessionId: string, itens: ItemDaFila[]): void {
+/** As séries guardadas para uma sessão, prontas para reenvio. */
+export function seriesGuardadasDe(sessionId: string): SerieDaExecucao[] {
+  return lerFilaDeSessao(sessionId).map((item) => item.serie);
+}
+
+export function apagarFilaDeSessao(sessionId: string): void {
   try {
-    if (!itens.length) {
-      window.localStorage.removeItem(CHAVE);
-      return;
-    }
-    const gravada: FilaGravada = { sessionId, itens };
-    window.localStorage.setItem(CHAVE, JSON.stringify(gravada));
+    window.localStorage.removeItem(chaveDoArmazenamento(sessionId));
   } catch {
-    // Sem persistência a fila continua valendo em memória até a aba fechar.
+    // Nada a fazer: a fila já foi esvaziada em memória.
   }
 }
 
-function apagar(): void {
+function gravar(sessionId: string, itens: ItemDaFila[]): void {
   try {
-    window.localStorage.removeItem(CHAVE);
+    // Só a chave desta sessão é tocada. Nunca `clear()`, nunca varredura por
+    // prefixo: o aparelho pode guardar a fila de outra sessão.
+    if (!itens.length) {
+      window.localStorage.removeItem(chaveDoArmazenamento(sessionId));
+      return;
+    }
+    const gravada: FilaGravada = { sessionId, itens };
+    window.localStorage.setItem(
+      chaveDoArmazenamento(sessionId),
+      JSON.stringify(gravada),
+    );
   } catch {
-    // Nada a fazer: a fila já foi esvaziada em memória.
+    // Sem persistência a fila continua valendo em memória até a aba fechar.
   }
 }
