@@ -50,9 +50,14 @@ export async function listarAlunos(): Promise<AlunoDaLista[]> {
   }));
 }
 
+/**
+ * Sem `token`: o link copiável é montado na Server Action que cria o convite, e
+ * nenhuma tela desta lista mostra o token. Credencial que não se exibe também
+ * não se trafega — ela viajaria no payload do componente de servidor à toa.
+ */
 export type ConvitePendente = Pick<
   Tables<"invites">,
-  "id" | "name" | "email" | "token" | "expires_at" | "created_at"
+  "id" | "name" | "email" | "expires_at" | "created_at"
 >;
 
 /** Convites ainda não aceitos, do mais recente para o mais antigo. */
@@ -61,7 +66,7 @@ export async function listarConvitesPendentes(): Promise<ConvitePendente[]> {
 
   const { data, error } = await supabase
     .from("invites")
-    .select("id, name, email, token, expires_at, created_at")
+    .select("id, name, email, expires_at, created_at")
     .is("accepted_at", null)
     .gt("expires_at", new Date().toISOString())
     .order("created_at", { ascending: false });

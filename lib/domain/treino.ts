@@ -5,6 +5,8 @@
  * Nada aqui é coluna no banco — tudo é calculado na leitura (doc 03).
  */
 
+import { diaLocalEmMs } from "./fuso";
+
 /** Tempo médio de execução de uma série, usado só na duração estimada. */
 const SEGUNDOS_POR_SERIE = 40;
 
@@ -30,8 +32,13 @@ export function duracaoEstimadaMin(exercicios: ExercicioPrescrito[]): number {
   return Math.max(5, Math.round(minutos / 5) * 5);
 }
 
-/** Total de séries prescritas no treino. */
-export function totalDeSeries(exercicios: ExercicioPrescrito[]): number {
+/**
+ * Total de séries prescritas no treino.
+ *
+ * Pede só `sets` — o histórico soma o denominador direto das linhas de
+ * `workout_exercises`, sem carregar `rest_seconds`, que só a duração usa.
+ */
+export function totalDeSeries(exercicios: { sets: number }[]): number {
   return exercicios.reduce((total, e) => total + e.sets, 0);
 }
 
@@ -59,21 +66,21 @@ export function volumeDaSessao(series: SerieRegistrada[]): number {
  *
  * Sempre entre 1 e `total_weeks`: um macrotreino que passou do prazo continua
  * mostrando a última semana em vez de um número maior que o total.
+ *
+ * Os dois dias passam por `diaLocalEmMs` (fuso do produto) e não pelo fuso do
+ * processo: na Vercel, que roda em UTC, às 21h de domingo o servidor já está em
+ * segunda e o aluno lia "Semana 2 de 8" um dia adiantado — toda semana, para
+ * quem abre o app à noite. `inicio` aceita o texto da coluna `date` direto.
  */
 export function semanaAtual(
-  inicio: Date,
+  inicio: Date | string,
   totalDeSemanas: number,
-  hoje: Date = new Date(),
+  hoje: Date | string = new Date(),
 ): number {
   const umDia = 24 * 60 * 60 * 1000;
-  const dias = Math.floor((diaLimpo(hoje) - diaLimpo(inicio)) / umDia);
+  const dias = Math.floor((diaLocalEmMs(hoje) - diaLocalEmMs(inicio)) / umDia);
   const semana = Math.floor(dias / 7) + 1;
   return Math.min(Math.max(semana, 1), totalDeSemanas);
-}
-
-/** Meia-noite local do dia, em milissegundos. Evita erro de fuso na subtração. */
-function diaLimpo(data: Date): number {
-  return new Date(data.getFullYear(), data.getMonth(), data.getDate()).getTime();
 }
 
 /**

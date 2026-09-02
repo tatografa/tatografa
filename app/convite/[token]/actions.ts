@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { traduzErro } from "@/lib/auth/mensagens";
+import { getSiteOrigin } from "@/lib/auth/site-url";
 import { createClient } from "@/lib/supabase/server";
 
 export type EstadoOnboarding = {
@@ -107,6 +108,10 @@ export async function criarAcesso(
     email: valido.email,
     password: analise.data.senha,
     options: {
+      // Sem `emailRedirectTo` o link de confirmação cai em `/`, onde ninguém
+      // troca o `?code=` por sessão — e a tela anterior acabou de prometer que
+      // "seus treinos estarão prontos". O destino é o app do aluno, não o painel.
+      emailRedirectTo: `${await getSiteOrigin()}/auth/confirmar?proximo=/app`,
       data: {
         role: "aluno",
         invite_token: token,

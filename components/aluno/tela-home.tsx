@@ -90,6 +90,20 @@ export function TelaHome({
       ) : (
         <SemTreino nomeDoPersonal={nomeDoPersonal} />
       )}
+
+      {/*
+        A porta de entrada do histórico. Ficava só no rodapé de `/app/treinos`,
+        e a home só oferece `/app/treinos` quando há mais de um treino: o aluno
+        do piloto, com um treino só, terminava a primeira sessão e o caminho até
+        o próprio histórico passava por dentro da tela que abre sessão.
+        A aba Progresso, que seria o lugar natural, é M2.
+      */}
+      <Link
+        href="/app/historico"
+        className="block rounded-card border border-border-soft bg-surface px-4 py-3 text-center text-[13px] font-semibold text-ink-2 transition hover:border-border-strong"
+      >
+        Ver histórico
+      </Link>
     </div>
   );
 }

@@ -20,7 +20,7 @@ export function CardMacrotreino({
   inicio,
   nomeDoPersonal,
 }: CardMacrotreinoProps) {
-  const semana = semanaAtual(new Date(inicio), totalDeSemanas);
+  const semana = semanaAtual(inicio, totalDeSemanas);
   const progresso = Math.round((semana / totalDeSemanas) * 100);
 
   return (

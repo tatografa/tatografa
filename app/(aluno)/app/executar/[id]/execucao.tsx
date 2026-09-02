@@ -28,8 +28,18 @@ import { cn } from "@/lib/utils";
 import { concluirTreino } from "../actions";
 import { useFilaDeSeries } from "./usar-fila-de-series";
 
-/** Só o que precisa sobreviver a recarregar a página. Nada de dado de série. */
-const CHAVE_DA_TELA = "repsclub.execucao.tela.v1";
+/**
+ * Só o que precisa sobreviver a recarregar a página. Nada de dado de série.
+ *
+ * A chave é por sessão, como a da fila (`usar-fila-de-series.ts`): com chave
+ * global, concluir um treino apagava a tela gravada de outra sessão que ainda
+ * estivesse no aparelho — o caso do celular emprestado na academia.
+ */
+const PREFIXO_DA_TELA = "repsclub.execucao.tela.v1";
+
+function chaveDaTela(sessionId: string): string {
+  return `${PREFIXO_DA_TELA}:${sessionId}`;
+}
 
 type TelaGravada = {
   sessionId: string;
@@ -188,7 +198,7 @@ function ExecucaoMontada({
         }
       }
 
-      apagarTela();
+      apagarTela(sessao.id);
       router.replace(`/app/executar/${treino.id}/fim`);
     } catch {
       setAvisoDeEnvio("Não deu para concluir agora. Tente de novo.");
@@ -722,7 +732,7 @@ function lerTela(sessionId: string): TelaGravada | null {
   // O inicializador de estado também roda no servidor, onde não há janela.
   if (typeof window === "undefined") return null;
   try {
-    const bruto = window.localStorage.getItem(CHAVE_DA_TELA);
+    const bruto = window.localStorage.getItem(chaveDaTela(sessionId));
     if (!bruto) return null;
     const gravada = JSON.parse(bruto) as TelaGravada;
     if (gravada?.sessionId !== sessionId) return null;
@@ -736,15 +746,15 @@ function lerTela(sessionId: string): TelaGravada | null {
 function gravarTela(tela: TelaGravada): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(CHAVE_DA_TELA, JSON.stringify(tela));
+    window.localStorage.setItem(chaveDaTela(tela.sessionId), JSON.stringify(tela));
   } catch {
     // Sem persistência a tela ainda funciona; só não retoma o exercício certo.
   }
 }
 
-function apagarTela(): void {
+function apagarTela(sessionId: string): void {
   try {
-    window.localStorage.removeItem(CHAVE_DA_TELA);
+    window.localStorage.removeItem(chaveDaTela(sessionId));
   } catch {
     // Nada a fazer.
   }

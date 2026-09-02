@@ -7,14 +7,15 @@
  * tela de conclusão usa — duas implementações dariam dois números.
  */
 
-/**
- * Fuso do produto. O público é brasileiro e a data é o rótulo de cada linha
- * do histórico: formatar com o fuso do servidor mostraria "3 de setembro" num
- * treino feito às 21h do dia 2. Formatar só no cliente (como `HoraLocal` faz
- * para um horário solto) deixaria a lista sem rótulo até hidratar, e aqui o
- * rótulo é o que identifica a linha.
+import { FUSO, diaLocal } from "./fuso";
+
+/*
+ * O fuso e o `diaLocal` vivem em `./fuso` porque não são só do histórico: a
+ * semana do macrotreino (`semanaAtual`, em `./treino`) errava o dia pelo mesmo
+ * motivo. Aqui a data é o rótulo que identifica cada linha da lista — formatar
+ * com o fuso do servidor mostraria "3 de setembro" num treino feito às 21h do
+ * dia 2, e formatar só no cliente deixaria a lista sem rótulo até hidratar.
  */
-const FUSO = "America/Sao_Paulo";
 
 /** Uma série registrada, do jeito que `session_sets` guarda. */
 export type SerieDoHistorico = {
@@ -117,16 +118,6 @@ export function cargaDaSerie(
 ): string {
   if (pesoCorporal || loadKg === null) return "Peso corporal";
   return `${formatarNumero(loadKg)} kg`;
-}
-
-/** Dia de uma data no fuso do produto, no formato "2026-09-02". */
-function diaLocal(iso: string): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: FUSO,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date(iso));
 }
 
 /**

@@ -86,6 +86,11 @@ Hex solto em componente reprova na revisão.
 - **Nada de N+1.** Buscar em lote e agrupar em memória, mesmo com poucos registros.
 - **Autorização de verdade mora no layout** (`requireTrainer()`, `requireStudent()`),
   não no `proxy.ts` — o proxy é otimista, só evita render à toa.
+- **Policy de escrita confere o relacionamento, não só o dono da linha — e no
+  `UPDATE` também.** Foi o mesmo furo três vezes (migrations 0007, 0009, 0010).
+  Toda coluna que aponta para o relacionamento (`student_id`, `workout_id`,
+  `trainer_id`) precisa estar no `with check` do insert **e** do update: um
+  `insert` bem trancado não vale nada se o update reescreve a mesma coluna.
 - **Nunca confiar em metadado de usuário para papel.** Metadado é editável pelo próprio
   usuário; a checagem é a existência da linha em `trainers` / `students`.
 - **Helper de RLS vive no schema `private`.** O PostgREST publica como RPC toda função de
@@ -183,3 +188,15 @@ Provar que funciona sem o Otávio ler código:
   é o rótulo da linha — vazia até a hidratação, e a linha sem identidade. O limite aceito:
   aluno em Manaus ou Rio Branco vê a data no horário de Brasília. Para o piloto serve;
   quando houver aluno fora do fuso, guardar a preferência no perfil.
+- **[2026-09-02]** O aluno **não nasce por API**: `students_insert` só aceita
+  `trainer_id = auth.uid()` (o personal). O gatilho é `security definer` e não
+  passa por policy, então o convite continua funcionando — e um POST direto
+  deixou de valer mais que um token de 192 bits. Do mesmo jeito, o aluno não
+  troca o próprio `trainer_id`: mudar de personal é decisão de quem convida.
+- **[2026-09-02]** Sessão concluída não se apaga (`workout_sessions_delete`
+  exige `finished_at is null`). Apagar levaria as séries por cascata, e quem
+  perde a leitura é o personal. Só a sessão em andamento e vazia é descartável.
+- **[2026-09-02]** Toda conta de "que dia é hoje" passa por `lib/domain/fuso.ts`
+  (`America/Sao_Paulo`), nunca pelo fuso do processo: o servidor roda em UTC e
+  às 21h no Brasil já virou o dia seguinte — exatamente o horário em que se
+  treina. Coluna `date` ("2026-09-01") é dia de calendário e não se converte.

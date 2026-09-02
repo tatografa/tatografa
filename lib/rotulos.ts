@@ -24,6 +24,26 @@ export const GRUPO_MUSCULAR: Record<Enums<"muscle_group">, string> = {
   cardio: "Cardio",
 };
 
+export const OBJETIVO: Record<Enums<"student_goal">, string> = {
+  massa: "Ganhar massa",
+  gordura: "Perder gordura",
+  condicionamento: "Condicionamento",
+  saude: "Saúde",
+};
+
+export const NIVEL: Record<Enums<"experience_level">, string> = {
+  iniciante: "Iniciante",
+  intermediario: "Intermediário",
+  avancado: "Avançado",
+};
+
+/** O enum é identificador; a interface é em português e não mostra "ativo" cru. */
+export const STATUS_DO_ALUNO: Record<Enums<"student_status">, string> = {
+  convidado: "Convidado",
+  ativo: "Ativo",
+  inativo: "Inativo",
+};
+
 export const EQUIPAMENTO: Record<Enums<"equipment">, string> = {
   barra: "Barra",
   halter: "Halter",

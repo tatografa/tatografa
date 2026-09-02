@@ -120,6 +120,11 @@ Decisão do PM. Sessão de outro treino com séries registradas é **encerrada e
 salva** como treino incompleto; só a sessão com zero séries é descartada de
 verdade. Série que o aluno executou não é apagada nem com confirmação.
 
+A regra agora também é do banco, não só do código: `workout_sessions_delete`
+exige `finished_at is null` (migration 0010). Antes, um DELETE direto na sessão
+concluída levava as séries por cascata — a decisão do PM valia no app e não
+valia na API.
+
 ### Correção de série já feita
 
 Tocar numa série concluída reabre os steppers com os valores atuais. O toque

@@ -35,10 +35,7 @@ export function TelaListaDeTreinos({
         {macrotreino ? (
           <p className="mt-0.5 text-[13px] text-ink-4">
             Semana{" "}
-            {semanaAtual(
-              new Date(macrotreino.started_at),
-              macrotreino.total_weeks,
-            )}{" "}
+            {semanaAtual(macrotreino.started_at, macrotreino.total_weeks)}{" "}
             de {macrotreino.total_weeks} · {nomeDoPersonal}
           </p>
         ) : null}

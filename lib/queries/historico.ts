@@ -97,32 +97,16 @@ export async function listarHistorico(
 
   const idsDeTreino = [...new Set(sessoes.map((s) => s.workout_id))];
 
-  const [{ data: treinos, error: erroTreinos }, { data: prescricoes, error: erroPrescricoes }, series] =
+  const [{ data: treinos, error: erroTreinos }, prescritasPorTreino, series] =
     await Promise.all([
       supabase.from("workouts").select("id, label, name").in("id", idsDeTreino),
-      supabase
-        .from("workout_exercises")
-        .select("workout_id, sets, rest_seconds")
-        .in("workout_id", idsDeTreino),
+      seriesPrescritasPorTreino(idsDeTreino),
       seriesDasSessoes(sessoes.map((s) => s.id)),
     ]);
 
   if (erroTreinos) throw erroTreinos;
-  if (erroPrescricoes) throw erroPrescricoes;
 
   const treinoPorId = new Map((treinos ?? []).map((t) => [t.id, t]));
-
-  // Agrupa antes de somar para usar `totalDeSeries` do domínio, a mesma conta
-  // que o painel do personal e a lista de treinos fazem.
-  const porTreino = new Map<string, { sets: number; rest_seconds: number }[]>();
-  for (const linha of prescricoes ?? []) {
-    const lista = porTreino.get(linha.workout_id) ?? [];
-    lista.push({ sets: linha.sets, rest_seconds: linha.rest_seconds });
-    porTreino.set(linha.workout_id, lista);
-  }
-  const prescritasPorTreino = new Map(
-    [...porTreino].map(([id, linhas]) => [id, totalDeSeries(linhas)]),
-  );
 
   const seriesPorSessao = new Map<string, SerieComSessao[]>();
   for (const serie of series) {
@@ -179,8 +163,9 @@ export async function lerSessaoDoHistorico(
   if (error) throw error;
   if (!sessao?.finished_at) return null;
 
-  const [treino, series] = await Promise.all([
+  const [treino, prescritas, series] = await Promise.all([
     lerTreino(sessao.workout_id),
+    seriesPrescritasPorTreino([sessao.workout_id]),
     seriesDasSessoes([sessao.id]),
   ]);
 
@@ -223,10 +208,66 @@ export async function lerSessaoDoHistorico(
     duration_seconds: sessao.duration_seconds,
     treino: treino ? { id: treino.id, label: treino.label, name: treino.name } : null,
     series_feitas: contarFeitas(series),
-    series_prescritas: treino?.total_series ?? 0,
+    // O mesmo denominador da lista, não `treino.total_series`: aquele pula a
+    // linha órfã e mostrava "12/13" onde a lista mostra "12 de 16".
+    series_prescritas: prescritas.get(sessao.workout_id) ?? 0,
     volume_kg: volumeDaSessao(series),
     exercicios,
   };
+}
+
+/**
+ * Séries prescritas por treino — o denominador de "12 de 16 séries".
+ *
+ * Uma função só para a lista e para o detalhe. A lista somava as linhas de
+ * `workout_exercises`; o detalhe usava `lerTreino().total_series`, que pula a
+ * linha órfã (exercício próprio apagado, `exercise_id` sem fk). O mesmo treino
+ * aparecia como "12 de 16" na lista e "12/13" no detalhe — e dava para ver
+ * "14/13", porque o numerador conta as séries órfãs que aquele denominador
+ * tinha descartado.
+ *
+ * A linha órfã continua sendo linha prescrita: o aluno executou o que estava
+ * mandado, e só o nome do exercício se perdeu. Vale a prescrição de hoje —
+ * versionar prescrição é M2, como o comentário de `series_prescritas` diz.
+ *
+ * A varredura por `range` é a mesma precaução de `seriesDasSessoes`: o corte de
+ * página do PostgREST é silencioso, e um denominador cortado vira um "12 de 4"
+ * inexplicável na tela.
+ */
+async function seriesPrescritasPorTreino(
+  idsDeTreino: string[],
+): Promise<Map<string, number>> {
+  if (!idsDeTreino.length) return new Map();
+
+  const supabase = await createClient();
+  const porTreino = new Map<string, { sets: number }[]>();
+
+  for (let inicio = 0; ; inicio += PAGINA_DE_SERIES) {
+    const { data, error } = await supabase
+      .from("workout_exercises")
+      .select("workout_id, sets")
+      .in("workout_id", idsDeTreino)
+      .order("workout_id")
+      .order("position")
+      .range(inicio, inicio + PAGINA_DE_SERIES - 1);
+
+    if (error) throw error;
+    const pagina = data ?? [];
+
+    for (const linha of pagina) {
+      const lista = porTreino.get(linha.workout_id) ?? [];
+      lista.push({ sets: linha.sets });
+      porTreino.set(linha.workout_id, lista);
+    }
+
+    if (pagina.length < PAGINA_DE_SERIES) break;
+  }
+
+  // `totalDeSeries` do domínio é a mesma soma que o painel do personal e a
+  // lista de treinos fazem — somar no braço aqui seria a quarta cópia.
+  return new Map(
+    [...porTreino].map(([id, linhas]) => [id, totalDeSeries(linhas)]),
+  );
 }
 
 /**

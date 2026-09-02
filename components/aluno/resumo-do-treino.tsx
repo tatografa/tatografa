@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Check } from "lucide-react";
 
+import { duracaoCurta, formatarNumero } from "@/lib/domain/historico";
 import { volumeDaSessao, type SerieRegistrada } from "@/lib/domain/treino";
 
 export interface ResumoDoTreinoProps {
@@ -48,11 +49,11 @@ export function ResumoDoTreino({
             aria-label="Resumo do treino"
             className="mt-7 flex items-center rounded-card-lg border border-dark-border bg-dark-surface py-5"
           >
-            <Metrica valor={duracao(duracaoSegundos)} rotulo="Duração" />
+            <Metrica valor={duracaoCurta(duracaoSegundos)} rotulo="Duração" />
             <Divisoria />
             <Metrica valor={String(realizadas.length)} rotulo="Séries" />
             <Divisoria />
-            <Metrica valor={`${formatarVolume(volume)} kg`} rotulo="Volume" />
+            <Metrica valor={`${formatarNumero(volume)} kg`} rotulo="Volume" />
           </section>
 
           {volume === 0 && realizadas.length > 0 ? (
@@ -63,12 +64,26 @@ export function ResumoDoTreino({
           ) : null}
         </div>
 
-        <Link
-          href="/app"
-          className="mt-8 flex h-[52px] w-full items-center justify-center rounded-[13px] bg-brand text-[16px] font-bold text-white shadow-cta transition active:scale-[0.99]"
-        >
-          Concluir
-        </Link>
+        <div className="mt-8 space-y-3">
+          <Link
+            href="/app"
+            className="flex h-[52px] w-full items-center justify-center rounded-[13px] bg-brand text-[16px] font-bold text-white shadow-cta transition active:scale-[0.99]"
+          >
+            Concluir
+          </Link>
+
+          {/*
+            O treino que acabou de ser gravado é justamente o que o aluno quer
+            conferir. Sem este link, o caminho até o histórico passava por
+            dentro da tela que abre uma nova sessão.
+          */}
+          <Link
+            href="/app/historico"
+            className="block text-center text-[13px] font-semibold text-ink-4 transition hover:text-dark-text"
+          >
+            Ver histórico
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -87,17 +102,4 @@ function Metrica({ valor, rotulo }: { valor: string; rotulo: string }) {
 
 function Divisoria() {
   return <span aria-hidden className="h-8 w-px shrink-0 bg-dark-border" />;
-}
-
-/** Treino de 48 minutos vira "48min"; de 1h05 vira "1h05". */
-function duracao(segundos: number | null): string {
-  if (segundos === null) return "—";
-  const minutos = Math.round(segundos / 60);
-  if (minutos < 60) return `${minutos}min`;
-  return `${Math.floor(minutos / 60)}h${String(minutos % 60).padStart(2, "0")}`;
-}
-
-/** 12500 vira "12.500"; 1237,5 vira "1.237,5". */
-function formatarVolume(valor: number): string {
-  return valor.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
 }

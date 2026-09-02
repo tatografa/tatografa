@@ -4,23 +4,26 @@ import { useActionState, useState } from "react";
 
 import { Button, EscolhaCards, Input } from "@/components/ui";
 import { Logo } from "@/components/logo";
+import { NIVEL, OBJETIVO } from "@/lib/rotulos";
 import { cn } from "@/lib/utils";
 
 import { criarAcesso, type EstadoOnboarding } from "./actions";
 
 const INICIAL: EstadoOnboarding = {};
 
+// Os rótulos saem de `lib/rotulos.ts`, o mesmo lugar que o painel do personal
+// lê: duas listas soltas divergiam na primeira vez que um objetivo mudasse.
 const OBJETIVOS = [
-  { valor: "massa", rotulo: "Ganhar massa", icone: "💪" },
-  { valor: "gordura", rotulo: "Perder gordura", icone: "🔥" },
-  { valor: "condicionamento", rotulo: "Condicionamento", icone: "🏃" },
-  { valor: "saude", rotulo: "Saúde", icone: "❤️" },
+  { valor: "massa", rotulo: OBJETIVO.massa, icone: "💪" },
+  { valor: "gordura", rotulo: OBJETIVO.gordura, icone: "🔥" },
+  { valor: "condicionamento", rotulo: OBJETIVO.condicionamento, icone: "🏃" },
+  { valor: "saude", rotulo: OBJETIVO.saude, icone: "❤️" },
 ];
 
 const NIVEIS = [
-  { valor: "iniciante", rotulo: "Iniciante" },
-  { valor: "intermediario", rotulo: "Intermediário" },
-  { valor: "avancado", rotulo: "Avançado" },
+  { valor: "iniciante", rotulo: NIVEL.iniciante },
+  { valor: "intermediario", rotulo: NIVEL.intermediario },
+  { valor: "avancado", rotulo: NIVEL.avancado },
 ];
 
 export function FormularioOnboarding({

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { Badge, Button, Card } from "@/components/ui";
+import { ListaDeAlunos } from "@/components/personal/lista-de-alunos";
+import { Button, Card } from "@/components/ui";
 import { requireTrainer } from "@/lib/auth/session";
 import { listarAlunos, listarConvitesPendentes } from "@/lib/queries/alunos";
 
@@ -9,13 +10,6 @@ import { cancelarConvite } from "./actions";
 import { ConvidarAluno } from "./convidar-aluno";
 
 export const metadata: Metadata = { title: "Painel" };
-
-const ROTULO_OBJETIVO: Record<string, string> = {
-  massa: "Ganhar massa",
-  gordura: "Perder gordura",
-  condicionamento: "Condicionamento",
-  saude: "Saúde",
-};
 
 export default async function PainelPage() {
   const { trainer } = await requireTrainer();
@@ -80,41 +74,7 @@ export default async function PainelPage() {
           <section className="space-y-3">
             <h2 className="eyebrow text-ink-4">Alunos · {alunos.length}</h2>
 
-            {alunos.length === 0 ? (
-              <p className="text-[14px] text-ink-3">
-                Nenhum aluno entrou ainda. Assim que alguém abrir o convite,
-                aparece aqui.
-              </p>
-            ) : (
-              <ul className="space-y-2">
-                {alunos.map((aluno) => (
-                  <li key={aluno.id}>
-                    <Link
-                      href={`/painel/alunos/${aluno.id}`}
-                      className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-border bg-surface px-4 py-3.5 transition hover:border-border-strong"
-                    >
-                      <div className="min-w-0">
-                        <p className="truncate text-[14.5px] font-semibold text-ink">
-                          {aluno.name}
-                        </p>
-                        <p className="truncate text-[12.5px] text-ink-4">
-                          {aluno.goal
-                            ? ROTULO_OBJETIVO[aluno.goal]
-                            : "Sem objetivo definido"}
-                          {" · "}
-                          {aluno.ultima_sessao
-                            ? `treinou ${desde(aluno.ultima_sessao)}`
-                            : "ainda não treinou"}
-                        </p>
-                      </div>
-                      <Badge tone={aluno.status === "ativo" ? "sucesso" : "neutro"}>
-                        {aluno.status}
-                      </Badge>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <ListaDeAlunos alunos={alunos} />
           </section>
         </div>
       )}
@@ -149,14 +109,4 @@ function diasAte(iso: string): string {
   if (dias <= 0) return "hoje";
   if (dias === 1) return "1 dia";
   return `${dias} dias`;
-}
-
-/** "hoje" / "há 3 dias" — leitura rápida na lista de alunos. */
-function desde(iso: string): string {
-  const dias = Math.floor(
-    (Date.now() - new Date(iso).getTime()) / (24 * 60 * 60 * 1000),
-  );
-  if (dias <= 0) return "hoje";
-  if (dias === 1) return "ontem";
-  return `há ${dias} dias`;
 }
