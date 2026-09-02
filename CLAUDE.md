@@ -99,6 +99,7 @@ Hex solto em componente reprova na revisão.
 
 - **Aprendizados:** `docs/LEARNINGS.md` — ler antes de codar; curar ao fim do milestone.
 - **Handoffs:** `docs/handoffs/<feature>.md` — contrato de dado que a tela consome.
+  Hoje: `prescricao.md` (o que a execução lê) e `execucao.md` (o que o histórico lê).
 
 ## Comandos
 
@@ -152,6 +153,24 @@ Provar que funciona sem o Otávio ler código:
 - **[2026-09-01]** Editar a prescrição **atualiza** as linhas que continuam em vez de
   apagar e recriar: `session_sets` referencia `workout_exercises.id` com cascata, e
   recriar levaria o histórico do aluno junto.
+- **[2026-09-02]** A execução grava por **fila local com reenvio**, não por requisição
+  síncrona: confirmar série é local e imediato, o `localStorage` guarda o que falta
+  enviar, e o servidor faz `upsert` em `(session_id, workout_exercise_id, set_number)`.
+  Reenvio e correção passam pelo mesmo caminho e não viram duplicata. O limite aceito é
+  a fila viver no aparelho até a Fase 4 — por isso o contador de pendentes fica visível
+  e o botão de concluir só fecha a sessão com a fila vazia.
+- **[2026-09-02]** Sessão em andamento de outro treino é **encerrada e salva**, nunca
+  apagada: série que o aluno executou é histórico. Só a sessão com zero séries é
+  descartada. Encerrar grava `finished_at` e `duration_seconds`, para não deixar sessão
+  meio-fechada.
+- **[2026-09-02]** Ler `localStorage` no cliente exige separar o **render de hidratação**
+  do resto: nele a janela já existe, então `typeof window` não protege. O gate é
+  `useMontado()` (`lib/usar-montado.ts`, sobre `useSyncExternalStore`) trocando a `key`
+  do componente — e não `setState` em efeito, que o lint recusa.
+- **[2026-09-02]** Policy de escrita de `session_sets` confere também **a que treino o
+  exercício pertence**. `owns_session` sozinho deixava o aluno gravar série apontando
+  para a prescrição de um treino alheio e inflar o histórico de um estranho. Migration
+  `0009` acrescentou `private.serie_no_treino_da_sessao`.
 - **[2026-09-01]** Repetições aceitam **só número ou faixa** (`12`, `8-10`). "Até a falha"
   e afins vão no campo de observação do exercício, que já existe. Decisão do Otávio: o
   alvo numérico garante que a tela de execução sempre tem o que mostrar no contador.

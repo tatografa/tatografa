@@ -63,8 +63,9 @@ export function TelaHome({
           </p>
 
           {/*
-            A execução é o M1-05; a rota já é a definitiva para o botão não
-            mudar de destino no meio do milestone.
+            Link, e não formulário: da home o aluno ainda não viu a prescrição,
+            então a tela de execução confirma o treino (ou oferece retomar o
+            que ficou aberto) antes de abrir a sessão.
           */}
           <Link
             href={`/app/executar/${proximo.id}`}

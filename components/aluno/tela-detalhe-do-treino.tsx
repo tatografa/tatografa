@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { iniciarTreino } from "@/app/(aluno)/app/executar/actions";
 import { classesDeBotao } from "@/components/ui";
 import type { ExercicioPrescrito, TreinoCompleto } from "@/lib/queries/treinos";
 
@@ -46,12 +47,21 @@ export function TelaDetalheDoTreino({ treino }: { treino: TreinoCompleto }) {
       </ol>
 
       {treino.exercicios.length ? (
-        <Link
-          href={`/app/executar/${treino.id}`}
-          className={classesDeBotao({ size: "lg", block: true })}
-        >
-          Começar treino
-        </Link>
+        /*
+         * Formulário, não link: o aluno já leu a prescrição inteira nesta
+         * tela, e mandá-lo para outra tela de confirmação seria um toque a
+         * mais na academia. A Server Action abre a sessão e redireciona — e é
+         * ela que trata o caso de já existir um treino em andamento.
+         */
+        <form action={iniciarTreino}>
+          <input type="hidden" name="treinoId" value={treino.id} />
+          <button
+            type="submit"
+            className={classesDeBotao({ size: "lg", block: true })}
+          >
+            Começar treino
+          </button>
+        </form>
       ) : (
         <p className="text-center text-[13px] text-ink-3">
           Este treino ainda não tem exercícios.
