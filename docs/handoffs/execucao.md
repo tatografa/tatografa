@@ -159,6 +159,18 @@ trocou de macrotreino veria a pílula sumir no dia seguinte.
 `lib/domain/recordes.ts` trata a chave como texto opaco de propósito — quem a
 monta é a camada de dados, que conhece as duas colunas.
 
+### `UltimaVez` carrega duas coisas, e não é redundância
+
+`carga`/`reps` são a **série mais pesada** daquela sessão — o que a pílula
+mostra, porque resume o dia numa linha. `porSerie` é a sessão inteira, série por
+série — o que abre o stepper no peso certo.
+
+São duas perguntas diferentes: "como foi da última vez?" e "com quanto eu começo
+esta série?". Quem rampa (50, 60, 60, 65) precisa da segunda, e foi decisão do
+Otávio que a série 2 abra em 60 e não na série 1 de hoje. A chave de `porSerie`
+é o `set_number` **em texto**: o objeto atravessa a fronteira servidor→cliente
+como JSON, onde chave numérica vira string de qualquer jeito.
+
 ### As duas leituras são diferentes, e é fácil confundi-las
 
 | Pergunta | Função | O que devolve |

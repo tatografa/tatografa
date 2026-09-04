@@ -61,7 +61,7 @@ async function seriesAnteriores(
     let consulta = supabase
       .from("session_sets")
       .select(
-        "session_id, load_kg, reps, skipped, workout_sessions!inner(student_id, finished_at), workout_exercises!inner(exercise_id, exercise_source)",
+        "session_id, set_number, load_kg, reps, skipped, workout_sessions!inner(student_id, finished_at), workout_exercises!inner(exercise_id, exercise_source)",
       )
       .eq("workout_sessions.student_id", alunoId)
       .not("workout_sessions.finished_at", "is", null)
@@ -92,6 +92,7 @@ async function seriesAnteriores(
         chave,
         sessaoId: linha.session_id,
         concluidaEm,
+        set_number: linha.set_number,
         // `load_kg` é `numeric` no Postgres e chega como string no cliente JS:
         // sem o `Number()`, `"9"` fica maior que `"80"` na comparação.
         load_kg: linha.load_kg === null ? null : Number(linha.load_kg),

@@ -109,17 +109,37 @@ casos de borda (o dev cobriu 16 casos por teste de função pura, mas ninguém r
 coerência de números entre painel e app do aluno, e o caminho completo do M1 com sessão
 real — este último depende da máquina do Otávio, não de revisor.
 
-### Achado do M2-03 que é decisão do Otávio
+### Decisão do Otávio no M2-03: o stepper abre no peso da última vez **daquela série**
 
-Com a referência na tela, ficou visível o que antes não incomodava: **o stepper
-de carga abre em 0 kg** mesmo quando a pílula diz "última vez: 62,5 kg × 10".
-O aluno lê o número e depois toca "+" vinte e cinco vezes para chegar nele.
+Com a referência na tela ficou visível o que antes não incomodava: o stepper de
+carga abria em 0 kg mesmo com a pílula dizendo o peso da última vez. Perguntado,
+o Otávio decidiu — e foi específico: **por série, não por exercício**. Se na
+série 1 ele levantou 50 kg, a série 1 abre em 50; se na série 2 foram 60, a
+série 2 abre em 60.
 
-Abrir o stepper já na carga da última vez resolve com cinco linhas, e o custo é
-real: quem confirmar sem olhar registra um peso que talvez não tenha levantado —
-e o histórico é o produto. Não entrou no card porque não está nos critérios de
-aceite e a escolha é de produto, não técnica. Pergunta para o Otávio: **abrir no
-peso da última vez, ou continuar em 0?**
+Isso é mais do que memória do exercício: quem rampa (50, 60, 60, 65) seria
+rebaixado pela regra que já existia, que repetia a série anterior **de hoje**.
+Por isso a última vez tem precedência sobre ela. A ordem final está comentada em
+`padraoPara` (`execucao.tsx`):
+
+1. a própria série, se já registrada — é correção;
+2. a mesma série da última vez — só a carga; as reps ficam no alvo prescrito,
+   senão um dia em que o aluno falhou em 8 rebaixaria a meta de 10 para sempre;
+3. a série anterior desta sessão — cobre treino com mais séries que o anterior;
+4. zero — primeira vez no exercício.
+
+Custo aceito e declarado: quem confirmar sem olhar registra o peso da última vez
+em vez do de hoje.
+
+### Ponto em aberto do M2-03 para o Otávio
+
+A pílula mostra **a série mais pesada** da última sessão (critério do card), e o
+stepper agora abre na **mesma série**. Numa rampa os dois números divergem na
+tela: a pílula diz "Última vez: 65 kg × 6" enquanto a série 1 abre em 50 kg.
+Não é erro — são duas perguntas diferentes ("como foi o dia?" e "com quanto
+começo esta série?") —, mas é a única incoerência visual que sobrou. Alternativa,
+se incomodar no piloto: a pílula passar a mostrar a mesma série ("Última vez
+nesta série: 50 kg × 10"). Fica como está até o Otávio ver na academia.
 
 ### Ordem
 

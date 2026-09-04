@@ -21,17 +21,37 @@ export type SerieComparavel = {
   sessaoId: string;
   /** `workout_sessions.finished_at`. É o que ordena "a última vez". */
   concluidaEm: string;
+  /** Posição prescrita, não contador (handoff `execucao.md`, item 1). */
+  set_number: number;
   load_kg: number | null;
   reps: number | null;
   skipped: boolean;
 };
 
-/** O que a pílula "última vez" mostra. Carga nula = peso corporal. */
+/** Uma série da sessão de referência. */
+export type SerieDeReferencia = { carga: number | null; reps: number | null };
+
+/**
+ * O que sobrou da última vez que o aluno fez este exercício.
+ *
+ * `carga`/`reps` são a **série mais pesada** daquela sessão: é o número que a
+ * pílula mostra, porque é o que resume o dia numa linha só.
+ *
+ * `porSerie` é a sessão inteira, série por série: é o que abre o stepper no
+ * peso certo. Os dois convivem porque respondem a perguntas diferentes —
+ * "como foi da última vez?" e "com quanto eu começo esta série?" — e quem
+ * rampa (50, 60, 60, 65) precisa da segunda.
+ *
+ * A chave de `porSerie` é o `set_number` **em texto**: o objeto atravessa a
+ * fronteira servidor→cliente como JSON, onde chave numérica vira string de
+ * qualquer jeito. Melhor o tipo dizer a verdade.
+ */
 export type UltimaVez = {
   carga: number | null;
   reps: number | null;
   /** ISO do fim da sessão de onde a referência veio. */
   concluidaEm: string;
+  porSerie: Record<string, SerieDeReferencia>;
 };
 
 /**
@@ -90,20 +110,40 @@ export function ultimaVezPorExercicio(
     }
   }
 
-  // 2. Dentro dela, a série mais pesada.
+  // 2. Dentro dela, a série mais pesada — e a sessão inteira, série por série.
   const melhor = new Map<string, SerieComparavel>();
+  const melhorDaSerie = new Map<string, SerieComparavel>();
   const referencia = new Map<string, UltimaVez>();
+
   for (const serie of feitas) {
     const sessao = sessaoPorChave.get(serie.chave);
     if (!sessao || serie.sessaoId !== sessao.id) continue;
-    const atual = melhor.get(serie.chave);
-    if (atual && !maisForte(serie, atual)) continue;
-    melhor.set(serie.chave, serie);
-    referencia.set(serie.chave, {
-      carga: serie.load_kg,
-      reps: serie.reps,
+
+    const registro = referencia.get(serie.chave) ?? {
+      carga: null,
+      reps: null,
       concluidaEm: serie.concluidaEm,
-    });
+      porSerie: {},
+    };
+
+    // O exercício pode aparecer duas vezes no mesmo treino: são duas linhas de
+    // prescrição com a mesma identidade, e as duas têm série 1. Fica a mais
+    // pesada, pelo mesmo critério da pílula.
+    const numero = String(serie.set_number);
+    const daSerie = melhorDaSerie.get(`${serie.chave}#${numero}`);
+    if (!daSerie || maisForte(serie, daSerie)) {
+      melhorDaSerie.set(`${serie.chave}#${numero}`, serie);
+      registro.porSerie[numero] = { carga: serie.load_kg, reps: serie.reps };
+    }
+
+    const atual = melhor.get(serie.chave);
+    if (!atual || maisForte(serie, atual)) {
+      melhor.set(serie.chave, serie);
+      registro.carga = serie.load_kg;
+      registro.reps = serie.reps;
+    }
+
+    referencia.set(serie.chave, registro);
   }
 
   return referencia;

@@ -272,7 +272,15 @@ function ExecucaoMontada({
                     <SerieAtiva
                       numero={numero}
                       exercicio={exercicio}
-                      valores={valores[chave] ?? padraoPara(exercicio, numero, series)}
+                      valores={
+                        valores[chave] ??
+                        padraoPara(
+                          exercicio,
+                          numero,
+                          series,
+                          referencia[exercicio.id],
+                        )
+                      }
                       aoMudar={(novos) =>
                         setValores((v) => ({ ...v, [chave]: novos }))
                       }
@@ -724,34 +732,52 @@ function numerosDasSeries(exercicio: ExercicioPrescrito): number[] {
 /**
  * Onde os steppers abrem.
  *
- * A carga repete a última série registrada do mesmo exercício nesta sessão —
- * é quase sempre a mesma, e o aluno não deveria ter que remontar o número a
- * cada série. As repetições abrem no alvo prescrito.
+ * Ordem das fontes, e o porquê de cada uma:
+ *
+ * 1. **A própria série, se já registrada.** É correção: abre no que está
+ *    gravado, senão o ✕ e o ✓ mostrariam números diferentes do registro.
+ * 2. **A mesma série da última vez.** Decisão do Otávio. Quem rampa
+ *    (50, 60, 60, 65) precisa disto: repetir a série 1 de hoje na série 2
+ *    abriria em 50 quando o aluno sabe que vai para 60. Só a carga vem daqui —
+ *    as repetições continuam no alvo prescrito, senão um dia em que o aluno
+ *    falhou em 8 rebaixaria a meta de 10 para sempre.
+ * 3. **A série anterior desta sessão.** Cobre o que a última vez não tem:
+ *    exercício novo no programa, ou treino de hoje com mais séries que o
+ *    anterior.
+ * 4. **Zero.** Primeira vez no exercício. Não há número honesto a sugerir.
+ *
+ * O passo 2 tem um custo aceito e declarado: quem confirmar sem olhar registra
+ * o peso da última vez em vez do de hoje. Foi por isso que a pergunta subiu ao
+ * PM em vez de virar decisão técnica — e a resposta foi que abrir em zero
+ * custava mais, porque obrigava o aluno a remontar o número de pé, com o
+ * celular na mão, entre uma série e outra.
  */
 function padraoPara(
   exercicio: ExercicioPrescrito,
   numero: number,
   series: Map<string, SerieDaExecucao>,
+  ultima: UltimaVez | undefined,
 ): Valores {
+  const alvo = alvoDeRepeticoes(exercicio.reps_target);
+
   const registrada = series.get(chaveDaSerie(exercicio.id, numero));
   if (registrada && !registrada.skipped) {
-    return {
-      carga: registrada.load_kg ?? 0,
-      reps: registrada.reps ?? alvoDeRepeticoes(exercicio.reps_target),
-    };
+    return { carga: registrada.load_kg ?? 0, reps: registrada.reps ?? alvo };
+  }
+
+  const daUltimaVez = ultima?.porSerie[String(numero)];
+  if (daUltimaVez && daUltimaVez.carga !== null && daUltimaVez.carga > 0) {
+    return { carga: daUltimaVez.carga, reps: alvo };
   }
 
   for (let anterior = numero - 1; anterior >= 1; anterior -= 1) {
     const feita = series.get(chaveDaSerie(exercicio.id, anterior));
     if (feita && !feita.skipped && feita.load_kg !== null) {
-      return {
-        carga: feita.load_kg,
-        reps: feita.reps ?? alvoDeRepeticoes(exercicio.reps_target),
-      };
+      return { carga: feita.load_kg, reps: feita.reps ?? alvo };
     }
   }
 
-  return { carga: 0, reps: alvoDeRepeticoes(exercicio.reps_target) };
+  return { carga: 0, reps: alvo };
 }
 
 function formatarCarga(valor: number): string {
