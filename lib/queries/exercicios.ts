@@ -140,3 +140,77 @@ export async function exerciciosPorReferencia(
 
   return mapa;
 }
+
+/** Um exercício próprio, com quantas prescrições o usam hoje. */
+export type ExercicioProprio = ExercicioDisponivel & {
+  source: "custom";
+  em_uso: number;
+};
+
+/**
+ * Os exercícios do personal logado, com a contagem de prescrições que apontam
+ * para cada um.
+ *
+ * A contagem existe por causa de um buraco do schema: `workout_exercises`
+ * guarda `exercise_id` **sem fk** (a coluna aponta ora para o catálogo, ora
+ * para cá, conforme `exercise_source`). Apagar um exercício em uso não é
+ * barrado pelo banco — a linha da prescrição fica órfã, e `lerTreino` a pula.
+ * Então a tela precisa avisar antes, e para avisar precisa do número.
+ *
+ * Uma consulta para os exercícios e uma para as prescrições, agrupadas em
+ * memória: com dezenas de exercícios próprios, contar por linha seria N+1.
+ */
+export async function listarExerciciosProprios(): Promise<ExercicioProprio[]> {
+  const supabase = await createClient();
+
+  const { data: proprios, error } = await supabase
+    .from("exercises")
+    .select(
+      "id, name, muscle_group, equipment, is_bodyweight, is_unilateral, default_rest_seconds",
+    )
+    .order("name");
+
+  if (error) throw error;
+  if (!proprios?.length) return [];
+
+  // O RLS de `workout_exercises` já restringe ao que o personal enxerga, então
+  // o filtro por origem e id basta.
+  const { data: usos, error: erroUsos } = await supabase
+    .from("workout_exercises")
+    .select("exercise_id")
+    .eq("exercise_source", "custom")
+    .in(
+      "exercise_id",
+      proprios.map((e) => e.id),
+    );
+
+  if (erroUsos) throw erroUsos;
+
+  const contagem = new Map<string, number>();
+  for (const uso of usos ?? []) {
+    contagem.set(uso.exercise_id, (contagem.get(uso.exercise_id) ?? 0) + 1);
+  }
+
+  return proprios
+    .map((e) => ({
+      ...e,
+      source: "custom" as const,
+      em_uso: contagem.get(e.id) ?? 0,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+}
+
+/** O catálogo base inteiro, para a lista única da tela de exercícios. */
+export async function listarCatalogo(): Promise<ExercicioDisponivel[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("exercises_catalog")
+    .select(
+      "id, name, muscle_group, equipment, is_bodyweight, is_unilateral, default_rest_seconds",
+    )
+    .order("name");
+
+  if (error) throw error;
+  return (data ?? []).map((e) => ({ ...e, source: "catalog" as const }));
+}
