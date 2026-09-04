@@ -68,7 +68,7 @@ essencial, e o personal acompanha sem precisar perguntar nada ao aluno.
 
 | Card | Escopo | Etiqueta | Status |
 |---|---|---|---|
-| M2-01 | Macrotreino: gestão, rotação A/B/C/D e treino sugerido | senior | feito · aguarda checkpoint |
+| M2-01 | Macrotreino: gestão, rotação A/B/C/D e treino sugerido | senior | feito · checkpoint parcial |
 | M2-02 | Exercícios próprios do personal | pleno | a fazer |
 | M2-03 | Referência histórica na execução e recordes na conclusão | pleno | a fazer |
 | M2-04 | Progresso do aluno: planilha e gráfico | senior | a fazer |
@@ -85,6 +85,29 @@ seguintes do aluno** (`/acesso`).
   decisão do macrotreino implícito. Contrato que desbloqueia M2-05 e M2-06.
 - **M2-04** — nenhum risco de dado, mas é a tela que mais depende de leitura correta do
   histórico; erro aqui mente sobre a evolução do aluno.
+
+### Checkpoint do M2-01 — parcial, e por quê
+
+O revisor não rodou: a conta bateu o limite mensal de gastos no meio da execução. Revisei
+eu mesmo os pontos de maior risco, por leitura de código e SQL:
+
+- **Regressão no M1:** `listarTreinosPorAluno` tem um único consumidor
+  (`/painel/treinos`), e passou a filtrar `status = 'ativo'` — a dívida que o brief
+  apontava. Superfície menor do que o risco previa.
+- **Programa vindo da URL:** conferido no servidor (`lerMacrotreino` devolve nulo para id
+  inexistente e para programa alheio, e a página recusa programa arquivado); `salvarTreino`
+  refaz a checagem.
+- **Funções novas de banco:** `treinos_feitos_na_semana` e `ativar_macrotreino` são
+  `security invoker` em `public` — não alargam acesso. A única `security definer`
+  (`mesociclo_tem_historico`) está em `private`, com execute revogado de `public`/`anon`.
+  Segue a convenção.
+- **Um ativo por aluno:** índice parcial reproduzido por SQL — primeiro passa, segundo
+  recusado, arquivado convive.
+
+**Não coberto, e precisa de revisão antes do fechamento do M2:** a rotação em todos os
+casos de borda (o dev cobriu 16 casos por teste de função pura, mas ninguém releu), a
+coerência de números entre painel e app do aluno, e o caminho completo do M1 com sessão
+real — este último depende da máquina do Otávio, não de revisor.
 
 ### Ordem
 
