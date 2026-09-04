@@ -68,7 +68,7 @@ essencial, e o personal acompanha sem precisar perguntar nada ao aluno.
 
 | Card | Escopo | Etiqueta | Status |
 |---|---|---|---|
-| M2-01 | Macrotreino: gestão, rotação A/B/C/D e treino sugerido | senior | a fazer |
+| M2-01 | Macrotreino: gestão, rotação A/B/C/D e treino sugerido | senior | feito · aguarda checkpoint |
 | M2-02 | Exercícios próprios do personal | pleno | a fazer |
 | M2-03 | Referência histórica na execução e recordes na conclusão | pleno | a fazer |
 | M2-04 | Progresso do aluno: planilha e gráfico | senior | a fazer |

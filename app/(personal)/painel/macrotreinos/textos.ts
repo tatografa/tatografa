@@ -11,15 +11,18 @@
 /**
  * A confirmação de arquivamento.
  *
- * Diz a consequência inteira, não "tem certeza?": arquivar tira o treino da
- * tela do aluno na hora, e ele fica **sem treino** até o personal montar outro.
- * A tela do personal não muda em nada depois do clique — quem sente é o aluno,
- * do outro lado —, então a frase precisa dizer isso antes.
+ * Diz a consequência inteira, não "tem certeza?": arquivar tira o treino do app
+ * na hora, e a pessoa fica **sem treino** até o personal montar outro. A tela do
+ * personal não muda em nada depois do clique — quem sente está do outro lado —,
+ * então a frase precisa dizer isso antes.
+ *
+ * Sem pronome de terceira pessoa: o cadastro não guarda gênero, e o nome é
+ * interpolado. "Carla … somem da tela dele" saía errado para metade da carteira.
  */
 export function textoDeArquivamento(aluno: string): string {
   return (
     `${primeiroNome(aluno)} fica sem treino até você montar outro. ` +
-    "Os treinos deste programa somem da tela dele agora — mas nada é apagado: " +
+    "Os treinos deste programa somem do app agora — mas nada é apagado: " +
     "prescrição e histórico continuam salvos, e dá para reativar o programa depois."
   );
 }
