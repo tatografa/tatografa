@@ -200,3 +200,11 @@ Provar que funciona sem o Otávio ler código:
   (`America/Sao_Paulo`), nunca pelo fuso do processo: o servidor roda em UTC e
   às 21h no Brasil já virou o dia seguinte — exatamente o horário em que se
   treina. Coluna `date` ("2026-09-01") é dia de calendário e não se converte.
+- **[2026-09-02]** Recorde pessoal é a **maior carga levantada**, independente das
+  repetições. Decisão do Otávio, que **contraria o doc 03** ("maior carga com pelo menos as
+  reps alvo") — registrada aqui para não ser "corrigida" por engano. Motivo: é o que o
+  aluno entende sem explicação. Limite aceito: premia quem reduz repetição para pôr mais
+  peso. Mudar isso é trocar uma função pura em `lib/domain/`.
+- **[2026-09-02]** Gráfico de evolução é **SVG à mão**, sem biblioteca. Um gráfico de linha
+  com pontos clicáveis não paga ~100 kB de dependência, e biblioteca genérica atrapalha o
+  que o doc 05 pede: linha de borda a borda, datas na horizontal, mais recente primeiro.

@@ -54,3 +54,39 @@ PII e contrato que desbloqueia o frontend. Neste milestone:
 
 - Conectar a Vercel para preview por branch (hoje a validação é local).
 - Definir se o piloto usa projeto Supabase separado de produção antes de M4.
+
+---
+
+## M2 · Utilidade contínua
+
+O que transforma o app de demonstração em ferramenta de uso semanal.
+
+**Pronto quando:** um aluno usa o app por duas semanas seguidas sem que falte nada
+essencial, e o personal acompanha sem precisar perguntar nada ao aluno.
+
+### Cards
+
+| Card | Escopo | Etiqueta | Status |
+|---|---|---|---|
+| M2-01 | Macrotreino: gestão, rotação A/B/C/D e treino sugerido | senior | a fazer |
+| M2-02 | Exercícios próprios do personal | pleno | a fazer |
+| M2-03 | Referência histórica na execução e recordes na conclusão | pleno | a fazer |
+| M2-04 | Progresso do aluno: planilha e gráfico | senior | a fazer |
+| M2-05 | Home do aluno completa: streak, total, rotação | pleno | a fazer |
+| M2-06 | Perfil do aluno no painel | pleno | a fazer |
+| M2-07 | Dashboard do personal com alertas de inatividade | pleno | a fazer |
+
+Já entregue no M1, apesar de constar na Fase 2 do roadmap: **link mágico para acessos
+seguintes do aluno** (`/acesso`).
+
+### Riscos que exigem checkpoint
+
+- **M2-01** — muda a cadeia `mesocycles → workouts` que M1 inteiro consome, e substitui a
+  decisão do macrotreino implícito. Contrato que desbloqueia M2-05 e M2-06.
+- **M2-04** — nenhum risco de dado, mas é a tela que mais depende de leitura correta do
+  histórico; erro aqui mente sobre a evolução do aluno.
+
+### Ordem
+
+M2-01 primeiro (desbloqueia 05 e 06). M2-02 e M2-03 são independentes. M2-04 depois do
+03, que produz as funções de PR que o gráfico reusa.
