@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
-import { Badge, Button, Card } from "@/components/ui";
+import { Badge, Button, Card, classesDeBotao } from "@/components/ui";
 import { listarTreinosPorAluno } from "@/lib/queries/treinos";
 
 export const metadata: Metadata = { title: "Treinos" };
@@ -20,11 +20,12 @@ export default async function TreinosPage() {
             {total === 0 ? "Nenhum treino ainda" : `${total} treino${total > 1 ? "s" : ""}`}
           </h1>
         </div>
+        {/* Treino novo nasce dentro de um programa, então o botão leva à tela
+            que sabe de qual: um "Novo treino" solto voltaria a perguntar aluno
+            e programa aqui, que é exatamente o que este card tirou do editor. */}
         {porAluno.length > 0 && (
-          <Link href="/painel/treinos/novo">
-            <Button>
-              <Plus size={16} aria-hidden /> Novo treino
-            </Button>
+          <Link href="/painel/macrotreinos" className={classesDeBotao()}>
+            <Plus size={16} aria-hidden /> Novo treino
           </Link>
         )}
       </header>
@@ -42,19 +43,36 @@ export default async function TreinosPage() {
                 <p className="text-[12.5px] text-ink-4">
                   {macrotreino
                     ? `${macrotreino.name} · ${macrotreino.total_weeks} semanas`
-                    : "Sem programa ainda"}
+                    : "Sem programa ativo"}
                 </p>
               </div>
 
-              {treinos.length === 0 ? (
+              {/* Só os treinos do programa ATIVO aparecem aqui (dívida do M1):
+                  os do programa arquivado continuam salvos e se consultam pela
+                  tela de macrotreinos. */}
+              {!macrotreino ? (
+                <Card className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-[13.5px] text-ink-3">
+                    {aluno.name.split(" ")[0]} está sem programa ativo — e sem treino
+                    no app.
+                  </p>
+                  <Link
+                    href={`/painel/macrotreinos/novo?aluno=${aluno.id}`}
+                    className={classesDeBotao({ size: "sm", variant: "secondary" })}
+                  >
+                    Criar programa
+                  </Link>
+                </Card>
+              ) : treinos.length === 0 ? (
                 <Card className="flex flex-wrap items-center justify-between gap-3">
                   <p className="text-[13.5px] text-ink-3">
                     {aluno.name.split(" ")[0]} ainda não tem treino montado.
                   </p>
-                  <Link href={`/painel/treinos/novo?aluno=${aluno.id}`}>
-                    <Button size="sm" variant="secondary">
-                      Montar treino
-                    </Button>
+                  <Link
+                    href={`/painel/treinos/novo?programa=${macrotreino.id}`}
+                    className={classesDeBotao({ size: "sm", variant: "secondary" })}
+                  >
+                    Montar treino
                   </Link>
                 </Card>
               ) : (

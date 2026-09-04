@@ -59,8 +59,8 @@ Fatias verticais do `docs/plan/milestones.md`. Todo milestone é validável pelo
 | # | Fase | Entrega | Status |
 |---|---|---|---|
 | M0 | Fase 0 · Fundação | Conta de personal, login, `/painel` protegido | validado |
-| M1 | Fase 1 · Fatia vertical | Convite → treino → execução → histórico | em andamento |
-| M2 | Fase 2 · Utilidade contínua | Macrotreino, PRs, progresso, painel completo | planejado |
+| M1 | Fase 1 · Fatia vertical | Convite → treino → execução → histórico | validado |
+| M2 | Fase 2 · Utilidade contínua | Macrotreino, PRs, progresso, painel completo | em andamento |
 | M3 | Fase 3 · Social e reavaliação | Feed, fotos, reavaliação física | planejado (cortável) |
 | M4 | Fase 4 · Pronto para o piloto | PWA, estados vazios/erro, e-mails, termos | planejado |
 
@@ -81,7 +81,11 @@ Hex solto em componente reprova na revisão.
 ## Convenções de código
 
 - **Regra de negócio fica em `lib/domain/`**, como função pura, testável sem banco.
-  Cálculo de PR, volume, streak, semana do macrotreino, duração estimada.
+  Cálculo de PR, volume, streak, semana do macrotreino, rotação, duração estimada.
+- **Texto ou regra que um componente cliente e uma página servidor dividem vive num
+  módulo neutro.** Função exportada de módulo `"use client"` não pode ser *chamada*
+  pelo servidor, só renderizada como componente — e duplicar a frase para contornar
+  isso é como duas cópias de um texto aprovado saem de sincronia.
 - **Acesso a dado fica em `lib/queries/`**, tipado, com `import "server-only"`.
 - **Nada de N+1.** Buscar em lote e agrupar em memória, mesmo com poucos registros.
 - **Autorização de verdade mora no layout** (`requireTrainer()`, `requireStudent()`),
@@ -104,7 +108,8 @@ Hex solto em componente reprova na revisão.
 
 - **Aprendizados:** `docs/LEARNINGS.md` — ler antes de codar; curar ao fim do milestone.
 - **Handoffs:** `docs/handoffs/<feature>.md` — contrato de dado que a tela consome.
-  Hoje: `prescricao.md` (o que a execução lê) e `execucao.md` (o que o histórico lê).
+  Hoje: `prescricao.md` (o que a execução lê), `execucao.md` (o que o histórico lê) e
+  `macrotreino.md` (programa, rotação e treino sugerido).
 
 ## Comandos
 
@@ -152,9 +157,28 @@ Provar que funciona sem o Otávio ler código:
   `mesocycles_write` exigia apenas `trainer_id = auth.uid()`, e isso deixava um personal
   qualquer criar macrotreino para aluno alheio — e empurrar treino que o aluno via.
   Migration `0007` acrescentou `private.trainer_of(student_id)`.
-- **[2026-09-01]** No M1, o macrotreino é **nomeado pelo personal** ao salvar o primeiro
-  treino do aluno (nome + total de semanas); os treinos seguintes reusam o programa
-  `ativo`. Nada é inventado pelo sistema. O M2 substitui por gestão de macrotreino.
+- **[2026-09-04]** O macrotreino tem tela própria (`/painel/macrotreinos`) e o treino
+  **nasce dentro de um programa**: o editor recebe o programa pela URL e não pergunta
+  mais aluno, nome nem semanas. Substitui a muleta do M1, em que o programa era
+  nomeado ao salvar o primeiro treino.
+- **[2026-09-04]** **Um programa ativo por aluno é índice no banco**, não convenção de
+  código (`mesocycles_um_ativo_por_aluno_idx`). É por esse campo que as telas do aluno
+  decidem o que mostrar: dois ativos seria a tela errada, em silêncio, e dois cliques
+  simultâneos bastam para criar os dois.
+- **[2026-09-04]** **Arquivar é mudar o status; apagar programa com histórico não é
+  possível pela API** (`mesocycles_delete`). O delete levaria treino, prescrição e
+  série por cascata. Programa sem nenhuma sessão continua apagável — lixo criado por
+  engano não fica preso. Sessão em andamento sobrevive ao arquivamento: o aluno
+  termina e salva.
+- **[2026-09-04]** **Trocar o programa ativo é uma transação só** (`ativar_macrotreino`,
+  migration 0012), e o programa novo **nasce arquivado** para depois ser ativado. Em
+  dois passos soltos, uma falha no meio deixa o aluno sem programa nenhum — abrindo o
+  app na academia sem treino.
+- **[2026-09-04]** A **semana da rotação sai do `started_at`**, não da segunda-feira do
+  calendário: programa começado numa quarta tem a semana 1 de quarta a terça. O número
+  que a tela mostra e a rotação vêm da mesma conta, então nunca discordam. Cuidado com
+  o par: `semanaAtual` tem teto (é rótulo), `semanaCorridaDoPrograma` não tem (é
+  janela) — travar a janela congelaria a rotação depois do prazo.
 - **[2026-09-01]** Editar a prescrição **atualiza** as linhas que continuam em vez de
   apagar e recriar: `session_sets` referencia `workout_exercises.id` com cascata, e
   recriar levaria o histórico do aluno junto.

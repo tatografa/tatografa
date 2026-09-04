@@ -35,6 +35,12 @@ export default async function PainelLayout({
               Alunos
             </Link>
             <Link
+              href="/painel/macrotreinos"
+              className="rounded-[9px] px-3 py-1.5 text-[13px] font-semibold text-ink-3 transition hover:bg-canvas-sunken hover:text-ink"
+            >
+              Macrotreinos
+            </Link>
+            <Link
               href="/painel/treinos"
               className="rounded-[9px] px-3 py-1.5 text-[13px] font-semibold text-ink-3 transition hover:bg-canvas-sunken hover:text-ink"
             >

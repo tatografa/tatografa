@@ -45,55 +45,47 @@ export type ItemDoEditor = {
   seriesRegistradas: number;
 };
 
-export type AlunoDoEditor = { id: string; name: string };
-
-export type ProgramaDoAluno = { id: string; name: string; total_weeks: number };
+/**
+ * O programa em que este treino vive. Vem pronto do servidor: desde o M2-01 o
+ * treino nasce dentro de um macrotreino, e quem escolhe o aluno é a tela de
+ * macrotreinos. O editor não pergunta nem um nem outro.
+ */
+export type ProgramaDoEditor = {
+  id: string;
+  name: string;
+  total_weeks: number;
+  aluno: { id: string; name: string };
+};
 
 export type TreinoEmEdicao = {
   id: string;
   label: string;
   nome: string;
   observacao: string;
-  alunoId: string;
   itens: ItemDoEditor[];
 };
 
 export type EditorDeTreinoProps = {
-  alunos: AlunoDoEditor[];
-  /** Programa ativo de cada aluno. Ausente = é o primeiro treino dele. */
-  programaPorAluno: Record<string, ProgramaDoAluno | undefined>;
+  programa: ProgramaDoEditor;
   treino?: TreinoEmEdicao;
-  alunoInicial?: string;
   salvo?: boolean;
 };
 
 const INICIAL: EstadoDoEditor = {};
 
 export function EditorDeTreino({
-  alunos,
-  programaPorAluno,
+  programa,
   treino,
-  alunoInicial,
   salvo = false,
 }: EditorDeTreinoProps) {
   const [estado, acao, enviando] = useActionState(salvarTreino, INICIAL);
 
-  const [alunoId, setAlunoId] = useState(
-    treino?.alunoId ?? alunoInicial ?? alunos[0]?.id ?? "",
-  );
   const [label, setLabel] = useState(treino?.label ?? "A");
   const [nome, setNome] = useState(treino?.nome ?? "");
   const [observacao, setObservacao] = useState(treino?.observacao ?? "");
   const [itens, setItens] = useState<ItemDoEditor[]>(treino?.itens ?? []);
-  const [programaNome, setProgramaNome] = useState("");
-  const [programaSemanas, setProgramaSemanas] = useState("8");
   const [aRemover, setARemover] = useState<ItemDoEditor | null>(null);
   const [buscaAberta, setBuscaAberta] = useState(false);
-
-  const programa = programaPorAluno[alunoId];
-  // Treino salvo já pendura num macrotreino: perguntar o programa na edição não
-  // faria sentido, e a Server Action nem olharia a resposta.
-  const precisaPrograma = !treino && Boolean(alunoId) && !programa;
 
   const resumo = useMemo(() => {
     const parametros = itens.map((item) => ({
@@ -154,17 +146,16 @@ export function EditorDeTreino({
     })),
   );
 
-  if (alunos.length === 0) return <SemAluno />;
-
   return (
     <form action={acao} noValidate className="space-y-6">
       <input type="hidden" name="treinoId" value={treino?.id ?? ""} />
       {/* `excluirTreino` lê este campo: o botão de excluir usa `formAction`
           neste mesmo formulário, porque <form> dentro de <form> é inválido. */}
       {treino && <input type="hidden" name="id" value={treino.id} />}
-      {/* O select de aluno fica desabilitado na edição e, desabilitado, não é
-          enviado: sem este hidden o `alunoId` chegaria vazio na Server Action. */}
-      {treino && <input type="hidden" name="alunoId" value={treino.alunoId} />}
+      {/* O programa é contexto herdado da URL, não escolha do formulário. Vai
+          num hidden porque campo que o usuário não edita não vira controle —
+          e campo desabilitado nem sequer entra no FormData. */}
+      <input type="hidden" name="programaId" value={programa.id} />
       <input type="hidden" name="exercicios" value={payload} />
 
       {salvo && (
@@ -177,26 +168,26 @@ export function EditorDeTreino({
       )}
 
       <Card size="lg" className="space-y-5">
-        <div className="grid gap-4 sm:grid-cols-[1fr_100px]">
-          <Select
-            label="Aluno"
-            // Campo desabilitado não entra no FormData. Na edição o valor vai
-            // pelo hidden acima, e o select fica só como leitura — sem `name`,
-            // senão o navegador mandaria dois campos com o mesmo nome.
-            name={treino ? undefined : "alunoId"}
-            value={alunoId}
-            onChange={(e) => setAlunoId(e.target.value)}
-            error={estado.errosPorCampo?.aluno}
-            // Trocar o aluno de um treino salvo moveria a prescrição de
-            // carteira; para isso o caminho é criar outro treino.
-            disabled={Boolean(treino)}
+        <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border-soft pb-4">
+          <div>
+            <p className="eyebrow text-ink-4">Programa</p>
+            <p className="mt-1 text-[14.5px] font-bold text-ink">{programa.name}</p>
+          </div>
+          <p className="text-[12.5px] text-ink-4">
+            {programa.aluno.name} · {programa.total_weeks} semanas
+          </p>
+        </div>
+
+        {estado.errosPorCampo?.programa && (
+          <p
+            role="alert"
+            className="rounded-[9px] bg-danger-bg px-3 py-2.5 text-[12.5px] font-semibold text-danger"
           >
-            {alunos.map((aluno) => (
-              <option key={aluno.id} value={aluno.id}>
-                {aluno.name}
-              </option>
-            ))}
-          </Select>
+            {estado.errosPorCampo.programa}
+          </p>
+        )}
+
+        <div className="sm:max-w-[140px]">
           <Input
             label="Letra"
             name="label"
@@ -204,6 +195,7 @@ export function EditorDeTreino({
             maxLength={4}
             onChange={(e) => setLabel(e.target.value.toUpperCase())}
             error={estado.errosPorCampo?.label}
+            hint="A, B, C…"
           />
         </div>
 
@@ -225,45 +217,6 @@ export function EditorDeTreino({
           error={estado.errosPorCampo?.observacao}
         />
 
-        {precisaPrograma && (
-          <div className="space-y-4 rounded-card border border-border bg-canvas-sunken p-4">
-            <div className="space-y-1">
-              <p className="eyebrow text-ink-3">Primeiro treino deste aluno</p>
-              <p className="text-[13px] leading-[1.5] text-ink-3">
-                Dê um nome ao programa dele. Os próximos treinos entram nesse mesmo
-                programa, sem perguntar de novo.
-              </p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-[1fr_140px]">
-              <Input
-                label="Nome do programa"
-                name="programaNome"
-                placeholder="Hipertrofia — início"
-                value={programaNome}
-                onChange={(e) => setProgramaNome(e.target.value)}
-                error={estado.errosPorCampo?.programaNome}
-              />
-              <Input
-                label="Semanas"
-                name="programaSemanas"
-                type="number"
-                inputMode="numeric"
-                min={1}
-                max={52}
-                value={programaSemanas}
-                onChange={(e) => setProgramaSemanas(e.target.value)}
-                error={estado.errosPorCampo?.programaSemanas}
-              />
-            </div>
-          </div>
-        )}
-
-        {programa && (
-          <p className="text-[12.5px] text-ink-4">
-            Programa: <span className="font-semibold text-ink-2">{programa.name}</span> ·{" "}
-            {programa.total_weeks} semanas
-          </p>
-        )}
       </Card>
 
       <section className="space-y-3">
@@ -332,7 +285,7 @@ export function EditorDeTreino({
           <ExcluirTreino nome={treino.nome} />
         ) : (
           <Link
-            href="/painel/treinos"
+            href="/painel/macrotreinos"
             className="text-[13px] font-semibold text-ink-4 transition hover:text-ink-2"
           >
             Cancelar
@@ -719,25 +672,6 @@ function ExcluirTreino({ nome }: { nome: string }) {
         </div>
       </Dialog>
     </>
-  );
-}
-
-function SemAluno() {
-  return (
-    <Card size="lg" className="max-w-xl space-y-4">
-      <div className="space-y-2">
-        <h2 className="text-[18px] font-extrabold tracking-[-0.02em] text-ink">
-          Convide um aluno primeiro
-        </h2>
-        <p className="text-[14px] leading-[1.6] text-ink-3">
-          Treino é sempre de alguém. Gere um convite no painel e volte aqui quando o
-          aluno tiver entrado.
-        </p>
-      </div>
-      <Link href="/painel">
-        <Button>Ir para o painel</Button>
-      </Link>
-    </Card>
   );
 }
 

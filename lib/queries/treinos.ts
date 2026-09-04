@@ -64,11 +64,18 @@ const COLUNAS_PRESCRICAO =
   "id, workout_id, exercise_id, exercise_source, position, sets, reps_target, rest_seconds, technique, notes";
 
 /**
- * Todos os treinos do personal, agrupados por aluno.
+ * Os treinos do **programa ativo** de cada aluno do personal.
  *
  * Quatro consultas fixas, não uma por aluno nem uma por treino: alunos,
  * macrotreinos, treinos e prescrições vêm em lote e o agrupamento acontece em
  * memória. O RLS já restringe tudo à carteira do personal logado.
+ *
+ * Só o programa ativo entra. No M1 a função trazia os treinos de TODOS os
+ * mesociclos do aluno enquanto o cabeçalho mostrava só o ativo — latente
+ * enquanto havia um programa por aluno, e lista errada assim que passou a
+ * haver gestão de macrotreino: os treinos do programa velho apareceriam sob o
+ * nome do programa novo, sem nada distinguindo os dois. Programa arquivado se
+ * consulta em `/painel/macrotreinos`.
  */
 export async function listarTreinosPorAluno(): Promise<TreinosDoAluno[]> {
   const supabase = await createClient();
@@ -83,7 +90,8 @@ export async function listarTreinosPorAluno(): Promise<TreinosDoAluno[]> {
 
   const { data: macros, error: erroMacros } = await supabase
     .from("mesocycles")
-    .select("id, name, total_weeks, started_at, student_id, status, created_at")
+    .select("id, name, total_weeks, started_at, student_id, created_at")
+    .eq("status", "ativo")
     .in(
       "student_id",
       alunos.map((a) => a.id),
@@ -94,7 +102,9 @@ export async function listarTreinosPorAluno(): Promise<TreinosDoAluno[]> {
 
   const macroPorAluno = new Map<string, Omit<MacrotreinoAtivo, "student_id">>();
   for (const macro of macros ?? []) {
-    if (macro.status === "ativo" && !macroPorAluno.has(macro.student_id)) {
+    // Um ativo por aluno é garantido pelo índice parcial da migration 0011.
+    // O `if` fica como rede: se o índice cair, o mais recente prevalece.
+    if (!macroPorAluno.has(macro.student_id)) {
       macroPorAluno.set(macro.student_id, {
         id: macro.id,
         name: macro.name,
@@ -104,8 +114,10 @@ export async function listarTreinosPorAluno(): Promise<TreinosDoAluno[]> {
     }
   }
 
-  const idsDeMacro = (macros ?? []).map((m) => m.id);
-  const alunoPorMacro = new Map((macros ?? []).map((m) => [m.id, m.student_id]));
+  const idsDeMacro = [...macroPorAluno.values()].map((m) => m.id);
+  const alunoPorMacro = new Map(
+    [...macroPorAluno.entries()].map(([alunoId, macro]) => [macro.id, alunoId]),
+  );
 
   // Erro aqui não pode virar lista vazia: "nenhum treino ainda" para um
   // personal que tem treinos o faria remontar tudo por cima.
@@ -164,30 +176,6 @@ export async function listarTreinosPorAluno(): Promise<TreinosDoAluno[]> {
     macrotreino: macroPorAluno.get(aluno.id) ?? null,
     treinos: treinosPorAluno.get(aluno.id) ?? [],
   }));
-}
-
-/**
- * Macrotreino ativo de cada aluno do personal, numa consulta só.
- *
- * O editor usa isto para saber se precisa pedir o nome do programa: só o
- * primeiro treino de um aluno pergunta.
- */
-export async function macrotreinosAtivos(): Promise<Map<string, MacrotreinoAtivo>> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("mesocycles")
-    .select("id, name, total_weeks, started_at, student_id")
-    .eq("status", "ativo")
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-
-  const mapa = new Map<string, MacrotreinoAtivo>();
-  for (const macro of data ?? []) {
-    if (!mapa.has(macro.student_id)) mapa.set(macro.student_id, macro);
-  }
-  return mapa;
 }
 
 /**

@@ -457,6 +457,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ativar_macrotreino: {
+        Args: { p_mesocycle_id: string }
+        Returns: undefined
+      }
       convite_por_token: {
         Args: { p_token: string }
         Returns: {
@@ -470,6 +474,13 @@ export type Database = {
         Returns: {
           total: number
           workout_exercise_id: string
+        }[]
+      }
+      treinos_feitos_na_semana: {
+        Args: { p_ate: string; p_de: string; p_student_id: string }
+        Returns: {
+          total: number
+          workout_id: string
         }[]
       }
     }

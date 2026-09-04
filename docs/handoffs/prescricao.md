@@ -10,7 +10,7 @@
 |---|---|
 | Leitura do treino com a prescrição | `lib/queries/treinos.ts` → `lerTreino(id)` |
 | Lista de treinos por aluno | `lib/queries/treinos.ts` → `listarTreinosPorAluno()` |
-| Macrotreino ativo por aluno | `lib/queries/treinos.ts` → `macrotreinosAtivos()` |
+| Macrotreino e rotação | `docs/handoffs/macrotreino.md` (M2-01) |
 | Busca e resolução de exercícios | `lib/queries/exercicios.ts` |
 | Formato de repetições e ordem | `lib/domain/prescricao.ts` |
 | Rótulos em português dos enums | `lib/rotulos.ts` |
@@ -77,16 +77,14 @@ resposta contaria a um estranho que aquele id existe.
 
 ## Decisões deste card
 
-### Macrotreino: o personal nomeia no primeiro treino
+### ~~Macrotreino: o personal nomeia no primeiro treino~~ (substituída no M2-01)
 
-O schema exige `mesocycle_id` em `workouts`, mas o M1 não tem tela de macrotreino.
-Decisão do PM: **ao salvar o primeiro treino de um aluno, o editor pede o nome do
-programa e o total de semanas**; nos treinos seguintes, o macrotreino `ativo` do
-aluno é reusado sem perguntar. Nada é inventado pelo sistema.
-
-**O M2 substitui isso** por gestão de macrotreino de verdade (rotação A/B/C/D,
-semana atual, mais de um programa por aluno). Ao fazer isso, o programa criado
-aqui já é uma linha normal de `mesocycles` — não há dado a migrar.
+> **Obsoleta.** No M1 o editor pedia o nome do programa e o total de semanas ao
+> salvar o primeiro treino do aluno — muleta para o schema, enquanto não havia
+> tela de macrotreino. O card **M2-01** substituiu isso por gestão de verdade:
+> o programa é criado em `/painel/macrotreinos` e chega ao editor pela URL, que
+> não pergunta mais aluno nem programa. `macrotreinosAtivos()` deixou de
+> existir. O contrato novo está em `docs/handoffs/macrotreino.md`.
 
 ### Salvamento por Server Action única
 

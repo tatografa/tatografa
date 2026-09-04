@@ -1,5 +1,6 @@
 import "server-only";
 
+import { janelaDaSemana, proximoDaRotacao } from "@/lib/domain/rotacao";
 import { duracaoEstimadaMin, totalDeSeries } from "@/lib/domain/treino";
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
@@ -24,6 +25,15 @@ export type TreinoDaAgenda = {
 export type AgendaDoAluno = {
   macrotreino: MacrotreinoDoAluno | null;
   treinos: TreinoDaAgenda[];
+  /**
+   * O treino sugerido pela rotação. Nulo quando não há programa ativo ou
+   * nenhum treino tem exercício prescrito.
+   *
+   * Sai daqui, e não de cada página, porque a home e a lista de treinos
+   * mostram a mesma sugestão: dois cálculos do mesmo número divergem na tela
+   * (aprendizado de 2026-09-02).
+   */
+  sugerido: TreinoDaAgenda | null;
 };
 
 /**
@@ -43,8 +53,8 @@ export type AgendaDoAluno = {
 export async function lerAgendaDoAluno(alunoId: string): Promise<AgendaDoAluno> {
   const supabase = await createClient();
 
-  // Mais de um macrotreino `ativo` não deveria existir, mas se existir o mais
-  // recente é o que vale — mesma regra de `macrotreinosAtivos()` no painel.
+  // Um ativo por aluno é garantido pelo índice parcial da migration 0011. A
+  // ordenação fica como rede: se o índice cair, o mais recente é o que vale.
   const { data: macro, error: erroMacro } = await supabase
     .from("mesocycles")
     .select("id, name, total_weeks, started_at")
@@ -55,7 +65,9 @@ export async function lerAgendaDoAluno(alunoId: string): Promise<AgendaDoAluno> 
     .maybeSingle();
 
   if (erroMacro) throw erroMacro;
-  if (!macro) return { macrotreino: null, treinos: [] };
+  // Programa arquivado não aparece para o aluno: o filtro por `ativo` acima já
+  // resolve isso, e o histórico continua intacto porque nada foi apagado.
+  if (!macro) return { macrotreino: null, treinos: [], sugerido: null };
 
   const { data: treinos, error: erroTreinos } = await supabase
     .from("workouts")
@@ -64,7 +76,7 @@ export async function lerAgendaDoAluno(alunoId: string): Promise<AgendaDoAluno> 
     .order("position");
 
   if (erroTreinos) throw erroTreinos;
-  if (!treinos?.length) return { macrotreino: macro, treinos: [] };
+  if (!treinos?.length) return { macrotreino: macro, treinos: [], sugerido: null };
 
   const { data: prescricoes, error: erroPrescricoes } = await supabase
     .from("workout_exercises")
@@ -83,32 +95,55 @@ export async function lerAgendaDoAluno(alunoId: string): Promise<AgendaDoAluno> 
     porTreino.set(linha.workout_id, lista);
   }
 
+  const agenda: TreinoDaAgenda[] = treinos.map((treino) => {
+    const exercicios = porTreino.get(treino.id) ?? [];
+    return {
+      id: treino.id,
+      label: treino.label,
+      name: treino.name,
+      position: treino.position,
+      total_exercicios: exercicios.length,
+      total_series: totalDeSeries(exercicios),
+      duracao_min: duracaoEstimadaMin(exercicios),
+    };
+  });
+
+  const feitos = await treinosFeitosNaSemana(alunoId, macro.started_at);
+
   return {
     macrotreino: macro,
-    treinos: treinos.map((treino) => {
-      const exercicios = porTreino.get(treino.id) ?? [];
-      return {
-        id: treino.id,
-        label: treino.label,
-        name: treino.name,
-        position: treino.position,
-        total_exercicios: exercicios.length,
-        total_series: totalDeSeries(exercicios),
-        duracao_min: duracaoEstimadaMin(exercicios),
-      };
-    }),
+    treinos: agenda,
+    sugerido: proximoDaRotacao(agenda, feitos),
   };
 }
 
 /**
- * O treino que a home sugere.
+ * Quais treinos o aluno já concluiu na semana corrente do programa.
  *
- * No M1 é simplesmente o de menor `position` — a lista já vem ordenada por ela.
- * Rotação ("o próximo que ainda não foi feito nesta semana") depende de
- * histórico e é M2; inventar isso agora daria uma sugestão errada com cara de
- * certa. Treino sem exercício prescrito é pulado: mandar o aluno abrir uma
- * tela de execução vazia é pior que sugerir o seguinte.
+ * A janela sai de `janelaDaSemana` (fronteira no `started_at`, não na segunda
+ * do calendário) e a contagem é agregada no banco por
+ * `treinos_feitos_na_semana`. Trazer as sessões para agrupar aqui repetiria o
+ * erro da migration 0008: o corte de página do PostgREST é silencioso, e uma
+ * lista truncada faria a tela sugerir de novo um treino já feito hoje.
+ *
+ * Erro não vira conjunto vazio: uma sugestão errada com cara de certa é pior
+ * que a página falhar, e todas as outras consultas desta função também
+ * estouram.
  */
-export function proximoTreino(treinos: TreinoDaAgenda[]): TreinoDaAgenda | null {
-  return treinos.find((treino) => treino.total_exercicios > 0) ?? null;
+async function treinosFeitosNaSemana(
+  alunoId: string,
+  inicioDoPrograma: string,
+): Promise<Set<string>> {
+  const supabase = await createClient();
+  const janela = janelaDaSemana(inicioDoPrograma);
+
+  const { data, error } = await supabase.rpc("treinos_feitos_na_semana", {
+    p_student_id: alunoId,
+    p_de: janela.de,
+    p_ate: janela.ate,
+  });
+
+  if (error) throw error;
+
+  return new Set((data ?? []).map((linha) => linha.workout_id));
 }

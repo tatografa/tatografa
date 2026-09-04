@@ -2,13 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { lerTreino, macrotreinosAtivos } from "@/lib/queries/treinos";
+import { lerTreino } from "@/lib/queries/treinos";
 
-import {
-  EditorDeTreino,
-  type ItemDoEditor,
-  type ProgramaDoAluno,
-} from "../editor-de-treino";
+import { EditorDeTreino, type ItemDoEditor } from "../editor-de-treino";
 
 export const metadata: Metadata = { title: "Editar treino" };
 
@@ -25,18 +21,6 @@ export default async function EditarTreinoPage({
   // `lerTreino` devolve nulo tanto para id inexistente quanto para treino de
   // outro personal: os dois casos são "não existe" para quem está olhando.
   if (!treino) notFound();
-
-  const programas = await macrotreinosAtivos();
-  const macro = programas.get(treino.aluno.id);
-  const programaPorAluno: Record<string, ProgramaDoAluno | undefined> = {
-    [treino.aluno.id]: macro
-      ? { id: macro.id, name: macro.name, total_weeks: macro.total_weeks }
-      : {
-          id: treino.macrotreino.id,
-          name: treino.macrotreino.name,
-          total_weeks: treino.macrotreino.total_weeks,
-        },
-  };
 
   const itens: ItemDoEditor[] = treino.exercicios.map((exercicio) => ({
     chave: exercicio.id,
@@ -71,16 +55,24 @@ export default async function EditarTreinoPage({
         </p>
       </header>
 
+      {/*
+        O programa vem do próprio treino, não de uma consulta ao programa ativo
+        do aluno: um treino de programa arquivado continua editável, e buscar "o
+        ativo" mostraria o nome do programa errado no cabeçalho do editor.
+      */}
       <EditorDeTreino
-        alunos={[treino.aluno]}
-        programaPorAluno={programaPorAluno}
+        programa={{
+          id: treino.macrotreino.id,
+          name: treino.macrotreino.name,
+          total_weeks: treino.macrotreino.total_weeks,
+          aluno: treino.aluno,
+        }}
         salvo={salvo === "1"}
         treino={{
           id: treino.id,
           label: treino.label,
           nome: treino.name,
           observacao: treino.notes ?? "",
-          alunoId: treino.aluno.id,
           itens,
         }}
       />

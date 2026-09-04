@@ -16,14 +16,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import type { TablesInsert } from "@/types/database";
 
-export type CampoDoEditor =
-  | "aluno"
-  | "label"
-  | "nome"
-  | "observacao"
-  | "programaNome"
-  | "programaSemanas"
-  | "exercicios";
+export type CampoDoEditor = "programa" | "label" | "nome" | "observacao" | "exercicios";
 
 export type ErroDeExercicio = Partial<Record<"sets" | "reps" | "descanso", string>>;
 
@@ -63,7 +56,9 @@ const esquemaExercicio = z.object({
 });
 
 const esquemaTreino = z.object({
-  alunoId: z.string().uuid("Escolha um aluno."),
+  // O treino nasce dentro de um programa, não solto num aluno: quem escolhe o
+  // aluno é a tela de macrotreinos, e o editor herda o contexto.
+  programaId: z.string().uuid("Escolha um programa."),
   treinoId: z.string().uuid().optional(),
   label: z
     .string()
@@ -77,23 +72,6 @@ const esquemaTreino = z.object({
     .array(esquemaExercicio)
     .min(1, "Adicione pelo menos um exercício.")
     .max(30, "No máximo 30 exercícios num treino."),
-});
-
-/**
- * O macrotreino só é perguntado no primeiro treino do aluno. Nos seguintes o
- * editor nem mostra os campos, e o servidor reusa o programa ativo.
- */
-const esquemaPrograma = z.object({
-  programaNome: z
-    .string()
-    .trim()
-    .min(2, "Dê um nome ao programa.")
-    .max(80, "Nome muito longo."),
-  programaSemanas: z
-    .number({ error: "Informe a duração em semanas." })
-    .int("Semanas em número inteiro.")
-    .min(1, "No mínimo 1 semana.")
-    .max(52, "No máximo 52 semanas."),
 });
 
 /**
@@ -118,7 +96,7 @@ export async function salvarTreino(
   const supabase = await createClient();
 
   const bruto = {
-    alunoId: texto(formData, "alunoId"),
+    programaId: texto(formData, "programaId"),
     treinoId: texto(formData, "treinoId") || undefined,
     label: texto(formData, "label"),
     nome: texto(formData, "nome"),
@@ -131,56 +109,34 @@ export async function salvarTreino(
 
   const dados = analise.data;
 
-  // O RLS de `students` já restringe à carteira do personal; a checagem aqui
-  // é para devolver mensagem em vez de estourar no insert.
-  const { data: aluno } = await supabase
-    .from("students")
-    .select("id")
-    .eq("id", dados.alunoId)
+  // O programa chega pela URL, então a conferência é obrigatória e é aqui: um
+  // uuid trocado na requisição não pode montar treino na carteira de outro
+  // personal. O RLS de `mesocycles` já recusaria a escrita, mas confirmar
+  // antes devolve mensagem em vez de estourar no insert.
+  const { data: programa } = await supabase
+    .from("mesocycles")
+    .select("id, status")
+    .eq("id", dados.programaId)
     .eq("trainer_id", trainer.id)
     .maybeSingle();
 
-  if (!aluno) {
-    return { errosPorCampo: { aluno: "Esse aluno não é seu." } };
+  if (!programa) {
+    return { errosPorCampo: { programa: "Esse programa não é seu." } };
   }
 
-  const { data: macroAtivo } = await supabase
-    .from("mesocycles")
-    .select("id")
-    .eq("student_id", dados.alunoId)
-    .eq("status", "ativo")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  let mesocycleId = macroAtivo?.id ?? null;
-
-  if (!mesocycleId) {
-    // Primeiro treino deste aluno: o personal nomeia o programa agora. O M2
-    // substitui isto por gestão de macrotreino de verdade.
-    const programa = esquemaPrograma.safeParse({
-      programaNome: texto(formData, "programaNome"),
-      programaSemanas: numero(formData, "programaSemanas"),
-    });
-    if (!programa.success) return comErros(programa.error);
-
-    const { data: criado, error } = await supabase
-      .from("mesocycles")
-      .insert({
-        student_id: dados.alunoId,
-        trainer_id: trainer.id,
-        name: programa.data.programaNome,
-        total_weeks: programa.data.programaSemanas,
-      })
-      .select("id")
-      .single();
-
-    if (error || !criado) {
-      return { erro: "Não deu para criar o programa. Tente de novo." };
-    }
-    mesocycleId = criado.id;
+  // Treino novo só entra em programa ativo: o aluno não vê programa arquivado,
+  // e montar treino que ninguém vai receber é trabalho jogado fora. Editar
+  // treino de programa arquivado continua valendo — o personal pode estar
+  // arrumando algo antes de reativar.
+  if (programa.status !== "ativo" && !dados.treinoId) {
+    return {
+      errosPorCampo: {
+        programa: "Esse programa está arquivado. Ative ele antes de montar treinos.",
+      },
+    };
   }
 
+  const mesocycleId = programa.id;
   let treinoId = dados.treinoId ?? null;
 
   if (treinoId) {
@@ -323,13 +279,6 @@ function texto(formData: FormData, campo: string): string {
   return String(formData.get(campo) ?? "").trim();
 }
 
-function numero(formData: FormData, campo: string): number | undefined {
-  const bruto = texto(formData, campo);
-  if (bruto === "") return undefined;
-  const valor = Number(bruto);
-  return Number.isFinite(valor) ? valor : undefined;
-}
-
 /**
  * A lista de exercícios chega como JSON num campo escondido: é uma estrutura
  * aninhada, e `FormData` plano viraria `exercicios[0][sets]` na mão.
@@ -375,12 +324,10 @@ function comErros(erro: z.ZodError): EstadoDoEditor {
 }
 
 const mapaDeCampos: Record<string, CampoDoEditor | undefined> = {
-  alunoId: "aluno",
-  treinoId: "aluno",
+  programaId: "programa",
+  treinoId: "programa",
   label: "label",
   nome: "nome",
   observacao: "observacao",
   exercicios: "exercicios",
-  programaNome: "programaNome",
-  programaSemanas: "programaSemanas",
 };

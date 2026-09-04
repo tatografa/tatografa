@@ -39,3 +39,12 @@ export function diaLocalEmMs(data: Date | string): number {
   const [ano, mes, dia] = diaLocal(data).split("-").map(Number);
   return Date.UTC(ano, mes - 1, dia);
 }
+
+/** Um dia de calendário à frente (ou atrás) de outro, como "2026-09-09". */
+export function diaSomandoDias(data: Date | string, dias: number): string {
+  const umDia = 24 * 60 * 60 * 1000;
+  // `toISOString` sobre um instante montado com `Date.UTC` devolve o mesmo dia
+  // de calendário que entrou: os dois lados vivem em UTC de propósito, sem
+  // horário e sem horário de verão no meio.
+  return new Date(diaLocalEmMs(data) + dias * umDia).toISOString().slice(0, 10);
+}
