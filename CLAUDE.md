@@ -229,6 +229,11 @@ Provar que funciona sem o Otávio ler código:
   reps alvo") — registrada aqui para não ser "corrigida" por engano. Motivo: é o que o
   aluno entende sem explicação. Limite aceito: premia quem reduz repetição para pôr mais
   peso. Mudar isso é trocar uma função pura em `lib/domain/`.
+- **[2026-09-04]** **Histórico por exercício agrupa por `(exercise_source, exercise_id)`,
+  nunca por `workout_exercise_id`.** Este último é uma linha de prescrição — existe uma
+  por treino e outra a cada programa novo —, então agrupar por ele faria "a última vez que
+  fiz supino" recomeçar do zero a cada macrotreino. `chaveDoExercicio` monta a chave;
+  `lib/domain/recordes.ts` a trata como texto opaco.
 - **[2026-09-02]** Gráfico de evolução é **SVG à mão**, sem biblioteca. Um gráfico de linha
   com pontos clicáveis não paga ~100 kB de dependência, e biblioteca genérica atrapalha o
   que o doc 05 pede: linha de borda a borda, datas na horizontal, mais recente primeiro.

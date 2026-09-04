@@ -11,7 +11,7 @@
 |---|---|---|---|---|
 | M0 | Fundação | Conta de personal, login, painel protegido | Criar conta, entrar, ver `/painel` | validado |
 | M1 | Fatia vertical | Convite → treino → execução → histórico | Roteiro completo com duas contas, treino executado na academia | construído · aguardando validação do Otávio |
-| M2 | Utilidade contínua | Macrotreino, referência histórica, PRs, progresso, painel | Aluno usa duas semanas seguidas sem faltar nada | planejado |
+| M2 | Utilidade contínua | Macrotreino, referência histórica, PRs, progresso, painel | Aluno usa duas semanas seguidas sem faltar nada | em andamento |
 | M3 | Social e reavaliação | Feed, foto do treino, reavaliação física | Postar treino, comentar, comparar antes/depois | planejado (cortável) |
 | M4 | Pronto para o piloto | PWA, estados vazios e de erro, e-mails, termos, acessibilidade | Alguém que não conhece o produto usa sem ajuda | planejado |
 
@@ -70,7 +70,7 @@ essencial, e o personal acompanha sem precisar perguntar nada ao aluno.
 |---|---|---|---|
 | M2-01 | Macrotreino: gestão, rotação A/B/C/D e treino sugerido | senior | feito · checkpoint parcial |
 | M2-02 | Exercícios próprios do personal | pleno | feito |
-| M2-03 | Referência histórica na execução e recordes na conclusão | pleno | a fazer |
+| M2-03 | Referência histórica na execução e recordes na conclusão | pleno | feito |
 | M2-04 | Progresso do aluno: planilha e gráfico | senior | a fazer |
 | M2-05 | Home do aluno completa: streak, total, rotação | pleno | a fazer |
 | M2-06 | Perfil do aluno no painel | pleno | a fazer |
@@ -108,6 +108,18 @@ eu mesmo os pontos de maior risco, por leitura de código e SQL:
 casos de borda (o dev cobriu 16 casos por teste de função pura, mas ninguém releu), a
 coerência de números entre painel e app do aluno, e o caminho completo do M1 com sessão
 real — este último depende da máquina do Otávio, não de revisor.
+
+### Achado do M2-03 que é decisão do Otávio
+
+Com a referência na tela, ficou visível o que antes não incomodava: **o stepper
+de carga abre em 0 kg** mesmo quando a pílula diz "última vez: 62,5 kg × 10".
+O aluno lê o número e depois toca "+" vinte e cinco vezes para chegar nele.
+
+Abrir o stepper já na carga da última vez resolve com cinco linhas, e o custo é
+real: quem confirmar sem olhar registra um peso que talvez não tenha levantado —
+e o histórico é o produto. Não entrou no card porque não está nos critérios de
+aceite e a escolha é de produto, não técnica. Pergunta para o Otávio: **abrir no
+peso da última vez, ou continuar em 0?**
 
 ### Ordem
 

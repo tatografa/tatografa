@@ -15,6 +15,8 @@
 | Fila local com reenvio | `app/(aluno)/app/executar/[id]/usar-fila-de-series.ts` |
 | Tela de execução | `app/(aluno)/app/executar/[id]/execucao.tsx` |
 | Resumo da conclusão (componente puro) | `components/aluno/resumo-do-treino.tsx` |
+| Referência histórica e recordes (puro) | `lib/domain/recordes.ts` |
+| Leitura das séries anteriores | `lib/queries/recordes.ts` |
 
 ## O que fica gravado
 
@@ -140,6 +142,58 @@ exatamente aí que o aluno precisa do valor certo. Sem service worker não há
 alarme sonoro com a tela apagada: o app mostra o tempo certo quando o aluno
 olha (Fase 4).
 
+## Referência histórica e recordes (M2-03)
+
+O que a execução grava passou a ser lido de volta pela própria execução — a
+pílula "última vez: 60 kg × 10" — e pela conclusão — o recorde batido. Quem for
+escrever o progresso (M2-04) reusa isto em vez de recalcular.
+
+### A identidade do exercício não é `workout_exercise_id`
+
+É o par `(exercise_source, exercise_id)`, montado por `chaveDoExercicio`.
+`session_sets` guarda `workout_exercise_id`, que é **uma linha de prescrição**:
+o mesmo supino tem uma linha por treino e outra a cada programa novo. Agrupar
+por ela responderia "a última vez que fiz supino nesta linha", e o aluno que
+trocou de macrotreino veria a pílula sumir no dia seguinte.
+
+`lib/domain/recordes.ts` trata a chave como texto opaco de propósito — quem a
+monta é a camada de dados, que conhece as duas colunas.
+
+### As duas leituras são diferentes, e é fácil confundi-las
+
+| Pergunta | Função | O que devolve |
+|---|---|---|
+| "Com quanto eu saí da última vez?" | `ultimaVezPorExercicio` | a série mais pesada da **última sessão concluída** com aquele exercício |
+| "Qual é o meu melhor de todos?" | `recordePorExercicio` | a **maior carga já levantada**, em qualquer sessão |
+
+Trocar uma pela outra dá uma tela plausível e errada: a pílula mostraria o
+recorde (e nunca desceria depois de um dia ruim), e o recorde mostraria o
+último treino (e todo dia mais pesado que o anterior viraria "recorde").
+
+### Recortes que não são detalhe
+
+1. **Sessão em andamento nunca entra** (`finished_at` não nulo). Contá-la faria
+   a pílula mostrar a série que o aluno acabou de confirmar.
+2. **A conclusão pede o recorde `exceto` a sessão que fechou.** Sem isso a marca
+   nova é o próprio teto e nenhum recorde aparece nunca.
+3. **Série pulada não conta** para referência nem para recorde.
+4. **Carga nula é peso corporal** — a referência cai nas repetições, e recorde
+   de carga não existe ali. **Carga zero é o stepper onde abriu** e também não
+   vira marca: senão a sessão seguinte anuncia "0 kg → 20 kg".
+5. **Estreia não é recorde.** Sem marca anterior não há o que superar.
+6. **`load_kg` chega como string.** `Number()` antes de comparar, senão `"9"`
+   fica maior que `"80"`.
+7. **Uma consulta paginada para o treino inteiro**, com `range` até a página vir
+   curta — o corte do PostgREST é silencioso, e a página perdida esconderia
+   justamente o dia mais pesado.
+
+### Recorde é a maior carga, e isso contraria o doc 03
+
+Decisão do PM, registrada no `CLAUDE.md` e repetida aqui para não ser
+"corrigida" por engano: o doc 03 pede "maior carga com pelo menos as reps
+alvo"; aqui é a maior carga, ponto. Limite aceito: premia quem tira repetição
+para pôr peso. Mudar isso é mudar `cargaDeRecorde`, e só ela.
+
 ## Segurança verificada (SQL, com dois personais e dois alunos)
 
 | Caso | Resultado |
@@ -200,7 +254,8 @@ relacionamento**.
 
 ## Fora do escopo (confirmado com o PM)
 
-Recordes pessoais e referência "última vez: 60kg × 10" (M2, dependem de
-histórico acumulado); foto do treino e post no feed (M3); bottom sheet do menu
-⋮ (M2); service worker, sincronização offline completa e alarme de fim de
-descanso (Fase 4).
+Foto do treino e post no feed (M3); bottom sheet do menu ⋮ (M2); service worker,
+sincronização offline completa e alarme de fim de descanso (Fase 4).
+
+~~Recordes pessoais e referência "última vez"~~ — entregues no M2-03, seção
+acima.

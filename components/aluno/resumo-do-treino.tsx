@@ -1,8 +1,12 @@
 import Link from "next/link";
-import { Check } from "lucide-react";
+import { Check, Medal } from "lucide-react";
 
 import { duracaoCurta, formatarNumero } from "@/lib/domain/historico";
+import { textoDoRecorde, type RecordeBatido } from "@/lib/domain/recordes";
 import { volumeDaSessao, type SerieRegistrada } from "@/lib/domain/treino";
+
+/** Um recorde batido, já com o nome do exercício resolvido para a tela. */
+export type RecordeNaTela = RecordeBatido & { nome: string };
 
 export interface ResumoDoTreinoProps {
   label: string;
@@ -10,6 +14,12 @@ export interface ResumoDoTreinoProps {
   /** `workout_sessions.duration_seconds`. Nulo vira "—", não vira zero. */
   duracaoSegundos: number | null;
   series: SerieRegistrada[];
+  /**
+   * Os recordes que esta sessão quebrou, na ordem do treino. Lista vazia é o
+   * caso normal e não desenha nada: o doc 05 é explícito — "não invente
+   * celebração vazia".
+   */
+  recordes?: RecordeNaTela[];
 }
 
 /**
@@ -18,14 +28,15 @@ export interface ResumoDoTreinoProps {
  * Componente puro, sem banco: é o que permite conferir a tela no navegador
  * numa rota descartável, já que o host do Supabase é bloqueado neste ambiente.
  *
- * Recordes pessoais e foto do treino são M2 e M3 — sem histórico acumulado,
- * "PR" aqui seria celebração vazia.
+ * Foto do treino e post no feed são M3. Os recordes chegam prontos: quem
+ * decide o que é recorde é `lib/domain/recordes.ts`, e a tela só desenha.
  */
 export function ResumoDoTreino({
   label,
   nome,
   duracaoSegundos,
   series,
+  recordes = [],
 }: ResumoDoTreinoProps) {
   const realizadas = series.filter((s) => !s.skipped);
   const volume = volumeDaSessao(series);
@@ -55,6 +66,36 @@ export function ResumoDoTreino({
             <Divisoria />
             <Metrica valor={`${formatarNumero(volume)} kg`} rotulo="Volume" />
           </section>
+
+          {recordes.length > 0 ? (
+            <section
+              aria-label={
+                recordes.length === 1 ? "Recorde pessoal" : "Recordes pessoais"
+              }
+              className="mt-4 rounded-card-lg border border-brand bg-brand-tint p-4"
+            >
+              <p className="eyebrow flex items-center gap-1.5 text-[10px] text-brand">
+                <Medal aria-hidden size={14} />
+                {recordes.length === 1 ? "Recorde pessoal" : "Recordes pessoais"}
+              </p>
+
+              <ul className="mt-3 space-y-2.5">
+                {recordes.map((recorde) => (
+                  <li key={recorde.chave} className="space-y-0.5">
+                    <p className="text-[14.5px] leading-tight font-bold text-dark-text">
+                      {recorde.nome}
+                    </p>
+                    <p className="text-[13px] font-semibold text-dark-text-2 tabular-nums">
+                      {textoDoRecorde(recorde)}
+                      {recorde.reps === null ? null : (
+                        <span className="text-ink-4"> · {recorde.reps} reps</span>
+                      )}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
 
           {volume === 0 && realizadas.length > 0 ? (
             <p className="mt-3 text-[12px] leading-relaxed text-ink-4">

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, CloudOff, Pencil, X } from "lucide-react";
+import { ArrowLeft, Check, CloudOff, History, Pencil, X } from "lucide-react";
 
 import { Stepper } from "@/components/aluno/stepper";
 import { TimerDeDescanso } from "@/components/aluno/timer-de-descanso";
@@ -20,6 +20,7 @@ import {
   seriesQueFaltam,
   type SerieDaExecucao,
 } from "@/lib/domain/execucao";
+import { textoDaUltimaVez, type UltimaVez } from "@/lib/domain/recordes";
 import { comoRelogio } from "@/lib/domain/treino";
 import type { ExercicioPrescrito, TreinoCompleto } from "@/lib/queries/treinos";
 import { useMontado } from "@/lib/usar-montado";
@@ -54,6 +55,13 @@ export interface ExecucaoProps {
   sessao: SessaoEmExecucao;
   /** As séries que o servidor já tem. A fila cobre por cima o que falta. */
   seriesIniciais: SerieDaExecucao[];
+  /**
+   * "Última vez: 60 kg × 10", por linha da prescrição
+   * (`workout_exercises.id`). Exercício nunca feito não aparece aqui, e a tela
+   * não desenha pílula nenhuma — "0 kg" seria mentira sobre um treino que não
+   * aconteceu.
+   */
+  referencia: Record<string, UltimaVez>;
 }
 
 /** Qual série já registrada está aberta para correção. */
@@ -92,6 +100,7 @@ function ExecucaoMontada({
   treino,
   sessao,
   seriesIniciais,
+  referencia,
   armazenamento,
 }: ExecucaoProps & { armazenamento: boolean }) {
   const router = useRouter();
@@ -233,6 +242,8 @@ function ExecucaoMontada({
             {exercicio.sets} séries · {exercicio.reps_target} reps ·{" "}
             {exercicio.rest_seconds}s descanso
           </p>
+
+          <UltimaVezDoExercicio ultima={referencia[exercicio.id]} />
 
           {exercicio.technique ? (
             <p className="mt-2.5 inline-block rounded-[8px] border border-dark-border px-2.5 py-1.5 text-[11px] font-medium text-ink-5">
@@ -389,6 +400,27 @@ function ExecucaoMontada({
         </div>
       </footer>
     </div>
+  );
+}
+
+/**
+ * A pílula de referência histórica (doc 05).
+ *
+ * Fica logo abaixo da prescrição porque é a decisão que ela informa: o aluno
+ * olha "última vez: 60 kg × 10" e escolhe o peso da série de agora. Sem
+ * histórico, nada é desenhado — o espaço vazio diz a verdade melhor que um
+ * traço.
+ */
+function UltimaVezDoExercicio({ ultima }: { ultima: UltimaVez | undefined }) {
+  if (!ultima) return null;
+  const texto = textoDaUltimaVez(ultima);
+  if (!texto) return null;
+
+  return (
+    <p className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-dark-surface px-3 py-1.5 text-[12px] font-semibold text-dark-text-2">
+      <History aria-hidden size={13} className="text-ink-4" />
+      <span className="text-ink-4">Última vez:</span> {texto}
+    </p>
   );
 }
 

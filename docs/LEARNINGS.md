@@ -104,3 +104,19 @@
   `lib/domain/fuso.ts` centraliza `FUSO` e `diaLocal`. Cuidado: coluna `date` chega como
   `"2026-09-01"` e `new Date()` a lê como meia-noite UTC — converter por fuso joga o início
   para o dia anterior; tratar o texto como dia de calendário.
+- [2026-09-04] [modelagem] **Chave de escrita não é chave de leitura histórica.**
+  `session_sets` aponta para `workout_exercise_id`, que é uma linha de prescrição — há uma
+  por treino e outra a cada programa novo. Agrupar por ela para responder "com quanto eu
+  fiz supino da última vez?" dá uma tela plausível e errada: a pílula sumiria toda vez que
+  o aluno trocasse de macrotreino. A identidade do exercício é `(exercise_source,
+  exercise_id)`. Antes de agrupar histórico, perguntar de que o número é "por": por linha
+  gravada ou por coisa do mundo.
+- [2026-09-04] [dominio] Duas leituras do mesmo histórico que se confundem à toa:
+  "a última vez" (última sessão concluída) e "o recorde" (maior de todos). Trocar uma pela
+  outra não estoura em lugar nenhum — a pílula passa a nunca descer depois de um dia ruim,
+  e todo treino mais pesado que o anterior vira "recorde" → funções separadas, nomeadas
+  pela pergunta que respondem, e teste que fixa o caso em que as duas discordam.
+- [2026-09-04] [dados] Zero registrado não é zero real. Carga 0 kg é o stepper deixado
+  onde abriu, e admiti-la como marca anterior faria a sessão seguinte anunciar
+  "recorde: 0 kg → 20 kg" → valor de fronteira que o formulário produz sozinho não vira
+  linha de base de comparação.

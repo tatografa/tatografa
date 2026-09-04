@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { requireStudent } from "@/lib/auth/session";
 import { seriesDaSessao, sessaoAbertaDoAluno } from "@/lib/queries/execucao";
+import { referenciaDoTreino } from "@/lib/queries/recordes";
 import { lerTreino } from "@/lib/queries/treinos";
 
 import { Execucao } from "./execucao";
@@ -44,13 +45,29 @@ export default async function ExecutarTreino(
     return <TelaSessaoPendente treino={treino} pendente={aberta} />;
   }
 
-  const series = await seriesDaSessao(aberta.id);
+  // As duas leituras não dependem uma da outra: a referência histórica não
+  // olha a sessão de agora (só sessão concluída entra), então esperar em série
+  // seria atrasar a tela à toa.
+  const [series, referencia] = await Promise.all([
+    seriesDaSessao(aberta.id),
+    referenciaDoTreino(
+      student.id,
+      treino.exercicios.map((e) => ({
+        id: e.id,
+        exercicio: {
+          exercise_id: e.exercicio.id,
+          exercise_source: e.exercicio.source,
+        },
+      })),
+    ),
+  ]);
 
   return (
     <Execucao
       treino={treino}
       sessao={{ id: aberta.id, started_at: aberta.started_at }}
       seriesIniciais={series}
+      referencia={referencia}
     />
   );
 }
