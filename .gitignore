@@ -42,3 +42,11 @@ next-env.d.ts
 
 # ...mas o exemplo entra no repositorio.
 !.env.example
+
+# Rota descartável de conferência visual.
+#
+# O host do Supabase é bloqueado neste ambiente, então a única forma de ver uma
+# tela que depende de dado é renderizá-la com props fixas numa rota temporária.
+# O card manda apagá-la antes do commit; isto aqui é a rede embaixo, para uma
+# rota esquecida não virar página de produção com dado inventado.
+app/conferir/
