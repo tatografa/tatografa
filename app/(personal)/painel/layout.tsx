@@ -46,6 +46,12 @@ export default async function PainelLayout({
             >
               Treinos
             </Link>
+            <Link
+              href="/painel/exercicios"
+              className="rounded-[9px] px-3 py-1.5 text-[13px] font-semibold text-ink-3 transition hover:bg-canvas-sunken hover:text-ink"
+            >
+              Exercícios
+            </Link>
           </nav>
 
           <div className="flex items-center gap-3">
