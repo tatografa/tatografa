@@ -156,3 +156,13 @@
 - [2026-09-05] [ui] SVG com `w-full` escala a altura junto: o mesmo gráfico que ocupa 150px
   no celular passa de 480px numa tela de 1280. O limite é largura máxima no contêiner de
   quem usa, nunca no componente — senão o gráfico do celular perde a borda a borda.
+- [2026-09-05] [dominio] "Semana" não é uma coisa só. A semana do programa (a partir do
+  `started_at` de cada aluno) e a semana de calendário respondem a perguntas diferentes, e
+  a primeira **não agrega**: cada aluno começa a dele num dia. Métrica de carteira precisa
+  de uma janela compartilhada. Manter as duas, nomeadas pelo que são.
+- [2026-09-05] [dominio] Divisão por zero não é zero. Aderência de um programa sem treino
+  prescrito é "não dá para dizer", e engolir isso como 0% derruba a média da carteira por
+  causa de um programa que o personal ainda está montando. Nulo até em cima, e "—" na tela.
+- [2026-09-05] [produto] Bloco de alerta vazio treina o olho a ignorar bloco de alerta —
+  por isso "precisam de atenção" some quando não há ninguém, em vez de mostrar lista vazia
+  ou um card dizendo que está tudo bem.

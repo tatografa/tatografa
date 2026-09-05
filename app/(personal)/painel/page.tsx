@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import {
+  AlunosQuePrecisamDeAtencao,
+  Indicadores,
+} from "@/components/personal/blocos-do-painel";
 import { ListaDeAlunos } from "@/components/personal/lista-de-alunos";
 import { Button, Card } from "@/components/ui";
 import { requireTrainer } from "@/lib/auth/session";
-import { listarAlunos, listarConvitesPendentes } from "@/lib/queries/alunos";
+import { listarConvitesPendentes } from "@/lib/queries/alunos";
+import { lerResumoDaCarteira } from "@/lib/queries/painel";
 
 import { cancelarConvite } from "./actions";
 import { ConvidarAluno } from "./convidar-aluno";
@@ -13,8 +18,11 @@ export const metadata: Metadata = { title: "Painel" };
 
 export default async function PainelPage() {
   const { trainer } = await requireTrainer();
-  const [alunos, convites] = await Promise.all([
-    listarAlunos(),
+
+  // O limiar sai da linha do personal, não de uma constante: é ajuste dele,
+  // editável em /painel/configuracoes.
+  const [{ alunos, alertas, indicadores }, convites] = await Promise.all([
+    lerResumoDaCarteira(trainer.dias_para_alerta),
     listarConvitesPendentes(),
   ]);
 
@@ -36,6 +44,19 @@ export default async function PainelPage() {
         <VazioSemAluno />
       ) : (
         <div className="space-y-8">
+          <Indicadores indicadores={indicadores} />
+
+          {/*
+            Acima da lista geral de propósito: o doc 06 chama este bloco de "a
+            lista mais útil da página — não a esconda embaixo". Sem ninguém
+            parado ele não desenha nada, porque bloco de alerta vazio treina o
+            olho a ignorar bloco de alerta.
+          */}
+          <AlunosQuePrecisamDeAtencao
+            alertas={alertas}
+            diasParaAlerta={trainer.dias_para_alerta}
+          />
+
           {convites.length > 0 && (
             <section className="space-y-3">
               <h2 className="eyebrow text-ink-4">

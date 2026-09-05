@@ -297,6 +297,7 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          dias_para_alerta: number
           email: string
           id: string
           name: string
@@ -306,6 +307,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          dias_para_alerta?: number
           email: string
           id: string
           name: string
@@ -315,6 +317,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          dias_para_alerta?: number
           email?: string
           id?: string
           name?: string
@@ -473,6 +476,13 @@ export type Database = {
         Args: { p_student_id: string }
         Returns: {
           dia: string
+        }[]
+      }
+      sessoes_na_semana: {
+        Args: { p_ate: string; p_de: string }
+        Returns: {
+          student_id: string
+          total: number
         }[]
       }
       series_por_exercicio: {

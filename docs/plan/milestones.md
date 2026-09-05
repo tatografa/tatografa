@@ -11,7 +11,7 @@
 |---|---|---|---|---|
 | M0 | Fundação | Conta de personal, login, painel protegido | Criar conta, entrar, ver `/painel` | validado |
 | M1 | Fatia vertical | Convite → treino → execução → histórico | Roteiro completo com duas contas, treino executado na academia | construído · aguardando validação do Otávio |
-| M2 | Utilidade contínua | Macrotreino, referência histórica, PRs, progresso, painel | Aluno usa duas semanas seguidas sem faltar nada | em andamento |
+| M2 | Utilidade contínua | Macrotreino, referência histórica, PRs, progresso, painel | Aluno usa duas semanas seguidas sem faltar nada | cards feitos · aguardando revisão e validação |
 | M3 | Social e reavaliação | Feed, foto do treino, reavaliação física | Postar treino, comentar, comparar antes/depois | planejado (cortável) |
 | M4 | Pronto para o piloto | PWA, estados vazios e de erro, e-mails, termos, acessibilidade | Alguém que não conhece o produto usa sem ajuda | planejado |
 
@@ -74,7 +74,7 @@ essencial, e o personal acompanha sem precisar perguntar nada ao aluno.
 | M2-04 | Progresso do aluno: planilha e gráfico | senior | feito |
 | M2-05 | Home do aluno completa: streak, total, rotação | pleno | feito |
 | M2-06 | Perfil do aluno no painel | pleno | feito |
-| M2-07 | Dashboard do personal com alertas de inatividade | pleno | a fazer |
+| M2-07 | Dashboard do personal com alertas de inatividade | pleno | feito |
 
 Já entregue no M1, apesar de constar na Fase 2 do roadmap: **link mágico para acessos
 seguintes do aluno** (`/acesso`).
@@ -193,6 +193,29 @@ achou um caso que **o RLS não barra e nunca vai barrar**: dois alunos do
 quem é o dado") valendo na direção contrária da usual: aqui não é redundância,
 é a única trava. Quem escrever outra rota aninhada em `/painel/alunos/[id]/`
 precisa repetir o filtro.
+
+### Duas semanas no M2-07, e por que elas são diferentes
+
+O painel mostra "treinos executados **esta semana**", e essa semana **não é** a
+do programa. `janelaDaSemana` (rotação) conta a partir do `started_at` de cada
+programa — a semana 2 da Carla começa numa quarta e a do João num sábado —,
+então ela é individual e não agrega. Para somar a carteira inteira só existe uma
+semana que todo mundo divide: a de calendário, segunda a domingo, no fuso do
+produto (`semanaDoCalendario`, em `lib/domain/atencao.ts`).
+
+As duas continuam existindo de propósito. Se um dia elas aparecerem lado a lado
+na mesma tela, o rótulo tem que dizer qual é qual.
+
+### Estado do M2
+
+Os sete cards estão feitos. **Falta para fechar o milestone:**
+
+1. A revisão adiada do M2-01 (rotação nos casos de borda, coerência de números
+   entre painel e app do aluno).
+2. Uma revisão consolidada do M2 inteiro — que no M1 achou três furos de RLS e
+   um caminho de perda de dado, e aqui ainda não rodou.
+3. O caminho completo com sessão real na máquina do Otávio, incluindo as
+   migrations 0013, 0014 e 0015, que ainda não passaram por um app de verdade.
 
 ### Ordem
 

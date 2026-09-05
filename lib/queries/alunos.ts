@@ -6,7 +6,7 @@ import type { Tables } from "@/types/database";
 
 export type AlunoDaLista = Pick<
   Tables<"students">,
-  "id" | "name" | "email" | "goal" | "status" | "created_at"
+  "id" | "name" | "email" | "goal" | "status" | "created_at" | "onboarded_at"
 > & {
   ultima_sessao: string | null;
 };
@@ -22,7 +22,7 @@ export async function listarAlunos(): Promise<AlunoDaLista[]> {
 
   const { data: alunos, error } = await supabase
     .from("students")
-    .select("id, name, email, goal, status, created_at")
+    .select("id, name, email, goal, status, created_at, onboarded_at")
     .order("created_at", { ascending: false });
 
   if (error) throw error;
