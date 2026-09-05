@@ -72,7 +72,7 @@ essencial, e o personal acompanha sem precisar perguntar nada ao aluno.
 | M2-02 | Exercícios próprios do personal | pleno | feito |
 | M2-03 | Referência histórica na execução e recordes na conclusão | pleno | feito |
 | M2-04 | Progresso do aluno: planilha e gráfico | senior | feito |
-| M2-05 | Home do aluno completa: streak, total, rotação | pleno | a fazer |
+| M2-05 | Home do aluno completa: streak, total, rotação | pleno | feito |
 | M2-06 | Perfil do aluno no painel | pleno | a fazer |
 | M2-07 | Dashboard do personal com alertas de inatividade | pleno | a fazer |
 
@@ -162,6 +162,23 @@ Dois limites declarados no card e aceitos aqui:
   uma vez para o acordeão e o filtro não irem ao servidor, e sessenta sessões do
   mesmo exercício são cinco meses treinando três vezes por semana. A tela avisa
   quando encosta no teto.
+
+### Migration nova no M2-05, e por que não pede checkpoint
+
+`0013_dias_de_treino` acrescenta uma função de **leitura**, `security invoker`,
+em `public`: ela lê `workout_sessions` com o RLS de quem chama, então não alarga
+acesso nenhum — provado por SQL (aluno pedindo os dias de outro aluno recebe
+lista vazia; personal alheio idem; personal do próprio aluno continua vendo).
+
+Ela existe porque a sequência precisa saber **quais dias** tiveram treino, não
+quantas sessões existem — e agrupar isso em memória repetiria o erro que a
+migration 0008 pagou, com um sintoma pior: sequência encurtada em silêncio.
+
+**A fronteira de dia está escrita em dois lugares** — o `at time zone
+'America/Sao_Paulo'` da função e o `FUSO` de `lib/domain/fuso.ts`. É o preço de
+agrupar no banco, e por isso a prova cobre justamente o horário em que os dois
+poderiam discordar: sessão às 23h30 UTC (20h30 no Brasil) cai no dia certo, e
+sessão às 02h UTC cai no dia anterior. Se um dia mudar, muda nos dois.
 
 ### Ordem
 

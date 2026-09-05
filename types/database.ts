@@ -469,6 +469,12 @@ export type Database = {
           personal: string
         }[]
       }
+      dias_de_treino: {
+        Args: { p_student_id: string }
+        Returns: {
+          dia: string
+        }[]
+      }
       series_por_exercicio: {
         Args: { p_workout_id: string }
         Returns: {

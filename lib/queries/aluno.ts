@@ -1,6 +1,7 @@
 import "server-only";
 
 import { janelaDaSemana, proximoDaRotacao } from "@/lib/domain/rotacao";
+import { sequenciaDeDias } from "@/lib/domain/sequencia";
 import { duracaoEstimadaMin, totalDeSeries } from "@/lib/domain/treino";
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
@@ -146,4 +147,51 @@ async function treinosFeitosNaSemana(
   if (error) throw error;
 
   return new Set((data ?? []).map((linha) => linha.workout_id));
+}
+
+/** Os dois indicadores do topo da home (doc 05). */
+export type IndicadoresDoAluno = {
+  /** Dias seguidos com ao menos um treino concluído. */
+  sequencia: number;
+  /** Sessões concluídas desde sempre. */
+  sessoesTotais: number;
+};
+
+/**
+ * Sequência e total de sessões.
+ *
+ * As duas contas são **agregadas no banco**: `dias_de_treino` devolve um dia de
+ * calendário por linha (o `distinct` é do Postgres, então duas sessões no mesmo
+ * dia já chegam como um) e o total vem de um `count` com `head: true`. Trazer
+ * as sessões para contar aqui repetiria o erro que a migration 0008 pagou — o
+ * corte de página do PostgREST é silencioso, e uma página perdida encurtaria a
+ * sequência sem ninguém perceber.
+ *
+ * A corrente em si sai de `sequenciaDeDias`, função pura: o banco sabe **quais**
+ * dias, o domínio sabe **quantos seguidos**.
+ *
+ * O filtro por `student_id` está aqui mesmo com o RLS cobrindo: a query não deve
+ * depender só da policy para saber de quem é o dado.
+ */
+export async function lerIndicadoresDoAluno(
+  alunoId: string,
+): Promise<IndicadoresDoAluno> {
+  const supabase = await createClient();
+
+  const [dias, total] = await Promise.all([
+    supabase.rpc("dias_de_treino", { p_student_id: alunoId }),
+    supabase
+      .from("workout_sessions")
+      .select("id", { count: "exact", head: true })
+      .eq("student_id", alunoId)
+      .not("finished_at", "is", null),
+  ]);
+
+  if (dias.error) throw dias.error;
+  if (total.error) throw total.error;
+
+  return {
+    sequencia: sequenciaDeDias((dias.data ?? []).map((linha) => linha.dia)),
+    sessoesTotais: total.count ?? 0,
+  };
 }

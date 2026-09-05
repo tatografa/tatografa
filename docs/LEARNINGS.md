@@ -134,3 +134,14 @@
   `request.jwt.claims` e provar RLS de verdade. Prova de leitura só vale rodando a consulta
   **sem** o filtro que a aplicação aplica — é o que um cliente forjado faz, e é o RLS que
   tem que barrar. Limpar a fixture depois: o banco de dev estava vazio e volta a ficar.
+- [2026-09-05] [banco] Agregar no banco protege da paginação silenciosa, mas move a regra
+  de fronteira de dia para dentro do SQL — e aí ela existe em dois lugares (`at time zone`
+  na função e `FUSO` em `lib/domain/fuso.ts`). Não dá para ter os dois: ou a regra é única
+  e a contagem vem para a memória, ou a contagem é segura e a regra é duplicada. Escolhida
+  a segunda, com a prova rodando **no horário em que as duas poderiam discordar** (23h30
+  UTC, que é 20h30 no Brasil) em vez de num horário qualquer.
+- [2026-09-05] [ux] Indicador zerado não é o mesmo problema que indicador escondido.
+  Esconder faz a tela mudar de forma no dia do primeiro treino, e o número aparece do nada;
+  mostrar "0 dias seguidos" sozinho parece punição. O que resolve é a frase de convite ao
+  lado do zero — e só enquanto o total também é zero, porque depois disso o zero é um fato
+  que o usuário já sabe ler.
