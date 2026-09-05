@@ -59,10 +59,14 @@ Fatias verticais do `docs/plan/milestones.md`. Todo milestone é validável pelo
 | # | Fase | Entrega | Status |
 |---|---|---|---|
 | M0 | Fase 0 · Fundação | Conta de personal, login, `/painel` protegido | validado |
-| M1 | Fase 1 · Fatia vertical | Convite → treino → execução → histórico | validado |
-| M2 | Fase 2 · Utilidade contínua | Macrotreino, PRs, progresso, painel completo | em andamento |
+| M1 | Fase 1 · Fatia vertical | Convite → treino → execução → histórico | construído · **não validado** |
+| M2 | Fase 2 · Utilidade contínua | Macrotreino, PRs, progresso, painel completo | construído · revisado · **não validado** |
 | M3 | Fase 3 · Social e reavaliação | Feed, fotos, reavaliação física | planejado (cortável) |
 | M4 | Fase 4 · Pronto para o piloto | PWA, estados vazios/erro, e-mails, termos | planejado |
+
+> **Nenhum milestone além do M0 rodou com Supabase de verdade.** Este ambiente não
+> alcança o host, e o roteiro de `docs/plan/M2-validacao.md` cobre M1 e M2 juntos.
+> Enquanto ele não rodar, "construído" é o máximo que se pode afirmar.
 
 ## Design System
 
