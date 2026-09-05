@@ -14,38 +14,39 @@ export type AlunoDaLista = Pick<
 /**
  * Alunos do personal logado, com a data da última sessão concluída.
  *
- * A última sessão vem por uma query só, agrupada — não uma por aluno. Com 50
- * alunos o N+1 não doeria, mas o hábito é o que evita a dor depois.
+ * A última sessão sai de `ultima_sessao_por_aluno` (migration 0016), que devolve
+ * **uma linha por aluno**, agregada no banco.
+ *
+ * Antes esta função varria todas as sessões concluídas da carteira ordenadas
+ * por data e ficava com a primeira de cada aluno. Funcionava até o corte de
+ * página silencioso do PostgREST — passando do teto, as sessões mais antigas
+ * sumiam e o aluno que treinou há três meses voltava como "nunca treinou". No
+ * M1 isso era um rótulo errado; com o M2-07 o mesmo dado virou alerta, e o
+ * aluno que treina toda semana apareceria em "precisam de atenção" com o motivo
+ * errado. Achado da revisão consolidada do M2.
  */
 export async function listarAlunos(): Promise<AlunoDaLista[]> {
   const supabase = await createClient();
 
-  const { data: alunos, error } = await supabase
-    .from("students")
-    .select("id, name, email, goal, status, created_at, onboarded_at")
-    .order("created_at", { ascending: false });
+  const [alunos, sessoes] = await Promise.all([
+    supabase
+      .from("students")
+      .select("id, name, email, goal, status, created_at, onboarded_at")
+      .order("created_at", { ascending: false }),
+    supabase.rpc("ultima_sessao_por_aluno"),
+  ]);
 
-  if (error) throw error;
-  if (!alunos?.length) return [];
+  if (alunos.error) throw alunos.error;
+  // Erro não vira "ninguém treinou": a lista diria que a carteira inteira está
+  // parada, e o painel abriria com todo mundo em "precisam de atenção".
+  if (sessoes.error) throw sessoes.error;
+  if (!alunos.data?.length) return [];
 
-  const { data: sessoes } = await supabase
-    .from("workout_sessions")
-    .select("student_id, finished_at")
-    .in(
-      "student_id",
-      alunos.map((a) => a.id),
-    )
-    .not("finished_at", "is", null)
-    .order("finished_at", { ascending: false });
+  const ultima = new Map(
+    (sessoes.data ?? []).map((linha) => [linha.student_id, linha.finished_at]),
+  );
 
-  const ultima = new Map<string, string>();
-  for (const s of sessoes ?? []) {
-    if (s.finished_at && !ultima.has(s.student_id)) {
-      ultima.set(s.student_id, s.finished_at);
-    }
-  }
-
-  return alunos.map((aluno) => ({
+  return alunos.data.map((aluno) => ({
     ...aluno,
     ultima_sessao: ultima.get(aluno.id) ?? null,
   }));

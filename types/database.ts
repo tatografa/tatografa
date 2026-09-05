@@ -492,6 +492,13 @@ export type Database = {
           workout_exercise_id: string
         }[]
       }
+      ultima_sessao_por_aluno: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          finished_at: string
+          student_id: string
+        }[]
+      }
       treinos_feitos_na_semana: {
         Args: { p_ate: string; p_de: string; p_student_id: string }
         Returns: {

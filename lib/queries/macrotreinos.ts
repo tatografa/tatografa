@@ -26,6 +26,19 @@ export type ProgramasDoAluno = {
 
 export type MacrotreinoDoPersonal = Macrotreino & { aluno: AlunoDoPrograma };
 
+/** Tamanho da página ao varrer `mesocycles`. */
+const PAGINA_DE_PROGRAMAS = 1000;
+
+type LinhaDePrograma = {
+  id: string;
+  name: string;
+  total_weeks: number;
+  started_at: string;
+  status: Enums<"mesocycle_status">;
+  student_id: string;
+  workouts: { count: number }[];
+};
+
 /**
  * Todos os programas da carteira do personal, agrupados por aluno.
  *
@@ -48,22 +61,35 @@ export async function listarProgramasPorAluno(): Promise<ProgramasDoAluno[]> {
   if (erroAlunos) throw erroAlunos;
   if (!alunos?.length) return [];
 
-  const { data: programas, error: erroProgramas } = await supabase
-    .from("mesocycles")
-    .select("id, name, total_weeks, started_at, status, student_id, workouts(count)")
-    .in(
-      "student_id",
-      alunos.map((aluno) => aluno.id),
-    )
-    .order("started_at", { ascending: false })
-    .order("created_at", { ascending: false });
+  // Varredura paginada, como em `lib/queries/historico.ts`. Programa arquivado
+  // se acumula para sempre, e o corte de página do PostgREST é silencioso: sem
+  // isto, um personal com carteira grande perderia o programa **ativo** de
+  // alguns alunos — e o painel usa `total_treinos` do ativo como denominador
+  // da aderência, então a média sairia calculada sobre menos gente.
+  const programas: LinhaDePrograma[] = [];
 
-  if (erroProgramas) throw erroProgramas;
+  for (let inicio = 0; ; inicio += PAGINA_DE_PROGRAMAS) {
+    const { data, error: erroProgramas } = await supabase
+      .from("mesocycles")
+      .select("id, name, total_weeks, started_at, status, student_id, workouts(count)")
+      .in(
+        "student_id",
+        alunos.map((aluno) => aluno.id),
+      )
+      .order("started_at", { ascending: false })
+      .order("created_at", { ascending: false })
+      .range(inicio, inicio + PAGINA_DE_PROGRAMAS - 1);
+
+    if (erroProgramas) throw erroProgramas;
+    const pagina = data ?? [];
+    programas.push(...pagina);
+    if (pagina.length < PAGINA_DE_PROGRAMAS) break;
+  }
 
   const ativoPorAluno = new Map<string, Macrotreino>();
   const arquivadosPorAluno = new Map<string, Macrotreino[]>();
 
-  for (const linha of programas ?? []) {
+  for (const linha of programas) {
     const programa: Macrotreino = {
       id: linha.id,
       name: linha.name,

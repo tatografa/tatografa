@@ -206,16 +206,44 @@ produto (`semanaDoCalendario`, em `lib/domain/atencao.ts`).
 As duas continuam existindo de propósito. Se um dia elas aparecerem lado a lado
 na mesma tela, o rótulo tem que dizer qual é qual.
 
+### Revisão consolidada do M2 — feita, e o que ela achou
+
+Rodou sobre `git diff 0e6630a..HEAD` (~5600 linhas, 115 arquivos). **Veredito:
+aprovado**, sem bloqueador. As três classes de defeito que a revisão do M1 achou
+não se repetiram: nenhum furo de RLS, nenhum vazamento entre alunos ou
+personais, nenhum ramo destrutivo decidido por medida cega. A revisão também
+cobriu os pontos que o checkpoint do M2-01 tinha deixado em aberto — rotação nos
+casos de borda e coerência de números entre painel e app — e não achou problema
+neles, então **a pendência do M2-01 está fechada**.
+
+Três correções entraram depois dela:
+
+1. **`salvarExercicio` dizia "salvo" sobre uma escrita que não aconteceu.** O
+   `update` filtrado por `trainer_id` devolve zero linhas sem erro quando o id
+   não é do personal, e a ação devolvia `sucesso`. Achado do revisor; corrigido
+   com `count: "exact"`, como `salvarPrograma` já fazia.
+2. **`listarAlunos` fazia aluno ativo parecer inativo.** Este é o mais grave, e
+   o revisor o classificou como sugestão — verificando, é pior do que parece. A
+   função varria **todas** as sessões concluídas da carteira para achar a mais
+   recente de cada aluno, sem paginação. Passando do teto de página do
+   PostgREST, o aluno que treinou há três meses volta como `ultima_sessao =
+   null`. No M1 isso era um rótulo errado na lista; **o M2-07 transformou o mesmo
+   dado em alerta**, e o aluno que treina toda semana apareceria em "precisam de
+   atenção" dizendo "entrou há 200 dias e ainda não treinou". Corrigido pela
+   migration `0016`, com `distinct on` no banco. Reproduzido por SQL antes
+   (página cortada → 1 aluno com data em vez de 2) e depois (os dois, com as
+   datas certas).
+3. **`listarProgramasPorAluno` sem paginação**, sugestão do revisor — e ela
+   deixou de ser cosmética no M2-07, porque o `total_treinos` do programa ativo
+   virou o denominador da aderência. Programa perdido = aluno fora da média.
+
 ### Estado do M2
 
-Os sete cards estão feitos. **Falta para fechar o milestone:**
-
-1. A revisão adiada do M2-01 (rotação nos casos de borda, coerência de números
-   entre painel e app do aluno).
-2. Uma revisão consolidada do M2 inteiro — que no M1 achou três furos de RLS e
-   um caminho de perda de dado, e aqui ainda não rodou.
-3. O caminho completo com sessão real na máquina do Otávio, incluindo as
-   migrations 0013, 0014 e 0015, que ainda não passaram por um app de verdade.
+Os sete cards estão feitos e a revisão consolidada passou. **Falta uma coisa
+só:** o caminho completo com sessão real na máquina do Otávio, seguindo
+`docs/plan/M2-validacao.md`. Nada do M2 rodou com Supabase de verdade — este
+ambiente não alcança o host —, e as quatro migrations novas (0013 a 0016) nunca
+passaram por um app.
 
 ### Ordem
 

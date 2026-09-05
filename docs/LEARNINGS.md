@@ -166,3 +166,17 @@
 - [2026-09-05] [produto] Bloco de alerta vazio treina o olho a ignorar bloco de alerta —
   por isso "precisam de atenção" some quando não há ninguém, em vez de mostrar lista vazia
   ou um card dizendo que está tudo bem.
+- [2026-09-05] [banco] **Update filtrado pelo dono devolve zero linhas sem erro.** É a
+  terceira variação do mesmo formato no projeto: a escrita não acontece, o Postgres não
+  reclama, e a ação responde "salvo". Todo `update` com `eq` de dono pede `count: "exact"`
+  e trata `count === 0` como "não encontrado" — a mensagem certa é recarregar a página, não
+  tentar de novo.
+- [2026-09-05] [banco] **Consulta que não decide nada hoje pode decidir amanhã.** A
+  varredura sem paginação de `listarAlunos` era, no M1, um rótulo errado numa lista. O
+  M2-07 pendurou o alerta de inatividade no mesmo dado, e a mesma truncagem passou a
+  acusar de "nunca treinou" quem treina toda semana. Ao pendurar decisão num dado que já
+  existia, reler como ele é lido — não só como ele é usado.
+- [2026-09-05] [revisao] Revisor classificou como 🟢 o defeito mais grave do milestone,
+  porque avaliou a consulta pelo que ela era antes e não pelo que passou a alimentar.
+  Achado de revisor é hipótese: confirmar no código e reproduzir antes de aceitar **e**
+  antes de descartar.

@@ -94,13 +94,13 @@ export async function salvarExercicio(
 
   // `eq("trainer_id")` no update é redundante com o RLS, e fica de propósito:
   // um id forjado na requisição não deve nem chegar à policy para ser negado.
-  const { error } = id
+  const { error, count } = id
     ? await supabase
         .from("exercises")
-        .update(linha)
+        .update(linha, { count: "exact" })
         .eq("id", id)
         .eq("trainer_id", trainer.id)
-    : await supabase.from("exercises").insert(linha);
+    : await supabase.from("exercises").insert(linha, { count: "exact" });
 
   if (error) {
     // Há unique em (trainer_id, name): o mesmo personal não repete nome.
@@ -111,6 +111,14 @@ export async function salvarExercicio(
       };
     }
     return { erro: "Não deu para salvar. Tente de novo.", campos };
+  }
+
+  // Zero linhas sem erro: o id não é de um exercício deste personal (forjado,
+  // ou apagado em outra aba entre abrir o diálogo e enviar). Sem esta checagem
+  // o diálogo fecha dizendo "salvo" sobre uma escrita que não aconteceu — o
+  // mesmo defeito que `salvarPrograma` já tratava, achado pela revisão do M2.
+  if (count === 0) {
+    return { erro: "Exercício não encontrado. Recarregue a página.", campos };
   }
 
   revalidatePath("/painel/exercicios");

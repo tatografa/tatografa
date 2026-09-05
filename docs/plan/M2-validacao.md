@@ -16,7 +16,7 @@ npm install
 
 ### As três migrations novas
 
-O M2 acrescentou três, e elas **já estão aplicadas no projeto de dev**
+O M2 acrescentou quatro, e elas **já estão aplicadas no projeto de dev**
 (`reps-club-dev`). Se você usa esse projeto, não precisa fazer nada. Se usa outro,
 aplique nesta ordem:
 
@@ -25,6 +25,7 @@ aplique nesta ordem:
 | `0013_dias_de_treino.sql` | Função de leitura que devolve os dias em que o aluno treinou. Alimenta a sequência ("🔥 5 dias seguidos"). |
 | `0014_dias_para_alerta.sql` | Coluna `trainers.dias_para_alerta`, padrão 7. É o limiar do alerta de inatividade. |
 | `0015_sessoes_na_semana.sql` | Função de leitura que conta sessões por aluno na semana, para os indicadores do painel. |
+| `0016_ultima_sessao_por_aluno.sql` | Função de leitura com a última sessão de cada aluno. Substitui uma varredura que truncava e fazia aluno ativo aparecer como "nunca treinou" no alerta. |
 
 Nenhuma delas cria policy nem apaga dado. As duas funções são `security invoker`: leem
 com as permissões de quem chama.
