@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Badge } from "@/components/ui";
 import type { AlunoDaLista } from "@/lib/queries/alunos";
 import { OBJETIVO, STATUS_DO_ALUNO } from "@/lib/rotulos";
@@ -24,12 +26,14 @@ export function ListaDeAlunos({ alunos }: { alunos: AlunoDaLista[] }) {
       {alunos.map((aluno) => (
         <li key={aluno.id}>
           {/*
-            Cartão, e não link: a ficha do aluno (`/painel/alunos/[id]`) é M2.
-            Enquanto a rota não existe, um link daqui levaria a 404 logo no
-            primeiro clique do personal depois que o aluno entra — o passo 2 do
-            roteiro de validação. Sem `hover`, porque não há para onde ir.
+            Link de novo: no M1 este cartão não levava a lugar nenhum porque
+            `/painel/alunos/[id]` não existia, e um link para 404 era pior que
+            um cartão parado. O M2-06 criou a rota e a dívida está paga.
           */}
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-border bg-surface px-4 py-3.5">
+          <Link
+            href={`/painel/alunos/${aluno.id}`}
+            className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-border bg-surface px-4 py-3.5 transition hover:border-border-strong"
+          >
             <div className="min-w-0">
               <p className="truncate text-[14.5px] font-semibold text-ink">
                 {aluno.name}
@@ -45,7 +49,7 @@ export function ListaDeAlunos({ alunos }: { alunos: AlunoDaLista[] }) {
             <Badge tone={aluno.status === "ativo" ? "sucesso" : "neutro"}>
               {STATUS_DO_ALUNO[aluno.status]}
             </Badge>
-          </div>
+          </Link>
         </li>
       ))}
     </ul>

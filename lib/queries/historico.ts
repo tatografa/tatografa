@@ -7,6 +7,7 @@ import {
   type LinhaDeSerie,
   type SerieDoHistorico,
 } from "@/lib/domain/historico";
+import { pareceUuid } from "@/lib/domain/id";
 import { totalDeSeries, volumeDaSessao } from "@/lib/domain/treino";
 import { createClient } from "@/lib/supabase/server";
 
@@ -314,10 +315,4 @@ async function seriesDasSessoes(ids: string[]): Promise<SerieComSessao[]> {
   }
 
   return todas;
-}
-
-/** Formato de uuid, sem a estritude de versão do zod v4: aqui só interessa
- * que o Postgres consiga fazer o cast sem estourar. */
-function pareceUuid(valor: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(valor);
 }

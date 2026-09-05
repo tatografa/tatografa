@@ -73,7 +73,7 @@ essencial, e o personal acompanha sem precisar perguntar nada ao aluno.
 | M2-03 | Referência histórica na execução e recordes na conclusão | pleno | feito |
 | M2-04 | Progresso do aluno: planilha e gráfico | senior | feito |
 | M2-05 | Home do aluno completa: streak, total, rotação | pleno | feito |
-| M2-06 | Perfil do aluno no painel | pleno | a fazer |
+| M2-06 | Perfil do aluno no painel | pleno | feito |
 | M2-07 | Dashboard do personal com alertas de inatividade | pleno | a fazer |
 
 Já entregue no M1, apesar de constar na Fase 2 do roadmap: **link mágico para acessos
@@ -179,6 +179,20 @@ migration 0008 pagou, com um sintoma pior: sequência encurtada em silêncio.
 agrupar no banco, e por isso a prova cobre justamente o horário em que os dois
 poderiam discordar: sessão às 23h30 UTC (20h30 no Brasil) cai no dia certo, e
 sessão às 02h UTC cai no dia anterior. Se um dia mudar, muda nos dois.
+
+### O que o M2-06 mostrou sobre quem barra o quê
+
+O RLS de `students`, `mesocycles`, `workout_sessions` e `session_sets` já
+segurava tudo o que o card pedia — nenhuma policy nova. Mas a prova por SQL
+achou um caso que **o RLS não barra e nunca vai barrar**: dois alunos do
+**mesmo** personal. Ele pode ler os dois, então
+`/painel/alunos/<A>/sessoes/<sessão do B>` só devolve nada porque
+`lerSessaoDoHistorico` filtra por `student_id` além do id da sessão.
+
+É a convenção do projeto ("a query não deve depender só da policy para saber de
+quem é o dado") valendo na direção contrária da usual: aqui não é redundância,
+é a única trava. Quem escrever outra rota aninhada em `/painel/alunos/[id]/`
+precisa repetir o filtro.
 
 ### Ordem
 

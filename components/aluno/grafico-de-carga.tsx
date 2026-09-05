@@ -4,6 +4,8 @@ import { useId, useState } from "react";
 
 import {
   dataCurta,
+  INTERVALOS,
+  type Intervalo,
   formatarCarga,
   linhaDoGrafico,
   tendenciaEmPalavras,
@@ -162,8 +164,10 @@ export function GraficoDeCarga({
           </ul>
         </section>
       ) : (
+        // "Escolha", não "toque": o mesmo gráfico aparece na ficha do aluno no
+        // painel (M2-06), onde o personal está no computador com o mouse.
         <p className="text-center text-[12px] text-ink-5">
-          Toque num ponto para ver as séries daquele dia.
+          Escolha um ponto para ver as séries daquele dia.
         </p>
       )}
     </div>
@@ -194,6 +198,48 @@ function Datas({ pontos }: { pontos: { x: number; sessao: SessaoDoExercicio }[] 
             {dataCurta(pontos[indice].sessao.concluidaEm)}
           </span>
         ))}
+    </div>
+  );
+}
+
+/**
+ * O filtro 6 / 12 / Total.
+ *
+ * Vive junto do gráfico e é usado pelo app do aluno e pela ficha do aluno no
+ * painel: são o mesmo controle sobre os mesmos dados, e duas cópias divergiriam
+ * na primeira mudança de opção.
+ *
+ * 44px de altura porque no celular ele é tocado de pé, com o polegar.
+ */
+export function FiltroDeIntervalo({
+  valor,
+  aoEscolher,
+}: {
+  valor: Intervalo;
+  aoEscolher: (intervalo: Intervalo) => void;
+}) {
+  return (
+    <div
+      role="group"
+      aria-label="Intervalo do gráfico"
+      className="flex gap-1 rounded-input bg-canvas-sunken p-1"
+    >
+      {INTERVALOS.map((opcao) => (
+        <button
+          key={opcao.rotulo}
+          type="button"
+          aria-pressed={valor === opcao.sessoes}
+          onClick={() => aoEscolher(opcao.sessoes)}
+          className={cn(
+            "h-11 flex-1 rounded-[9px] text-[12.5px] font-bold transition",
+            valor === opcao.sessoes
+              ? "bg-surface text-ink shadow-sm"
+              : "text-ink-4 hover:text-ink-2",
+          )}
+        >
+          {opcao.rotulo}
+        </button>
+      ))}
     </div>
   );
 }

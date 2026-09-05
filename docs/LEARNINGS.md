@@ -145,3 +145,14 @@
   mostrar "0 dias seguidos" sozinho parece punição. O que resolve é a frase de convite ao
   lado do zero — e só enquanto o total também é zero, porque depois disso o zero é um fato
   que o usuário já sabe ler.
+- [2026-09-05] [seguranca] RLS não distingue dois recursos que o mesmo usuário pode ler.
+  O personal enxerga todos os alunos da carteira, então `/painel/alunos/<A>/sessoes/<sessão
+  do B>` passa pela policy — o que barra é o filtro por `student_id` dentro da consulta.
+  Em rota aninhada, o id do pai é uma **afirmação da URL**: reconferir que o filho pertence
+  a ele, sempre. Não é redundância com o RLS; é a única trava.
+- [2026-09-05] [ui] Componente compartilhado entre celular e desktop carrega o texto junto:
+  "Toque num ponto" veio do app do aluno e apareceu na tela do personal, que usa mouse.
+  Copy de componente reusado fala do **que acontece**, não do gesto.
+- [2026-09-05] [ui] SVG com `w-full` escala a altura junto: o mesmo gráfico que ocupa 150px
+  no celular passa de 480px numa tela de 1280. O limite é largura máxima no contêiner de
+  quem usa, nunca no componente — senão o gráfico do celular perde a borda a borda.

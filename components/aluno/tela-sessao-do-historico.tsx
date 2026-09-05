@@ -16,15 +16,26 @@ import type { ExercicioDoHistorico, SessaoDetalhada } from "@/lib/queries/histor
  * A tela é do tema **claro**: o escuro é da execução, onde o aluno está de pé
  * na academia. Aqui ele está lendo.
  */
-export function TelaSessaoDoHistorico({ sessao }: { sessao: SessaoDetalhada }) {
+export function TelaSessaoDoHistorico({
+  sessao,
+  voltarPara = { href: "/app/historico", rotulo: "Histórico" },
+}: {
+  sessao: SessaoDetalhada;
+  /**
+   * Para onde o "voltar" leva. O padrão é o histórico do aluno; a ficha do
+   * aluno no painel (M2-06) passa o caminho dela. É a única diferença entre as
+   * duas telas — o resto, incluindo os três estados da série, é o mesmo.
+   */
+  voltarPara?: { href: string; rotulo: string };
+}) {
   return (
     <div className="space-y-4">
       <header>
         <Link
-          href="/app/historico"
+          href={voltarPara.href}
           className="eyebrow text-ink-4 transition hover:text-ink-2"
         >
-          ← Histórico
+          ← {voltarPara.rotulo}
         </Link>
         <h1 className="mt-2 text-[20px] font-extrabold tracking-[-0.02em] text-ink">
           {sessao.treino

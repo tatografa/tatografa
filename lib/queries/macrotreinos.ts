@@ -121,3 +121,37 @@ export async function lerMacrotreino(id: string): Promise<MacrotreinoDoPersonal 
     aluno: data.students,
   };
 }
+
+/**
+ * O programa ativo de um aluno, para a ficha dele no painel.
+ *
+ * Um ativo por aluno é garantido pelo índice parcial da migration 0011; a
+ * ordenação fica como rede, igual à da home do aluno. Nulo = o aluno está sem
+ * treino, que é informação, não erro.
+ */
+export async function programaAtivoDoAluno(
+  alunoId: string,
+): Promise<Macrotreino | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("mesocycles")
+    .select("id, name, total_weeks, started_at, status, workouts(count)")
+    .eq("student_id", alunoId)
+    .eq("status", "ativo")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+
+  return {
+    id: data.id,
+    name: data.name,
+    total_weeks: data.total_weeks,
+    started_at: data.started_at,
+    status: data.status,
+    total_treinos: data.workouts[0]?.count ?? 0,
+  };
+}

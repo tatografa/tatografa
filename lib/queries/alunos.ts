@@ -1,5 +1,6 @@
 import "server-only";
 
+import { pareceUuid } from "@/lib/domain/id";
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
 
@@ -73,4 +74,42 @@ export async function listarConvitesPendentes(): Promise<ConvitePendente[]> {
 
   if (error) throw error;
   return data ?? [];
+}
+
+/** O aluno como a ficha do painel mostra. */
+export type AlunoDaFicha = Pick<
+  Tables<"students">,
+  | "id"
+  | "name"
+  | "email"
+  | "goal"
+  | "experience_level"
+  | "status"
+  | "created_at"
+  | "onboarded_at"
+>;
+
+/**
+ * Um aluno da carteira do personal.
+ *
+ * Devolve `null` tanto para id inexistente quanto para aluno de outro personal
+ * — mesma regra de `lerTreino` e `lerMacrotreino`: os dois casos são "não
+ * existe" para quem está olhando, e distinguir contaria a um estranho que
+ * aquele id existe. Quem barra é o RLS de `students`; a página vira 404.
+ */
+export async function lerAluno(id: string): Promise<AlunoDaFicha | null> {
+  if (!pareceUuid(id)) return null;
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("students")
+    .select(
+      "id, name, email, goal, experience_level, status, created_at, onboarded_at",
+    )
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
 }

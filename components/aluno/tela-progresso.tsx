@@ -7,7 +7,6 @@ import { useState } from "react";
 import { classesDeBotao } from "@/components/ui";
 import {
   dataCurta,
-  INTERVALOS,
   linhaDoGrafico,
   LIMITE_DE_SESSOES,
   recortarIntervalo,
@@ -19,7 +18,7 @@ import {
 import type { ExercicioComProgresso } from "@/lib/queries/progresso";
 import { cn } from "@/lib/utils";
 
-import { GraficoDeCarga } from "./grafico-de-carga";
+import { FiltroDeIntervalo, GraficoDeCarga } from "./grafico-de-carga";
 
 /** Quantas sessões o acordeão aberto mostra (doc 05). */
 const SESSOES_NA_PLANILHA = 3;
@@ -308,29 +307,7 @@ function Detalhe({
         </h2>
       </div>
 
-      <div
-        role="group"
-        aria-label="Intervalo do gráfico"
-        className="flex gap-1 rounded-input bg-canvas-sunken p-1"
-      >
-        {INTERVALOS.map((opcao) => (
-          <button
-            key={opcao.rotulo}
-            type="button"
-            aria-pressed={intervalo === opcao.sessoes}
-            onClick={() => setIntervalo(opcao.sessoes)}
-            className={cn(
-              // 44px: é filtro tocado de pé, com o polegar.
-              "h-11 flex-1 rounded-[9px] text-[12.5px] font-bold transition",
-              intervalo === opcao.sessoes
-                ? "bg-surface text-ink shadow-sm"
-                : "text-ink-4 hover:text-ink-2",
-            )}
-          >
-            {opcao.rotulo}
-          </button>
-        ))}
-      </div>
+      <FiltroDeIntervalo valor={intervalo} aoEscolher={setIntervalo} />
 
       <GraficoDeCarga nome={exercicio.nome} sessoes={recorte} />
 
