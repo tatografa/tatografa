@@ -17,6 +17,8 @@
 | Resumo da conclusão (componente puro) | `components/aluno/resumo-do-treino.tsx` |
 | Referência histórica e recordes (puro) | `lib/domain/recordes.ts` |
 | Leitura das séries anteriores | `lib/queries/recordes.ts` |
+| Evolução por exercício (puro) | `lib/domain/progresso.ts` |
+| Leitura do histórico agrupado | `lib/queries/progresso.ts` |
 
 ## O que fica gravado
 
@@ -206,6 +208,26 @@ Decisão do PM, registrada no `CLAUDE.md` e repetida aqui para não ser
 alvo"; aqui é a maior carga, ponto. Limite aceito: premia quem tira repetição
 para pôr peso. Mudar isso é mudar `cargaDeRecorde`, e só ela.
 
+## Evolução por exercício (M2-04)
+
+`progressoDoAluno` devolve o histórico inteiro já agrupado em **exercício →
+sessão → séries**, na ordem que a tela lê (mais recente primeiro). Quem for
+mostrar progresso no painel do personal (M2-06) reusa isto: a conta é a mesma, e
+duas implementações dariam dois números.
+
+- **O ponto da linha é a carga máxima da sessão** (doc 03, `exerciseProgress`),
+  não a média nem a última série. Empate de carga fica com as repetições
+  maiores, a mesma regra da pílula "última vez".
+- **O eixo do gráfico é cronológico** — mais antigo à esquerda —, ao contrário
+  das listas da tela, que são mais-recente-primeiro. Inverter o eixo inverteria
+  o significado de uma linha subindo.
+- **Teto de `LIMITE_DE_SESSOES` (60) por exercício.** A tela carrega tudo de uma
+  vez para não ir ao servidor a cada acordeão, e o teto limita o payload; quando
+  encosta nele, a tela avisa.
+- Série pulada e sessão em andamento ficam fora dos dois modos.
+- `textoDaSerie` formata a série uma vez só, para a planilha e para o painel do
+  ponto do gráfico.
+
 ## Segurança verificada (SQL, com dois personais e dois alunos)
 
 | Caso | Resultado |
@@ -219,6 +241,20 @@ para pôr peso. Mudar isso é mudar `cargaDeRecorde`, e só ela.
 | Personal lendo séries do próprio aluno | vê tudo |
 | Aluno fechando ou apagando sessão alheia | 0 linhas |
 | Aluno gravando série na própria sessão já fechada | permitido (é o que salva a série tardia) |
+
+### Leitura do progresso (M2-04), conferida com fixtures no projeto de dev
+
+Os dois alunos treinaram **o mesmo exercício do catálogo** de propósito: é o
+caso em que agrupar por identidade de exercício misturaria as duas curvas se o
+RLS não segurasse.
+
+| Caso | Resultado |
+|---|---|
+| Aluno lê o histórico **sem** filtro de `student_id` (cliente forjado) | só as séries dele |
+| Aluno Dois lendo tudo | só as dele; mesmo exercício, curvas separadas |
+| Personal alheio sobre o histórico do Aluno Um | 0 linhas |
+| Personal do próprio aluno | vê tudo (a policy não é restritiva demais — o M2-06 depende disso) |
+| Sessão em andamento no recorte do progresso | fora: a série de 200 kg aberta não entrou na curva |
 
 **Furo encontrado e corrigido aqui** (migration `0009`): `session_sets_write`
 exigia só `private.owns_session(session_id)` — conferia de quem era a sessão,

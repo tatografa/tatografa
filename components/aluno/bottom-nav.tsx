@@ -13,19 +13,41 @@ type Aba = {
 };
 
 /**
- * As quatro abas do doc 05. No M1 só "Treinar" tem para onde ir: Progresso,
- * Feed e Perfil aparecem para o aluno entender o mapa do app, mas sem `href` —
- * um link que leva a 404 é pior que um item visivelmente indisponível.
+ * As quatro abas do doc 05. Feed e Perfil ainda aparecem sem `href` — um link
+ * que leva a 404 é pior que um item visivelmente indisponível. Progresso ganhou
+ * destino no M2-04.
  */
 const ABAS: Aba[] = [
   { rotulo: "Treinar", href: "/app", Icone: Dumbbell },
-  { rotulo: "Progresso", Icone: TrendingUp },
+  { rotulo: "Progresso", href: "/app/progresso", Icone: TrendingUp },
   { rotulo: "Feed", Icone: Users },
   { rotulo: "Perfil", Icone: User },
 ];
 
+/**
+ * Qual aba acende: a de **prefixo mais longo** que casa com a rota.
+ *
+ * "Treinar" é `/app` e cobre todo o app do aluno, então `/app/progresso`
+ * também casa com ela — as duas acenderiam ao mesmo tempo. Ganha a mais
+ * específica. O prefixo termina em "/" de propósito: um `startsWith("/app")`
+ * cru acenderia a aba numa rota futura chamada `/apps`.
+ */
+function abaAtiva(caminho: string): string | null {
+  let escolhida: Aba | null = null;
+  for (const aba of ABAS) {
+    if (!aba.href) continue;
+    const casa = caminho === aba.href || caminho.startsWith(`${aba.href}/`);
+    if (!casa) continue;
+    if (!escolhida || aba.href.length > (escolhida.href?.length ?? 0)) {
+      escolhida = aba;
+    }
+  }
+  return escolhida?.rotulo ?? null;
+}
+
 export function BottomNav() {
   const caminho = usePathname();
+  const ativaAgora = abaAtiva(caminho);
 
   return (
     <nav
@@ -39,12 +61,7 @@ export function BottomNav() {
     >
       <ul className="mx-auto flex max-w-[440px] items-stretch">
         {ABAS.map(({ rotulo, href, Icone }) => {
-          // "Treinar" cobre todo o app do aluno, não só a home — mas o
-          // prefixo precisa terminar em "/": um `startsWith("/app")` cru
-          // acenderia a aba em qualquer rota futura começada por "app".
-          const ativa = href
-            ? caminho === href || caminho.startsWith(`${href}/`)
-            : false;
+          const ativa = rotulo === ativaAgora;
           const conteudo = (
             <>
               <Icone size={16} aria-hidden />

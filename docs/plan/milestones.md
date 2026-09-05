@@ -71,7 +71,7 @@ essencial, e o personal acompanha sem precisar perguntar nada ao aluno.
 | M2-01 | Macrotreino: gestão, rotação A/B/C/D e treino sugerido | senior | feito · checkpoint parcial |
 | M2-02 | Exercícios próprios do personal | pleno | feito |
 | M2-03 | Referência histórica na execução e recordes na conclusão | pleno | feito |
-| M2-04 | Progresso do aluno: planilha e gráfico | senior | a fazer |
+| M2-04 | Progresso do aluno: planilha e gráfico | senior | feito |
 | M2-05 | Home do aluno completa: streak, total, rotação | pleno | a fazer |
 | M2-06 | Perfil do aluno no painel | pleno | a fazer |
 | M2-07 | Dashboard do personal com alertas de inatividade | pleno | a fazer |
@@ -140,6 +140,28 @@ Não é erro — são duas perguntas diferentes ("como foi o dia?" e "com quanto
 começo esta série?") —, mas é a única incoerência visual que sobrou. Alternativa,
 se incomodar no piloto: a pílula passar a mostrar a mesma série ("Última vez
 nesta série: 50 kg × 10"). Fica como está até o Otávio ver na academia.
+
+### Leitura do M2-04: como o eixo do gráfico foi interpretado
+
+O doc 05 pede "mais recente primeiro" na tela de progresso, e isso vale para as
+**listas**: os exercícios saem pelo treinado mais recentemente, e o acordeão
+abre nas três sessões mais recentes. **O eixo do gráfico é o contrário: mais
+antigo à esquerda.** Uma linha do tempo invertida faria uma linha subindo
+significar carga caindo — exatamente o "mentir sobre a evolução do aluno" que o
+card avisa. Se o Otávio quiser o outro sentido, é uma linha em
+`linhaDoGrafico`.
+
+Dois limites declarados no card e aceitos aqui:
+
+- **Alvo de toque no gráfico.** As faixas clicáveis dividem a largura da tela
+  entre os pontos, então 44px por ponto é geometricamente impossível a partir de
+  nove sessões. Por isso o gráfico abre em **6 sessões** (faixas de 58×146px);
+  em "Total" com oito treinos a faixa cai para 44px, e continua encolhendo. Quem
+  troca o filtro escolhe isso sabendo.
+- **Teto de 60 sessões por exercício.** A tela carrega o histórico inteiro de
+  uma vez para o acordeão e o filtro não irem ao servidor, e sessenta sessões do
+  mesmo exercício são cinco meses treinando três vezes por semana. A tela avisa
+  quando encosta no teto.
 
 ### Ordem
 

@@ -120,3 +120,17 @@
   onde abriu, e admiti-la como marca anterior faria a sessão seguinte anunciar
   "recorde: 0 kg → 20 kg" → valor de fronteira que o formulário produz sozinho não vira
   linha de base de comparação.
+- [2026-09-05] [dataviz] Ordem de lista e ordem de eixo não são a mesma decisão. O doc pede
+  "mais recente primeiro" e isso é verdade para as listas; aplicar ao eixo do gráfico
+  inverteria o significado de uma linha subindo → num gráfico de evolução o eixo é sempre
+  cronológico, e a regra de ordenação da lista fica na lista.
+- [2026-09-05] [a11y] Alvo de toque de 44px em ponto de gráfico é promessa que a geometria
+  não cumpre: com doze pontos numa tela de 390px cabem 32px cada, e círculos grandes o
+  bastante se sobrepõem. → faixa vertical de altura inteira, uma por ponto, como **botão
+  HTML sobreposto** ao SVG: não se sobrepõe nunca, dá foco de teclado e nome acessível de
+  graça, e o filtro padrão (6 sessões) é escolhido para a faixa passar dos 44px.
+- [2026-09-05] [verificacao] O MCP do Supabase funciona neste ambiente mesmo com o host
+  bloqueado para o app: dá para criar fixture, impersonar `authenticated` com
+  `request.jwt.claims` e provar RLS de verdade. Prova de leitura só vale rodando a consulta
+  **sem** o filtro que a aplicação aplica — é o que um cliente forjado faz, e é o RLS que
+  tem que barrar. Limpar a fixture depois: o banco de dev estava vazio e volta a ficar.
