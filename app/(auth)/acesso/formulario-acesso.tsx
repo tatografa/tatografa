@@ -68,7 +68,13 @@ export function FormularioAcesso() {
       </div>
 
       <p className="text-center text-[13.5px] font-medium text-ink-3">
-        É personal trainer?{" "}
+        {/*
+          O aluno tem senha — ele a criou no onboarding. A frase anterior dizia
+          "É personal trainer?", o que manda o aluno embora justamente quando o
+          link mágico não chega (limite de e-mail do plano gratuito). Foi assim
+          que o primeiro teste de campo parou.
+        */}
+        Prefere a senha que você criou?{" "}
         <Link
           href="/entrar"
           className="font-semibold text-brand transition hover:text-brand-hover"

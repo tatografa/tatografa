@@ -21,11 +21,17 @@ export function FormularioLogin({
   return (
     <form action={acao} noValidate className="space-y-7">
       <header className="space-y-2">
+        {/*
+          Não é só do personal: o aluno define senha no onboarding, e esta é a
+          tela que a usa. Chamar de "entrar como personal" mandava o aluno
+          embora da única porta que funcionava sem esperar e-mail — foi o que
+          travou o primeiro teste de campo.
+        */}
         <h2 className="text-[25px] font-extrabold tracking-[-0.02em] text-ink">
-          Entrar como personal
+          Entrar com senha
         </h2>
         <p className="text-[14px] font-medium text-ink-3">
-          Use o e-mail cadastrado na sua conta.
+          Vale para personal e para aluno. Use o e-mail da sua conta.
         </p>
       </header>
 
