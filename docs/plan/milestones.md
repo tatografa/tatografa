@@ -239,11 +239,15 @@ Três correções entraram depois dela:
 
 ### O que o teste de campo achou (setembro/2026)
 
-Primeira vez que M1 e M2 rodaram com Supabase de verdade. **37 dos 51 passos
-bateram**, incluindo as Partes 4, 5 e 6 inteiras — execução série a série,
-referência da última vez, recorde e progresso funcionam com dado real. Os
-defeitos foram todos na **borda de autenticação**, que é justamente o que este
-ambiente nunca conseguiu exercitar:
+Primeira vez que M1 e M2 rodaram com Supabase de verdade. Ao fim de três
+rodadas, **47 dos 51 passos bateram** — o roteiro inteiro foi percorrido,
+incluindo o painel do personal e o caso do celular sem sinal. Execução série a
+série, referência da última vez, recorde, progresso e a coerência de números
+entre painel e app funcionam com dado real.
+
+Nenhum defeito encontrado estava na lógica de negócio, nas policies ou nos
+números. **Todos estavam nas bordas que este ambiente não alcança** —
+autenticação, troca de conta e estado de sessão:
 
 1. **O aluno não tinha como sair.** O botão existia só no painel, e o proxy
    devolve todo usuário logado que abre `/entrar`, `/cadastro` ou `/acesso` para
@@ -253,7 +257,16 @@ ambiente nunca conseguiu exercitar:
    confirmação caindo em `localhost` e o link mágico travado no limite de envio,
    sobrava a senha do onboarding — e a única frase que apontava para ela dizia
    "É personal trainer?". Corrigido.
-3. **Confirmação de e-mail continua sendo o gargalo do piloto.** O convite virou
+3. **A sessão em andamento era invisível.** O aluno registrou 6 séries, saiu sem
+   concluir, e a home não dizia nada — sessão sem `finished_at` não aparece no
+   histórico (é "agora", não passado), e só ao tentar começar outro treino é que
+   ele esbarrava nela. **Não houve perda de dado:** as 6 séries estavam no
+   banco. O defeito era não haver como vê-las. Corrigido com o card "Treino em
+   andamento" na home, que substitui o card de próximo treino.
+4. **O contador de séries pendentes era só um ícone.** No teste, o aluno viu
+   "um ícone de nuvem" e não soube o que era — justamente o aviso que torna
+   aceitável a fila viver no aparelho. Ganhou rótulo visível ("1 a enviar").
+5. **Confirmação de e-mail continua sendo o gargalo do piloto.** O convite virou
    link copiável em 2026-08-31 justamente por causa do limite de ~2 e-mails/hora,
    mas o `signUp` do aluno ainda dispara uma confirmação. Decisão pendente do
    Otávio: desligar a confirmação de e-mail no Supabase — o token do convite já

@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 import { classesDeBotao } from "@/components/ui";
+import { horaDaSessao, rotuloDoDia } from "@/lib/domain/historico";
 import { saudacao } from "@/lib/domain/treino";
+import type { SessaoAberta } from "@/lib/queries/execucao";
 import type {
   IndicadoresDoAluno,
   MacrotreinoDoAluno,
@@ -19,6 +21,12 @@ export type TelaHomeProps = {
   /** O treino sugerido pela rotação; nulo quando não há nada montado. */
   proximo: TreinoDaAgenda | null;
   indicadores: IndicadoresDoAluno;
+  /**
+   * O treino que ficou aberto, se houver. Sem isto a home não dizia nada sobre
+   * ele, e o aluno só descobria ao tentar começar outro — com as séries já
+   * registradas presas numa sessão invisível.
+   */
+  sessaoAberta: SessaoAberta | null;
 };
 
 /**
@@ -39,6 +47,7 @@ export function TelaHome({
   totalDeTreinos,
   proximo,
   indicadores,
+  sessaoAberta,
 }: TelaHomeProps) {
   return (
     <div className="space-y-4">
@@ -60,7 +69,9 @@ export function TelaHome({
         />
       ) : null}
 
-      {proximo ? (
+      {sessaoAberta ? (
+        <EmAndamento sessao={sessaoAberta} />
+      ) : proximo ? (
         <section className="rounded-card-lg border-[1.5px] border-brand bg-surface p-4.5">
           <p className="eyebrow text-brand">Seu próximo treino</p>
           <h2 className="mt-2 text-[19px] font-extrabold tracking-[-0.01em] text-ink">
@@ -116,6 +127,53 @@ export function TelaHome({
         Ver histórico
       </Link>
     </div>
+  );
+}
+
+/**
+ * O treino que ficou aberto.
+ *
+ * Ele **substitui** o card de próximo treino em vez de conviver com ele: com os
+ * dois na tela, e ainda por cima podendo ser o mesmo treino, a home passaria a
+ * fazer duas propostas ao mesmo tempo. Quem tem treino aberto tem uma próxima
+ * ação só — voltar para ele.
+ *
+ * Sem este card, a sessão aberta era invisível: o aluno só esbarrava nela ao
+ * tentar começar outro treino, e as séries já registradas ficavam num lugar que
+ * o histórico não mostra (sessão sem `finished_at` não é histórico, é agora).
+ * Achado do teste de campo — o dado estava salvo, e ninguém conseguia vê-lo.
+ */
+function EmAndamento({ sessao }: { sessao: SessaoAberta }) {
+  const series = sessao.series_registradas;
+
+  return (
+    <section className="rounded-card-lg border-[1.5px] border-brand bg-brand-soft p-4.5">
+      <p className="eyebrow text-brand">Treino em andamento</p>
+      <h2 className="mt-2 text-[19px] font-extrabold tracking-[-0.01em] text-ink">
+        {sessao.treino
+          ? `Treino ${sessao.treino.label} · ${sessao.treino.name}`
+          : "Treino removido"}
+      </h2>
+      <p className="mt-1 text-[13px] text-ink-3">
+        Começado {rotuloDoDia(sessao.started_at).toLowerCase()} às{" "}
+        {horaDaSessao(sessao.started_at)}
+        {series > 0
+          ? ` · ${series} ${series === 1 ? "série registrada" : "séries registradas"}`
+          : ""}
+      </p>
+
+      <Link
+        href={`/app/executar/${sessao.workout_id}`}
+        className={classesDeBotao({ size: "lg", block: true, className: "mt-4" })}
+      >
+        Voltar para o treino
+      </Link>
+
+      <p className="mt-3 text-center text-[12px] leading-relaxed text-ink-4">
+        Enquanto ele estiver aberto, não entra no histórico. Conclua por lá para
+        guardar.
+      </p>
+    </section>
   );
 }
 

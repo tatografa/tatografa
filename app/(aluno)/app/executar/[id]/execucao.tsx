@@ -515,10 +515,13 @@ function SeriesPendentes({ quantidade }: { quantidade: number }) {
       className="flex shrink-0 items-center gap-1.5 rounded-full bg-dark-elev px-2.5 py-1.5 text-[11px] font-bold text-dark-text-2"
     >
       <CloudOff aria-hidden size={13} />
-      {quantidade}
-      <span className="sr-only">
-        {quantidade === 1 ? "série a enviar" : "séries a enviar"}
-      </span>
+      {/*
+        O rótulo é visível, não só `sr-only`: no teste de campo o aluno viu "um
+        ícone de nuvem" e não soube o que era. Ícone sozinho não diz que há
+        coisa pendente de envio — e é justamente esse aviso que torna aceitável
+        a fila viver no aparelho.
+      */}
+      {quantidade} a enviar
     </p>
   );
 }

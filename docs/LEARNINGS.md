@@ -190,3 +190,12 @@
   alcançou. Nenhum apareceu em revisão de código, prova por SQL ou screenshot com props
   fixas: todos os três só existem quando há um usuário logado querendo virar outro.
   O que o ambiente não alcança é onde o defeito mora.
+- [2026-09-11] [ux] **Dado salvo que ninguém consegue ver é indistinguível de dado
+  perdido.** A sessão em andamento tinha as 6 séries no banco, e o teste de campo a
+  reportou como "não ficou salva" — porque o histórico exclui sessão sem `finished_at`
+  (correto) e nenhuma tela dizia que ela existia. Todo estado que o app guarda fora do
+  caminho principal precisa de uma porta de volta visível na tela inicial.
+- [2026-09-11] [ux] Ícone sem rótulo não comunica estado. O contador de séries pendentes
+  era `<CloudOff/>` mais um número, com o texto só em `sr-only`: o usuário viu "um ícone de
+  nuvem". Era justamente o aviso que torna aceitável a fila viver no aparelho — e ele
+  dependia de o usuário adivinhar o significado do desenho.
