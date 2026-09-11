@@ -13,15 +13,18 @@ type Aba = {
 };
 
 /**
- * As quatro abas do doc 05. Feed e Perfil ainda aparecem sem `href` — um link
- * que leva a 404 é pior que um item visivelmente indisponível. Progresso ganhou
- * destino no M2-04.
+ * As quatro abas do doc 05. Feed ainda aparece sem `href` — um link que leva a
+ * 404 é pior que um item visivelmente indisponível.
+ *
+ * Perfil ganhou destino porque é onde mora o **sair**, e sem ele a conta de
+ * aluno não tinha saída: o proxy devolve para `/app` quem tenta abrir uma tela
+ * de entrada já logado. Achado do primeiro teste de campo.
  */
 const ABAS: Aba[] = [
   { rotulo: "Treinar", href: "/app", Icone: Dumbbell },
   { rotulo: "Progresso", href: "/app/progresso", Icone: TrendingUp },
   { rotulo: "Feed", Icone: Users },
-  { rotulo: "Perfil", Icone: User },
+  { rotulo: "Perfil", href: "/app/perfil", Icone: User },
 ];
 
 /**

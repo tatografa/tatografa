@@ -180,3 +180,13 @@
   porque avaliou a consulta pelo que ela era antes e não pelo que passou a alimentar.
   Achado de revisor é hipótese: confirmar no código e reproduzir antes de aceitar **e**
   antes de descartar.
+- [2026-09-11] [auth] **Redirecionar quem já está logado para longe das telas de entrada
+  fecha a única saída** quando a área de destino não tem botão de sair. O app do aluno
+  ficou dez cards sem `sair`, e ninguém percebeu porque em desenvolvimento se limpa cookie
+  sem pensar. Toda área autenticada precisa da porta de saída **dentro** dela — e num
+  produto usado em celular emprestado isso é requisito, não conforto.
+- [2026-09-11] [verificacao] O primeiro teste com sessão real achou três defeitos, e os
+  três estavam na **borda de autenticação** — exatamente o que o ambiente remoto nunca
+  alcançou. Nenhum apareceu em revisão de código, prova por SQL ou screenshot com props
+  fixas: todos os três só existem quando há um usuário logado querendo virar outro.
+  O que o ambiente não alcança é onde o defeito mora.

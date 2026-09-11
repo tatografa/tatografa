@@ -1,9 +1,8 @@
 import Link from "next/link";
 
 import { Logo } from "@/components/logo";
+import { BotaoSair } from "@/components/botao-sair";
 import { requireTrainer } from "@/lib/auth/session";
-
-import { BotaoSair } from "./botao-sair";
 
 /**
  * Moldura do painel do personal (desktop).

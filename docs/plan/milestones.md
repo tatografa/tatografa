@@ -237,6 +237,28 @@ Três correções entraram depois dela:
    deixou de ser cosmética no M2-07, porque o `total_treinos` do programa ativo
    virou o denominador da aderência. Programa perdido = aluno fora da média.
 
+### O que o teste de campo achou (setembro/2026)
+
+Primeira vez que M1 e M2 rodaram com Supabase de verdade. **37 dos 51 passos
+bateram**, incluindo as Partes 4, 5 e 6 inteiras — execução série a série,
+referência da última vez, recorde e progresso funcionam com dado real. Os
+defeitos foram todos na **borda de autenticação**, que é justamente o que este
+ambiente nunca conseguiu exercitar:
+
+1. **O aluno não tinha como sair.** O botão existia só no painel, e o proxy
+   devolve todo usuário logado que abre `/entrar`, `/cadastro` ou `/acesso` para
+   a própria área. Conta de aluno virava armadilha: trocar de conta exigia
+   limpar cookies. Corrigido com `/app/perfil` e a aba Perfil ligada.
+2. **O texto expulsava o aluno da porta que funcionava.** Com o e-mail de
+   confirmação caindo em `localhost` e o link mágico travado no limite de envio,
+   sobrava a senha do onboarding — e a única frase que apontava para ela dizia
+   "É personal trainer?". Corrigido.
+3. **Confirmação de e-mail continua sendo o gargalo do piloto.** O convite virou
+   link copiável em 2026-08-31 justamente por causa do limite de ~2 e-mails/hora,
+   mas o `signUp` do aluno ainda dispara uma confirmação. Decisão pendente do
+   Otávio: desligar a confirmação de e-mail no Supabase — o token do convite já
+   prova o canal.
+
 ### Estado do M2
 
 Os sete cards estão feitos e a revisão consolidada passou. **Falta uma coisa
