@@ -316,7 +316,7 @@ suposição.
 
 | Card | Escopo | Etiqueta | Status |
 |---|---|---|---|
-| M4-01 | PWA: instalar, funcionar sem sinal, alarme de descanso | senior | a fazer |
+| M4-01 | PWA: instalar, funcionar sem sinal, alarme de descanso | senior | feito · checkpoint aprovado |
 | M4-02 | E-mails transacionais (convite, recuperação, link mágico) | pleno | **bloqueado** |
 | M4-03 | Erros, estados vazios e de carregamento | pleno | a fazer |
 | M4-04 | Acessibilidade: teclado, leitor de tela, contraste | pleno | a fazer |
@@ -329,6 +329,28 @@ suposição.
   toque `/app` ou `/painel`.
 - **M4-02** — depende de provedor e domínio, e o token do convite passa a viajar por
   e-mail.
+
+### Checkpoint do M4-01 — aprovado
+
+A estratégia escolhida é a conservadora que o card autorizava: **nenhuma
+resposta de navegação entra no cache**. Só o build estático do Next (nome com
+hash), ícones, `logo.svg` e `/offline`, que é pública.
+
+Verificado contra o build de produção, com o worker ativo e navegação por quatro
+rotas: **20 entradas no cache, e a única página é `/offline`**. Sem rede, a
+navegação cai nela em vez de no erro do navegador. Contrato e prova em
+`docs/handoffs/pwa.md`.
+
+**Duas premissas do card caíram na implementação**, e estão registradas no
+handoff:
+
+1. **Migrar a fila para IndexedDB não resolveria o limite declarado.** "Limpar
+   dados de navegação" apaga `localStorage` e IndexedDB juntos — mesmo gesto,
+   mesmo lugar. O que ajuda é `navigator.storage.persist()` (aplicado), contra o
+   descarte automático por pressão de disco. A fila continua em `localStorage`.
+2. **O Next 16 tem `experimental.useOffline`** — detecção de conexão e reenvio
+   automático de navegação e Server Action. Ligado, e **não** substitui a fila:
+   confirmar série tem que ser local e imediato.
 
 ### Bloqueios que dependem do Otávio
 

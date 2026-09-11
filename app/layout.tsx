@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 
+import { RegistraServiceWorker } from "@/components/registra-service-worker";
+
 import "./globals.css";
 
 // Inter é a família de UI. JetBrains Mono só aparece em eyebrow, label de
@@ -24,6 +26,15 @@ export const metadata: Metadata = {
   },
   description:
     "Personal trainers montam os treinos. Alunos executam e registram carga e repetições, série por série.",
+  // O iOS não lê o manifest: ícone e nome da tela inicial saem daqui.
+  appleWebApp: {
+    capable: true,
+    title: "Reps Club",
+    statusBarStyle: "black-translucent",
+  },
+  icons: {
+    apple: "/apple-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
@@ -38,7 +49,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR" className={`${inter.variable} ${jetbrainsMono.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        {children}
+        <RegistraServiceWorker />
+      </body>
     </html>
   );
 }

@@ -1,3 +1,4 @@
+import { AvisoDeOffline } from "@/components/aluno/aviso-de-offline";
 import { BottomNav } from "@/components/aluno/bottom-nav";
 import { requireStudent } from "@/lib/auth/session";
 
@@ -17,6 +18,7 @@ export default async function AlunoLayout({
 
   return (
     <div className="min-h-dvh bg-canvas">
+      <AvisoDeOffline />
       {/*
        * O padding de baixo reserva a altura da bottom nav (64px) mais a área
        * segura do aparelho: sem isso o último card fica embaixo da barra em

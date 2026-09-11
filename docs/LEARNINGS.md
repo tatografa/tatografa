@@ -228,3 +228,14 @@ Três consequências para os próximos milestones:
 3. **Deploy contínuo mudou o custo do teste.** Com a Vercel conectada, validar deixou de
    ser um evento e passou a ser o caminho normal — não vale mais empilhar milestones sem
    passar por lá.
+
+- [2026-09-11] [pwa] **Service worker é superfície de vazamento que o RLS não cobre.** O
+  banco protege a API; o cache do navegador é do aparelho, não da pessoa. Num produto onde
+  o celular é emprestado, uma resposta de navegação cacheada mostra o treino de um aluno
+  para o outro — e basta um `cache.put` sem conferir o `mode` da requisição. A prova é
+  contar o que ficou no cache depois de navegar, não ler o código.
+- [2026-09-11] [armazenamento] `localStorage` e IndexedDB são apagados pelo **mesmo**
+  gesto do usuário ("limpar dados de navegação"). Migrar de um para o outro para
+  "sobreviver à limpeza" é trabalho que não entrega nada. O que existe de verdade é
+  `navigator.storage.persist()`, e ele só protege do descarte automático por pressão de
+  disco.

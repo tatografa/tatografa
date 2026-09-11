@@ -23,6 +23,7 @@ import {
 import { textoDaUltimaVez, type UltimaVez } from "@/lib/domain/recordes";
 import { comoRelogio } from "@/lib/domain/treino";
 import type { ExercicioPrescrito, TreinoCompleto } from "@/lib/queries/treinos";
+import { agendarAlarmeDeDescanso } from "@/lib/alarme-de-descanso";
 import { useMontado } from "@/lib/usar-montado";
 import { cn } from "@/lib/utils";
 
@@ -153,6 +154,9 @@ function ExecucaoMontada({
       // número, não acabou de levantar.
       if (iniciarDescanso && descanso > 0) {
         setDescansoAte(Date.now() + descanso * 1000);
+        // O alarme é extra: quem manda no número da tela continua sendo o
+        // timestamp acima. Serve para quem guardou o celular no bolso.
+        agendarAlarmeDeDescanso(descanso);
       }
     },
     [fila],
