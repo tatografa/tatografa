@@ -30,6 +30,11 @@ export function Dialog({
   className,
 }: DialogProps) {
   const ref = React.useRef<HTMLDialogElement>(null);
+  // Id gerado, não fixo: dois diálogos montados ao mesmo tempo repetiriam
+  // `id="dialog-titulo"` e o leitor de tela leria o título do outro.
+  const idBase = React.useId();
+  const tituloId = `${idBase}-titulo`;
+  const descricaoId = `${idBase}-descricao`;
 
   React.useEffect(() => {
     const dialog = ref.current;
@@ -55,18 +60,22 @@ export function Dialog({
         "backdrop:bg-ink/50 backdrop:backdrop-blur-[2px]",
         className,
       )}
-      aria-labelledby="dialog-titulo"
+      aria-labelledby={tituloId}
+      aria-describedby={descricao ? descricaoId : undefined}
     >
       <div className="p-6">
         <header className="mb-5 space-y-1.5">
           <h2
-            id="dialog-titulo"
+            id={tituloId}
             className="text-[19px] font-extrabold tracking-[-0.02em] text-ink"
           >
             {titulo}
           </h2>
           {descricao && (
-            <p className="text-[13.5px] font-medium leading-[1.5] text-ink-3">
+            <p
+              id={descricaoId}
+              className="text-[13.5px] font-medium leading-[1.5] text-ink-3"
+            >
               {descricao}
             </p>
           )}

@@ -56,7 +56,7 @@ export default async function EditarProgramaPage({
       {salvo === "1" && (
         <p
           role="status"
-          className="max-w-xl rounded-card border border-success/30 bg-success/10 px-4 py-3 text-[13.5px] font-semibold text-success-dark"
+          className="max-w-xl rounded-card border border-success/30 bg-success-soft px-4 py-3 text-[13.5px] font-semibold text-success-dark"
         >
           Programa salvo.
         </p>

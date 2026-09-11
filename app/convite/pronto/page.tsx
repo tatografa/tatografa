@@ -26,7 +26,7 @@ export default async function ProntoPage() {
         <h1 className="text-[28px] font-extrabold tracking-[-0.02em] text-dark-text">
           Tudo pronto, {primeiroNome}!
         </h1>
-        <p className="mx-auto max-w-[260px] text-[15px] leading-[1.6] text-ink-5">
+        <p className="mx-auto max-w-[260px] text-[15px] leading-[1.6] text-dark-muted">
           Sua conta está pronta e conectada à{" "}
           <strong className="font-bold text-dark-text-2">{personal.name}</strong>
           .

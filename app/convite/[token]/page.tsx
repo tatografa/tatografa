@@ -94,7 +94,7 @@ function Aviso({
         <h1 className="text-[28px] font-extrabold tracking-[-0.02em] text-dark-text">
           {titulo}
         </h1>
-        <p className="mx-auto max-w-[280px] text-[15px] leading-[1.6] text-ink-5">
+        <p className="mx-auto max-w-[280px] text-[15px] leading-[1.6] text-dark-muted">
           {texto}
         </p>
       </div>

@@ -242,7 +242,7 @@ function ExecucaoMontada({
           <h1 className="mt-4 text-[26px] leading-tight font-extrabold tracking-[-0.02em] text-dark-text">
             {exercicio.exercicio.name}
           </h1>
-          <p className="mt-1 text-[13px] text-ink-4">
+          <p className="mt-1 text-[13px] text-dark-muted">
             {exercicio.sets} séries · {exercicio.reps_target} reps ·{" "}
             {exercicio.rest_seconds}s descanso
           </p>
@@ -250,7 +250,7 @@ function ExecucaoMontada({
           <UltimaVezDoExercicio ultima={referencia[exercicio.id]} />
 
           {exercicio.technique ? (
-            <p className="mt-2.5 inline-block rounded-[8px] border border-dark-border px-2.5 py-1.5 text-[11px] font-medium text-ink-5">
+            <p className="mt-2.5 inline-block rounded-[8px] border border-dark-border px-2.5 py-1.5 text-[11px] font-medium text-dark-muted">
               {exercicio.technique}
             </p>
           ) : null}
@@ -351,7 +351,7 @@ function ExecucaoMontada({
           {fila.aviso ? (
             <p
               role="alert"
-              className="mt-4 rounded-card border border-brand bg-brand-tint p-3 text-[13px] leading-relaxed text-dark-text"
+              className="mt-4 rounded-card border border-brand-on-dark bg-brand-tint p-3 text-[13px] leading-relaxed text-dark-text"
             >
               {fila.aviso}
             </p>
@@ -430,8 +430,8 @@ function UltimaVezDoExercicio({ ultima }: { ultima: UltimaVez | undefined }) {
 
   return (
     <p className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-dark-surface px-3 py-1.5 text-[12px] font-semibold text-dark-text-2">
-      <History aria-hidden size={13} className="text-ink-4" />
-      <span className="text-ink-4">Última vez:</span> {texto}
+      <History aria-hidden size={13} className="text-dark-muted" />
+      <span className="text-dark-muted">Última vez:</span> {texto}
     </p>
   );
 }
@@ -467,7 +467,7 @@ function Cabecalho({
             <p className="eyebrow text-[12px] text-dark-text">
               Treino {treino.label}
             </p>
-            <p className="mt-0.5 truncate font-mono text-[10px] font-medium tracking-[0.08em] text-ink-4 uppercase">
+            <p className="mt-0.5 truncate font-mono text-[10px] font-medium tracking-[0.08em] text-dark-muted uppercase">
               {treino.name}
             </p>
           </div>
@@ -489,7 +489,7 @@ function Cabecalho({
           />
         </div>
 
-        <div className="mt-2 flex items-baseline justify-between font-mono text-[10px] tracking-[0.08em] text-ink-4 uppercase">
+        <div className="mt-2 flex items-baseline justify-between font-mono text-[10px] tracking-[0.08em] text-dark-muted uppercase">
           <span>
             Exercício {indice + 1} de {treino.exercicios.length}
           </span>
@@ -588,9 +588,9 @@ function SerieAtiva({
        * de 44px, `gap-2` e `px-3` estouravam os 390px de um celular comum e a
        * linha vazava para fora do cartão.
        */
-      className="grid grid-cols-[18px_1fr_1fr_48px] items-center gap-1 rounded-card-lg border-[1.5px] border-brand bg-brand-tint px-2 py-3.5"
+      className="grid grid-cols-[18px_1fr_1fr_48px] items-center gap-1 rounded-card-lg border-[1.5px] border-brand-on-dark bg-brand-tint px-2 py-3.5"
     >
-      <span className="font-mono text-[13px] font-bold text-brand">
+      <span className="font-mono text-[13px] font-bold text-brand-on-dark">
         {numero}
       </span>
 
@@ -628,7 +628,7 @@ function SerieAtiva({
             type="button"
             onClick={aoCancelar}
             aria-label={`Cancelar correção da série ${numero}`}
-            className="flex size-9 items-center justify-center rounded-full text-ink-4"
+            className="flex size-9 items-center justify-center rounded-full text-dark-muted"
           >
             <X aria-hidden size={16} />
           </button>
@@ -713,7 +713,7 @@ function SerieRegistrada({
         {serie.reps === null ? "—" : serie.reps}
       </span>
       <span className="justify-self-end flex items-center gap-1">
-        <Pencil aria-hidden size={12} className="text-ink-4" />
+        <Pencil aria-hidden size={12} className="text-dark-muted" />
         <span
           aria-hidden
           className={cn(

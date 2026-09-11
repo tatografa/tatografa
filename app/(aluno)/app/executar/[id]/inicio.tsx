@@ -1,4 +1,3 @@
-import Link from "next/link";
 
 import { HoraLocal } from "@/components/aluno/hora-local";
 import type { SessaoAberta } from "@/lib/queries/execucao";
@@ -6,6 +5,7 @@ import type { TreinoCompleto } from "@/lib/queries/treinos";
 
 import { iniciarTreino } from "../actions";
 import { ResolucaoDaSessaoPendente } from "./resolucao-pendente";
+import { LinkDeVoltar } from "@/components/aluno/link-de-voltar";
 
 /**
  * Telas de entrada da execução. São componentes de servidor com formulário:
@@ -77,7 +77,7 @@ export function TelaSessaoPendente({
         treinoLabel={treino.label}
       />
 
-      <p className="mt-3 text-[13px] text-ink-4">
+      <p className="mt-3 text-[13px] text-dark-muted">
         Começou às <HoraLocal iso={pendente.started_at} />.
       </p>
     </Moldura>
@@ -98,14 +98,11 @@ function Moldura({
   return (
     <div className="fixed inset-0 z-40 overflow-y-auto bg-dark-bg text-dark-text">
       <div className="mx-auto max-w-[440px] px-5 pt-[calc(20px+env(safe-area-inset-top))] pb-10">
-        <Link
-          href={voltarPara}
-          className="eyebrow text-ink-4 transition hover:text-dark-text-2"
-        >
+        <LinkDeVoltar href={voltarPara} tom="escuro">
           ← Voltar
-        </Link>
+        </LinkDeVoltar>
 
-        <p className="eyebrow mt-6 text-[10px] text-brand">{eyebrow}</p>
+        <p className="eyebrow mt-6 text-[10px] text-brand-on-dark">{eyebrow}</p>
         <h1 className="mt-2 text-[26px] leading-tight font-extrabold tracking-[-0.02em] text-dark-text">
           {titulo}
         </h1>

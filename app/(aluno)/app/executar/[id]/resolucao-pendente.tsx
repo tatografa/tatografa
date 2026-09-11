@@ -130,7 +130,7 @@ function Resolucao({
         )}
       </div>
 
-      <p className="mt-4 text-[12px] leading-relaxed text-ink-4">
+      <p className="mt-4 text-[12px] leading-relaxed text-dark-muted">
         {guardadas.length
           ? "Nada é encerrado enquanto houver série guardada neste aparelho."
           : seriesNoServidor > 0
@@ -169,7 +169,7 @@ function SeriesGuardadas({
           ? "série guardada neste aparelho"
           : "séries guardadas neste aparelho"}
       </p>
-      <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-4">
+      <p className="mt-1.5 text-[12.5px] leading-relaxed text-dark-muted">
         {enviando
           ? "Enviando para o servidor…"
           : "Elas ainda não chegaram ao servidor. Este treino não pode ser encerrado antes disso."}

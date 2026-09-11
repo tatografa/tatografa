@@ -25,11 +25,11 @@ export function CardMacrotreino({
 
   return (
     <section className="rounded-card-lg bg-dark-bg px-4.5 py-4">
-      <p className="eyebrow text-ink-4">Macrotreino ativo</p>
+      <p className="eyebrow text-dark-muted">Macrotreino ativo</p>
       <h2 className="mt-2 text-[19px] font-extrabold tracking-[-0.01em] text-dark-text">
         {nome}
       </h2>
-      <p className="mt-1 text-[12px] text-ink-5">
+      <p className="mt-1 text-[12px] text-dark-muted">
         Semana {semana} de {totalDeSemanas} · {nomeDoPersonal}
       </p>
 

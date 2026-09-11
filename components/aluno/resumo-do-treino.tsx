@@ -52,7 +52,7 @@ export function ResumoDoTreino({
           <h1 className="mt-5 text-[30px] leading-tight font-extrabold tracking-[-0.02em] text-dark-text">
             Treino concluído
           </h1>
-          <p className="mt-1.5 text-[14px] text-ink-4">
+          <p className="mt-1.5 text-[14px] text-dark-muted">
             Treino {label} · {nome}
           </p>
 
@@ -72,9 +72,9 @@ export function ResumoDoTreino({
               aria-label={
                 recordes.length === 1 ? "Recorde pessoal" : "Recordes pessoais"
               }
-              className="mt-4 rounded-card-lg border border-brand bg-brand-tint p-4"
+              className="mt-4 rounded-card-lg border border-brand-on-dark bg-brand-tint p-4"
             >
-              <p className="eyebrow flex items-center gap-1.5 text-[10px] text-brand">
+              <p className="eyebrow flex items-center gap-1.5 text-[10px] text-brand-on-dark">
                 <Medal aria-hidden size={14} />
                 {recordes.length === 1 ? "Recorde pessoal" : "Recordes pessoais"}
               </p>
@@ -88,7 +88,7 @@ export function ResumoDoTreino({
                     <p className="text-[13px] font-semibold text-dark-text-2 tabular-nums">
                       {textoDoRecorde(recorde)}
                       {recorde.reps === null ? null : (
-                        <span className="text-ink-4"> · {recorde.reps} reps</span>
+                        <span className="text-dark-muted"> · {recorde.reps} reps</span>
                       )}
                     </p>
                   </li>
@@ -98,7 +98,7 @@ export function ResumoDoTreino({
           ) : null}
 
           {volume === 0 && realizadas.length > 0 ? (
-            <p className="mt-3 text-[12px] leading-relaxed text-ink-4">
+            <p className="mt-3 text-[12px] leading-relaxed text-dark-muted">
               Exercício de peso corporal não entra no volume — somar repetições
               a quilos daria um número sem significado.
             </p>
@@ -120,7 +120,7 @@ export function ResumoDoTreino({
           */}
           <Link
             href="/app/historico"
-            className="block text-center text-[13px] font-semibold text-ink-4 transition hover:text-dark-text"
+            className="block text-center text-[13px] font-semibold text-dark-muted transition hover:text-dark-text"
           >
             Ver histórico
           </Link>
@@ -136,7 +136,7 @@ function Metrica({ valor, rotulo }: { valor: string; rotulo: string }) {
       <p className="text-[22px] font-extrabold tracking-[-0.01em] text-dark-text">
         {valor}
       </p>
-      <p className="eyebrow mt-1.5 text-[9px] text-ink-4">{rotulo}</p>
+      <p className="eyebrow mt-1.5 text-[9px] text-dark-muted">{rotulo}</p>
     </div>
   );
 }

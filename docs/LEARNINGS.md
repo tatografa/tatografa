@@ -262,3 +262,28 @@ Três consequências para os próximos milestones:
   e eu conferi um build velho. `ss -ltn` não mostrou o processo; `ps aux | grep
   next-server` mostrou. Antes de confiar num teste de navegador: conferir em que porta o
   servidor subiu, e que ele é o que acabou de subir.
+- [2026-09-11] [design-system] **Uma cor de marca não serve aos dois temas.** `#ff2a2a`
+  reprova como texto sobre branco (3.74) e o escurecido reprova como texto sobre preto
+  (3.68). Não existe valor único que passe nos dois — a saída é dois tokens com papéis
+  declarados (`brand` e `brand-on-dark`), não uma cor tentando ter duas opiniões. O mesmo
+  raciocínio vale para o cinza secundário: `ink-*` é da área clara, `dark-muted` é da
+  escura, e misturar foi o que criou metade dos defeitos deste card.
+- [2026-09-11] [design-system] **`bg-X/15 text-X` reprova sempre.** A cor diluída em cima
+  de si mesma escurece o fundo na mesma medida em que a cor já é escura, e o par estaciona
+  em ~4.1 — para verde, vermelho e âmbar igualmente. Fundo claro de selo precisa ser token
+  próprio (`brand-soft`, `success-soft`), nunca transparência da mesma cor.
+- [2026-09-11] [acessibilidade] **O axe não enxerga contraste sobre fundo transparente.**
+  Ele não resolve a cor através do elemento pai e classifica como "incompleto", que não
+  aparece na contagem de violações. Foi assim que `#4a4a4a` sobre preto (2.23) passou
+  batido numa auditoria "limpa". A conta de contraste feita token a token, fora do
+  navegador, pega o que o axe cala — e as duas juntas custam pouco.
+- [2026-09-11] [acessibilidade] **Auditoria automática não mede alvo de toque nem foco em
+  fluxo.** Zero violações de axe e ainda assim havia link de 14px de altura no app usado
+  de pé na academia. Medir `getBoundingClientRect()` de todo controle e percorrer a tela
+  com Tab lendo o `outline` computado são cinco linhas cada, e acham o que a regra não
+  cobre.
+- [2026-09-11] [verificacao] **Ler estilo computado logo depois de focar mede a transição,
+  não o estado.** Concluí que o foco era invisível nos campos de formulário porque li
+  `borderColor` no mesmo instante do `focus()` — com `transition` na classe, o valor ainda
+  era o antigo. Esperar a transição mostrou borda vermelha e halo, corretos desde sempre.
+  Quase "consertei" o que não estava quebrado: com animação no elemento, medir depois.

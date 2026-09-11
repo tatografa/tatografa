@@ -5,6 +5,7 @@ import type { SessaoDoHistorico } from "@/lib/queries/historico";
 import { LIMITE_DO_HISTORICO } from "@/lib/queries/historico";
 
 import { CardDeSessao } from "./card-de-sessao";
+import { LinkDeVoltar } from "@/components/aluno/link-de-voltar";
 
 /**
  * Lista do histórico (card M1-06). Recebe as sessões prontas, sem banco — é o
@@ -15,12 +16,9 @@ export function TelaHistorico({ sessoes }: { sessoes: SessaoDoHistorico[] }) {
   return (
     <div className="space-y-4">
       <header>
-        <Link
-          href="/app/treinos"
-          className="eyebrow text-ink-4 transition hover:text-ink-2"
-        >
+        <LinkDeVoltar href="/app/treinos">
           ← Treinos
-        </Link>
+        </LinkDeVoltar>
         <h1 className="mt-2 text-[21px] font-extrabold tracking-[-0.02em] text-ink">
           Histórico
         </h1>

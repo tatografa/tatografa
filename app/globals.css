@@ -10,18 +10,43 @@
  */
 @theme {
   /* ---- Marca e ação ---------------------------------------------------- */
-  /* O painel e a landing usavam #F23030 nos protótipos. Unificado em #FF2A2A. */
-  --color-brand: #ff2a2a;
-  --color-brand-hover: #c92323;
+  /*
+   * O vermelho da marca nasceu #FF2A2A (protótipos unificaram #F23030 nele).
+   * Ele **reprova em AA**: texto branco em cima dá 3.73, e como texto sobre
+   * branco dá 3.74 — e nenhum tamanho de botão deste app chega a "texto
+   * grande", que é o único jeito de 3.73 passar. Por isso a cor de ação
+   * escureceu para #CF2222 (branco em cima: 5.38; sobre canvas: 4.88).
+   *
+   * O vivo não sumiu: ele continua sendo a identidade onde o fundo é escuro,
+   * em `--color-brand-on-dark`. Vermelho escuro sobre preto reprova (3.68 como
+   * texto), vermelho vivo sobre branco reprova. São dois papéis, não uma cor
+   * com duas opiniões.
+   */
+  --color-brand: #cf2222;
+  --color-brand-on-dark: #ff2a2a;
+  --color-brand-hover: #a81d1d;
   --color-brand-soft: #fff3f3;
   --color-brand-tint: rgba(255, 42, 42, 0.08);
 
   /* ---- Tema claro ------------------------------------------------------ */
+  /*
+   * A escala comprimiu no M4-04. Os degraus originais (#6e6e69, #84847f,
+   * #9a9a95) desciam até 2.57 sobre o canvas — ink-4 e ink-5 eram legíveis
+   * para quem já enxerga bem e desapareciam para o resto. Hierarquia que não
+   * se lê não é hierarquia, é decoração.
+   *
+   * Agora os cinco degraus passam 4.5 sobre o pior fundo claro
+   * (`canvas-sunken`). Os passos ficaram mais sutis, e tudo bem: o que separa
+   * um eyebrow de um parágrafo aqui é tamanho, peso e a fonte mono — cor é o
+   * reforço, nunca o único sinal.
+   *
+   * Nenhum destes serve sobre fundo escuro: lá o token é `dark-muted`.
+   */
   --color-ink: #0a0a0a;
   --color-ink-2: #54544f;
-  --color-ink-3: #6e6e69;
-  --color-ink-4: #84847f;
-  --color-ink-5: #9a9a95;
+  --color-ink-3: #5e5e59;
+  --color-ink-4: #666661;
+  --color-ink-5: #6b6b66;
   --color-surface: #ffffff;
   --color-canvas: #f4f4f2;
   --color-canvas-sunken: #ededea;
@@ -38,14 +63,32 @@
   --color-dark-border-2: #3a3a3a;
   --color-dark-text: #fafafa;
   --color-dark-text-2: #e8e8e3;
-  --color-dark-muted: #4a4a4a;
+  /*
+   * Era #4a4a4a: 2.23 sobre o fundo da execução. É o número da série e o "—"
+   * das séries que ainda faltam — informação que o aluno lê de pé, suado, com
+   * o celular apoiado no banco. #8a8a8a dá 5.73.
+   */
+  --color-dark-muted: #8a8a8a;
 
   /* ---- Semânticas ------------------------------------------------------ */
-  --color-success: #1f9d57;
+  /* #1f9d57 dava 3.49 com o branco do selo de confirmação. */
+  --color-success: #15803d;
+  /*
+   * Fundo claro do selo e do aviso de sucesso, como `brand-soft` é do vermelho.
+   *
+   * Existe porque `bg-success/15 text-success` — a cor em cima de si mesma
+   * diluída — **reprova sempre**: a diluição escurece o fundo na mesma medida
+   * que a cor já é escura, e o par estaciona em torno de 4.1. Vale para as três
+   * semânticas, não só para o verde. Fundo é token próprio, não a mesma cor com
+   * transparência.
+   */
+  --color-success-soft: #edf7f1;
   --color-success-dark: #1f6d45;
-  --color-warning: #c79a13;
+  /* #c79a13 dava 2.42 sobre o próprio fundo de aviso. */
+  --color-warning: #8a6708;
   --color-warning-bg: #fdf6e8;
-  --color-danger: #ff2a2a;
+  /* Mesmo vermelho da ação — e agora legível sobre `danger-bg` (4.73). */
+  --color-danger: #cf2222;
   --color-danger-bg: #ffecec;
   /* Fundo do badge neutro (doc 04, seção "Componentes base"). */
   --color-badge-neutral: #f2f2ef;
@@ -91,6 +134,27 @@
   :focus-visible {
     outline: 2px solid var(--color-brand);
     outline-offset: 2px;
+  }
+
+  /*
+   * Movimento reduzido é preferência de sistema, e aqui ela vale para tudo de
+   * uma vez em vez de utilitário a utilitário: quem liga isso no aparelho
+   * costuma ter enxaqueca vestibular, e uma transição esquecida num canto já
+   * basta para enjoar.
+   *
+   * Some a animação, não o estado: `1ms` em vez de `none` mantém o `transitionend`
+   * disparando, então nada que dependa do fim da transição trava. `scroll-behavior`
+   * volta a ser instantâneo — rolagem suave é dos piores gatilhos.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 1ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 

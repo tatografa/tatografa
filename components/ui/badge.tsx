@@ -10,7 +10,7 @@ const tones: Record<Tone, string> = {
   // Selo que precisa saltar dentro de um card já discreto (doc 05: "SUGERIDO",
   // branco sobre a marca).
   "brand-solido": "bg-brand text-white",
-  sucesso: "bg-success/15 text-success",
+  sucesso: "bg-success-soft text-success",
 };
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {

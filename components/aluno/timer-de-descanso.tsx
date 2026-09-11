@@ -53,7 +53,7 @@ export function TimerDeDescanso({
     >
       <div className="mx-auto flex max-w-[440px] items-center gap-4">
         <div className="min-w-0 flex-1">
-          <p className="eyebrow text-[9px] text-ink-4">
+          <p className="eyebrow text-[9px] text-dark-muted">
             {acabou ? "Descanso terminado" : "Descanso"}
           </p>
           {/*

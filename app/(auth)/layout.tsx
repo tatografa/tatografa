@@ -21,17 +21,17 @@ export default function AuthLayout({
         </Link>
 
         <div className="hidden max-w-[400px] lg:block">
-          <p className="eyebrow mb-3.5 text-brand">Área do personal trainer</p>
+          <p className="eyebrow mb-3.5 text-brand-on-dark">Área do personal trainer</p>
           <h1 className="mb-4 text-[32px] font-extrabold leading-[1.2] tracking-[-0.02em]">
             Seus alunos, seus treinos, um só painel.
           </h1>
-          <p className="text-[14.5px] font-medium leading-[1.6] text-ink-5">
+          <p className="text-[14.5px] font-medium leading-[1.6] text-dark-muted">
             Monte os treinos, acompanhe as execuções e veja a evolução de cada
             aluno série por série.
           </p>
         </div>
 
-        <p className="hidden text-[12px] font-medium text-ink-4 lg:block">
+        <p className="hidden text-[12px] font-medium text-dark-muted lg:block">
           Reps Club
         </p>
       </aside>

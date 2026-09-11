@@ -4,6 +4,7 @@ import { semanaAtual } from "@/lib/domain/treino";
 import type { MacrotreinoDoAluno, TreinoDaAgenda } from "@/lib/queries/aluno";
 
 import { CardDeTreino } from "./card-de-treino";
+import { LinkDeVoltar } from "@/components/aluno/link-de-voltar";
 
 export type TelaListaDeTreinosProps = {
   nomeDoPersonal: string;
@@ -23,12 +24,9 @@ export function TelaListaDeTreinos({
   return (
     <div className="space-y-4">
       <header>
-        <Link
-          href="/app"
-          className="eyebrow text-ink-4 transition hover:text-ink-2"
-        >
+        <LinkDeVoltar href="/app">
           ← Treinar
-        </Link>
+        </LinkDeVoltar>
         <h1 className="mt-2 text-[21px] font-extrabold tracking-[-0.02em] text-ink">
           {macrotreino?.name ?? "Meus treinos"}
         </h1>

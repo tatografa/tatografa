@@ -1,20 +1,17 @@
-import Link from "next/link";
 
 import { iniciarTreino } from "@/app/(aluno)/app/executar/actions";
 import { classesDeBotao } from "@/components/ui";
 import type { ExercicioPrescrito, TreinoCompleto } from "@/lib/queries/treinos";
+import { LinkDeVoltar } from "@/components/aluno/link-de-voltar";
 
 /** Detalhe do treino (doc 05, tela 4). Recebe o treino pronto, sem banco. */
 export function TelaDetalheDoTreino({ treino }: { treino: TreinoCompleto }) {
   return (
     <div className="space-y-4">
       <header>
-        <Link
-          href="/app/treinos"
-          className="eyebrow text-ink-4 transition hover:text-ink-2"
-        >
+        <LinkDeVoltar href="/app/treinos">
           ← Treinos
-        </Link>
+        </LinkDeVoltar>
         <h1 className="mt-2 text-[20px] font-extrabold tracking-[-0.02em] text-ink">
           Treino {treino.label}
         </h1>

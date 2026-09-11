@@ -1,4 +1,3 @@
-import Link from "next/link";
 
 import {
   cargaDaSerie,
@@ -9,6 +8,7 @@ import {
   type LinhaDeSerie,
 } from "@/lib/domain/historico";
 import type { ExercicioDoHistorico, SessaoDetalhada } from "@/lib/queries/historico";
+import { LinkDeVoltar } from "@/components/aluno/link-de-voltar";
 
 /**
  * Detalhe de uma sessão do histórico (card M1-06). Puro, sem banco.
@@ -31,12 +31,9 @@ export function TelaSessaoDoHistorico({
   return (
     <div className="space-y-4">
       <header>
-        <Link
-          href={voltarPara.href}
-          className="eyebrow text-ink-4 transition hover:text-ink-2"
-        >
+        <LinkDeVoltar href={voltarPara.href}>
           ← {voltarPara.rotulo}
-        </Link>
+        </LinkDeVoltar>
         <h1 className="mt-2 text-[20px] font-extrabold tracking-[-0.02em] text-ink">
           {sessao.treino
             ? `Treino ${sessao.treino.label} · ${sessao.treino.name}`

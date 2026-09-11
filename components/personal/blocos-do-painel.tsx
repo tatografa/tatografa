@@ -77,7 +77,7 @@ export function AlunosQuePrecisamDeAtencao({
         </h2>
         <Link
           href="/painel/configuracoes"
-          className="text-[12px] font-medium text-ink-5 transition hover:text-ink-3"
+          className="inline-flex min-h-6 items-center text-[12px] font-medium text-ink-5 transition hover:text-ink-3"
         >
           Avisar depois de {diasParaAlerta}{" "}
           {diasParaAlerta === 1 ? "dia" : "dias"} · ajustar

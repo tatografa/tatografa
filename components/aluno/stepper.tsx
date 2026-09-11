@@ -52,7 +52,7 @@ export function Stepper({
       >
         {formatar(valor)}
         {unidade ? (
-          <span className="ml-0.5 text-[10px] font-normal text-ink-4">
+          <span className="ml-0.5 text-[10px] font-normal text-dark-muted">
             {unidade}
           </span>
         ) : null}

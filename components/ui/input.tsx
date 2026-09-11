@@ -68,6 +68,14 @@ export function Input({
       {error ? (
         <p
           id={`${inputId}-erro`}
+          /*
+           * `role="alert"` porque o `aria-describedby` sozinho só fala quando o
+           * foco chega ao campo — e depois de uma Server Action o foco está
+           * longe dali. Sem isto, quem usa leitor de tela envia o formulário e
+           * não ouve nada. `Select` e `Textarea` já tinham; o `Input`, que é o
+           * campo mais usado do produto, não.
+           */
+          role="alert"
           className="text-[12.5px] font-semibold text-danger"
         >
           {error}

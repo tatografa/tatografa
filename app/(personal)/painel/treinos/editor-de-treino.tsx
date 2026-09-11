@@ -161,7 +161,7 @@ export function EditorDeTreino({
       {salvo && (
         <p
           role="status"
-          className="rounded-card border border-success/30 bg-success/10 px-4 py-3 text-[13.5px] font-semibold text-success-dark"
+          className="rounded-card border border-success/30 bg-success-soft px-4 py-3 text-[13.5px] font-semibold text-success-dark"
         >
           Treino salvo. O aluno já vê essa prescrição.
         </p>

@@ -110,7 +110,7 @@ function Aba({
       aria-selected={ativa}
       onClick={aoEscolher}
       className={cn(
-        "flex h-10 flex-1 items-center justify-center gap-1.5 rounded-[9px] text-[13px] font-bold transition",
+        "flex h-11 flex-1 items-center justify-center gap-1.5 rounded-[9px] text-[13px] font-bold transition",
         ativa
           ? "bg-surface text-ink shadow-sm"
           : "text-ink-4 hover:text-ink-2",
@@ -295,10 +295,14 @@ function Detalhe({
   return (
     <div className="space-y-4">
       <div>
+        {/*
+          Botão e não `LinkDeVoltar`: aqui voltar é fechar o detalhe no estado
+          local, sem navegar. O alvo de 44px é o mesmo pelo mesmo motivo.
+        */}
         <button
           type="button"
           onClick={aoVoltar}
-          className="eyebrow text-ink-4 transition hover:text-ink-2"
+          className="eyebrow -mt-2 inline-flex min-h-11 items-center text-ink-4 transition hover:text-ink-2"
         >
           ← Exercícios
         </button>

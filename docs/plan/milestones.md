@@ -319,7 +319,7 @@ suposição.
 | M4-01 | PWA: instalar, funcionar sem sinal, alarme de descanso | senior | feito · checkpoint aprovado |
 | M4-02 | E-mails transacionais (convite, recuperação, link mágico) | pleno | **bloqueado** |
 | M4-03 | Erros, estados vazios e de carregamento | pleno | feito |
-| M4-04 | Acessibilidade: teclado, leitor de tela, contraste | pleno | a fazer |
+| M4-04 | Acessibilidade: teclado, leitor de tela, contraste | pleno | feito · **1 critério aberto** |
 | M4-05 | Termos de uso e privacidade | junior | **bloqueado** |
 
 ### Riscos que exigem checkpoint
@@ -351,6 +351,38 @@ Junto veio uma correção do teste de campo: o onboarding do convite perdia
 nascimento, peso e altura quando a Server Action falhava por algo que não era
 culpa do aluno. O React reseta o formulário depois da ação; agora os campos
 voltam pelo estado, menos a senha, que não tem por que viajar de volta.
+
+### O que o M4-04 entregou
+
+Auditoria com axe-core em 15 telas — 11 rotas públicas e 4 telas com sessão,
+renderizadas com props fixas. De **17 violações a zero**. Todas eram de
+contraste: rótulo, landmark e nome acessível já estavam certos desde o M1, e a
+árvore de acessibilidade da execução mostra os 21 controles nomeados, incluindo
+"Corrigir série 1: 50 kg, 10 repetições".
+
+A paleta mudou de valor, não de identidade. O vermelho da ação escureceu de
+`#ff2a2a` para `#cf2222` — branco em cima dava 3.73, e nenhum tamanho de botão
+deste app chega a "texto grande", que seria o único jeito de 3.73 passar. **Um
+vermelho não serve aos dois temas** (escuro sobre preto reprova, vivo sobre
+branco reprova), então o vivo virou `brand-on-dark` e segue sendo a marca na
+execução.
+
+Dois achados que auditoria automática não pega, e os dois eram reais:
+
+- **`dark-muted` a 2.23** na execução — o número da série e o "—" do que falta.
+  O axe não resolve fundo transparente e marca "incompleto" em silêncio; quem
+  pegou foi a conta de contraste feita token a token, fora do navegador.
+- **Alvo de toque**: o link "← Treinos" tinha **14px de altura**, um terço do
+  mínimo, num app operado de pé com a mão suada. Eram cinco cópias do mesmo link
+  escrito à mão — viraram um componente.
+
+Também caiu uma armadilha de design system: **`bg-X/15 text-X` reprova sempre**.
+A cor diluída sobre si mesma estaciona em 4.1, para verde, vermelho e âmbar
+igualmente. Fundo claro precisa de token próprio.
+
+**O critério que fica aberto** é o que o card marca como obrigatório: teste com
+leitor de tela de verdade (VoiceOver no iOS). Não há iPhone neste ambiente, e
+emular não é testar. Roteiro pronto em `docs/plan/M4-04-roteiro-voiceover.md`.
 
 ### Checkpoint do M4-01 — aprovado
 
@@ -387,6 +419,6 @@ Dois cards não podem começar sem decisão dele:
 
 ### Ordem
 
-M4-01 e M4-03 estão feitos. Sobra o **M4-04** (acessibilidade), que é
-independente e pode começar a qualquer momento. **M4-02** e **M4-05** esperam o
-Otávio: provedor de e-mail com domínio próprio, e o texto dos termos.
+M4-01, M4-03 e M4-04 estão feitos — o M4-04 com um critério aberto que depende
+de um iPhone, não de código. Sobram **M4-02** e **M4-05**, que esperam o Otávio:
+provedor de e-mail com domínio próprio, e o texto dos termos.
