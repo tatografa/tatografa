@@ -10,10 +10,10 @@
 | # | Nome | Entrega (linguagem de negócio) | Como o Otávio valida | Status |
 |---|---|---|---|---|
 | M0 | Fundação | Conta de personal, login, painel protegido | Criar conta, entrar, ver `/painel` | validado |
-| M1 | Fatia vertical | Convite → treino → execução → histórico | Roteiro completo com duas contas, treino executado na academia | construído · aguardando validação do Otávio |
-| M2 | Utilidade contínua | Macrotreino, referência histórica, PRs, progresso, painel | Aluno usa duas semanas seguidas sem faltar nada | cards feitos · revisão aprovada · **aguardando validação** |
+| M1 | Fatia vertical | Convite → treino → execução → histórico | Roteiro completo com duas contas, treino executado na academia | **validado em campo** |
+| M2 | Utilidade contínua | Macrotreino, referência histórica, PRs, progresso, painel | Aluno usa duas semanas seguidas sem faltar nada | **validado em campo** |
 | M3 | Social e reavaliação | Feed, foto do treino, reavaliação física | Postar treino, comentar, comparar antes/depois | planejado (cortável) |
-| M4 | Pronto para o piloto | PWA, estados vazios e de erro, e-mails, termos, acessibilidade | Alguém que não conhece o produto usa sem ajuda | planejado |
+| M4 | Pronto para o piloto | PWA, estados vazios e de erro, e-mails, termos, acessibilidade | Alguém que não conhece o produto usa sem ajuda | **em andamento** |
 
 ---
 
@@ -272,15 +272,77 @@ autenticação, troca de conta e estado de sessão:
    Otávio: desligar a confirmação de e-mail no Supabase — o token do convite já
    prova o canal.
 
-### Estado do M2
+### Estado do M2: fechado
 
-Os sete cards estão feitos e a revisão consolidada passou. **Falta uma coisa
-só:** o caminho completo com sessão real na máquina do Otávio, seguindo
-`docs/plan/M2-validacao.md`. Nada do M2 rodou com Supabase de verdade — este
-ambiente não alcança o host —, e as quatro migrations novas (0013 a 0016) nunca
-passaram por um app.
+**50 dos 51 passos bateram.** O único que ficou marcado como falha (P8.2, o
+contador de séries pendentes lido como "um ícone de nuvem") foi corrigido no
+commit `b756da2`, antes do último deploy que o Otávio testou.
+
+Os sete cards, a revisão consolidada e a validação em campo — os três passaram.
+**M1 e M2 estão validados.**
+
+### As três perguntas de produto, respondidas pelo uso
+
+O roteiro pedia explicitamente que o Otávio anotasse se alguma delas o
+incomodasse. Ele percorreu os passos que as expõem e não anotou nenhuma, então
+ficam como estão — e ficam registradas aqui para não serem reabertas por
+suposição:
+
+1. **A pílula mostra o pico do dia e o stepper abre na mesma série.** Numa rampa
+   os dois números divergem (P5.3 e P5.4 bateram).
+2. **O eixo do gráfico vai do mais antigo para o mais recente** (P6.3 bateu).
+3. **Sete dias é o padrão do alerta de inatividade** (P7.3 e P7.4 bateram).
 
 ### Ordem
 
 M2-01 primeiro (desbloqueia 05 e 06). M2-02 e M2-03 são independentes. M2-04 depois do
 03, que produz as funções de PR que o gráfico reusa.
+
+---
+
+## M4 · Pronto para o piloto (em andamento)
+
+O que separa "funciona" de "outra pessoa consegue usar".
+
+**Pronto quando:** um aluno de verdade — não o Otávio — recebe o convite, instala,
+treina duas semanas e volta sozinho, sem ninguém explicando.
+
+**O M3 foi adiado de propósito.** Ele está marcado como cortável desde o
+planejamento e adiciona valor social a um produto que ainda não foi usado por
+ninguém de fora. Depois do piloto ele se decide com informação em vez de
+suposição.
+
+### Cards
+
+| Card | Escopo | Etiqueta | Status |
+|---|---|---|---|
+| M4-01 | PWA: instalar, funcionar sem sinal, alarme de descanso | senior | a fazer |
+| M4-02 | E-mails transacionais (convite, recuperação, link mágico) | pleno | **bloqueado** |
+| M4-03 | Erros, estados vazios e de carregamento | pleno | a fazer |
+| M4-04 | Acessibilidade: teclado, leitor de tela, contraste | pleno | a fazer |
+| M4-05 | Termos de uso e privacidade | junior | **bloqueado** |
+
+### Riscos que exigem checkpoint
+
+- **M4-01** — o service worker decide o que o navegador serve. Cache de rota autenticada
+  mostra o treino de um aluno para outro. Checkpoint antes de qualquer estratégia que
+  toque `/app` ou `/painel`.
+- **M4-02** — depende de provedor e domínio, e o token do convite passa a viajar por
+  e-mail.
+
+### Bloqueios que dependem do Otávio
+
+Dois cards não podem começar sem decisão dele:
+
+| O quê | Trava qual card | Custa? |
+|---|---|---|
+| Provedor de e-mail (Resend ou similar) | M4-02 | Free tier serve |
+| Domínio próprio (SPF/DKIM, e endereço de produto) | M4-02 | ~R$40/ano |
+| Texto de termos e privacidade | M4-05 | Advogado, se quiser revisão |
+| Projeto Supabase separado para produção | nenhum card, mas trava o piloto | Free tier serve |
+
+### Ordem
+
+M4-01 primeiro: é o mais pesado e o que paga as dívidas declaradas no handoff da
+execução. M4-03 e M4-04 são independentes e podem correr em paralelo com ele.
+M4-02 e M4-05 esperam o Otávio.

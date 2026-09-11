@@ -28,9 +28,9 @@ Interface inteira em **português do Brasil**.
   _Desvio consciente da lei 1 do método:_ as sessões deste projeto são abertas com uma
   branch designada pelo harness. Enquanto isso valer, ela faz o papel da branch de
   milestone. Não trocar de branch sem o Otávio pedir.
-- **Preview/homologação:** ainda não há Vercel conectada. Validação hoje é local
-  (`npm run dev`) mais evidência no commit.
-- **Produção:** ainda não publicada.
+- **Preview/produção:** **Vercel conectada** em `tatografa.vercel.app`, publicando a
+  branch de trabalho. Todo push vira deploy. O Supabase é o `reps-club-dev`.
+- **Piloto:** ainda não decidido se usa projeto Supabase separado (pendência do M4).
 
 ## Stack
 
@@ -59,14 +59,15 @@ Fatias verticais do `docs/plan/milestones.md`. Todo milestone é validável pelo
 | # | Fase | Entrega | Status |
 |---|---|---|---|
 | M0 | Fase 0 · Fundação | Conta de personal, login, `/painel` protegido | validado |
-| M1 | Fase 1 · Fatia vertical | Convite → treino → execução → histórico | construído · **não validado** |
-| M2 | Fase 2 · Utilidade contínua | Macrotreino, PRs, progresso, painel completo | construído · revisado · **não validado** |
+| M1 | Fase 1 · Fatia vertical | Convite → treino → execução → histórico | **validado em campo** |
+| M2 | Fase 2 · Utilidade contínua | Macrotreino, PRs, progresso, painel completo | **validado em campo** |
 | M3 | Fase 3 · Social e reavaliação | Feed, fotos, reavaliação física | planejado (cortável) |
 | M4 | Fase 4 · Pronto para o piloto | PWA, estados vazios/erro, e-mails, termos | planejado |
 
-> **Nenhum milestone além do M0 rodou com Supabase de verdade.** Este ambiente não
-> alcança o host, e o roteiro de `docs/plan/M2-validacao.md` cobre M1 e M2 juntos.
-> Enquanto ele não rodar, "construído" é o máximo que se pode afirmar.
+> **M1 e M2 foram validados em campo em 10-11/09/2026** — 50 dos 51 passos do roteiro,
+> com Supabase de verdade, treino executado no celular e conferência no painel.
+> Os quatro defeitos encontrados estavam todos em **bordas de autenticação e estado de
+> sessão**, nenhum na lógica de negócio. Registro em `docs/plan/milestones.md`.
 
 ## Design System
 

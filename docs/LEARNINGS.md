@@ -199,3 +199,32 @@
   era `<CloudOff/>` mais um número, com o texto só em `sr-only`: o usuário viu "um ícone de
   nuvem". Era justamente o aviso que torna aceitável a fila viver no aparelho — e ele
   dependia de o usuário adivinhar o significado do desenho.
+
+---
+
+## Curadoria ao fim do M2 (2026-09-11)
+
+M1 e M2 validados em campo. O padrão que atravessa as três rodadas de teste, e que vale
+mais que qualquer item isolado acima:
+
+**Os quatro defeitos encontrados com Supabase real estavam todos fora da lógica de
+negócio.** Nenhum em cálculo, policy, migration ou número. Todos em **autenticação,
+troca de conta e estado de sessão** — as bordas que o ambiente remoto nunca alcançou:
+
+| Defeito | O que não o pegou |
+|---|---|
+| Aluno sem botão de sair | revisão de código, SQL, screenshot |
+| Texto mandando o aluno embora da porta certa | idem |
+| Sessão em andamento invisível | idem |
+| Ícone de nuvem sem rótulo | idem |
+
+Três consequências para os próximos milestones:
+
+1. **Prova por SQL e screenshot com props fixas cobrem o que calculam, não o que
+   acontece.** Elas acharam furo de RLS de verdade no M1 e confirmaram os números do M2.
+   Nenhuma delas pode achar "o usuário não consegue sair".
+2. **Fluxo de entrada e saída merece o mesmo rigor que a regra de negócio.** No M2 ele
+   recebeu menos, e foi onde tudo quebrou.
+3. **Deploy contínuo mudou o custo do teste.** Com a Vercel conectada, validar deixou de
+   ser um evento e passou a ser o caminho normal — não vale mais empilhar milestones sem
+   passar por lá.
