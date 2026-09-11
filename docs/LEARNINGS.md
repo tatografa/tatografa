@@ -239,3 +239,26 @@ Três consequências para os próximos milestones:
   "sobreviver à limpeza" é trabalho que não entrega nada. O que existe de verdade é
   `navigator.storage.persist()`, e ele só protege do descarte automático por pressão de
   disco.
+- [2026-09-11] [next] **`error.tsx` não envolve o `layout.tsx` do próprio segmento** — só
+  os layouts abaixo dele. Isso deixa de ser curiosidade num app onde a **autorização mora
+  no layout**: `requireStudent()` e `requireTrainer()` tocam o Supabase em toda navegação,
+  são a leitura mais provável de falhar, e a falha delas passa por cima do `error.tsx` que
+  parece cobrir a área. Sem um `app/error.tsx` na raiz, ela cai no `global-error`, que
+  troca o documento inteiro e não carrega o CSS do app. Boundary "do segmento" cobre menos
+  do que o nome sugere: conferir quem está acima, não só quem está dentro.
+- [2026-09-11] [verificacao] **Asserção de teste que compara texto de tela erra por causa
+  do CSS.** `innerText` devolve o texto já transformado por `text-transform`, então um
+  `uppercase` fez uma verificação de `digest` falhar contra o hex minúsculo que eu mesmo
+  tinha passado. Gastei uma rodada investigando um componente que nunca esteve quebrado.
+  Comparar sem diferenciar caixa, ou ler `textContent`, que ignora o CSS.
+- [2026-09-11] [next] **O React reseta o formulário depois de uma Server Action.** Todo
+  campo não controlado volta vazio, inclusive quando a falha não é culpa do usuário. Num
+  onboarding de duas etapas isso obriga a redigitar tudo — foi o que aconteceu no teste de
+  campo quando o limite de e-mail do Supabase estourou. A correção é devolver os valores
+  no estado da ação e reaplicá-los por `defaultValue`; senha fica de fora, porque não tem
+  por que viajar de volta ao navegador.
+- [2026-09-11] [ambiente] **Servidor de dev órfão faz testar a versão errada.** Um
+  `next-server` de sessão anterior segurava a 3000, o `npm run dev` subiu calado na 3002,
+  e eu conferi um build velho. `ss -ltn` não mostrou o processo; `ps aux | grep
+  next-server` mostrou. Antes de confiar num teste de navegador: conferir em que porta o
+  servidor subiu, e que ele é o que acabou de subir.

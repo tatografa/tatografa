@@ -259,10 +259,19 @@ export function FormularioOnboarding({
             error={estado.errosPorCampo?.objetivo}
           />
 
+          {/*
+            `defaultValue` vindo do estado da ação: o React **reseta** o
+            formulário depois de uma Server Action, então tudo o que não é
+            controlado volta vazio. Sem isto, uma falha que não é culpa do aluno
+            — o limite de e-mail do Supabase, por exemplo — o obrigava a
+            redigitar nascimento, peso e altura. Foi o que aconteceu no teste de
+            campo. A senha fica de fora de propósito: ela não volta do servidor.
+          */}
           <Input
             label="Data de nascimento"
             name="nascimento"
             type="date"
+            defaultValue={estado.campos?.nascimento}
             error={estado.errosPorCampo?.nascimento}
           />
 
@@ -274,6 +283,7 @@ export function FormularioOnboarding({
               inputMode="decimal"
               step="0.1"
               placeholder="78,5"
+              defaultValue={estado.campos?.peso}
               error={estado.errosPorCampo?.peso}
             />
             <Input
@@ -282,6 +292,7 @@ export function FormularioOnboarding({
               type="number"
               inputMode="numeric"
               placeholder="180"
+              defaultValue={estado.campos?.altura}
               error={estado.errosPorCampo?.altura}
             />
           </div>

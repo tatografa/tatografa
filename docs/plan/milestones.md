@@ -318,7 +318,7 @@ suposição.
 |---|---|---|---|
 | M4-01 | PWA: instalar, funcionar sem sinal, alarme de descanso | senior | feito · checkpoint aprovado |
 | M4-02 | E-mails transacionais (convite, recuperação, link mágico) | pleno | **bloqueado** |
-| M4-03 | Erros, estados vazios e de carregamento | pleno | a fazer |
+| M4-03 | Erros, estados vazios e de carregamento | pleno | feito |
 | M4-04 | Acessibilidade: teclado, leitor de tela, contraste | pleno | a fazer |
 | M4-05 | Termos de uso e privacidade | junior | **bloqueado** |
 
@@ -329,6 +329,28 @@ suposição.
   toque `/app` ou `/painel`.
 - **M4-02** — depende de provedor e domínio, e o token do convite passa a viajar por
   e-mail.
+
+### O que o M4-03 entregou
+
+Sete boundaries onde antes não havia **nenhum**, em 28 rotas: `global-error`,
+`app/error.tsx`, `app/not-found.tsx`, mais erro e 404 próprios de `/app` e de
+`/painel` — estes dois com a navegação de pé, para o usuário perder a tela e não
+o app. Quatro `loading.tsx` nas rotas de consulta pesada.
+
+`docs/plan/inventario-de-rotas.md` é o inventário que o card pedia: cada rota,
+com seu vazio, seu erro e seu carregamento, e o que falta em cada uma.
+
+**A descoberta do card:** `error.tsx` não envolve o `layout.tsx` do próprio
+segmento. Como a autorização mora no layout (`requireStudent`,
+`requireTrainer`), a leitura mais provável de falhar no produto inteiro passava
+por cima dos boundaries de `/app` e `/painel` e caía no `global-error` — que
+troca o documento e não carrega o CSS. `app/error.tsx` fecha isso, e a regra
+foi confirmada no navegador antes de virar código.
+
+Junto veio uma correção do teste de campo: o onboarding do convite perdia
+nascimento, peso e altura quando a Server Action falhava por algo que não era
+culpa do aluno. O React reseta o formulário depois da ação; agora os campos
+voltam pelo estado, menos a senha, que não tem por que viajar de volta.
 
 ### Checkpoint do M4-01 — aprovado
 
@@ -365,6 +387,6 @@ Dois cards não podem começar sem decisão dele:
 
 ### Ordem
 
-M4-01 primeiro: é o mais pesado e o que paga as dívidas declaradas no handoff da
-execução. M4-03 e M4-04 são independentes e podem correr em paralelo com ele.
-M4-02 e M4-05 esperam o Otávio.
+M4-01 e M4-03 estão feitos. Sobra o **M4-04** (acessibilidade), que é
+independente e pode começar a qualquer momento. **M4-02** e **M4-05** esperam o
+Otávio: provedor de e-mail com domínio próprio, e o texto dos termos.

@@ -7,6 +7,15 @@ import { traduzErro } from "@/lib/auth/mensagens";
 import { getSiteOrigin } from "@/lib/auth/site-url";
 import { createClient } from "@/lib/supabase/server";
 
+/** Os campos do formulário, como texto, para devolver o que o aluno digitou. */
+export type CamposDoOnboarding = {
+  objetivo?: string;
+  nivel?: string;
+  nascimento?: string;
+  peso?: string;
+  altura?: string;
+};
+
 export type EstadoOnboarding = {
   erro?: string;
   errosPorCampo?: Partial<
@@ -15,6 +24,18 @@ export type EstadoOnboarding = {
       string
     >
   >;
+  /**
+   * O que voltou para a tela depois de uma falha. Este é o formulário mais
+   * longo do produto — objetivo, nível, nascimento, peso e altura — e ele
+   * falha por motivo que não é culpa do aluno: no teste de campo, o limite de
+   * e-mail do Supabase devolveu "muitas tentativas seguidas" e ele teve que
+   * preencher tudo de novo.
+   *
+   * A senha fica **de fora** de propósito: devolvê-la ao navegador para
+   * repovoar o campo a faria trafegar de volta sem necessidade. Digitar a senha
+   * outra vez é barato; redigitar sete campos não é.
+   */
+  campos?: CamposDoOnboarding;
   sucesso?: "confirme-email";
 };
 
@@ -79,6 +100,15 @@ export async function criarAcesso(
   const token = String(formData.get("token") ?? "");
   const nome = String(formData.get("nome") ?? "");
 
+  // Tudo menos a senha volta para a tela em qualquer falha.
+  const campos: CamposDoOnboarding = {
+    objetivo: bruto.objetivo,
+    nivel: bruto.nivel,
+    nascimento: bruto.nascimento,
+    peso: bruto.peso,
+    altura: bruto.altura,
+  };
+
   const analise = esquema.safeParse(bruto);
   if (!analise.success) {
     const errosPorCampo: EstadoOnboarding["errosPorCampo"] = {};
@@ -88,7 +118,7 @@ export async function criarAcesso(
       >;
       if (campo && !errosPorCampo[campo]) errosPorCampo[campo] = problema.message;
     }
-    return { errosPorCampo };
+    return { errosPorCampo, campos };
   }
 
   const supabase = await createClient();
@@ -101,7 +131,10 @@ export async function criarAcesso(
   const valido = convite?.[0];
 
   if (!valido) {
-    return { erro: "Esse convite não vale mais. Peça um novo ao seu personal." };
+    return {
+      erro: "Esse convite não vale mais. Peça um novo ao seu personal.",
+      campos,
+    };
   }
 
   const { data, error } = await supabase.auth.signUp({
@@ -131,9 +164,10 @@ export async function criarAcesso(
     if (/convite_invalido|convite_email_divergente|database/i.test(error.message)) {
       return {
         erro: "Esse convite não vale mais. Peça um novo ao seu personal.",
+        campos,
       };
     }
-    return { erro: traduzErro(error.message) };
+    return { erro: traduzErro(error.message), campos };
   }
 
   if (data.session) redirect("/convite/pronto");
