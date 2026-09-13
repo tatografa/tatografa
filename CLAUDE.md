@@ -30,9 +30,10 @@ Interface inteira em **português do Brasil**.
   milestone. Não trocar de branch sem o Otávio pedir.
 - **Preview/produção:** **Vercel conectada** em `tatografa.vercel.app`, publicando a
   branch de trabalho. Todo push vira deploy. O Supabase é o `reps-club-dev`.
-  O domínio próprio é **`repsclub.com.br`** (registrado na Hostinger); apontá-lo para a
-  Vercel não exige mudança de código — `getSiteOrigin()` deriva do host da requisição.
-  Roteiro: `docs/plan/configurar-dominio-e-email.md`.
+  O domínio é **`repsclub.com.br`** (Hostinger), mas **a raiz já serve outro site** desde
+  nov/2025 — o app vai para **`app.repsclub.com.br`**, que não toca no que existe.
+  Apontar não exige mudança de código: `getSiteOrigin()` deriva do host da requisição.
+  Roteiro e quem faz o quê: `docs/plan/configurar-dominio-e-email.md`.
 - **Piloto:** ainda não decidido se usa projeto Supabase separado (pendência do M4).
 
 ## Stack

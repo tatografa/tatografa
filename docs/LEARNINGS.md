@@ -322,3 +322,17 @@ Três consequências para os próximos milestones:
   e-mails/hora" do plano gratuito. A decisão era certa, o motivo era falso — e ninguém
   reconfere um motivo que já está escrito. Vale reabrir o *porquê* quando o assunto volta,
   não só o *o quê*.
+- [2026-09-13] [infra] **Antes de mandar alguém mexer em DNS, ler o DNS.** Escrevi um
+  roteiro mandando sobrescrever o registro `A` de `repsclub.com.br` com o IP da Vercel.
+  Ao inspecionar de verdade, a raiz já servia um site no ar desde nov/2025 — o roteiro
+  teria derrubado. Subdomínio novo (`app.`) entrega o mesmo resultado sem tocar em nada.
+  Registro de DNS "vazio" é suposição; `getDNSRecords` custa uma chamada.
+- [2026-09-13] [infra] **Conferir o que já existe antes de mandar criar.** O roteiro
+  pedia criar `contato@repsclub.com.br`; a caixa existia havia dez meses, ativa e com
+  mensagens dentro. Se eu tivesse "executado" criando com senha nova, teria quebrado o
+  que já usava aquela caixa.
+- [2026-09-13] [ferramentas] **Ter acesso ao painel não é ter a ferramenta.** A MCP da
+  Vercel permite comprar domínio, mas não adicionar domínio a um projeto; a do Supabase
+  não expõe configuração de auth. Vale checar qual operação existe antes de prometer
+  execução — e antes de declarar que não dá, porque eu já tinha dito que não tinha acesso
+  à Vercel quando tinha.
