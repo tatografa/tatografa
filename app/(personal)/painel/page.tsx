@@ -95,7 +95,7 @@ export default async function PainelPage() {
           <section className="space-y-3">
             <h2 className="eyebrow text-ink-4">Alunos · {alunos.length}</h2>
 
-            <ListaDeAlunos alunos={alunos} />
+            <ListaDeAlunos alunos={alunos} idDoPersonal={trainer.id} />
           </section>
         </div>
       )}

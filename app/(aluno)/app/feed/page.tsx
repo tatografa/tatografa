@@ -26,6 +26,7 @@ export default async function FeedPage({ searchParams }: PageProps<"/app/feed">)
       posts={posts}
       aba={escolhida}
       nomeDoPersonal={personal.name}
+      idDoPersonal={personal.id}
     />
   );
 }

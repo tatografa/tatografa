@@ -1,4 +1,5 @@
 import { AvisoDeOffline } from "@/components/aluno/aviso-de-offline";
+import { BarraDeVoltaAoPainel } from "@/components/aluno/barra-de-volta-ao-painel";
 import { BottomNav } from "@/components/aluno/bottom-nav";
 import { requireStudent } from "@/lib/auth/session";
 
@@ -14,7 +15,13 @@ import { requireStudent } from "@/lib/auth/session";
 export default async function AlunoLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  await requireStudent();
+  const { student, personal } = await requireStudent();
+
+  // O personal que treina é aluno de si mesmo: a linha em `students` tem `id` e
+  // `trainer_id` iguais (migration 0019). Comparar os dois é o jeito mais barato
+  // de saber que existe painel do outro lado — nenhuma consulta a mais, porque
+  // `requireStudent()` já traz os dois e é memoizada por requisição.
+  const tambemEPersonal = student.id === personal.id;
 
   return (
     <div className="min-h-dvh bg-canvas">
@@ -25,6 +32,7 @@ export default async function AlunoLayout({
        * iPhone com faixa inferior.
        */}
       <div className="mx-auto min-h-dvh max-w-[440px] bg-canvas px-5 pt-4 pb-[calc(64px+env(safe-area-inset-bottom)+16px)]">
+        {tambemEPersonal ? <BarraDeVoltaAoPainel /> : null}
         {children}
       </div>
 

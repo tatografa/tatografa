@@ -29,10 +29,12 @@ export function FeedNavegavel({
   posts,
   aba,
   nomeDoPersonal,
+  idDoPersonal,
 }: {
   posts: PostDoFeed[];
   aba: AbaDoFeed;
   nomeDoPersonal: string;
+  idDoPersonal: string;
 }) {
   const router = useRouter();
   const [pendente, iniciarTroca] = useTransition();
@@ -48,6 +50,7 @@ export function FeedNavegavel({
       aba={escolhida}
       carregando={pendente}
       nomeDoPersonal={nomeDoPersonal}
+      idDoPersonal={idDoPersonal}
       aoTrocarAba={(proxima) => {
         if (proxima === escolhida) return;
         setDesejada(proxima);

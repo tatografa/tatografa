@@ -11,7 +11,18 @@ import { OBJETIVO, STATUS_DO_ALUNO } from "@/lib/rotulos";
  * se abre no navegador com props fixas, que é o único jeito de conferir a
  * interface neste ambiente — o host do Supabase é bloqueado pela rede.
  */
-export function ListaDeAlunos({ alunos }: { alunos: AlunoDaLista[] }) {
+export function ListaDeAlunos({
+  alunos,
+  idDoPersonal,
+}: {
+  alunos: AlunoDaLista[];
+  /**
+   * Para marcar a própria linha. O personal que treina é aluno de si mesmo
+   * (migration 0019), então ele aparece na própria lista — e sem o selo a
+   * carteira fica com um nome repetido do cabeçalho, sem explicação.
+   */
+  idDoPersonal: string;
+}) {
   if (!alunos.length) {
     return (
       <p className="text-[14px] text-ink-3">
@@ -46,9 +57,12 @@ export function ListaDeAlunos({ alunos }: { alunos: AlunoDaLista[] }) {
                   : "ainda não treinou"}
               </p>
             </div>
-            <Badge tone={aluno.status === "ativo" ? "sucesso" : "neutro"}>
-              {STATUS_DO_ALUNO[aluno.status]}
-            </Badge>
+            <span className="flex shrink-0 items-center gap-1.5">
+              {aluno.id === idDoPersonal ? <Badge tone="brand">Você</Badge> : null}
+              <Badge tone={aluno.status === "ativo" ? "sucesso" : "neutro"}>
+                {STATUS_DO_ALUNO[aluno.status]}
+              </Badge>
+            </span>
           </Link>
         </li>
       ))}

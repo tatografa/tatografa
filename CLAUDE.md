@@ -188,6 +188,33 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-13]** **O personal treina virando aluno de si mesmo**, e não publicando
+  "como personal". Decisão do Otávio. Uma linha em `students` com `id` e
+  `trainer_id` iguais ao próprio usuário — `students.id` já é o id de
+  `auth.users`, então isso sempre foi uma linha válida; faltava a permissão.
+  A partir dela ele aparece na própria carteira, monta o próprio macrotreino no
+  editor de sempre, executa no app do aluno e posta no feed da turma. **Nenhuma
+  tela nova** foi escrita para isso, e **nenhum campo de "modo"** existe: painel e
+  app são endereços diferentes, cada um com a sua autorização no layout, então
+  trocar de lado é navegar. Um campo "modo atual" criaria um estado capaz de
+  discordar da URL. Isso também resolve o selo "PERSONAL" do doc 05, que a
+  policy `posts_insert` não permitiria de outro jeito (só aluno publica): a tela
+  compara o autor do post com o `trainer_id` de quem olha, sem consulta a mais,
+  porque só existe um personal por turma. O limite aceito: o personal entra na
+  contagem de alunos do próprio painel e no alerta de inatividade. A linha dele
+  vem marcada com "Você" na lista.
+- **[2026-09-13]** **Policy de escrita confere as DUAS pontas do relacionamento,
+  não só a que aponta para você** (migration 0019). `students_insert` exigia
+  `trainer_id = auth.uid()` e deixava `id` livre: um personal inseria
+  `students (id = <outro usuário>, trainer_id = si mesmo)` e **alistava um
+  estranho na própria carteira**, sem convite — bastava a vítima não ter linha
+  em `students`, o que vale para qualquer outro personal. Alistado, o atacante
+  lia o perfil, as sessões e (com a 0018) os posts dela. É a quarta vez que o
+  mesmo formato aparece, depois de 0007, 0009 e 0010. **Cuidado ao comparar com
+  a 0010:** ela tirou desta policy um ramo `id = auth.uid()` unido por `or`, e a
+  0019 recoloca `id = auth.uid()` unido por `and`. Com `or` o `trainer_id` fica
+  livre e o furo da 0010 volta; com `and` as duas colunas ficam presas ao mesmo
+  usuário.
 - **[2026-08-31]** Leitura do convite sem sessão usa a função estreita
   `convite_por_token`, não a chave de serviço: a chave ignoraria o RLS do banco inteiro
   se vazasse do ambiente.

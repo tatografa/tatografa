@@ -4,6 +4,7 @@ import { Heart, Lock, MessageCircle, Users } from "lucide-react";
 import Link from "next/link";
 
 import { Carregando, Esqueleto } from "@/components/esqueleto";
+import { Badge } from "@/components/ui";
 import type { AbaDoFeed, PostDoFeed } from "@/lib/queries/feed";
 import { cn } from "@/lib/utils";
 
@@ -26,12 +27,21 @@ export function TelaFeed({
   aba,
   aoTrocarAba,
   nomeDoPersonal,
+  idDoPersonal,
   carregando = false,
 }: {
   posts: PostDoFeed[];
   aba: AbaDoFeed;
   aoTrocarAba: (aba: AbaDoFeed) => void;
   nomeDoPersonal: string;
+  /**
+   * Para o selo "PERSONAL" do doc 05. O personal que treina é aluno de si
+   * mesmo (migration 0019), então ele posta com `student_id` como todo mundo —
+   * e o que o distingue é ser o `trainer_id` de quem está olhando. Como só
+   * existe um personal por turma, comparar os dois ids basta: nenhuma consulta
+   * a mais, e nada de expor quem é personal para além do próprio.
+   */
+  idDoPersonal: string;
   /**
    * A aba mudou e os posts da nova ainda não chegaram. A aba acende na hora —
    * o toque foi recebido —, mas a lista vira esqueleto em vez de continuar
@@ -76,7 +86,7 @@ export function TelaFeed({
         <ul className="space-y-3">
           {posts.map((post) => (
             <li key={post.id}>
-              <CardDePost post={post} />
+              <CardDePost post={post} idDoPersonal={idDoPersonal} />
             </li>
           ))}
         </ul>
@@ -112,7 +122,15 @@ function Aba({
   );
 }
 
-function CardDePost({ post }: { post: PostDoFeed }) {
+function CardDePost({
+  post,
+  idDoPersonal,
+}: {
+  post: PostDoFeed;
+  idDoPersonal: string;
+}) {
+  const doPersonal = post.autor.id === idDoPersonal;
+
   return (
     <Link
       href={`/app/feed/${post.id}`}
@@ -127,8 +145,16 @@ function CardDePost({ post }: { post: PostDoFeed }) {
         </span>
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[13px] font-bold text-ink">
-            {post.meu ? "Você" : post.autor.nome}
+          <p className="flex items-center gap-1.5 text-[13px] font-bold text-ink">
+            <span className="truncate">
+              {post.meu ? "Você" : post.autor.nome}
+            </span>
+            {/* O selo não encolhe: é ele que muda como se lê o post. */}
+            {doPersonal ? (
+              <Badge tone="brand-solido" className="shrink-0">
+                Personal
+              </Badge>
+            ) : null}
           </p>
           {/*
             O cadeado só aparece no que é privado, e só para quem publicou: é o
