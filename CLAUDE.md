@@ -87,8 +87,11 @@ Hex solto em componente reprova na revisão.
   EscolhaCards. Exportados por `components/ui/index.ts`.
 - **Utilitário `eyebrow`:** label mono maiúsculo, definido em `globals.css`.
 - **Tipografia:** Inter na interface toda; JetBrains Mono só em eyebrow, label, badge e timer.
-- **Referência visual:** os `.dc.html` do handoff são referência, não código. Reconstruir
-  em React, nunca copiar o HTML.
+- **Referência visual:** `docs/design/` — o handoff original, com os specs das 12 telas do
+  aluno (`05-telas-aluno.md`), das 10 do painel (`06-telas-personal.md`) e os protótipos
+  `.dc.html`. Os protótipos são **referência, não código**: reconstruir em React, nunca
+  copiar o HTML. Onde o handoff e este arquivo discordarem, **este vence** — ele registra
+  o que foi decidido depois, com o produto na mão.
 
 ## Convenções de código
 

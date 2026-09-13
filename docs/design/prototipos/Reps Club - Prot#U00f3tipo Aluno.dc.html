@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0}
+  a{color:#FF2A2A;text-decoration:none}
+  a:hover{color:#d61f1f}
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#e7e5df;font-family:Archivo,sans-serif;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;align-items:center;padding:32px 16px 60px">
+
+  <div style="width:392px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <span style="font:800 15px Archivo,sans-serif;color:#0a0a0a;letter-spacing:-0.01em">Reps Club — Protótipo</span>
+    <span onClick="{{ goSplash }}" style="font:600 11px JetBrains Mono,monospace;letter-spacing:0.06em;color:#84847f;cursor:pointer">reiniciar</span>
+  </div>
+
+  <div style="width:392px;background:#0a0a0a;border-radius:50px;padding:13px;box-shadow:0 18px 50px rgba(0,0,0,.3)">
+    <div style="position:relative;border-radius:38px;overflow:hidden;width:366px">
+
+    <!-- SPLASH -->
+    <sc-if value="{{ isSplash }}" hint-placeholder-val="{{ true }}">
+      <div style="background:#0a0a0a;height:800px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center">
+        <div style="width:72px;height:72px;border-radius:18px;background:#FF2A2A;display:flex;align-items:center;justify-content:center;margin-bottom:22px"><span style="font:800 30px Archivo,sans-serif;color:#fff">R</span></div>
+        <h1 style="font:800 26px Archivo,sans-serif;letter-spacing:-0.02em;color:#fafafa;margin:0 0 10px">Reps Club</h1>
+        <p style="font:400 14px/1.5 Archivo,sans-serif;color:#9a9a95;margin:0 0 36px;max-width:260px">Protótipo navegável do app do aluno.</p>
+        <button onClick="{{ startOnboarding }}" style="width:100%;padding:16px;border:none;border-radius:13px;background:#FF2A2A;color:#fff;font:700 15px Archivo,sans-serif;cursor:pointer">Entrar como Aluno</button>
+      </div>
+    </sc-if>
+
+    <!-- OB1 · Criar acesso -->
+    <sc-if value="{{ isOb1 }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#F4F4F2;height:800px;display:flex;flex-direction:column">
+        <div style="flex:none;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 28px"><span style="font:600 13px Archivo,sans-serif;color:#0a0a0a">9:41</span><span style="font:600 11px Archivo,sans-serif;color:#0a0a0a;letter-spacing:0.1em">● ● ●</span></div>
+        <div style="flex:1;overflow:auto;padding:18px 28px 28px">
+          <div style="font:600 10px JetBrains Mono,monospace;letter-spacing:0.1em;text-transform:uppercase;color:#9a9a95;margin-bottom:7px">Etapa 1 de 2</div>
+          <div style="display:flex;gap:6px;margin-bottom:22px"><div style="flex:1;height:4px;border-radius:2px;background:#FF2A2A"></div><div style="flex:1;height:4px;border-radius:2px;background:#e2e2de"></div></div>
+          <h2 style="font:800 25px/1.2 Archivo,sans-serif;letter-spacing:-0.02em;color:#0a0a0a;margin:0 0 8px">Quase lá, João!</h2>
+          <p style="font:400 14px/1.5 Archivo,sans-serif;color:#6e6e69;margin:0 0 20px">Defina sua senha para acessar os treinos da <strong style="color:#0a0a0a">Marina Costa</strong>.</p>
+          <label style="display:block;font:600 10px JetBrains Mono,monospace;letter-spacing:0.06em;text-transform:uppercase;color:#9a9a95;margin-bottom:7px">E-mail</label>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border:1.5px solid #e7e7e2;border-radius:12px;background:#ededea;margin-bottom:13px"><span style="font:500 14px Archivo,sans-serif;color:#54544f">joao.silva@email.com</span><span style="width:18px;height:18px;border-radius:50%;background:#1f9d57;color:#fff;font:700 10px Archivo,sans-serif;display:flex;align-items:center;justify-content:center">✓</span></div>
+          <label style="display:block;font:600 10px JetBrains Mono,monospace;letter-spacing:0.06em;text-transform:uppercase;color:#9a9a95;margin-bottom:7px">Senha</label>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border:1.5px solid #e2e2de;border-radius:12px;background:#fff;margin-bottom:24px"><span style="font:500 15px Archivo,sans-serif;color:#0a0a0a;letter-spacing:0.18em">••••••••</span><span style="font:400 15px Archivo,sans-serif;color:#9a9a95">👁</span></div>
+          <button onClick="{{ goOb2 }}" style="width:100%;padding:16px;border:none;border-radius:13px;background:#FF2A2A;color:#fff;font:700 16px Archivo,sans-serif;cursor:pointer">Continuar</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- OB2 · Perfil -->
+    <sc-if value="{{ isOb2 }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#F4F4F2;height:800px;display:flex;flex-direction:column">
+        <div style="flex:none;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 28px"><span style="font:600 13px Archivo,sans-serif;color:#0a0a0a">9:41</span><span style="font:600 11px Archivo,sans-serif;color:#0a0a0a;letter-spacing:0.1em">● ● ●</span></div>
+        <div style="flex:1;overflow:auto;padding:18px 28px 28px">
+          <div style="font:600 10px JetBrains Mono,monospace;letter-spacing:0.1em;text-transform:uppercase;color:#9a9a95;margin-bottom:7px">Etapa 2 de 2</div>
+          <div style="display:flex;gap:6px;margin-bottom:22px"><div style="flex:1;height:4px;border-radius:2px;background:#FF2A2A"></div><div style="flex:1;height:4px;border-radius:2px;background:#FF2A2A"></div></div>
+          <h2 style="font:800 25px/1.2 Archivo,sans-serif;letter-spacing:-0.02em;color:#0a0a0a;margin:0 0 8px">Conta pra gente</h2>
+          <p style="font:400 14px/1.5 Archivo,sans-serif;color:#6e6e69;margin:0 0 20px">A Marina usa esses dados para montar e ajustar seus treinos.</p>
+          <label style="display:block;font:600 10px JetBrains Mono,monospace;letter-spacing:0.09em;text-transform:uppercase;color:#9a9a95;margin-bottom:9px">Objetivo principal</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:28px">
+            <div style="display:flex;flex-direction:column;gap:8px;padding:13px;border-radius:12px;border:1.5px solid #FF2A2A;background:#fff3f3"><span style="font:400 17px Archivo,sans-serif;color:#FF2A2A">▲</span><span style="font:600 12px Archivo,sans-serif;color:#0a0a0a">Ganhar massa</span></div>
+            <div style="display:flex;flex-direction:column;gap:8px;padding:13px;border-radius:12px;border:1.5px solid #e2e2de;background:#fff"><span style="font:400 17px Archivo,sans-serif;color:#9a9a95">◐</span><span style="font:600 12px Archivo,sans-serif;color:#54544f">Perder gordura</span></div>
+          </div>
+          <button onClick="{{ goOb3 }}" style="width:100%;padding:16px;border:none;border-radius:13px;background:#FF2A2A;color:#fff;font:700 16px Archivo,sans-serif;cursor:pointer">Concluir e entrar</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- OB3 · Bem-vindo -->
+    <sc-if value="{{ isOb3 }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#0a0a0a;height:800px;display:flex;flex-direction:column">
+        <div style="flex:none;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 28px"><span style="font:600 13px Archivo,sans-serif;color:#fff">9:41</span><span style="font:600 11px Archivo,sans-serif;color:#fff;letter-spacing:0.1em">● ● ●</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center">
+          <div style="width:88px;height:88px;border-radius:50%;background:#FF2A2A;display:flex;align-items:center;justify-content:center;margin-bottom:28px;box-shadow:0 12px 40px rgba(255,42,42,.4)"><span style="font:800 40px Archivo,sans-serif;color:#fff">✓</span></div>
+          <h2 style="font:800 28px/1.15 Archivo,sans-serif;letter-spacing:-0.02em;color:#fafafa;margin:0 0 12px">Tudo pronto, João!</h2>
+          <p style="font:400 15px/1.55 Archivo,sans-serif;color:#9a9a95;margin:0 0 32px;max-width:260px">Sua conta está pronta e conectada à <strong style="color:#e8e8e3">Marina Costa</strong>.</p>
+          <button onClick="{{ goHome }}" style="width:100%;padding:17px;border:none;border-radius:13px;background:#FF2A2A;color:#fff;font:700 16px Archivo,sans-serif;cursor:pointer">Ver meus treinos</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- HOME -->
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#F4F4F2;height:800px;display:flex;flex-direction:column">
+        <div style="flex:none;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 28px"><span style="font:600 13px Archivo,sans-serif;color:#0a0a0a">9:41</span><span style="font:600 11px Archivo,sans-serif;color:#0a0a0a;letter-spacing:0.1em">● ● ●</span></div>
+        <div style="flex:1;overflow:auto;padding:16px 20px 0">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <h2 style="font:800 22px Archivo,sans-serif;letter-spacing:-0.02em;color:#0a0a0a;margin:0">Bom dia, João</h2>
+            <div onClick="{{ goPerfilAluno }}" style="width:38px;height:38px;border-radius:50%;background:#e7e7e2;flex:none;cursor:pointer"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+            <div style="background:#fff;border-radius:12px;padding:12px 8px;text-align:center"><div style="display:flex;align-items:center;justify-content:center;gap:4px"><span style="color:#FF2A2A">🔥</span><span style="font:800 18px Archivo,sans-serif;color:#0a0a0a">5</span></div><div style="font:600 9px JetBrains Mono,monospace;letter-spacing:0.06em;color:#9a9a95;margin-top:3px">DIAS SEGUIDOS</div></div>
+            <div style="background:#fff;border-radius:12px;padding:12px 8px;text-align:center"><div style="font:800 18px Archivo,sans-serif;color:#0a0a0a">42</div><div style="font:600 9px JetBrains Mono,monospace;letter-spacing:0.06em;color:#9a9a95;margin-top:3px">SESSÕES TOTAIS</div></div>
+          </div>
+          <div style="background:#0a0a0a;border-radius:16px;padding:16px 18px;margin-bottom:12px">
+            <div style="font:600 10px JetBrains Mono,monospace;letter-spacing:0.1em;color:#84847f;margin-bottom:6px">MACROTREINO ATIVO</div>
+            <div style="font:800 19px Archivo,sans-serif;color:#fafafa;letter-spacing:-0.01em;margin-bottom:5px">Projeto Verão</div>
+            <div style="font:400 12px Archivo,sans-serif;color:#9a9a95;margin-bottom:10px">Semana 3 de 8 · Marina Costa</div>
+            <div style="height:4px;border-radius:2px;background:#232323;overflow:hidden"><div style="width:38%;height:100%;background:#FF2A2A;border-radius:2px"></div></div>
+          </div>
+          <div style="background:#fff;border:1.5px solid #FF2A2A;border-radius:16px;padding:18px;margin-bottom:14px">
+            <div style="font:700 10px JetBrains Mono,monospace;letter-spacing:0.1em;color:#FF2A2A;margin-bottom:6px">SEU PRÓXIMO TREINO</div>
+            <div style="font:800 19px Archivo,sans-serif;color:#0a0a0a;letter-spacing:-0.01em;margin-bottom:4px">Treino B · Costas e Bíceps</div>
+            <div style="font:400 13px Archivo,sans-serif;color:#6e6e69;margin-bottom:10px">6 exercícios · ~45min</div>
+            <button onClick="{{ startExecB }}" style="width:100%;padding:14px;border:none;border-radius:12px;background:#FF2A2A;color:#fff;font:700 14px Archivo,sans-serif;cursor:pointer;margin-bottom:8px">Iniciar treino</button>
+            <p onClick="{{ goTreinos }}" style="font:500 12px Archivo,sans-serif;color:#9a9a95;margin:0;text-align:center;cursor:pointer">Fazer outro treino</p>
+          </div>
+          <div onClick="{{ goReavalHome }}" style="display:flex;align-items:center;gap:11px;background:#fdf6e8;border-radius:14px;padding:13px 14px;margin-bottom:18px;cursor:pointer">
+            <span style="font:400 18px Archivo,sans-serif;color:#c79a13">📅</span>
+            <div style="flex:1"><div style="font:700 13px Archivo,sans-serif;color:#0a0a0a">Reavaliação disponível</div><div style="font:400 11px/1.4 Archivo,sans-serif;color:#6e6e69;margin-top:1px">A Marina liberou sua reavaliação de 30 dias</div></div>
+            <span style="flex:none;font:600 11px Archivo,sans-serif;color:#0a0a0a;border:1.5px solid #0a0a0a;border-radius:8px;padding:7px 10px">Fazer agora</span>
+          </div>
+        </div>
+        <div style="flex:none;height:64px;background:#fff;border-top:1px solid #e7e7e2;display:flex;align-items:center;justify-content:space-around">
+          <div onClick="{{ goHome }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#FF2A2A">▣</span><span style="font:600 9px Archivo,sans-serif;color:#FF2A2A">Treinar</span></div>
+          <div onClick="{{ goProgresso }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#9a9a95">▲</span><span style="font:600 9px Archivo,sans-serif;color:#9a9a95">Progresso</span></div>
+          <div onClick="{{ goFeed }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#9a9a95">◈</span><span style="font:600 9px Archivo,sans-serif;color:#9a9a95">Feed</span></div>
+          <div onClick="{{ goPerfilAluno }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#9a9a95">●</span><span style="font:600 9px Archivo,sans-serif;color:#9a9a95">Perfil</span></div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- TREINOS · lista -->
+    <sc-if value="{{ isTreinos }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#F4F4F2;height:800px;display:flex;flex-direction:column">
+        <div style="flex:none;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 28px"><span style="font:600 13px Archivo,sans-serif;color:#0a0a0a">9:41</span><span style="font:600 11px Archivo,sans-serif;color:#0a0a0a;letter-spacing:0.1em">● ● ●</span></div>
+        <div style="flex:none;padding:14px 20px 0;display:flex;align-items:center;gap:14px"><span onClick="{{ goHome }}" style="font:400 20px Archivo,sans-serif;color:#0a0a0a;cursor:pointer">←</span><h2 style="font:800 21px Archivo,sans-serif;letter-spacing:-0.01em;color:#0a0a0a;margin:0">Projeto Verão</h2></div>
+        <div style="flex:none;padding:4px 20px 16px 54px;font:400 13px Archivo,sans-serif;color:#84847f">Semana 3 de 8 · Marina Costa</div>
+        <div style="flex:1;overflow:auto;padding:0 20px;display:flex;flex-direction:column;gap:10px">
+          <div onClick="{{ toastTreinoA }}" style="background:#fff;border:1px solid #ececE7;border-radius:14px;padding:15px 16px;cursor:pointer">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><span style="font:700 15px Archivo,sans-serif;color:#0a0a0a">Treino A · Peito e Tríceps</span><span style="width:22px;height:22px;border-radius:50%;background:#1f9d57;color:#fff;font:700 11px Archivo,sans-serif;display:flex;align-items:center;justify-content:center">✓</span></div>
+            <div style="font:400 12px Archivo,sans-serif;color:#84847f">5 exercícios · ~38min</div>
+          </div>
+          <div onClick="{{ goTreinoDetalhe }}" style="background:#fff;border:1.5px solid #FF2A2A;border-radius:14px;padding:15px 16px;cursor:pointer">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><span style="font:700 15px Archivo,sans-serif;color:#0a0a0a">Treino B · Costas e Bíceps</span><span style="font:700 9px JetBrains Mono,monospace;letter-spacing:0.08em;color:#fff;background:#FF2A2A;border-radius:5px;padding:4px 7px">SUGERIDO</span></div>
+            <div style="font:400 12px Archivo,sans-serif;color:#84847f">6 exercícios · ~45min</div>
+          </div>
+          <div onClick="{{ toastTreinoC }}" style="background:#fff;border:1px solid #ececE7;border-radius:14px;padding:15px 16px;cursor:pointer"><div style="font:700 15px Archivo,sans-serif;color:#0a0a0a;margin-bottom:4px">Treino C · Pernas</div><div style="font:400 12px Archivo,sans-serif;color:#84847f">7 exercícios · ~52min</div></div>
+          <div onClick="{{ toastTreinoD }}" style="background:#fff;border:1px solid #ececE7;border-radius:14px;padding:15px 16px;cursor:pointer"><div style="font:700 15px Archivo,sans-serif;color:#0a0a0a;margin-bottom:4px">Treino D · Ombro e Core</div><div style="font:400 12px Archivo,sans-serif;color:#84847f">4 exercícios · ~30min</div></div>
+        </div>
+        <div style="flex:none;padding:16px 20px 24px;text-align:center"><span style="font:500 12px Archivo,sans-serif;color:#84847f">Ver histórico completo</span></div>
+      </div>
+    </sc-if>
+
+    <!-- TREINO DETALHE -->
+    <sc-if value="{{ isTreinoDetalhe }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#F4F4F2;height:800px;display:flex;flex-direction:column">
+        <div style="flex:none;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 28px"><span style="font:600 13px Archivo,sans-serif;color:#0a0a0a">9:41</span><span style="font:600 11px Archivo,sans-serif;color:#0a0a0a;letter-spacing:0.1em">● ● ●</span></div>
+        <div style="flex:none;padding:14px 20px 0;display:flex;align-items:center;gap:14px"><span onClick="{{ goTreinos }}" style="font:400 20px Archivo,sans-serif;color:#0a0a0a;cursor:pointer">←</span><div><div style="font:800 20px Archivo,sans-serif;letter-spacing:-0.01em;color:#0a0a0a">Treino B</div><div style="font:400 12px Archivo,sans-serif;color:#84847f;margin-top:1px">Costas e Bíceps</div></div></div>
+        <div style="flex:none;padding:16px 20px 14px;display:flex;align-items:center">
+          <div style="flex:1;text-align:center"><div style="font:800 19px Archivo,sans-serif;color:#0a0a0a">6</div><div style="font:600 9px JetBrains Mono,monospace;letter-spacing:0.06em;color:#9a9a95;margin-top:3px">EXERCÍCIOS</div></div>
+          <div style="width:1px;height:28px;background:#d8d8d2"></div>
+          <div style="flex:1;text-align:center"><div style="font:800 19px Archivo,sans-serif;color:#0a0a0a">~45min</div><div style="font:600 9px JetBrains Mono,monospace;letter-spacing:0.06em;color:#9a9a95;margin-top:3px">DURAÇÃO</div></div>
+          <div style="width:1px;height:28px;background:#d8d8d2"></div>
+          <div style="flex:1;text-align:center"><div style="font:800 19px Archivo,sans-serif;color:#0a0a0a">24</div><div style="font:600 9px JetBrains Mono,monospace;letter-spacing:0.06em;color:#9a9a95;margin-top:3px">SÉRIES</div></div>
+        </div>
+        <div style="flex:1;overflow:auto;padding:0 20px;display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ treinoBList }}" as="ex" hint-placeholder-count="6">
+            <div style="display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:12px;background:#fff;border-radius:12px;padding:12px 14px">
+              <span style="font:700 12px JetBrains Mono,monospace;color:#9a9a95">{{ ex.n }}</span>
+              <div><div style="font:600 14px Archivo,sans-serif;color:#0a0a0a">{{ ex.name }}</div><div style="font:400 11px Archivo,sans-serif;color:#84847f;margin-top:1px">{{ ex.sets }} × {{ ex.reps }} · {{ ex.rest }}s descanso</div></div>
+              <span style="font:600 11px Archivo,sans-serif;color:#54544f;background:#f2f2ef;border-radius:7px;padding:5px 9px">{{ ex.tag }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="flex:none;padding:14px 20px 24px"><button onClick="{{ startExecB }}" style="width:100%;padding:16px;border:none;border-radius:13px;background:#FF2A2A;color:#fff;font:700 15px Archivo,sans-serif;cursor:pointer">Começar treino</button></div>
+      </div>
+    </sc-if>
+
+    <!-- EXEC -->
+    <sc-if value="{{ isExec }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#0a0a0a;height:800px;display:flex;flex-direction:column;position:relative">
+        <div style="flex:none;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 28px"><span style="font:600 13px Archivo,sans-serif;color:#fff">9:41</span><span style="font:600 11px Archivo,sans-serif;color:#fff;letter-spacing:0.1em">● ● ●</span></div>
+        <div style="flex:none;padding:6px 20px 0;display:flex;align-items:center;justify-content:space-between">
+          <span onClick="{{ goHome }}" style="font:400 20px Archivo,sans-serif;color:#e8e8e3;cursor:pointer">←</span>
+          <div style="text-align:center"><div style="font:700 12px JetBrains Mono,monospace;letter-spacing:0.1em;color:#fafafa">TREINO B</div><div style="font:500 10px JetBrains Mono,monospace;letter-spacing:0.08em;color:#84847f;margin-top:2px">COSTAS E BÍCEPS</div></div>
+          <span onClick="{{ toggleSheet }}" style="font:700 16px Archivo,sans-serif;color:#e8e8e3;letter-spacing:0.1em;cursor:pointer">⋮</span>
+        </div>
+        <div style="flex:none;padding:14px 20px 0">
+          <div style="height:4px;border-radius:2px;background:#232323;overflow:hidden;margin-bottom:8px"><div style="width:{{ execProgressPct }}%;height:100%;background:#FF2A2A;border-radius:2px"></div></div>
+          <div style="display:flex;justify-content:space-between"><span style="font:600 10px JetBrains Mono,monospace;letter-spacing:0.08em;color:#84847f">EXERCÍCIO {{ exNum }} DE {{ exTotal }}</span><span style="font:600 10px JetBrains Mono,monospace;letter-spacing:0.08em;color:#84847f">18:42</span></div>
+        </div>
+        <div style="flex:none;padding:20px 20px 0">
+          <h2 style="font:800 26px/1.15 Archivo,sans-serif;letter-spacing:-0.02em;color:#fafafa;margin:0 0 6px">{{ curExName }}</h2>
+          <div style="font:400 13px Archivo,sans-serif;color:#84847f;margin-bottom:10px">{{ curExSets }} séries · {{ curExReps }} reps · {{ curExRest }}s descanso</div>
+          <div style="display:inline-block;font:500 11px Archivo,sans-serif;color:#9a9a95;border:1px solid #2a2a2a;border-radius:8px;padding:5px 10px;margin-bottom:14px">{{ curExLastText }}</div>
+        </div>
+        <div style="flex:1;padding:2px 20px 0;display:flex;flex-direction:column;gap:9px;overflow:auto">
+          <sc-for list="{{ setsList }}" as="st" hint-placeholder-count="4">
+            <sc-if value="{{ st.isActive }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:22px 1fr 1fr 52px;align-items:center;gap:8px;padding:14px 12px;border-radius:16px;border:1.5px solid #FF2A2A;background:rgba(255,42,42,.08)">
+                <span style="font:700 13px JetBrains Mono,monospace;color:#FF2A2A">{{ st.num }}</span>
+                <sc-if value="{{ bodyweight }}" hint-placeholder-val="{{ false }}"><span style="font:600 13px Archivo,sans-serif;color:#e8e8e3;text-align:center">peso corporal</span></sc-if>
+                <sc-if value="{{ notBodyweight }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;align-items:center;justify-content:center;gap:8px">
+                    <span onClick="{{ decLoad }}" style="width:26px;height:26px;border-radius:50%;background:#232323;color:#e8e8e3;display:flex;align-items:center;justify-content:center;font:700 15px Archivo,sans-serif;cursor:pointer">–</span>
+                    <span style="font:800 19px Archivo,sans-serif;color:#fafafa">{{ curLoadFmt }}<span style="font:400 10px Archivo,sans-serif;color:#84847f;margin-left:2px">kg</span></span>
+                    <span onClick="{{ incLoad }}" style="width:26px;height:26px;border-radius:50%;background:#232323;color:#e8e8e3;display:flex;align-items:center;justify-content:center;font:700 15px Archivo,sans-serif;cursor:pointer">+</span>
+                  </div>
+                </sc-if>
+                <div style="display:flex;align-items:center;justify-content:center;gap:8px">
+                  <span onClick="{{ decReps }}" style="width:26px;height:26px;border-radius:50%;background:#232323;color:#e8e8e3;display:flex;align-items:center;justify-content:center;font:700 15px Archivo,sans-serif;cursor:pointer">–</span>
+                  <span style="font:800 19px Archivo,sans-serif;color:#fafafa">{{ curReps }}</span>
+                  <span onClick="{{ incReps }}" style="width:26px;height:26px;border-radius:50%;background:#232323;color:#e8e8e3;display:flex;align-items:center;justify-content:center;font:700 15px Archivo,sans-serif;cursor:pointer">+</span>
+                </div>
+                <span onClick="{{ confirmSet }}" style="width:44px;height:44px;border-radius:50%;background:#FF2A2A;color:#fff;display:flex;align-items:center;justify-content:center;font:800 18px Archivo,sans-serif;box-shadow:0 8px 20px rgba(255,42,42,.4);cursor:pointer">✓</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ st.isDone }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:26px 1fr 1fr 40px;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:#161616;opacity:.5">
+                <span style="font:700 13px JetBrains Mono,monospace;color:#84847f">{{ st.num }}</span>
+                <span style="font:600 15px Archivo,sans-serif;color:#e8e8e3">{{ st.loadLabel }}</span>
+                <span style="font:600 15px Archivo,sans-serif;color:#e8e8e3">{{ st.reps }} <span style="font:400 11px Archivo,sans-serif;color:#84847f">reps</span></span>
+                <span style="width:32px;height:32px;border-radius:50%;background:#1f6d45;color:#fff;display:flex;align-items:center;justify-content:center;font:700 14px Archivo,sans-serif">✓</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ st.isPending }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:26px 1fr 1fr 40px;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:#161616">
+                <span style="font:700 13px JetBrains Mono,monospace;color:#4a4a4a">{{ st.num }}</span>
+                <span style="font:600 15px Archivo,sans-serif;color:#4a4a4a">{{ st.loadLabel }}</span>
+                <span style="font:600 15px Archivo,sans-serif;color:#4a4a4a">{{ st.reps }} <span style="font:400 11px Archivo,sans-serif;color:#3a3a3a">reps</span></span>
+                <span style="width:32px;height:32px;border-radius:50%;border:1.5px solid #2a2a2a"></span>
+              </div>
+            </sc-if>
+          </sc-for>
+        </div>
+        <div style="flex:none;padding:16px 20px 22px;display:flex;gap:10px">
+          <button onClick="{{ nextExercise }}" style="flex:1;padding:15px;border:1.5px solid #3a3a3a;border-radius:13px;background:transparent;color:#e8e8e3;font:600 13px Archivo,sans-serif;cursor:pointer">Pular exercício</button>
+          <button onClick="{{ nextExercise }}" style="flex:1.3;padding:15px;border:none;border-radius:13px;background:#2a2a2a;color:#fff;font:700 13px Archivo,sans-serif;cursor:pointer">Próximo exercício →</button>
+        </div>
+        <sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ toggleSheet }}" style="position:absolute;inset:0;background:rgba(10,10,10,.6);display:flex;align-items:flex-end;z-index:3">
+            <div onClick="{{ stopProp }}" style="width:100%;background:#141414;border-radius:22px 22px 0 0;padding:22px 22px 26px">
+              <div style="width:36px;height:4px;border-radius:2px;background:#333;margin:0 auto 18px"></div>
+              <div style="font:800 18px Archivo,sans-serif;color:#fafafa;letter-spacing:-0.01em;margin-bottom:14px">{{ curExName }}</div>
+              <div onClick="{{ demoToast }}" style="display:flex;align-items:center;gap:14px;padding:13px 4px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#9a9a95">▶</span><span style="font:500 14px Archivo,sans-serif;color:#e8e8e3">Ver demonstração</span></div>
+              <div onClick="{{ missedSet }}" style="display:flex;align-items:center;gap:14px;padding:13px 4px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#9a9a95">✕</span><span style="font:500 14px Archivo,sans-serif;color:#e8e8e3">Não consegui fazer</span></div>
+              <div onClick="{{ historyToast }}" style="display:flex;align-items:center;gap:14px;padding:13px 4px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#9a9a95">≡</span><span style="font:500 14px Archivo,sans-serif;color:#e8e8e3">Ver histórico deste exercício</span></div>
+              <div style="height:1px;background:#232323;margin:8px 0"></div>
+              <div onClick="{{ endWorkout }}" style="display:flex;align-items:center;gap:14px;padding:13px 4px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#FF2A2A">■</span><span style="font:600 14px Archivo,sans-serif;color:#FF2A2A">Encerrar treino</span></div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- REST -->
+    <sc-if value="{{ isRest }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#0a0a0a;height:800px;display:flex;flex-direction:column">
+        <div style="flex:none;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 28px"><span style="font:600 13px Archivo,sans-serif;color:#fff">9:41</span><span style="font:600 11px Archivo,sans-serif;color:#fff;letter-spacing:0.1em">● ● ●</span></div>
+        <div style="flex:none;padding:6px 20px 0;display:flex;align-items:center;justify-content:space-between">
+          <span onClick="{{ goHome }}" style="font:400 20px Archivo,sans-serif;color:#e8e8e3;cursor:pointer">←</span>
+          <div style="text-align:center"><div style="font:700 12px JetBrains Mono,monospace;letter-spacing:0.1em;color:#fafafa">TREINO B</div><div style="font:500 10px JetBrains Mono,monospace;letter-spacing:0.08em;color:#84847f;margin-top:2px">COSTAS E BÍCEPS</div></div>
+          <span style="font:700 16px Archivo,sans-serif;color:#e8e8e3;letter-spacing:0.1em">⋮</span>
+        </div>
+        <div style="flex:none;padding:20px 20px 0">
+          <h2 style="font:800 26px/1.15 Archivo,sans-serif;letter-spacing:-0.02em;color:#fafafa;margin:0 0 6px">{{ curExName }}</h2>
+          <div style="font:400 13px Archivo,sans-serif;color:#84847f">{{ curExSets }} séries · {{ curExReps }} reps · {{ curExRest }}s descanso</div>
+        </div>
+        <div style="flex:1"></div>
+        <div style="flex:none;height:55%;background:#0a0a0a;border-top:2px solid #FF2A2A;border-radius:26px 26px 0 0;display:flex;flex-direction:column;align-items:center;padding:26px 24px 24px;box-shadow:0 -20px 50px rgba(0,0,0,.5)">
+          <div style="font:600 11px JetBrains Mono,monospace;letter-spacing:0.14em;color:#9a9a95;margin-bottom:18px">DESCANSO</div>
+          <div style="position:relative;width:180px;height:180px;display:flex;align-items:center;justify-content:center;margin-bottom:22px">
+            <svg width="180" height="180" style="position:absolute;top:0;left:0;transform:rotate(-90deg)"><circle cx="90" cy="90" r="82" fill="none" stroke="#232323" stroke-width="5"></circle><circle cx="90" cy="90" r="82" fill="none" stroke="#FF2A2A" stroke-width="5" stroke-linecap="round" stroke-dasharray="515" stroke-dashoffset="180"></circle></svg>
+            <span style="font:800 44px Archivo,sans-serif;letter-spacing:-0.02em;color:#fafafa">{{ curExRest }}s</span>
+          </div>
+          <div style="font:400 13px Archivo,sans-serif;color:#9a9a95;margin-bottom:20px">Próxima: Série {{ activeSet }} · {{ curLoadFmt }}kg × {{ curReps }}</div>
+          <div style="display:flex;gap:10px;width:100%">
+            <button style="flex:1;padding:13px;border:1.5px solid #3a3a3a;border-radius:12px;background:transparent;color:#e8e8e3;font:600 12px Archivo,sans-serif;cursor:pointer">-15s</button>
+            <button style="flex:1;padding:13px;border:1.5px solid #3a3a3a;border-radius:12px;background:transparent;color:#e8e8e3;font:600 12px Archivo,sans-serif;cursor:pointer">+15s</button>
+            <button onClick="{{ skipRest }}" style="flex:1.4;padding:13px;border:none;border-radius:12px;background:#FF2A2A;color:#fff;font:700 12px Archivo,sans-serif;cursor:pointer">Pular descanso</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- DONE -->
+    <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#0a0a0a;height:800px;position:relative;overflow:auto">
+        <div style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(212,163,49,.25),rgba(212,163,49,0) 70%)"></div>
+        <div style="position:relative;padding:64px 24px 24px;display:flex;flex-direction:column;align-items:center;text-align:center">
+          <div style="width:64px;height:64px;border-radius:50%;background:#FF2A2A;display:flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 12px 40px rgba(255,42,42,.4)"><span style="font:800 28px Archivo,sans-serif;color:#fff">✓</span></div>
+          <h2 style="font:800 22px/1.15 Archivo,sans-serif;letter-spacing:-0.02em;color:#fafafa;margin:0 0 16px">Treino B concluído</h2>
+          <div style="display:flex;align-items:center;margin-bottom:18px;width:100%">
+            <div style="flex:1;text-align:center"><div style="font:800 20px Archivo,sans-serif;color:#fafafa">42min</div><div style="font:600 9px JetBrains Mono,monospace;letter-spacing:0.08em;color:#84847f;margin-top:3px">DURAÇÃO</div></div>
+            <div style="width:1px;height:30px;background:#232323"></div>
+            <div style="flex:1;text-align:center"><div style="font:800 20px Archivo,sans-serif;color:#fafafa">6</div><div style="font:600 9px JetBrains Mono,monospace;letter-spacing:0.08em;color:#84847f;margin-top:3px">EXERCÍCIOS</div></div>
+            <div style="width:1px;height:30px;background:#232323"></div>
+            <div style="flex:1;text-align:center"><div style="font:800 20px Archivo,sans-serif;color:#fafafa">4.280kg</div><div style="font:600 9px JetBrains Mono,monospace;letter-spacing:0.08em;color:#84847f;margin-top:3px">VOLUME TOTAL</div></div>
+          </div>
+          <div style="width:100%;display:flex;flex-direction:column;gap:8px;margin-bottom:24px">
+            <div style="width:100%;border:1px solid #7a5a1f;background:rgba(212,163,49,.08);border-radius:14px;padding:12px 14px;text-align:left;display:flex;align-items:center;gap:11px"><span style="color:#d4a331;font-size:20px">🏆</span><div><div style="font:700 11px JetBrains Mono,monospace;letter-spacing:0.1em;color:#d4a331;margin-bottom:3px">NOVO RECORDE · CARGA</div><div style="font:600 13px Archivo,sans-serif;color:#fafafa">Remada Curvada · 42,5kg × 10</div></div></div>
+          </div>
+          <button onClick="{{ goCamera }}" style="width:100%;padding:16px;border:none;border-radius:13px;background:#FF2A2A;color:#fff;font:700 15px Archivo,sans-serif;cursor:pointer;margin-bottom:12px">Publicar treino</button>
+          <p onClick="{{ saveOnly }}" style="font:500 12px Archivo,sans-serif;color:#84847f;margin:0;text-align:center;cursor:pointer">Só salvar, não publicar</p>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- CAMERA -->
+    <sc-if value="{{ isCamera }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#0a0a0a;height:800px;display:flex;flex-direction:column">
+        <div style="flex:none;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 28px"><span style="font:600 13px Archivo,sans-serif;color:#fff">9:41</span><span style="font:600 11px Archivo,sans-serif;color:#fff;letter-spacing:0.1em">● ● ●</span></div>
+        <div style="flex:none;padding:0 20px 14px;display:flex;align-items:center;justify-content:space-between"><span onClick="{{ goDone }}" style="font:400 20px Archivo,sans-serif;color:#e8e8e3;cursor:pointer">✕</span><span style="font:700 13px Archivo,sans-serif;color:#fafafa">Publicar foto</span><span style="width:20px"></span></div>
+        <div style="flex:1;margin:0 14px;border-radius:20px;background:linear-gradient(180deg,#1a1a1e 0%,#232326 50%,#1a1a1e 100%);display:flex;align-items:center;justify-content:center;position:relative">
+          <div style="width:120px;height:120px;border:1.5px solid rgba(255,255,255,.35);border-radius:4px"></div>
+          <div style="position:absolute;bottom:14px;left:14px;right:14px"><div style="background:rgba(10,10,10,.7);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px"><span style="color:#d4a331">🏆</span><div style="flex:1"><div style="font:700 12px Archivo,sans-serif;color:#fafafa">Treino B concluído · 1 recorde</div></div></div></div>
+        </div>
+        <div style="flex:none;padding:20px 20px 28px;display:flex;align-items:center;justify-content:center;gap:48px">
+          <div style="width:44px"></div>
+          <div onClick="{{ takePhoto }}" style="width:72px;height:72px;border-radius:50%;border:3px solid #fff;display:flex;align-items:center;justify-content:center;cursor:pointer"><div style="width:60px;height:60px;border-radius:50%;background:#fff"></div></div>
+          <div style="width:44px;height:44px;border-radius:10px;background:#232323;display:flex;align-items:center;justify-content:center"><span style="color:#9a9a95">🔄</span></div>
+        </div>
+        <div style="flex:none;padding:0 20px 18px;text-align:center"><p onClick="{{ skipPhoto }}" style="font:500 12px Archivo,sans-serif;color:#84847f;margin:0;cursor:pointer">Pular e publicar sem foto</p></div>
+      </div>
+    </sc-if>
+
+    <!-- COMPOSE -->
+    <sc-if value="{{ isCompose }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#F4F4F2;height:800px;display:flex;flex-direction:column;position:relative">
+        <div style="flex:none;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 28px"><span style="font:600 13px Archivo,sans-serif;color:#0a0a0a">9:41</span><span style="font:600 11px Archivo,sans-serif;color:#0a0a0a;letter-spacing:0.1em">● ● ●</span></div>
+        <div style="flex:none;padding:12px 20px 16px;display:flex;align-items:center;justify-content:space-between">
+          <span onClick="{{ goDone }}" style="font:600 14px Archivo,sans-serif;color:#54544f;cursor:pointer">Cancelar</span>
+          <span onClick="{{ tryPublish }}" style="font:700 14px Archivo,sans-serif;color:#FF2A2A;cursor:pointer">Publicar</span>
+        </div>
+        <div style="flex:1;overflow:auto;padding:0 20px;display:flex;flex-direction:column;gap:14px">
+          <div style="background:#0a0a0a;border-radius:16px;padding:16px 18px">
+            <div style="font:800 17px Archivo,sans-serif;color:#fafafa;letter-spacing:-0.01em;margin-bottom:10px">Treino B · Costas e Bíceps</div>
+            <div style="display:flex;align-items:center;margin-bottom:10px"><div style="flex:1;text-align:center"><div style="font:800 16px Archivo,sans-serif;color:#fafafa">42min</div></div><div style="width:1px;height:20px;background:#232323"></div><div style="flex:1;text-align:center"><div style="font:800 16px Archivo,sans-serif;color:#fafafa">6 exercícios</div></div><div style="width:1px;height:20px;background:#232323"></div><div style="flex:1;text-align:center"><div style="font:800 16px Archivo,sans-serif;color:#fafafa">4.280kg</div></div></div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:2px"><div style="display:inline-flex;align-items:center;gap:6px;background:rgba(212,163,49,.12);border-radius:8px;padding:5px 10px"><span style="color:#d4a331">🏆</span><span style="font:600 11px Archivo,sans-serif;color:#d4a331">1 recorde pessoal</span></div></div>
+            <div style="aspect-ratio:16/10;width:100%;border-radius:10px;background:#232323;overflow:hidden;display:flex;align-items:center;justify-content:center;margin-top:4px"><span style="font:500 11px Archivo,sans-serif;color:#6e6e69">{{ photoLabel }}</span></div>
+          </div>
+          <div style="font:600 10px JetBrains Mono,monospace;letter-spacing:0.1em;color:#9a9a95;margin-top:2px">QUEM VÊ ESSE POST</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div onClick="{{ setReachMarina }}" style="{{ reachMarinaStyle }}"><span style="font:400 18px Archivo,sans-serif;color:#FF2A2A">👤</span><div><div style="font:700 13px Archivo,sans-serif;color:#0a0a0a">Só a Marina</div><div style="font:400 11px Archivo,sans-serif;color:#84847f">Apenas seu personal vê e comenta</div></div></div>
+            <div onClick="{{ setReachPublico }}" style="{{ reachPublicoStyle }}"><span style="font:400 18px Archivo,sans-serif;color:#9a9a95">🌐</span><div><div style="font:700 13px Archivo,sans-serif;color:#0a0a0a">Público</div><div style="font:400 11px Archivo,sans-serif;color:#84847f">Qualquer aluno do Reps Club pode ver</div></div></div>
+          </div>
+          <div style="font:400 11px/1.5 Archivo,sans-serif;color:#9a9a95">Cargas e volume aparecem no post. Peso corporal e medidas nunca são publicados.</div>
+        </div>
+        <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;background:rgba(10,10,10,.4);display:flex;align-items:center;justify-content:center;padding:0 26px">
+            <div style="background:#fff;border-radius:20px;padding:28px 26px;box-shadow:0 24px 60px rgba(0,0,0,.3);display:flex;flex-direction:column;align-items:center;text-align:center">
+              <div style="width:56px;height:56px;border-radius:50%;border:1.5px solid #c7c7c1;display:flex;align-items:center;justify-content:center;margin-bottom:18px"><span style="font:400 24px Archivo,sans-serif;color:#54544f">!</span></div>
+              <h3 style="font:800 20px Archivo,sans-serif;letter-spacing:-0.01em;color:#0a0a0a;margin:0 0 10px">Publicar para qualquer aluno?</h3>
+              <p style="font:400 13px/1.5 Archivo,sans-serif;color:#6e6e69;margin:0 0 24px">Seu nome, foto e as cargas deste treino ficam visíveis para toda a base do Reps Club.</p>
+              <div style="display:flex;gap:10px;width:100%">
+                <button onClick="{{ cancelConfirm }}" style="flex:1;padding:14px;border:1.5px solid #0a0a0a;border-radius:12px;background:transparent;color:#0a0a0a;font:700 13px Archivo,sans-serif;cursor:pointer">Voltar</button>
+                <button onClick="{{ publish }}" style="flex:1.3;padding:14px;border:none;border-radius:12px;color:#fff;font:700 13px Archivo,sans-serif;cursor:pointer;background:#000">Continuar</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- FEED -->
+    <sc-if value="{{ isFeed }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#F4F4F2;height:800px;display:flex;flex-direction:column">
+        <div style="flex:none;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 28px"><span style="font:600 13px Archivo,sans-serif;color:#0a0a0a">9:41</span><span style="font:600 11px Archivo,sans-serif;color:#0a0a0a;letter-spacing:0.1em">● ● ●</span></div>
+        <div style="flex:none;padding:12px 20px 0;display:flex;align-items:center;justify-content:space-between"><h2 style="font:800 22px Archivo,sans-serif;letter-spacing:-0.02em;color:#0a0a0a;margin:0">Feed</h2><span style="font:400 18px Archivo,sans-serif;color:#54544f">🔍</span></div>
+        <div style="flex:none;padding:14px 20px 12px">
+          <div style="display:flex;background:#e7e7e2;border-radius:11px;padding:3px">
+            <div onClick="{{ setFeedPublico }}" style="{{ feedTabPublicoStyle }}">Público</div>
+            <div onClick="{{ setFeedPersonal }}" style="{{ feedTabPersonalStyle }}">Personal</div>
+          </div>
+        </div>
+        <div style="flex:1;overflow:auto;padding:0 20px;display:flex;flex-direction:column;gap:10px">
+          <sc-for list="{{ posts }}" as="p" hint-placeholder-count="3">
+            <div onClick="{{ p.onClick }}" style="background:#fff;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;cursor:pointer">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:34px;height:34px;border-radius:50%;background:#e7e7e2;flex:none"></div>
+                <div style="flex:1;display:flex;align-items:center;gap:6px"><span style="font:700 13px Archivo,sans-serif;color:#0a0a0a">{{ p.author }}</span>
+                  <sc-if value="{{ p.isPersonal }}" hint-placeholder-val="{{ false }}"><span style="font:700 9px JetBrains Mono,monospace;letter-spacing:0.06em;color:#fff;background:#FF2A2A;border-radius:5px;padding:2px 6px">PERSONAL</span></sc-if>
+                </div>
+                <span style="font:500 11px Archivo,sans-serif;color:#9a9a95">{{ p.time }}</span>
+              </div>
+              <sc-if value="{{ p.isComment }}" hint-placeholder-val="{{ false }}">
+                <div style="font:400 13px/1.4 Archivo,sans-serif;color:#54544f">{{ p.commentText }}</div>
+              </sc-if>
+              <sc-if value="{{ p.isWorkout }}" hint-placeholder-val="{{ true }}">
+                <div style="background:#0a0a0a;border-radius:12px;padding:12px 14px"><div style="font:700 14px Archivo,sans-serif;color:#fafafa;margin-bottom:8px">{{ p.workout }}</div><div style="display:flex;gap:14px"><span style="font:600 12px Archivo,sans-serif;color:#e8e8e3">{{ p.dur }}</span><span style="font:600 12px Archivo,sans-serif;color:#e8e8e3">{{ p.exCount }}</span><span style="font:600 12px Archivo,sans-serif;color:#e8e8e3">{{ p.volume }}</span></div></div>
+                <sc-if value="{{ p.record }}" hint-placeholder-val="{{ false }}"><div style="display:inline-flex;align-self:flex-start;align-items:center;gap:6px;background:rgba(212,163,49,.12);border-radius:8px;padding:4px 9px"><span style="color:#d4a331">🏆</span><span style="font:600 10px Archivo,sans-serif;color:#d4a331">Recorde pessoal</span></div></sc-if>
+                <div style="font:400 13px/1.4 Archivo,sans-serif;color:#54544f">{{ p.caption }}</div>
+              </sc-if>
+              <div style="display:flex;gap:22px;padding-top:2px"><span style="font:600 12px Archivo,sans-serif;color:#84847f">🔥 {{ p.likes }}</span><span style="font:600 12px Archivo,sans-serif;color:#84847f">💬 {{ p.commentsCount }}</span></div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="flex:none;height:64px;background:#fff;border-top:1px solid #e7e7e2;display:flex;align-items:center;justify-content:space-around">
+          <div onClick="{{ goHome }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#9a9a95">▣</span><span style="font:600 9px Archivo,sans-serif;color:#9a9a95">Treinar</span></div>
+          <div onClick="{{ goProgresso }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#9a9a95">▲</span><span style="font:600 9px Archivo,sans-serif;color:#9a9a95">Progresso</span></div>
+          <div onClick="{{ goFeed }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#FF2A2A">◈</span><span style="font:600 9px Archivo,sans-serif;color:#FF2A2A">Feed</span></div>
+          <div onClick="{{ goPerfilAluno }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#9a9a95">●</span><span style="font:600 9px Archivo,sans-serif;color:#9a9a95">Perfil</span></div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- POST DETAIL -->
+    <sc-if value="{{ isPost }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#F4F4F2;height:800px;display:flex;flex-direction:column">
+        <div style="flex:none;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 28px"><span style="font:600 13px Archivo,sans-serif;color:#0a0a0a">9:41</span><span style="font:600 11px Archivo,sans-serif;color:#0a0a0a;letter-spacing:0.1em">● ● ●</span></div>
+        <div style="flex:none;padding:8px 20px 0"><span onClick="{{ goFeed }}" style="font:400 20px Archivo,sans-serif;color:#0a0a0a;cursor:pointer">←</span></div>
+        <div style="flex:1;overflow:auto;padding:12px 20px 0;display:flex;flex-direction:column;gap:12px">
+          <div style="background:#fff;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:10px"><div style="width:34px;height:34px;border-radius:50%;background:#e7e7e2;flex:none"></div><div style="flex:1"><span style="font:700 13px Archivo,sans-serif;color:#0a0a0a">{{ activePost.author }}</span></div><span style="font:500 11px Archivo,sans-serif;color:#9a9a95">{{ activePost.time }}</span></div>
+            <div style="background:#0a0a0a;border-radius:12px;padding:12px 14px"><div style="font:700 14px Archivo,sans-serif;color:#fafafa">{{ activePost.workout }}</div></div>
+            <div style="display:flex;gap:22px;padding-top:2px"><span style="font:600 12px Archivo,sans-serif;color:#FF2A2A">🔥 {{ activePost.likes }}</span><span style="font:600 12px Archivo,sans-serif;color:#84847f">💬 {{ activePost.commentsCount }}</span></div>
+          </div>
+          <div style="font:600 10px JetBrains Mono,monospace;letter-spacing:0.1em;color:#9a9a95">COMENTÁRIOS</div>
+          <div style="display:flex;flex-direction:column;gap:10px;overflow:auto">
+            <sc-for list="{{ activePost.comments }}" as="c" hint-placeholder-count="2">
+              <div style="display:flex;gap:10px;padding:2px 12px">
+                <div style="width:26px;height:26px;border-radius:50%;background:#e7e7e2;flex:none"></div>
+                <div><div style="display:flex;align-items:center;gap:6px"><span style="font:700 12px Archivo,sans-serif;color:#0a0a0a">{{ c.who }}</span><span style="font:400 10px Archivo,sans-serif;color:#9a9a95;margin-left:auto">{{ c.time }}</span></div><div style="font:400 12px/1.4 Archivo,sans-serif;color:#54544f;margin-top:2px">{{ c.text }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div onClick="{{ commentToast }}" style="flex:none;padding:12px 20px 22px;display:flex;align-items:center;gap:10px;background:#fff;border-top:1px solid #e7e7e2;cursor:pointer">
+          <div style="width:30px;height:30px;border-radius:50%;background:#e7e7e2;flex:none"></div>
+          <div style="flex:1;background:#f2f2ef;border-radius:20px;padding:9px 14px;font:400 13px Archivo,sans-serif;color:#9a9a95">Comentar...</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- PROGRESSO · Meu Treino -->
+    <sc-if value="{{ isProgresso }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#F4F4F2;height:800px;display:flex;flex-direction:column">
+        <div style="flex:none;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 28px"><span style="font:600 13px Archivo,sans-serif;color:#0a0a0a">9:41</span><span style="font:600 11px Archivo,sans-serif;color:#0a0a0a;letter-spacing:0.1em">● ● ●</span></div>
+        <div style="flex:none;padding:12px 20px 14px"><h2 style="font:800 22px Archivo,sans-serif;letter-spacing:-0.02em;color:#0a0a0a;margin:0 0 3px">Meu treino</h2><div style="font:400 12px Archivo,sans-serif;color:#84847f">Projeto Verão · Semana 3 de 8</div></div>
+
+        <sc-if value="{{ graphHistoryClosed }}" hint-placeholder-val="{{ true }}">
+          <div style="flex:none;padding:0 20px 14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div style="background:#fff;border-radius:14px;padding:12px 9px;text-align:center"><div style="font-size:17px;line-height:1;margin-bottom:5px">🔥</div><div style="font:800 19px Archivo,sans-serif;color:#0a0a0a;line-height:1">5</div><div style="font:600 8px JetBrains Mono,monospace;letter-spacing:0.05em;color:#9a9a95;margin-top:4px">DIAS SEGUIDOS</div></div>
+            <div style="background:#fff;border-radius:14px;padding:12px 9px;text-align:center"><div style="font-size:17px;line-height:1;margin-bottom:5px">🏆</div><div style="font:800 19px Archivo,sans-serif;color:#0a0a0a;line-height:1">42,5<span style="font:700 11px Archivo,sans-serif">kg</span></div><div style="font:600 8px JetBrains Mono,monospace;letter-spacing:0.05em;color:#9a9a95;margin-top:4px">RECORDE · REMADA</div></div>
+            <div style="background:#fff;border-radius:14px;padding:12px 9px;text-align:center"><div style="font-size:17px;line-height:1;margin-bottom:5px">🎯</div><div style="font:800 19px Archivo,sans-serif;color:#0a0a0a;line-height:1">38<span style="font:700 11px Archivo,sans-serif">%</span></div><div style="font:600 8px JetBrains Mono,monospace;letter-spacing:0.05em;color:#9a9a95;margin-top:4px">DO PROGRAMA</div></div>
+          </div>
+
+          <div style="flex:none;padding:0 20px 12px">
+            <div style="display:flex;background:#e7e7e2;border-radius:11px;padding:3px">
+              <div onClick="{{ setViewPlanilha }}" style="{{ viewPlanilhaStyle }}">Planilha</div>
+              <div onClick="{{ setViewGrafico }}" style="{{ viewGraficoStyle }}">Gráfico</div>
+            </div>
+          </div>
+          <div style="flex:none;padding:0 20px 12px;display:flex;gap:7px">
+            <span onClick="{{ setTrainA }}" style="{{ tabAStyle }}">Treino A</span>
+            <span onClick="{{ setTrainB }}" style="{{ tabBStyle }}">Treino B</span>
+            <span onClick="{{ setTrainC }}" style="{{ tabCStyle }}">Treino C</span>
+          </div>
+
+          <sc-if value="{{ isViewPlanilha }}" hint-placeholder-val="{{ true }}">
+            <div style="flex:1;overflow-y:auto;padding:0 20px;display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:0 2px"><span style="font:600 10px JetBrains Mono,monospace;letter-spacing:0.1em;color:#9a9a95">PEITO E TRÍCEPS · 6 EXERCÍCIOS</span><span style="font:500 10px Archivo,sans-serif;color:#84847f">última: 16/ago</span></div>
+              <sc-for list="{{ exercises }}" as="ex" hint-placeholder-count="6">
+                <div onClick="{{ ex.onClick }}" style="{{ ex.cardStyle }}">
+                  <div style="flex:1;min-width:0">
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span style="font:700 13px Archivo,sans-serif;color:#0a0a0a">{{ ex.name }}</span><sc-if value="{{ ex.record }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px">🏆</span></sc-if></div>
+                    <div style="font:400 11px Archivo,sans-serif;color:#9a9a95">{{ ex.sub }}</div>
+                  </div>
+                  <div style="text-align:right;flex:none"><div style="font:800 15px Archivo,sans-serif;color:#0a0a0a">{{ ex.load }}<span style="font:600 10px Archivo,sans-serif;color:#84847f">{{ ex.unit }}</span></div><div style="font:600 9px JetBrains Mono,monospace;letter-spacing:0.05em;margin-top:2px;color:{{ ex.deltaColor }}">{{ ex.deltaText }}</div></div>
+                  <div style="flex:none;font:600 11px Archivo,sans-serif;color:#c4c4bf">{{ ex.chevron }}</div>
+                </div>
+                <sc-if value="{{ ex.expanded }}" hint-placeholder-val="{{ false }}">
+                  <div style="background:#fff;border-radius:0 0 14px 14px;margin-top:-8px;padding:4px 15px 12px;display:flex;flex-direction:column;gap:7px">
+                    <div style="display:flex;justify-content:space-between;padding:0 1px"><span style="font:600 9px JetBrains Mono,monospace;letter-spacing:0.06em;color:#9a9a95">DATA</span><span style="font:600 9px JetBrains Mono,monospace;letter-spacing:0.06em;color:#9a9a95">SÉRIE</span><span style="font:600 9px JetBrains Mono,monospace;letter-spacing:0.06em;color:#9a9a95">REPS</span><span style="font:600 9px JetBrains Mono,monospace;letter-spacing:0.06em;color:#9a9a95">CARGA</span></div>
+                    <sc-for list="{{ ex.history }}" as="h" hint-placeholder-count="3">
+                      <div style="display:flex;justify-content:space-between;padding:6px 1px;border-top:1px solid #f0f0ec"><span style="font:500 11px Archivo,sans-serif;color:#54544f">{{ h.d }}</span><span style="font:500 11px Archivo,sans-serif;color:#54544f">{{ h.s }}</span><span style="font:500 11px Archivo,sans-serif;color:#54544f">{{ h.r }}</span><span style="font:700 11px Archivo,sans-serif;color:#0a0a0a">{{ h.c }}</span></div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isViewGrafico }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;overflow:auto;padding:0 20px;display:flex;flex-direction:column;gap:10px">
+              <div onClick="{{ openSupino }}" style="background:#fff;border-radius:14px;padding:11px 15px;cursor:pointer">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:7px"><span style="font:700 13px Archivo,sans-serif;color:#0a0a0a">Supino reto</span><span style="font:700 12px Archivo,sans-serif;color:#1f9d57">62,5kg · +8%</span></div>
+                <svg viewBox="0 0 300 90" preserveAspectRatio="none" style="width:100%;height:58px;display:block;overflow:visible"><polyline points="{{ supinoPreview.points }}" fill="none" stroke="{{ supinoPreview.color }}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></polyline><sc-for list="{{ supinoPreview.dots }}" as="dot" hint-placeholder-count="6"><circle cx="{{ dot.cx }}" cy="{{ dot.cy }}" r="{{ dot.r }}" fill="{{ supinoPreview.color }}" opacity="{{ dot.opacity }}"></circle></sc-for></svg>
+                <div style="display:flex;justify-content:space-between;margin-top:4px"><span style="font:500 9px JetBrains Mono,monospace;color:#b6b6b0">{{ supinoPreview.firstDate }}</span><span style="font:500 9px JetBrains Mono,monospace;color:#b6b6b0">{{ supinoPreview.lastDate }}</span></div>
+              </div>
+              <div onClick="{{ openCrucifixo }}" style="background:#fff;border-radius:14px;padding:11px 15px;border:1.5px solid #d4a331;cursor:pointer">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:7px"><span style="display:flex;align-items:center;gap:6px;font:700 13px Archivo,sans-serif;color:#0a0a0a">Crucifixo inclinado <span style="font-size:11px">🏆</span></span><span style="font:700 12px Archivo,sans-serif;color:#d4a331">18kg · recorde</span></div>
+                <svg viewBox="0 0 300 90" preserveAspectRatio="none" style="width:100%;height:58px;display:block;overflow:visible"><polyline points="{{ crucifixoPreview.points }}" fill="none" stroke="{{ crucifixoPreview.color }}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></polyline><sc-for list="{{ crucifixoPreview.dots }}" as="dot" hint-placeholder-count="6"><circle cx="{{ dot.cx }}" cy="{{ dot.cy }}" r="{{ dot.r }}" fill="{{ crucifixoPreview.color }}" opacity="{{ dot.opacity }}"></circle></sc-for></svg>
+                <div style="display:flex;justify-content:space-between;margin-top:4px"><span style="font:500 9px JetBrains Mono,monospace;color:#b6b6b0">{{ crucifixoPreview.firstDate }}</span><span style="font:500 9px JetBrains Mono,monospace;color:#b6b6b0">{{ crucifixoPreview.lastDate }}</span></div>
+              </div>
+              <div onClick="{{ openTriceps }}" style="background:#fff;border-radius:14px;padding:11px 15px;cursor:pointer">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:7px"><span style="font:700 13px Archivo,sans-serif;color:#0a0a0a">Tríceps corda</span><span style="font:700 12px Archivo,sans-serif;color:#1f9d57">30kg · +7%</span></div>
+                <svg viewBox="0 0 300 90" preserveAspectRatio="none" style="width:100%;height:58px;display:block;overflow:visible"><polyline points="{{ tricepsPreview.points }}" fill="none" stroke="{{ tricepsPreview.color }}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></polyline><sc-for list="{{ tricepsPreview.dots }}" as="dot" hint-placeholder-count="6"><circle cx="{{ dot.cx }}" cy="{{ dot.cy }}" r="{{ dot.r }}" fill="{{ tricepsPreview.color }}" opacity="{{ dot.opacity }}"></circle></sc-for></svg>
+                <div style="display:flex;justify-content:space-between;margin-top:4px"><span style="font:500 9px JetBrains Mono,monospace;color:#b6b6b0">{{ tricepsPreview.firstDate }}</span><span style="font:500 9px JetBrains Mono,monospace;color:#b6b6b0">{{ tricepsPreview.lastDate }}</span></div>
+              </div>
+            </div>
+          </sc-if>
+
+          <div style="flex:none;height:64px;background:#fff;border-top:1px solid #e7e7e2;display:flex;align-items:center;justify-content:space-around">
+            <div onClick="{{ goHome }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#9a9a95">▣</span><span style="font:600 9px Archivo,sans-serif;color:#9a9a95">Treinar</span></div>
+            <div onClick="{{ goProgresso }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#FF2A2A">▲</span><span style="font:600 9px Archivo,sans-serif;color:#FF2A2A">Progresso</span></div>
+            <div onClick="{{ goFeed }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#9a9a95">◈</span><span style="font:600 9px Archivo,sans-serif;color:#9a9a95">Feed</span></div>
+            <div onClick="{{ goPerfilAluno }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#9a9a95">●</span><span style="font:600 9px Archivo,sans-serif;color:#9a9a95">Perfil</span></div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ graphHistoryEx }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:none;padding:0 20px 0;display:flex;align-items:center;gap:14px"><span onClick="{{ closeGraph }}" style="font:400 20px Archivo,sans-serif;color:#0a0a0a;cursor:pointer">←</span><h2 style="font:800 21px Archivo,sans-serif;letter-spacing:-0.01em;color:#0a0a0a;margin:0">Histórico</h2></div>
+          <div style="flex:1;overflow-y:auto;padding:14px 20px 20px">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px"><span style="font:700 13px Archivo,sans-serif;color:#0a0a0a">{{ graphHistoryEx.name }}</span><span style="font:700 12px Archivo,sans-serif;color:{{ graphHistoryEx.chartColor }}">{{ graphHistoryEx.chartSummary }}</span></div>
+            <div style="position:relative;height:58px">
+              <svg viewBox="0 0 300 90" preserveAspectRatio="none" style="width:100%;height:100%;display:block;overflow:visible"><polyline points="{{ chartPoints }}" fill="none" stroke="{{ graphHistoryEx.chartColor }}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+              <sc-for list="{{ chartCoords }}" as="pt" hint-placeholder-count="6">
+                <div onClick="{{ pt.onClick }}" style="position:absolute;width:16px;height:16px;border-radius:50%;left:{{ pt.xPct }}%;top:{{ pt.yPct }}%;transform:translate(-50%,-50%);cursor:pointer;display:flex;align-items:center;justify-content:center"><div style="width:{{ pt.dotSize }}px;height:{{ pt.dotSize }}px;border-radius:50%;background:{{ graphHistoryEx.chartColor }}"></div></div>
+              </sc-for>
+              <sc-if value="{{ selectedCoord }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:{{ selectedCoord.xPct }}%;top:{{ selectedCoord.yPct }}%;transform:{{ selectedCoord.tooltipTransform }};background:#0a0a0a;color:#fff;border-radius:8px;padding:6px 9px;white-space:nowrap;font:600 10px Archivo,sans-serif;pointer-events:none;z-index:2">{{ selectedCoord.d }} · {{ selectedCoord.s }}x{{ selectedCoord.r }} · {{ selectedCoord.c }}</div></sc-if>
+            </div>
+            <div style="height:14px;position:relative">
+              <sc-for list="{{ chartCoords }}" as="pt" hint-placeholder-count="6"><span style="position:absolute;left:{{ pt.xPct }}%;top:0;transform:translateX(-50%);font:{{ pt.labelWeight }} 7px JetBrains Mono,monospace;color:{{ pt.labelColor }};white-space:nowrap">{{ pt.d }}</span></sc-for>
+            </div>
+            <div style="display:flex;background:#e7e7e2;border-radius:9px;padding:3px;margin:16px 0 14px">
+              <div onClick="{{ range6.onClick }}" style="{{ range6.style }}">{{ range6.label }}</div>
+              <div onClick="{{ range12.onClick }}" style="{{ range12.style }}">{{ range12.label }}</div>
+              <div onClick="{{ rangeAll.onClick }}" style="{{ rangeAll.style }}">{{ rangeAll.label }}</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 0.7fr 0.9fr 1fr;padding:0 13px 4px"><span style="font:600 9px JetBrains Mono,monospace;letter-spacing:0.06em;color:#9a9a95">DATA</span><span style="font:600 9px JetBrains Mono,monospace;letter-spacing:0.06em;color:#9a9a95;text-align:center">SÉRIE</span><span style="font:600 9px JetBrains Mono,monospace;letter-spacing:0.06em;color:#9a9a95;text-align:center">REPS</span><span style="font:600 9px JetBrains Mono,monospace;letter-spacing:0.06em;color:#9a9a95;text-align:right">CARGA</span></div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+              <sc-for list="{{ tableRows }}" as="h" hint-placeholder-count="3">
+                <div style="display:grid;grid-template-columns:1fr 0.7fr 0.9fr 1fr;align-items:center;background:#fff;border-radius:12px;padding:12px 13px"><span style="font:700 11px JetBrains Mono,monospace;color:#84847f">{{ h.d }}</span><span style="font:500 12px Archivo,sans-serif;color:#54544f;text-align:center">{{ h.s }}</span><span style="font:500 12px Archivo,sans-serif;color:#54544f;text-align:center">{{ h.r }}</span><span style="font:800 13px Archivo,sans-serif;color:#0a0a0a;text-align:right">{{ h.c }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- PERFIL ALUNO -->
+    <sc-if value="{{ isPerfilAluno }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#F4F4F2;height:800px;display:flex;flex-direction:column">
+        <div style="flex:none;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 28px"><span style="font:600 13px Archivo,sans-serif;color:#0a0a0a">9:41</span><span style="font:600 11px Archivo,sans-serif;color:#0a0a0a;letter-spacing:0.1em">● ● ●</span></div>
+        <div style="flex:1;overflow:auto;padding:16px 20px 0">
+          <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:18px">
+            <div style="width:82px;height:82px;border-radius:50%;background:#e7e7e2;margin-bottom:10px"></div>
+            <div style="font:800 19px Archivo,sans-serif;color:#0a0a0a;letter-spacing:-0.01em">João Silva</div>
+            <div style="font:400 12px Archivo,sans-serif;color:#9a9a95">@joaosilva</div>
+          </div>
+          <div onClick="{{ profileToast }}" style="display:flex;align-items:center;gap:12px;background:#fff;border-radius:14px;padding:13px 14px;margin-bottom:16px;cursor:pointer">
+            <div style="width:38px;height:38px;border-radius:50%;background:#262626;color:#cfcfcf;font:700 13px Archivo,sans-serif;display:flex;align-items:center;justify-content:center;flex:none">MC</div>
+            <div style="flex:1"><div style="font:700 13px Archivo,sans-serif;color:#0a0a0a">Marina Costa</div><div style="font:400 11px Archivo,sans-serif;color:#84847f">Seu personal trainer</div></div>
+            <span style="font:600 10px Archivo,sans-serif;color:#0a0a0a;border:1.5px solid #0a0a0a;border-radius:8px;padding:6px 9px;white-space:nowrap">📱 WhatsApp</span>
+          </div>
+          <div style="font:600 10px JetBrains Mono,monospace;letter-spacing:0.1em;color:#9a9a95;margin-bottom:8px">MEUS DADOS</div>
+          <div style="background:#fff;border-radius:14px;margin-bottom:16px;overflow:hidden">
+            <div onClick="{{ profileToast }}" style="display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border-bottom:1px solid #f2f2ef;cursor:pointer"><span style="font:500 13px Archivo,sans-serif;color:#54544f">Peso</span><div style="display:flex;align-items:center;gap:8px"><span style="font:600 13px Archivo,sans-serif;color:#0a0a0a">78kg</span><span style="color:#c7c7c1">›</span></div></div>
+            <div onClick="{{ goReavalPerfil }}" style="display:flex;align-items:center;justify-content:space-between;padding:13px 15px;cursor:pointer"><span style="font:500 13px Archivo,sans-serif;color:#54544f">Reavaliação de 30 dias</span><span style="color:#c7c7c1">›</span></div>
+          </div>
+          <div style="font:600 10px JetBrains Mono,monospace;letter-spacing:0.1em;color:#9a9a95;margin-bottom:8px">CONTA</div>
+          <div style="background:#fff;border-radius:14px;overflow:hidden">
+            <div onClick="{{ profileToast }}" style="display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border-bottom:1px solid #f2f2ef;cursor:pointer"><span style="font:500 13px Archivo,sans-serif;color:#54544f">Notificações</span><span style="color:#c7c7c1">›</span></div>
+            <div onClick="{{ sair }}" style="display:flex;align-items:center;justify-content:space-between;padding:13px 15px;cursor:pointer"><span style="font:600 13px Archivo,sans-serif;color:#FF2A2A">Sair</span></div>
+          </div>
+        </div>
+        <div style="flex:none;height:64px;background:#fff;border-top:1px solid #e7e7e2;display:flex;align-items:center;justify-content:space-around">
+          <div onClick="{{ goHome }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#9a9a95">▣</span><span style="font:600 9px Archivo,sans-serif;color:#9a9a95">Treinar</span></div>
+          <div onClick="{{ goProgresso }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#9a9a95">▲</span><span style="font:600 9px Archivo,sans-serif;color:#9a9a95">Progresso</span></div>
+          <div onClick="{{ goFeed }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#9a9a95">◈</span><span style="font:600 9px Archivo,sans-serif;color:#9a9a95">Feed</span></div>
+          <div onClick="{{ goPerfilAluno }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><span style="font:400 16px Archivo,sans-serif;color:#FF2A2A">●</span><span style="font:600 9px Archivo,sans-serif;color:#FF2A2A">Perfil</span></div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- REAVALIAÇÃO -->
+    <sc-if value="{{ isReaval }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#F4F4F2;height:800px;display:flex;flex-direction:column">
+        <div style="flex:none;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 28px"><span style="font:600 13px Archivo,sans-serif;color:#0a0a0a">9:41</span><span style="font:600 11px Archivo,sans-serif;color:#0a0a0a;letter-spacing:0.1em">● ● ●</span></div>
+        <div style="flex:none;padding:12px 20px 0;display:flex;align-items:center;gap:14px"><span onClick="{{ backFromReaval }}" style="font:400 20px Archivo,sans-serif;color:#0a0a0a;cursor:pointer">←</span><h2 style="font:800 19px Archivo,sans-serif;letter-spacing:-0.01em;color:#0a0a0a;margin:0">Reavaliação de 30 dias</h2></div>
+        <div style="flex:1;overflow:auto;padding:16px 20px 24px">
+          <div style="background:#fff;border-radius:14px;padding:16px;margin-bottom:14px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;position:relative">
+              <div style="text-align:center;padding-right:10px"><div style="font:600 10px JetBrains Mono,monospace;letter-spacing:0.08em;color:#9a9a95;margin-bottom:6px">ANTES</div><div style="font:800 20px Archivo,sans-serif;color:#0a0a0a">82kg</div></div>
+              <div style="text-align:center;padding-left:10px"><div style="font:600 10px JetBrains Mono,monospace;letter-spacing:0.08em;color:#9a9a95;margin-bottom:6px">AGORA</div><div style="font:800 20px Archivo,sans-serif;color:#0a0a0a">78kg</div></div>
+              <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:#ececE7"></div>
+            </div>
+            <div style="height:1px;background:#ececE7;margin:14px 0 10px"></div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:500 12px Archivo,sans-serif;color:#54544f">Cintura</span><span style="font:600 12px Archivo,sans-serif;color:#1f9d57">86cm → 80cm ↓</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:500 12px Archivo,sans-serif;color:#54544f">Braço</span><span style="font:600 12px Archivo,sans-serif;color:#1f9d57">34cm → 36cm ↑</span></div>
+            </div>
+          </div>
+          <div style="font:400 11px/1.5 Archivo,sans-serif;color:#9a9a95;margin-bottom:14px">Fotos e medidas são privadas. Só você e a Marina veem.</div>
+          <button onClick="{{ sendReaval }}" style="width:100%;padding:16px;border:none;border-radius:13px;background:#FF2A2A;color:#fff;font:700 15px Archivo,sans-serif;cursor:pointer">Enviar reavaliação</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ toastMsg }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:#0a0a0a;color:#fff;padding:11px 18px;border-radius:12px;font:600 12px Archivo,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:10;white-space:nowrap">{{ toastMsg }}</div>
+    </sc-if>
+
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    screen: 'splash', sheetOpen: false,
+    execIndex: 0, activeSet: 1, curLoad: 40, curReps: 10,
+    reach: 'marina', hasPhoto: false, confirmOpen: false,
+    feedTab: 'publico', activePostId: null,
+    treinoView: 'planilha', trainTab: 'A', expandedEx: null,
+    graphEx: null, chartRange: 6, selectedPoint: null,
+    reavalFrom: 'home', toastMsg: null
+  };
+
+  exerciseDefs = [
+    { name: 'Barra fixa', sets: 4, repsLabel: '8-10', repsBase: 9, restS: 90, load: null, bodyweight: true, lastText: 'Peso corporal' },
+    { name: 'Remada Curvada', sets: 4, repsLabel: '8-10', repsBase: 10, restS: 90, load: 40, lastText: 'Última vez: 40kg × 10' },
+    { name: 'Puxada frontal', sets: 3, repsLabel: '10-12', repsBase: 11, restS: 75, load: 54, lastText: 'Última vez: 54kg × 11' },
+    { name: 'Remada baixa', sets: 3, repsLabel: '10-12', repsBase: 10, restS: 75, load: 20, lastText: 'Primeira vez' },
+    { name: 'Rosca direta', sets: 3, repsLabel: '10-12', repsBase: 11, restS: 60, load: 16, lastText: 'Última vez: 16kg × 11' },
+    { name: 'Rosca alternada', sets: 3, repsLabel: '10-12', repsBase: 11, restS: 60, load: 14, lastText: 'Última vez: 14kg × 11' }
+  ];
+
+  treinoBList = [
+    { n: 1, name: 'Barra fixa', sets: 4, reps: '8-10', rest: 90, tag: 'peso corporal' },
+    { n: 2, name: 'Remada curvada', sets: 4, reps: '8-10', rest: 90, tag: '40kg' },
+    { n: 3, name: 'Puxada frontal', sets: 3, reps: '10-12', rest: 75, tag: '54kg' },
+    { n: 4, name: 'Remada baixa', sets: 3, reps: '10-12', rest: 75, tag: 'primeira vez' },
+    { n: 5, name: 'Rosca direta', sets: 3, reps: '10-12', rest: 60, tag: '16kg' },
+    { n: 6, name: 'Rosca alternada', sets: 3, reps: '10-12', rest: 60, tag: '14kg' }
+  ];
+
+  postsData = [
+    { id: 'p1', author: 'Rafael Lima', time: 'há 2h', isWorkout: true, workout: 'Treino A · Peito e Tríceps', dur: '38min', exCount: '5 exercícios', volume: '3.120kg', record: false, caption: 'Semana pesada, mas fechei tudo 💪', likes: 12, commentsCount: 3,
+      comments: [{ who: 'Marina Costa', time: 'há 1h', text: 'Boa evolução no supino, semana que vem sobe carga' }, { who: 'Beatriz Souza', time: 'há 40min', text: 'Mandou bem!' }] },
+    { id: 'p3', author: 'Beatriz Souza', time: 'há 5h', isWorkout: true, workout: 'Treino C · Pernas', dur: '52min', exCount: '7 exercícios', volume: '5.640kg', record: true, caption: 'Perna tremendo 🦵', likes: 21, commentsCount: 6,
+      comments: [{ who: 'Rafael Lima', time: 'há 3h', text: 'Monstro!' }] }
+  ];
+
+  toast(msg) { clearTimeout(this._t); this.setState({ toastMsg: msg }); this._t = setTimeout(() => this.setState({ toastMsg: null }), 2200); }
+
+  goSplash = () => this.setState({ screen: 'splash' });
+  startOnboarding = () => this.setState({ screen: 'ob1' });
+  goOb2 = () => this.setState({ screen: 'ob2' });
+  goOb3 = () => this.setState({ screen: 'ob3' });
+  goHome = () => this.setState({ screen: 'home', sheetOpen: false });
+  goTreinos = () => this.setState({ screen: 'treinos' });
+  goTreinoDetalhe = () => this.setState({ screen: 'treino-detalhe' });
+  toastTreinoA = () => this.toast('Treino A já concluído esta semana');
+  toastTreinoC = () => this.toast('Somente Treino B é interativo neste protótipo');
+  toastTreinoD = () => this.toast('Somente Treino B é interativo neste protótipo');
+
+  startExec(idx) {
+    const d = this.exerciseDefs[idx];
+    this.setState({ screen: 'exec', execIndex: idx, activeSet: 1, curLoad: d.load || 20, curReps: d.repsBase, sheetOpen: false });
+  }
+  startExecB = () => this.startExec(0);
+
+  decLoad = () => this.setState(s => ({ curLoad: Math.max(0, +(s.curLoad - 2.5).toFixed(1)) }));
+  incLoad = () => this.setState(s => ({ curLoad: +(s.curLoad + 2.5).toFixed(1) }));
+  decReps = () => this.setState(s => ({ curReps: Math.max(0, s.curReps - 1) }));
+  incReps = () => this.setState(s => ({ curReps: s.curReps + 1 }));
+
+  confirmSet = () => {
+    const d = this.exerciseDefs[this.state.execIndex];
+    if (this.state.activeSet < d.sets) this.setState(s => ({ activeSet: s.activeSet + 1, screen: 'rest' }));
+    else this.nextExercise();
+  };
+  skipRest = () => this.setState({ screen: 'exec' });
+  nextExercise = () => {
+    const idx = this.state.execIndex;
+    if (idx >= this.exerciseDefs.length - 1) this.setState({ screen: 'done', sheetOpen: false });
+    else this.startExec(idx + 1);
+  };
+  toggleSheet = () => this.setState(s => ({ sheetOpen: !s.sheetOpen }));
+  stopProp = (e) => e && e.stopPropagation && e.stopPropagation();
+  demoToast = () => { this.toast('Demonstração indisponível no protótipo'); this.setState({ sheetOpen: false }); };
+  missedSet = () => { this.setState({ sheetOpen: false }); this.toast('Marcado como não realizado'); this.confirmSet(); };
+  historyToast = () => { this.toast('Disponível na aba Progresso'); this.setState({ sheetOpen: false }); };
+  endWorkout = () => this.setState({ screen: 'done', sheetOpen: false });
+
+  goDone = () => this.setState({ screen: 'done' });
+  goCamera = () => this.setState({ screen: 'camera' });
+  takePhoto = () => this.setState({ screen: 'compose', hasPhoto: true });
+  skipPhoto = () => this.setState({ screen: 'compose', hasPhoto: false });
+  saveOnly = () => { this.toast('Treino salvo'); this.setState({ screen: 'home' }); };
+  setReachMarina = () => this.setState({ reach: 'marina' });
+  setReachPublico = () => this.setState({ reach: 'publico' });
+  tryPublish = () => { if (this.state.reach === 'publico') this.setState({ confirmOpen: true }); else this.publish(); };
+  publish = () => { this.setState({ screen: 'home', confirmOpen: false }); this.toast('Treino publicado!'); };
+  cancelConfirm = () => this.setState({ confirmOpen: false });
+
+  goFeed = () => this.setState({ screen: 'feed' });
+  setFeedPublico = () => this.setState({ feedTab: 'publico' });
+  setFeedPersonal = () => { this.setState({ feedTab: 'personal' }); this.toast('Sem posts do personal ainda'); };
+  goPost = (id) => this.setState({ screen: 'post', activePostId: id });
+  commentToast = () => this.toast('Comentários em breve');
+
+  goProgresso = () => this.setState({ screen: 'progresso' });
+  setViewPlanilha = () => this.setState({ treinoView: 'planilha' });
+  setViewGrafico = () => this.setState({ treinoView: 'grafico' });
+  setTrainA = () => this.setState({ trainTab: 'A' });
+  setTrainB = () => { this.setState({ trainTab: 'B' }); this.toast('Somente Treino A tem dados neste protótipo'); };
+  setTrainC = () => { this.setState({ trainTab: 'C' }); this.toast('Somente Treino A tem dados neste protótipo'); };
+  openSupino = () => this.setState({ graphEx: 'Supino reto', chartRange: 6, selectedPoint: null });
+  openCrucifixo = () => this.setState({ graphEx: 'Crucifixo inclinado', chartRange: 6, selectedPoint: null });
+  openTriceps = () => this.setState({ graphEx: 'Tríceps corda', chartRange: 6, selectedPoint: null });
+  closeGraph = () => this.setState({ graphEx: null, chartRange: 6, selectedPoint: null });
+
+  buildChart(history, range) {
+    const n = range === 'total' ? history.length : Math.min(range, history.length);
+    const pts = history.slice(-n);
+    const loads = pts.map(p => parseFloat(String(p.c).replace(',', '.')));
+    const min = Math.min(...loads), max = Math.max(...loads);
+    const span = (max - min) || 1;
+    const w = 300, h = 90, padY = 12, chartH = h - padY * 2;
+    const stepX = pts.length > 1 ? w / (pts.length - 1) : 0;
+    return pts.map((p, i) => {
+      const x = i === pts.length - 1 ? w : i * stepX;
+      const y = padY + chartH - ((loads[i] - min) / span) * chartH;
+      return { x, y, xPct: (x / w) * 100, yPct: (y / h) * 100, d: p.d, s: p.s, r: p.r, c: p.c };
+    });
+  }
+
+  goPerfilAluno = () => this.setState({ screen: 'perfil-aluno' });
+  profileToast = () => this.toast('Editável no app real');
+  sair = () => this.setState({ screen: 'splash' });
+  goReavalHome = () => this.setState({ screen: 'reaval', reavalFrom: 'home' });
+  goReavalPerfil = () => this.setState({ screen: 'reaval', reavalFrom: 'perfil' });
+  backFromReaval = () => this.setState({ screen: this.state.reavalFrom === 'home' ? 'home' : 'perfil-aluno' });
+  sendReaval = () => { this.toast('Reavaliação enviada'); this.setState({ screen: this.state.reavalFrom === 'home' ? 'home' : 'perfil-aluno' }); };
+
+  renderVals() {
+    const s = this.state;
+    const screen = s.screen;
+
+    // exec
+    const d = this.exerciseDefs[s.execIndex];
+    const setsList = [];
+    for (let i = 0; i < d.sets; i++) {
+      const num = i + 1;
+      if (num < s.activeSet) setsList.push({ num, isDone: true, loadLabel: d.bodyweight ? 'peso corporal' : (d.load + ' kg'), reps: d.repsBase });
+      else if (num === s.activeSet) setsList.push({ num, isActive: true });
+      else setsList.push({ num, isPending: true, loadLabel: d.bodyweight ? 'peso corporal' : (d.load + ' kg'), reps: d.repsBase });
+    }
+
+    // planilha data
+    const data = [
+      { name: 'Supino reto', sub: '4 séries · 8-10 reps', load: '62,5', unit: 'kg', deltaText: '↑ +2,5kg', deltaColor: '#1f9d57', record: false, chartColor: '#FF2A2A', chartSummary: '62,5kg · +8%',
+        history: [
+          { d: '14/jul', s: '4', r: '8-10', c: '52,5kg' }, { d: '16/jul', s: '4', r: '8-10', c: '52,5kg' },
+          { d: '19/jul', s: '4', r: '8-10', c: '55kg' }, { d: '21/jul', s: '4', r: '8-10', c: '55kg' },
+          { d: '24/jul', s: '4', r: '8-10', c: '57,5kg' }, { d: '26/jul', s: '4', r: '8-10', c: '57,5kg' },
+          { d: '29/jul', s: '4', r: '8-10', c: '60kg' }, { d: '31/jul', s: '4', r: '8-10', c: '60kg' },
+          { d: '02/ago', s: '4', r: '8-10', c: '60kg' }, { d: '05/ago', s: '4', r: '8-10', c: '60kg' },
+          { d: '09/ago', s: '4', r: '8-10', c: '60kg' }, { d: '16/ago', s: '4', r: '8-10', c: '62,5kg' }
+        ] },
+      { name: 'Crucifixo inclinado', sub: '3 séries · 12 reps', load: '18', unit: 'kg', deltaText: 'RECORDE', deltaColor: '#d4a331', record: true, chartColor: '#d4a331', chartSummary: '18kg · recorde',
+        history: [
+          { d: '14/jul', s: '3', r: '12', c: '12kg' }, { d: '16/jul', s: '3', r: '12', c: '12kg' },
+          { d: '19/jul', s: '3', r: '12', c: '14kg' }, { d: '21/jul', s: '3', r: '12', c: '14kg' },
+          { d: '24/jul', s: '3', r: '12', c: '14kg' }, { d: '26/jul', s: '3', r: '12', c: '16kg' },
+          { d: '29/jul', s: '3', r: '12', c: '16kg' }, { d: '31/jul', s: '3', r: '12', c: '16kg' },
+          { d: '02/ago', s: '3', r: '12', c: '16kg' }, { d: '05/ago', s: '3', r: '12', c: '16kg' },
+          { d: '09/ago', s: '3', r: '12', c: '16kg' }, { d: '16/ago', s: '3', r: '12', c: '18kg' }
+        ] },
+      { name: 'Desenvolvimento halteres', sub: '3 séries · 10 reps', load: '22', unit: 'kg', deltaText: '= manteve', deltaColor: '#84847f', record: false,
+        history: [{ d: '16/ago', s: '3', r: '10', c: '22kg' }, { d: '09/ago', s: '3', r: '10', c: '22kg' }, { d: '02/ago', s: '3', r: '10', c: '20kg' }] },
+      { name: 'Tríceps corda', sub: '3 séries · 12-15 reps', load: '30', unit: 'kg', deltaText: '↑ +2kg', deltaColor: '#1f9d57', record: false, chartColor: '#FF2A2A', chartSummary: '30kg · +7%',
+        history: [
+          { d: '14/jul', s: '3', r: '12-15', c: '24kg' }, { d: '16/jul', s: '3', r: '12-15', c: '24kg' },
+          { d: '19/jul', s: '3', r: '12-15', c: '25kg' }, { d: '21/jul', s: '3', r: '12-15', c: '26kg' },
+          { d: '24/jul', s: '3', r: '12-15', c: '26kg' }, { d: '26/jul', s: '3', r: '12-15', c: '28kg' },
+          { d: '29/jul', s: '3', r: '12-15', c: '28kg' }, { d: '31/jul', s: '3', r: '12-15', c: '28kg' },
+          { d: '02/ago', s: '3', r: '12-15', c: '28kg' }, { d: '05/ago', s: '3', r: '12', c: '28kg' },
+          { d: '09/ago', s: '3', r: '12', c: '28kg' }, { d: '16/ago', s: '3', r: '12-15', c: '30kg' }
+        ] },
+      { name: 'Abdominal prancha', sub: '3 séries · 45s', load: '50', unit: 's', deltaText: '↑ +5s', deltaColor: '#1f9d57', record: false,
+        history: [{ d: '16/ago', s: '3', r: '45s', c: '50s' }, { d: '09/ago', s: '3', r: '45s', c: '45s' }, { d: '02/ago', s: '3', r: '30s', c: '42s' }] },
+      { name: 'Elevação lateral', sub: '3 séries · 15 reps', load: '10', unit: 'kg', deltaText: '= manteve', deltaColor: '#84847f', record: false,
+        history: [{ d: '16/ago', s: '3', r: '15', c: '10kg' }, { d: '09/ago', s: '3', r: '15', c: '10kg' }, { d: '02/ago', s: '3', r: '12', c: '10kg' }] }
+    ];
+    const expandedEx = s.expandedEx;
+    const exercises = data.map((ex, i) => {
+      const expanded = expandedEx === i;
+      const base = 'background:#fff;padding:13px 15px;display:flex;align-items:center;gap:12px;cursor:pointer;';
+      const shape = expanded ? 'border-radius:14px 14px 0 0;' : 'border-radius:14px;';
+      const border = ex.record ? 'border:1.5px solid #d4a331;' : '';
+      return { ...ex, history: ex.history.slice(-3).reverse(), expanded, chevron: expanded ? '▲' : '▼', cardStyle: base + shape + border,
+        onClick: () => this.setState(st => ({ expandedEx: st.expandedEx === i ? null : i })) };
+    });
+
+    const buildPreview = (name) => {
+      const ex = data.find(x => x.name === name);
+      const pts = this.buildChart(ex.history, 6);
+      const points = pts.map(c => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
+      const dots = pts.map((c, i) => ({ cx: c.x, cy: c.y, r: i === pts.length - 1 ? 5.5 : 3, opacity: i === pts.length - 1 ? 1 : 0.35 + i * (0.5 / (pts.length - 2 || 1)) }));
+      return { points, dots, color: ex.chartColor, firstDate: pts[0].d, lastDate: pts[pts.length - 1].d };
+    };
+    const supinoPreview = buildPreview('Supino reto');
+    const crucifixoPreview = buildPreview('Crucifixo inclinado');
+    const tricepsPreview = buildPreview('Tríceps corda');
+
+    const graphEx = s.graphEx;
+    const graphHistoryEx = graphEx ? data.find(x => x.name === graphEx) : null;
+    const coords = graphHistoryEx ? this.buildChart(graphHistoryEx.history, s.chartRange) : [];
+    const chartPoints = coords.map(c => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
+    const chartCoords = coords.map((c, i) => ({ ...c, dotSize: s.selectedPoint === i ? 9 : 6, labelColor: i === coords.length - 1 ? '#0a0a0a' : '#b6b6b0', labelWeight: i === coords.length - 1 ? 700 : 500,
+      onClick: () => this.setState(st => ({ selectedPoint: st.selectedPoint === i ? null : i })) }));
+    let selectedCoord = s.selectedPoint != null ? chartCoords[s.selectedPoint] : null;
+    if (selectedCoord) {
+      const tx = selectedCoord.xPct < 15 ? -10 : selectedCoord.xPct > 85 ? -90 : -50;
+      selectedCoord = { ...selectedCoord, tooltipTransform: `translate(${tx}%,-135%)` };
+    }
+    const tableRows = [...chartCoords].reverse();
+    const rangeOpt = (val, label) => ({ label, style: 'flex:1;text-align:center;padding:6px;border-radius:7px;font:' + (s.chartRange === val ? '700 10px Archivo,sans-serif;color:#0a0a0a;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08)' : '600 10px Archivo,sans-serif;color:#84847f') + ';cursor:pointer',
+      onClick: () => this.setState({ chartRange: val, selectedPoint: null }) });
+
+    const tabStyle = (active) => 'font:' + (active ? '700 11px Archivo,sans-serif;color:#fff;background:#0a0a0a' : '600 11px Archivo,sans-serif;color:#54544f;background:#fff;border:1px solid #ececE7') + ';border-radius:9px;padding:7px 14px;cursor:pointer';
+    const toggleStyle = (active) => 'flex:1;text-align:center;padding:10px;border-radius:9px;cursor:pointer;font:' + (active ? '700 12px Archivo,sans-serif;color:#0a0a0a;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08)' : '600 12px Archivo,sans-serif;color:#84847f');
+    const reachStyle = (active) => 'display:flex;align-items:center;gap:12px;background:#fff;border-radius:14px;padding:12px 14px;cursor:pointer;' + (active ? 'border:1.5px solid #FF2A2A' : 'border:1px solid #ececE7');
+
+    const posts = this.postsData.map(p => ({ ...p, onClick: () => this.goPost(p.id) }));
+    const activePost = this.postsData.find(p => p.id === s.activePostId) || this.postsData[0];
+
+    return {
+      isSplash: screen === 'splash', isOb1: screen === 'ob1', isOb2: screen === 'ob2', isOb3: screen === 'ob3',
+      isHome: screen === 'home', isTreinos: screen === 'treinos', isTreinoDetalhe: screen === 'treino-detalhe',
+      isExec: screen === 'exec', isRest: screen === 'rest', isDone: screen === 'done', isCamera: screen === 'camera', isCompose: screen === 'compose',
+      isFeed: screen === 'feed', isPost: screen === 'post', isProgresso: screen === 'progresso', isPerfilAluno: screen === 'perfil-aluno', isReaval: screen === 'reaval',
+      goSplash: this.goSplash, startOnboarding: this.startOnboarding, goOb2: this.goOb2, goOb3: this.goOb3, goHome: this.goHome,
+      goTreinos: this.goTreinos, goTreinoDetalhe: this.goTreinoDetalhe, toastTreinoA: this.toastTreinoA, toastTreinoC: this.toastTreinoC, toastTreinoD: this.toastTreinoD,
+      startExecB: this.startExecB, treinoBList: this.treinoBList,
+      sheetOpen: s.sheetOpen, toggleSheet: this.toggleSheet, stopProp: this.stopProp, demoToast: this.demoToast, missedSet: this.missedSet, historyToast: this.historyToast, endWorkout: this.endWorkout,
+      execProgressPct: Math.round((s.execIndex / this.exerciseDefs.length) * 100), exNum: s.execIndex + 1, exTotal: this.exerciseDefs.length,
+      curExName: d.name, curExSets: d.sets, curExReps: d.repsLabel, curExRest: d.restS, curExLastText: d.lastText,
+      bodyweight: !!d.bodyweight, notBodyweight: !d.bodyweight, activeSet: s.activeSet,
+      curLoadFmt: String(s.curLoad).replace('.', ','), curReps: s.curReps,
+      decLoad: this.decLoad, incLoad: this.incLoad, decReps: this.decReps, incReps: this.incReps, confirmSet: this.confirmSet, setsList,
+      skipRest: this.skipRest, nextExercise: this.nextExercise,
+      goDone: this.goDone, saveOnly: this.saveOnly, goCamera: this.goCamera, takePhoto: this.takePhoto, skipPhoto: this.skipPhoto,
+      photoLabel: s.hasPhoto ? 'foto anexada' : 'foto do treino',
+      setReachMarina: this.setReachMarina, setReachPublico: this.setReachPublico,
+      reachMarinaStyle: reachStyle(s.reach === 'marina'), reachPublicoStyle: reachStyle(s.reach === 'publico'),
+      tryPublish: this.tryPublish, publish: this.publish, cancelConfirm: this.cancelConfirm, confirmOpen: s.confirmOpen,
+      goFeed: this.goFeed, setFeedPublico: this.setFeedPublico, setFeedPersonal: this.setFeedPersonal,
+      feedTabPublicoStyle: toggleStyle(s.feedTab === 'publico'), feedTabPersonalStyle: toggleStyle(s.feedTab === 'personal'),
+      posts, activePost, commentToast: this.commentToast,
+      goProgresso: this.goProgresso, setViewPlanilha: this.setViewPlanilha, setViewGrafico: this.setViewGrafico,
+      viewPlanilhaStyle: toggleStyle(s.treinoView === 'planilha'), viewGraficoStyle: toggleStyle(s.treinoView === 'grafico'),
+      isViewPlanilha: s.treinoView === 'planilha', isViewGrafico: s.treinoView === 'grafico',
+      setTrainA: this.setTrainA, setTrainB: this.setTrainB, setTrainC: this.setTrainC,
+      tabAStyle: tabStyle(s.trainTab === 'A'), tabBStyle: tabStyle(s.trainTab === 'B'), tabCStyle: tabStyle(s.trainTab === 'C'),
+      exercises, supinoPreview, crucifixoPreview, tricepsPreview,
+      openSupino: this.openSupino, openCrucifixo: this.openCrucifixo, openTriceps: this.openTriceps, closeGraph: this.closeGraph,
+      graphHistoryEx, graphHistoryClosed: !graphHistoryEx, chartPoints, chartCoords, selectedCoord, tableRows,
+      range6: rangeOpt(6, '6 treinos'), range12: rangeOpt(12, '12 treinos'), rangeAll: rangeOpt('total', 'Total'),
+      goPerfilAluno: this.goPerfilAluno, profileToast: this.profileToast, sair: this.sair,
+      goReavalHome: this.goReavalHome, goReavalPerfil: this.goReavalPerfil, backFromReaval: this.backFromReaval, sendReaval: this.sendReaval,
+      toastMsg: s.toastMsg
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <style>
+    html,body{margin:0;height:100%}
+    body{font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
+    a{color:#F23030;text-decoration:none}
+    a:hover{color:#c92323}
+    input{font-family:inherit}
+    input::placeholder{color:#a3a3ad}
+    input:focus{outline:none;border-color:#F23030!important;box-shadow:0 0 0 3px rgba(242,48,48,.12)}
+    .lg-btn{transition:transform .15s,box-shadow .15s}
+    .lg-btn:hover{transform:translateY(-1px)}
+  </style>
+</helmet>
+
+<div style="min-height:100vh;display:grid;grid-template-columns:1fr 1fr;background:#fff;color:#16161a">
+
+  <!-- ============ LEFT: BRAND ============ -->
+  <div style="background:#16161a;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:44px 52px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <img src="assets/logo.svg" style="width:30px;height:30px;border-radius:8px">
+      <span style="font:800 17px Inter,sans-serif;letter-spacing:-0.01em">reps club</span>
+    </div>
+    <div style="max-width:420px">
+      <div style="font:700 12px Inter,sans-serif;letter-spacing:.08em;color:#ff6b6b;margin-bottom:14px">GESTÃO DE TREINOS E EVOLUÇÃO</div>
+      <h1 style="font:800 34px/1.2 Inter,sans-serif;letter-spacing:-0.02em;margin:0 0 16px">Treine, acompanhe e evolua em um só lugar.</h1>
+      <p style="font:500 14.5px/1.6 Inter,sans-serif;color:#a3a3ad;margin:0">Personais gerenciam seus alunos. Alunos acompanham seus treinos, evolução, os resultados em uma única plataforma.</p>
+    </div>
+    <div style="font:500 12.5px Inter,sans-serif;color:#71717a">© 2026 Reps Club</div>
+  </div>
+
+  <!-- ============ RIGHT: FORM ============ -->
+  <div style="display:flex;align-items:center;justify-content:center;padding:40px">
+    <div style="width:100%;max-width:380px">
+      <h2 style="font:800 26px Inter,sans-serif;letter-spacing:-0.02em;margin:0 0 8px">Entrar na conta</h2>
+      <p style="font:500 14px Inter,sans-serif;color:#6b6b73;margin:0 0 32px">Entre para acessar sua área de aluno ou personal trainer.</p>
+
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div>
+          <label style="display:block;font:600 12.5px Inter,sans-serif;color:#52525b;margin-bottom:7px">E-mail</label>
+          <input type="email" value="{{ email }}" onChange="{{ onEmailChange }}" placeholder="voce@email.com" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:11px;border:1.5px solid #ededf0;font:500 14px Inter,sans-serif;color:#16161a">
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+            <label style="font:600 12.5px Inter,sans-serif;color:#52525b">Senha</label>
+            <a href="#" style="font:600 12.5px Inter,sans-serif">Esqueci minha senha</a>
+          </div>
+          <input type="password" value="{{ senha }}" onChange="{{ onSenhaChange }}" placeholder="••••••••" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:11px;border:1.5px solid #ededf0;font:500 14px Inter,sans-serif;color:#16161a">
+        </div>
+
+        <sc-if value="{{ erro }}" hint-placeholder-val="{{ false }}">
+          <div style="font:600 12.5px Inter,sans-serif;color:#F23030;background:#FFECEC;border-radius:9px;padding:9px 12px">Informe e-mail e senha para continuar.</div>
+        </sc-if>
+
+        <button onClick="{{ onEntrar }}" class="lg-btn" style="margin-top:6px;padding:13px;border:none;border-radius:12px;background:#F23030;color:#fff;font:700 14.5px Inter,sans-serif;cursor:pointer;box-shadow:0 10px 22px rgba(242,48,48,.28)">Entrar</button>
+
+        <div style="display:flex;align-items:center;gap:12px;margin:6px 0">
+          <div style="flex:1;height:1px;background:#ededf0"></div>
+          <span style="font:600 12px Inter,sans-serif;color:#a3a3ad">ou</span>
+          <div style="flex:1;height:1px;background:#ededf0"></div>
+        </div>
+
+        <button onClick="{{ onEntrar }}" class="lg-btn" style="padding:13px;border:1.5px solid #ededf0;border-radius:12px;background:#fff;color:#16161a;font:600 14px Inter,sans-serif;cursor:pointer">Continuar com Google</button>
+      </div>
+
+      <p style="font:500 13.5px Inter,sans-serif;color:#6b6b73;margin-top:28px;text-align:center">Não tem conta? <a href="./Landing Page.dc.html">Conheça o Reps Club</a></p>
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { email: '', senha: '', erro: false };
+
+  onEmailChange = e => this.setState({ email: e.target.value, erro: false });
+  onSenhaChange = e => this.setState({ senha: e.target.value, erro: false });
+
+  onEntrar = () => {
+    if (!this.state.email || !this.state.senha) { this.setState({ erro: true }); return; }
+    window.location.href = './Painel do Personal - Dashboard.dc.html';
+  };
+
+  renderVals() {
+    return {
+      email: this.state.email,
+      senha: this.state.senha,
+      erro: this.state.erro,
+      onEmailChange: this.onEmailChange,
+      onSenhaChange: this.onSenhaChange,
+      onEntrar: this.onEntrar,
+    };
+  }
+}
+</script>
+</body>
+</html>

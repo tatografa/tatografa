@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    html,body{margin:0}
+    body{font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased;background:#fff}
+    a{color:#E8342A;text-decoration:none}
+    a:hover{color:#c22823}
+    button{font-family:inherit}
+    input{font-family:inherit}
+    input::placeholder{color:#9A9A9A}
+    input:focus{outline:none;border-color:#E8342A!important;box-shadow:0 0 0 3px rgba(232,52,42,.12)}
+    .lp-btn{transition:transform .15s,box-shadow .15s,background .15s}
+    .lp-btn:hover{transform:translateY(-1px)}
+    .lp-card{transition:box-shadow .18s,transform .18s}
+    .lp-card:hover{box-shadow:0 16px 40px rgba(11,11,12,.10);transform:translateY(-2px)}
+    .lp-nav-link{transition:color .15s;color:#c9c9cb}
+    .lp-nav-link:hover{color:#fff!important}
+    .lp-dark-link{transition:color .15s}
+    .lp-dark-link:hover{color:#0B0B0C!important}
+    .lp-reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
+    .lp-in{opacity:1;transform:translateY(0)}
+    .lp-toggle-btn{transition:background .15s,color .15s}
+    @media (prefers-reduced-motion:reduce){.lp-reveal{transition:none;opacity:1;transform:none}}
+    :focus-visible{outline:2px solid #E8342A;outline-offset:2px}
+  </style>
+</helmet>
+
+<div style="background:#fff;color:#0B0B0C;padding:24px 24px 20px">
+
+  <!-- ============ 1. HERO SLAB ============ -->
+  <div style="background:#0B0B0C;border-radius:28px;overflow:hidden;position:relative">
+    <!-- nav -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;row-gap:12px;column-gap:16px;padding:22px 36px;position:relative;z-index:2">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="assets/logo.svg" style="width:28px;height:28px;border-radius:8px;display:block">
+        <span style="font:700 16px Inter,sans-serif;letter-spacing:-0.01em;color:#fff">reps club</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;background:#151517;border:1px solid #2c2c2f;border-radius:999px;padding:4px">
+        <button onClick="{{ setPersonaPersonal }}" class="lp-toggle-btn" style="font:600 12.5px Inter,sans-serif;padding:9px 18px;border-radius:999px;border:none;cursor:pointer;background:{{ personalBg }};color:{{ personalColor }}">Para Personais</button>
+        <button onClick="{{ setPersonaAluno }}" class="lp-toggle-btn" style="font:600 12.5px Inter,sans-serif;padding:9px 18px;border-radius:999px;border:none;cursor:pointer;background:{{ alunoBg }};color:{{ alunoColor }}">Para Alunos</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;row-gap:10px">
+        
+        <a href="./Login.dc.html" aria-label="Entrar" class="lp-btn" style="width:40px;height:40px;border-radius:50%;border:1.5px solid #3a3a3d;display:inline-flex;align-items:center;justify-content:center;background:transparent">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"></circle><path d="M4.5 20c0-3.8 3.4-6.4 7.5-6.4s7.5 2.6 7.5 6.4"></path></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- radial glow -->
+    <div style="position:absolute;left:50%;bottom:-30%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(ellipse at center,rgba(232,52,42,.14) 0%,rgba(255,255,255,.05) 40%,transparent 70%);pointer-events:none"></div>
+
+    <!-- hero content -->
+    <div style="text-align:center;padding:56px 32px 0;position:relative;z-index:1">
+      <div style="display:inline-flex;align-items:center;gap:8px;border:1px solid #2c2c2f;background:#151517;color:#c9c9cb;font:600 12px Inter,sans-serif;padding:7px 16px;border-radius:999px;margin-bottom:26px">
+        <span style="color: rgb(232, 52, 42);">★</span> {{ heroEyebrow }}</div>
+      <h1 style="font:900 66px/1.02 Inter,sans-serif;letter-spacing:-0.03em;color:#fff;margin:0 auto 22px;max-width:760px">{{ heroHeadline }}</h1>
+      <p style="font:400 15.5px/1.7 Inter,sans-serif;color:#9A9A9A;margin:0 auto 32px;max-width:560px">{{ heroSubheadline }}</p>
+      <button onClick="{{ openContact }}" class="lp-btn" style="font:700 14.5px Inter,sans-serif;color:#fff;background:#E8342A;border:none;padding:15px 32px;border-radius:999px;cursor:pointer;box-shadow:0 14px 30px rgba(232,52,42,.35)">{{ heroCta }}</button>
+    </div>
+
+    <!-- phone fan: PERSONAL -->
+    <sc-if value="{{ isPersonal }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;justify-content:center;align-items:flex-end;gap:0;padding:52px 24px 0;position:relative;z-index:1">
+        <div style="width:250px;background:#1a1a1d;border:1px solid #2c2c2f;border-radius:28px 28px 0 0;padding:12px 12px 0;transform:rotate(-8deg) translateY(46px);transform-origin:bottom center;box-shadow:0 24px 50px rgba(0,0,0,.5)">
+          <div style="background:#0f0f11;border-radius:18px 18px 0 0;padding:22px 18px;min-height:296px">
+            <div style="font:600 10.5px Inter,sans-serif;color:#8a8a8c;margin-bottom:14px">Seus alunos</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;justify-content:space-between;font:600 12px Inter,sans-serif;color:#fff"><span>Marina S.</span><span style="color:#1f9d57">92%</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;font:600 12px Inter,sans-serif;color:#fff"><span>Diego M.</span><span style="color:#1f9d57">88%</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;font:600 12px Inter,sans-serif;color:#fff"><span>Paula K.</span><span style="color:#E8342A">54%</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;font:600 12px Inter,sans-serif;color:#fff"><span>Caio R.</span><span style="color:#1f9d57">79%</span></div>
+            </div>
+            <div style="font:500 10.5px Inter,sans-serif;color:#8a8a8c;margin-top:14px">Adesão média do seu time</div>
+          </div>
+        </div>
+        <div style="width:300px;background:#1a1a1d;border:1px solid #2c2c2f;border-radius:34px 34px 0 0;padding:14px 14px 0;position:relative;z-index:2;transform:translateY(-14px);box-shadow:0 30px 60px rgba(0,0,0,.55)">
+          <div style="background:#0f0f11;border-radius:20px 20px 0 0;padding:24px 20px;min-height:352px">
+            <div style="font:600 11px Inter,sans-serif;color:#8a8a8c;margin-bottom:2px">Montar treino</div>
+            <div style="font:700 17px Inter,sans-serif;color:#fff;letter-spacing:-0.01em;margin-bottom:16px">Marina S. · Treino A</div>
+            <div style="background:#1a1a1d;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:11px;margin-bottom:16px">
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:15px;height:15px;border-radius:5px;background:#E8342A;flex:none"></span><span style="font:600 12px Inter,sans-serif;color:#fff">Agachamento livre · 4x10</span></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:15px;height:15px;border-radius:5px;background:#E8342A;flex:none"></span><span style="font:600 12px Inter,sans-serif;color:#fff">Leg press · 3x12</span></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:15px;height:15px;border-radius:5px;border:1.5px solid #3a3a3d;flex:none"></span><span style="font:600 12px Inter,sans-serif;color:#8a8a8c">Cadeira extensora · 3x15</span></div>
+            </div>
+            <button style="width:100%;font:700 12.5px Inter,sans-serif;color:#fff;background:#E8342A;border:none;padding:12px;border-radius:999px;cursor:default">Enviar treino ao aluno</button>
+          </div>
+        </div>
+        <div style="width:250px;background:#1a1a1d;border:1px solid #2c2c2f;border-radius:28px 28px 0 0;padding:12px 12px 0;transform:rotate(8deg) translateY(46px);transform-origin:bottom center;box-shadow:0 24px 50px rgba(0,0,0,.5)">
+          <div style="background:#0f0f11;border-radius:18px 18px 0 0;padding:22px 18px;min-height:296px">
+            <div style="font:600 10.5px Inter,sans-serif;color:#8a8a8c;margin-bottom:14px">Execução em tempo real</div>
+            <div style="font:600 12px Inter,sans-serif;color:#fff;margin-bottom:8px">Marina S. · Leg press</div>
+            <div style="height:7px;border-radius:4px;background:#232326;overflow:hidden;margin-bottom:14px"><div style="width:66%;height:100%;background:#E8342A"></div></div>
+            <div style="font:600 12px Inter,sans-serif;color:#fff;margin-bottom:8px">Diego M. · Agachamento</div>
+            <div style="height:7px;border-radius:4px;background:#232326;overflow:hidden"><div style="width:100%;height:100%;background:#1f9d57"></div></div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- phone fan: ALUNO -->
+    <sc-if value="{{ isAluno }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;justify-content:center;align-items:flex-end;gap:0;padding:52px 24px 0;position:relative;z-index:1">
+        <div style="width:250px;background:#1a1a1d;border:1px solid #2c2c2f;border-radius:28px 28px 0 0;padding:12px 12px 0;transform:rotate(-8deg) translateY(46px);transform-origin:bottom center;box-shadow:0 24px 50px rgba(0,0,0,.5)">
+          <div style="background:#0f0f11;border-radius:18px 18px 0 0;padding:22px 18px;min-height:296px">
+            <div style="font:600 10.5px Inter,sans-serif;color:#8a8a8c;margin-bottom:14px">Seus pontos</div>
+            <div style="font:900 40px Inter,sans-serif;color:#fff;margin-bottom:4px">1.240</div>
+            <div style="font:600 11px Inter,sans-serif;color:#E8342A;margin-bottom:18px">+120 esta semana</div>
+            <div style="height:7px;border-radius:4px;background:#232326;overflow:hidden;margin-bottom:8px"><div style="width:68%;height:100%;background:#E8342A"></div></div>
+            <div style="font:500 10.5px Inter,sans-serif;color:#8a8a8c">Faltam 360 pts para o nível Prata</div>
+          </div>
+        </div>
+        <div style="width:300px;background:#1a1a1d;border:1px solid #2c2c2f;border-radius:34px 34px 0 0;padding:14px 14px 0;position:relative;z-index:2;transform:translateY(-14px);box-shadow:0 30px 60px rgba(0,0,0,.55)">
+          <div style="background:#0f0f11;border-radius:20px 20px 0 0;padding:24px 20px;min-height:352px">
+            <div style="font:600 11px Inter,sans-serif;color:#8a8a8c;margin-bottom:2px">Boa tarde, Marina</div>
+            <div style="font:700 17px Inter,sans-serif;color:#fff;letter-spacing:-0.01em;margin-bottom:16px">Treino de hoje</div>
+            <div style="background:#1a1a1d;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:11px;margin-bottom:16px">
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:15px;height:15px;border-radius:5px;background:#E8342A;flex:none"></span><span style="font:600 12px Inter,sans-serif;color:#fff">Agachamento livre · 4x10</span></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:15px;height:15px;border-radius:5px;background:#E8342A;flex:none"></span><span style="font:600 12px Inter,sans-serif;color:#fff">Leg press · 3x12</span></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:15px;height:15px;border-radius:5px;border:1.5px solid #3a3a3d;flex:none"></span><span style="font:600 12px Inter,sans-serif;color:#8a8a8c">Cadeira extensora · 3x15</span></div>
+            </div>
+            <button style="width:100%;font:700 12.5px Inter,sans-serif;color:#fff;background:#E8342A;border:none;padding:12px;border-radius:999px;cursor:default">Registrar treino</button>
+          </div>
+        </div>
+        <div style="width:250px;background:#1a1a1d;border:1px solid #2c2c2f;border-radius:28px 28px 0 0;padding:12px 12px 0;transform:rotate(8deg) translateY(46px);transform-origin:bottom center;box-shadow:0 24px 50px rgba(0,0,0,.5)">
+          <div style="background:#0f0f11;border-radius:18px 18px 0 0;padding:22px 18px;min-height:296px">
+            <div style="font:600 10.5px Inter,sans-serif;color:#8a8a8c;margin-bottom:14px">Orientação do exercício</div>
+            <div style="font:600 12px Inter,sans-serif;color:#fff;margin-bottom:10px">Agachamento livre</div>
+            <div style="height:110px;border-radius:10px;background:#1a1a1d;border:1px solid #2c2c2f;display:flex;align-items:center;justify-content:center;margin-bottom:10px">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#E8342A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            </div>
+            <div style="font:500 10.5px/1.5 Inter,sans-serif;color:#8a8a8c">Vídeo demonstrativo e dicas de execução do seu personal</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- ============ 2. DEMONSTRAÇÃO DA PLATAFORMA (somente Para Personais) ============ -->
+  <sc-if value="{{ isPersonal }}" hint-placeholder-val="{{ true }}">
+    <div id="demo" style="max-width:1160px;margin:0 auto;padding:96px 24px 0">
+      <div style="font:600 11px Inter,sans-serif;letter-spacing:.14em;color:#9A9A9A;margin-bottom:14px">DEMONSTRAÇÃO DA PLATAFORMA</div>
+      <h2 style="font:900 44px/1.08 Inter,sans-serif;letter-spacing:-0.02em;margin:0 0 8px;max-width:760px">{{ demoHeadline }}</h2>
+    </div>
+  </sc-if>
+  <sc-if value="{{ isAluno }}" hint-placeholder-val="{{ false }}">
+    <div style="padding-top:40px"></div>
+  </sc-if>
+
+  <!-- demo: PERSONAL -->
+  <sc-if value="{{ isPersonal }}" hint-placeholder-val="{{ true }}">
+    <div style="max-width:1160px;margin:0 auto;padding:0 24px">
+      <div data-pillar="p1" class="lp-reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:64px;align-items:center;padding:56px 0">
+        <div style="background:#F5F5F6;border-radius:24px;padding:56px 40px;display:flex;justify-content:center">
+          <div style="width:280px;background:#fff;border-radius:18px;box-shadow:0 18px 44px rgba(11,11,12,.12);padding:22px">
+            <div style="font:600 11px Inter,sans-serif;letter-spacing:.08em;color:#9A9A9A;margin-bottom:14px">SEUS ALUNOS</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;justify-content:space-between;font:600 12.5px Inter,sans-serif"><span>Marina S.</span><span style="color:#1f9d57">Em dia</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;font:600 12.5px Inter,sans-serif"><span>Diego M.</span><span style="color:#1f9d57">Em dia</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;font:700 12.5px Inter,sans-serif;color:#E8342A;background:#fdeceb;border-radius:8px;padding:7px 10px;margin:0 -10px"><span>Paula K.</span><span>3 dias parada</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;font:600 12.5px Inter,sans-serif"><span>Caio R.</span><span style="color:#1f9d57">Em dia</span></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font:600 11px Inter,sans-serif;letter-spacing:.14em;color:#9A9A9A;margin-bottom:14px">GESTÃO DE ALUNOS</div>
+          <h3 style="font:900 34px/1.15 Inter,sans-serif;letter-spacing:-0.02em;margin:0 0 14px">Todos os seus alunos, em um só painel</h3>
+          <p style="font:400 15px/1.7 Inter,sans-serif;color:#6E6E6E;margin:0 0 24px">Acompanhe adesão, histórico e status de cada aluno sem precisar de planilhas soltas ou grupos de WhatsApp.</p>
+        </div>
+      </div>
+
+      <div data-pillar="p2" class="lp-reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:64px;align-items:center;padding:56px 0">
+        <div style="order:2;background:#F5F5F6;border-radius:24px;padding:56px 40px;display:flex;justify-content:center">
+          <div style="width:280px;background:#fff;border-radius:18px;box-shadow:0 18px 44px rgba(11,11,12,.12);padding:22px">
+            <div style="font:600 11px Inter,sans-serif;letter-spacing:.08em;color:#9A9A9A;margin-bottom:14px">MONTAR TREINO</div>
+            <div style="display:flex;flex-direction:column;gap:11px;margin-bottom:14px">
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:15px;height:15px;border-radius:5px;background:#E8342A;flex:none"></span><span style="font:600 12px Inter,sans-serif">Agachamento livre · 4x10</span></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:15px;height:15px;border-radius:5px;background:#E8342A;flex:none"></span><span style="font:600 12px Inter,sans-serif">Leg press · 3x12</span></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:15px;height:15px;border-radius:5px;border:1.5px solid #e4e4e5;flex:none"></span><span style="font:600 12px Inter,sans-serif;color:#9A9A9A">+ Adicionar exercício</span></div>
+            </div>
+            <button style="width:100%;font:700 12.5px Inter,sans-serif;color:#fff;background:#E8342A;border:none;padding:11px;border-radius:999px;cursor:default">Enviar para Marina S.</button>
+          </div>
+        </div>
+        <div style="order:1">
+          <div style="font:600 11px Inter,sans-serif;letter-spacing:.14em;color:#9A9A9A;margin-bottom:14px">TREINOS E EXERCÍCIOS</div>
+          <h3 style="font:900 34px/1.15 Inter,sans-serif;letter-spacing:-0.02em;margin:0 0 14px">Crie treinos e cadastre exercícios em minutos</h3>
+          <p style="font:400 15px/1.7 Inter,sans-serif;color:#6E6E6E;margin:0 0 24px">Monte treinos a partir de uma biblioteca de exercícios própria e envie direto para o app do aluno.</p>
+        </div>
+      </div>
+
+      <div data-pillar="p3" class="lp-reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:64px;align-items:center;padding:56px 0 72px">
+        <div style="background:#F5F5F6;border-radius:24px;padding:56px 40px;display:flex;justify-content:center">
+          <div style="width:280px;background:#fff;border-radius:18px;box-shadow:0 18px 44px rgba(11,11,12,.12);padding:22px">
+            <div style="font:600 11px Inter,sans-serif;letter-spacing:.08em;color:#9A9A9A;margin-bottom:14px">EVOLUÇÃO · MARINA S.</div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div><div style="display:flex;justify-content:space-between;font:600 12px Inter,sans-serif;margin-bottom:5px"><span>Carga no agachamento</span><span style="color:#E8342A">+18%</span></div><div style="height:6px;border-radius:3px;background:#F1F1F2;overflow:hidden"><div style="width:78%;height:100%;background:#E8342A"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font:600 12px Inter,sans-serif;margin-bottom:5px"><span>Frequência semanal</span><span style="color:#E8342A">3,4x</span></div><div style="height:6px;border-radius:3px;background:#F1F1F2;overflow:hidden"><div style="width:85%;height:100%;background:#E8342A"></div></div></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font:600 11px Inter,sans-serif;letter-spacing:.14em;color:#9A9A9A;margin-bottom:14px">ACOMPANHAMENTO EM TEMPO REAL</div>
+          <h3 style="font:900 34px/1.15 Inter,sans-serif;letter-spacing:-0.02em;margin:0 0 14px">Veja a execução e a evolução de cada aluno</h3>
+          <p style="font:400 15px/1.7 Inter,sans-serif;color:#6E6E6E;margin:0 0 24px">Acompanhe treinos registrados em tempo real e monitore a evolução de cargas, frequência e reavaliações.</p>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- demo: ALUNO (removida a pedido — sem seção de demonstração para esta persona) -->
+  <sc-if value="{{ false }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:1160px;margin:0 auto;padding:0 24px">
+      <div data-pillar="a1" class="lp-reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:64px;align-items:center;padding:56px 0">
+        <div style="background:#F5F5F6;border-radius:24px;padding:56px 40px;display:flex;justify-content:center">
+          <div style="width:280px;background:#fff;border-radius:18px;box-shadow:0 18px 44px rgba(11,11,12,.12);padding:22px">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+              <div style="width:40px;height:40px;border-radius:50%;background:#0B0B0C;color:#fff;display:flex;align-items:center;justify-content:center;font:700 14px Inter,sans-serif">RC</div>
+              <div>
+                <div style="font:700 13.5px Inter,sans-serif">Rafael Costa</div>
+                <div style="font:500 11.5px Inter,sans-serif;color:#9A9A9A">Seu personal dedicado</div>
+              </div>
+            </div>
+            <div style="background:#F1F1F2;border-radius:12px;padding:12px 14px;font:500 12.5px/1.5 Inter,sans-serif;color:#3a3a3d;margin-bottom:8px">Enviei seu treino de hoje. Ajustei a carga do leg press para 3x12.</div>
+            <div style="background:#E8342A;color:#fff;border-radius:12px;padding:12px 14px;font:500 12.5px/1.5 Inter,sans-serif;margin-left:32px">Recebido, bora treinar!</div>
+          </div>
+        </div>
+        <div>
+          <div style="font:600 11px Inter,sans-serif;letter-spacing:.14em;color:#9A9A9A;margin-bottom:14px">TREINOS DO SEU PERSONAL</div>
+          <h3 style="font:900 34px/1.15 Inter,sans-serif;letter-spacing:-0.02em;margin:0 0 14px">Receba os treinos direto no app</h3>
+          <p style="font:400 15px/1.7 Inter,sans-serif;color:#6E6E6E;margin:0 0 24px">Seu personal monta e envia o treino, você recebe tudo organizado no seu celular, com séries, repetições e carga.</p>
+        </div>
+      </div>
+
+      <div data-pillar="a2" class="lp-reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:64px;align-items:center;padding:56px 0">
+        <div style="order:2;background:#F5F5F6;border-radius:24px;padding:56px 40px;display:flex;justify-content:center">
+          <div style="width:280px;background:#fff;border-radius:18px;box-shadow:0 18px 44px rgba(11,11,12,.12);padding:22px">
+            <div style="font:600 11px Inter,sans-serif;letter-spacing:.08em;color:#9A9A9A;margin-bottom:14px">ORIENTAÇÃO DO EXERCÍCIO</div>
+            <div style="font:700 13.5px Inter,sans-serif;margin-bottom:10px">Agachamento livre</div>
+            <div style="height:120px;border-radius:12px;background:#F1F1F2;display:flex;align-items:center;justify-content:center;margin-bottom:10px">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E8342A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            </div>
+            <p style="font:500 12px/1.5 Inter,sans-serif;color:#6E6E6E;margin:0">Vídeo e orientações de execução para treinar com segurança.</p>
+          </div>
+        </div>
+        <div style="order:1">
+          <div style="font:600 11px Inter,sans-serif;letter-spacing:.14em;color:#9A9A9A;margin-bottom:14px">ORIENTAÇÕES DE EXECUÇÃO</div>
+          <h3 style="font:900 34px/1.15 Inter,sans-serif;letter-spacing:-0.02em;margin:0 0 14px">Nunca fique em dúvida na execução</h3>
+          <p style="font:400 15px/1.7 Inter,sans-serif;color:#6E6E6E;margin:0 0 24px">Cada exercício traz vídeo e instruções para você treinar com técnica correta, mesmo treinando sozinho.</p>
+        </div>
+      </div>
+
+      <div data-pillar="a3" class="lp-reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:64px;align-items:center;padding:56px 0 72px">
+        <div style="background:#F5F5F6;border-radius:24px;padding:56px 40px;display:flex;justify-content:center">
+          <div style="width:280px;background:#fff;border-radius:18px;box-shadow:0 18px 44px rgba(11,11,12,.12);padding:22px">
+            <div style="font:600 11px Inter,sans-serif;letter-spacing:.08em;color:#9A9A9A;margin-bottom:14px">REAVALIAÇÃO · MARÇO → JULHO</div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div><div style="display:flex;justify-content:space-between;font:600 12px Inter,sans-serif;margin-bottom:5px"><span>Carga no agachamento</span><span style="color:#E8342A">+18%</span></div><div style="height:6px;border-radius:3px;background:#F1F1F2;overflow:hidden"><div style="width:78%;height:100%;background:#E8342A"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font:600 12px Inter,sans-serif;margin-bottom:5px"><span>Massa magra</span><span style="color:#E8342A">+2,1 kg</span></div><div style="height:6px;border-radius:3px;background:#F1F1F2;overflow:hidden"><div style="width:62%;height:100%;background:#E8342A"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font:600 12px Inter,sans-serif;margin-bottom:5px"><span>Frequência semanal</span><span style="color:#E8342A">3,4x</span></div><div style="height:6px;border-radius:3px;background:#F1F1F2;overflow:hidden"><div style="width:85%;height:100%;background:#E8342A"></div></div></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font:600 11px Inter,sans-serif;letter-spacing:.14em;color:#9A9A9A;margin-bottom:14px">EVOLUÇÃO E HISTÓRICO</div>
+          <h3 style="font:900 34px/1.15 Inter,sans-serif;letter-spacing:-0.02em;margin:0 0 14px">Acompanhe sua evolução e seu histórico</h3>
+          <p style="font:400 15px/1.7 Inter,sans-serif;color:#6E6E6E;margin:0 0 24px">Registre cada treino em tempo real e consulte reavaliações, cargas e frequência direto pelo celular.</p>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ 3. CTA FINAL ============ -->
+  <div style="max-width:1160px;margin:0 auto 14px;padding:24px 24px 0">
+    <div style="background:#0B0B0C;border-radius:28px;padding:80px 32px;text-align:center;position:relative;overflow:hidden">
+      <div style="position: absolute; left: 50%; bottom: -50%; transform: translateX(-50%); width: 800px; height: 400px; pointer-events: none; background-color: #000000EB"></div>
+      <div style="position:relative">
+        <h2 style="font:900 48px/1.05 Inter,sans-serif;letter-spacing:-0.02em;color:#fff;margin:0 auto 14px;max-width:640px">{{ ctaFinalHeadline }}</h2>
+        <p style="font:400 15px Inter,sans-serif;color:#9A9A9A;margin:0 0 30px">{{ ctaFinalSubheadline }}</p>
+        <button onClick="{{ openContact }}" class="lp-btn" style="font: 700 14.5px Inter,sans-serif; color: #000000; border: none; padding: 15px 32px; border-radius: 999px; cursor: pointer; box-shadow: 0px 14px 30px 0px #F4F4F459; background-color: #A9FFF4">{{ heroCta }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 4. FOOTER ============ -->
+  <div style="max-width:1160px;margin:0 auto;padding:0 24px 10px">
+    <div style="background:#0B0B0C;border-radius:28px;padding:32px 44px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="assets/logo.svg" style="width:26px;height:26px;border-radius:7px">
+        <span style="font:700 15px Inter,sans-serif;color:#fff">reps club</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;row-gap:10px">
+        <a href="#demo" class="lp-nav-link" style="font:500 13px Inter,sans-serif">Demonstração</a>
+        <a href="#" class="lp-nav-link" style="font:500 13px Inter,sans-serif">Instagram</a>
+        <a href="#" class="lp-nav-link" style="font:500 13px Inter,sans-serif">LinkedIn</a>
+        <a href="#" class="lp-nav-link" style="font:500 13px Inter,sans-serif">Termos</a>
+        <a href="#" class="lp-nav-link" style="font:500 13px Inter,sans-serif">Privacidade</a>
+      </div>
+      <div style="font:500 12.5px Inter,sans-serif;color:#6E6E6E">© 2026 Reps Club</div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL CONTATO ============ -->
+  <sc-if value="{{ contactOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeContact }}" style="position:fixed;inset:0;background:rgba(11,11,12,.6);display:flex;align-items:center;justify-content:center;z-index:90;padding:24px">
+      <div onClick="{{ stop }}" style="width:100%;max-width:480px;max-height:88vh;overflow:auto;background:#fff;border-radius:24px;padding:36px">
+
+        <sc-if value="{{ contactSent }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center;padding:20px 0">
+            <div style="width:52px;height:52px;border-radius:50%;background:#e9f7ee;color:#1f9d57;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font:800 22px Inter,sans-serif">✓</div>
+            <h3 style="font:800 22px Inter,sans-serif;margin:0 0 10px">Recebemos seu contato.</h3>
+            <p style="font:500 14px/1.6 Inter,sans-serif;color:#6E6E6E;margin:0 0 24px">Nossa equipe retorna pelo WhatsApp.</p>
+            <button onClick="{{ closeContact }}" style="font:600 14px Inter,sans-serif;color:#0B0B0C;border:1.5px solid #e4e4e5;background:#fff;padding:11px 24px;border-radius:999px;cursor:pointer">Fechar</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ contactFormVisible }}" hint-placeholder-val="{{ true }}">
+          <h3 style="font:800 22px Inter,sans-serif;letter-spacing:-0.01em;margin:0 0 6px">Entrar em contato</h3>
+          <p style="font:500 13.5px Inter,sans-serif;color:#6E6E6E;margin:0 0 24px">{{ modalSubtitle }}</p>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div><label style="display:block;font:600 12.5px Inter,sans-serif;color:#6E6E6E;margin-bottom:6px">Nome</label>
+              <input value="{{ f.nome }}" onChange="{{ onField_nome }}" placeholder="Seu nome" style="width:100%;box-sizing:border-box;padding:11px 14px;border-radius:12px;border:1.5px solid #e4e4e5;font:500 14px Inter,sans-serif"></div>
+            <div><label style="display:block;font:600 12.5px Inter,sans-serif;color:#6E6E6E;margin-bottom:6px">E-mail</label>
+              <input type="email" value="{{ f.email }}" onChange="{{ onField_email }}" placeholder="voce@email.com" style="width:100%;box-sizing:border-box;padding:11px 14px;border-radius:12px;border:1.5px solid #e4e4e5;font:500 14px Inter,sans-serif"></div>
+            <div><label style="display:block;font:600 12.5px Inter,sans-serif;color:#6E6E6E;margin-bottom:6px">Telefone</label>
+              <input value="{{ f.telefone }}" onChange="{{ onField_telefone }}" placeholder="(11) 90000-0000" style="width:100%;box-sizing:border-box;padding:11px 14px;border-radius:12px;border:1.5px solid #e4e4e5;font:500 14px Inter,sans-serif"></div>
+
+            <!-- campos PERSONAL -->
+            <sc-if value="{{ isPersonal }}" hint-placeholder-val="{{ true }}">
+              <div><label style="display:block;font:600 12.5px Inter,sans-serif;color:#6E6E6E;margin-bottom:6px">Quantos alunos possui?</label>
+                <select value="{{ f.qtdAlunos }}" onChange="{{ onField_qtdAlunos }}" style="width:100%;box-sizing:border-box;padding:11px 14px;border-radius:12px;border:1.5px solid #e4e4e5;font:500 14px Inter,sans-serif;background:#fff">
+                  <option value="">Selecione</option>
+                  <option value="1-15">1 a 15 alunos</option>
+                  <option value="16-30">16 a 30 alunos</option>
+                  <option value="31-49">31 a 49 alunos</option>
+                  <option value="50+">50 alunos ou mais</option>
+                </select>
+              </div>
+              <div><label style="display:block;font:600 12.5px Inter,sans-serif;color:#6E6E6E;margin-bottom:6px">Já utiliza alguma plataforma para gestão de alunos?</label>
+                <input value="{{ f.plataformaAtual }}" onChange="{{ onField_plataformaAtual }}" placeholder="Ex.: planilhas, outro app, nenhuma" style="width:100%;box-sizing:border-box;padding:11px 14px;border-radius:12px;border:1.5px solid #e4e4e5;font:500 14px Inter,sans-serif"></div>
+            </sc-if>
+
+            <!-- campos ALUNO -->
+            <sc-if value="{{ isAluno }}" hint-placeholder-val="{{ false }}">
+              <div><label style="display:block;font:600 12.5px Inter,sans-serif;color:#6E6E6E;margin-bottom:6px">Já possui personal trainer ou consultoria de treino?</label>
+                <div style="display:flex;gap:10px">
+                  <button type="button" onClick="{{ setPossuiPersonalSim }}" style="flex:1;font:600 13px Inter,sans-serif;padding:10px;border-radius:999px;cursor:pointer;border:1.5px solid {{ possuiPersonalSimBorder }};background:{{ possuiPersonalSimBg }};color:{{ possuiPersonalSimColor }}">Sim</button>
+                  <button type="button" onClick="{{ setPossuiPersonalNao }}" style="flex:1;font:600 13px Inter,sans-serif;padding:10px;border-radius:999px;cursor:pointer;border:1.5px solid {{ possuiPersonalNaoBorder }};background:{{ possuiPersonalNaoBg }};color:{{ possuiPersonalNaoColor }}">Não</button>
+                </div>
+              </div>
+              <div><label style="display:block;font:600 12.5px Inter,sans-serif;color:#6E6E6E;margin-bottom:6px">Qual é o seu objetivo?</label>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <label style="display:flex;align-items:center;gap:8px;font:500 13px Inter,sans-serif;color:#3a3a3d"><input type="checkbox" checked="{{ f.objetivoPerderPeso }}" onChange="{{ onToggle_objetivoPerderPeso }}">Perder peso</label>
+                  <label style="display:flex;align-items:center;gap:8px;font:500 13px Inter,sans-serif;color:#3a3a3d"><input type="checkbox" checked="{{ f.objetivoGanharMassa }}" onChange="{{ onToggle_objetivoGanharMassa }}">Ganhar massa muscular</label>
+                  <label style="display:flex;align-items:center;gap:8px;font:500 13px Inter,sans-serif;color:#3a3a3d"><input type="checkbox" checked="{{ f.objetivoVoltarTreinar }}" onChange="{{ onToggle_objetivoVoltarTreinar }}">Voltar a treinar</label>
+                  <label style="display:flex;align-items:center;gap:8px;font:500 13px Inter,sans-serif;color:#3a3a3d"><input type="checkbox" checked="{{ f.objetivoPersonalDecide }}" onChange="{{ onToggle_objetivoPersonalDecide }}">Quero que o personal decida</label>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ contactError }}" hint-placeholder-val="{{ false }}">
+              <div style="font:600 12.5px Inter,sans-serif;color:#E8342A;background:#fdeceb;border-radius:10px;padding:9px 12px">Preencha todos os campos para continuar.</div>
+            </sc-if>
+
+            <div style="display:flex;gap:12px;margin-top:6px">
+              <button onClick="{{ closeContact }}" style="flex:1;font:600 14px Inter,sans-serif;color:#6E6E6E;border:1.5px solid #e4e4e5;background:#fff;padding:12px;border-radius:999px;cursor:pointer">Cancelar</button>
+              <button onClick="{{ submitContact }}" style="flex:1;font:700 14px Inter,sans-serif;color:#fff;background:#E8342A;border:none;padding:12px;border-radius:999px;cursor:pointer">Enviar</button>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    persona: 'personal',
+    contactOpen: false,
+    contactSent: false,
+    contactError: false,
+    f: {
+      nome: '', email: '', telefone: '',
+      qtdAlunos: '', plataformaAtual: '',
+      possuiPersonal: '',
+      objetivoPerderPeso: false, objetivoGanharMassa: false, objetivoVoltarTreinar: false, objetivoPersonalDecide: false,
+    },
+  };
+
+  componentDidMount() { this.observeReveals(); }
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.persona !== this.state.persona) this.observeReveals();
+  }
+
+  observeReveals() {
+    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const nodes = document.querySelectorAll('[data-pillar]:not(.lp-in)');
+    if (reduced) { nodes.forEach(n => n.classList.add('lp-in')); return; }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('lp-in'), i * 90);
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    nodes.forEach(n => io.observe(n));
+  }
+
+  setPersonaPersonal = () => this.setState({ persona: 'personal' });
+  setPersonaAluno = () => this.setState({ persona: 'aluno' });
+
+  openContact = () => this.setState({ contactOpen: true, contactSent: false, contactError: false });
+  closeContact = () => this.setState({ contactOpen: false });
+  stop = e => e.stopPropagation();
+
+  field = (key, e) => this.setState(s => ({ f: { ...s.f, [key]: e.target.value }, contactError: false }));
+  toggle = (key) => this.setState(s => ({ f: { ...s.f, [key]: !s.f[key] }, contactError: false }));
+  setPossuiPersonal = (val) => this.setState(s => ({ f: { ...s.f, possuiPersonal: val }, contactError: false }));
+
+  submitContact = () => {
+    const { f, persona } = this.state;
+    const baseFilled = [f.nome, f.email, f.telefone].every(v => String(v).trim().length > 0);
+    let extraFilled = true;
+    if (persona === 'personal') {
+      extraFilled = String(f.qtdAlunos).trim().length > 0 && String(f.plataformaAtual).trim().length > 0;
+    } else {
+      const anyObjetivo = f.objetivoPerderPeso || f.objetivoGanharMassa || f.objetivoVoltarTreinar || f.objetivoPersonalDecide;
+      extraFilled = String(f.possuiPersonal).trim().length > 0 && anyObjetivo;
+    }
+    if (!baseFilled || !extraFilled) { this.setState({ contactError: true }); return; }
+    this.setState({ contactSent: true, contactError: false });
+  };
+
+  renderVals() {
+    const isPersonal = this.state.persona === 'personal';
+    const isAluno = !isPersonal;
+    return {
+      isPersonal,
+      isAluno,
+      personalBg: isPersonal ? '#fff' : 'transparent',
+      personalColor: isPersonal ? '#0B0B0C' : '#c9c9cb',
+      alunoBg: isAluno ? '#fff' : 'transparent',
+      alunoColor: isAluno ? '#0B0B0C' : '#c9c9cb',
+      heroEyebrow: isPersonal ? 'Para personal trainers' : 'Para alunos',
+      heroHeadline: isPersonal ? 'A plataforma completa para gerenciar seus alunos.' : 'Seu treino, sua evolução, no seu bolso.',
+      heroSubheadline: isPersonal
+        ? 'Crie treinos, cadastre exercícios, acompanhe a execução em tempo real e monitore a evolução de cada aluno em um só lugar.'
+        : 'Receba os treinos enviados pelo seu personal, veja orientações de cada exercício, registre sua execução em tempo real e acompanhe sua evolução.',
+      heroCta: isPersonal ? 'Quero começar' : 'Entrar em contato',
+      demoHeadline: isPersonal ? 'Tudo que você precisa para gerenciar seus alunos.' : 'Tudo que você precisa para evoluir no treino.',
+      ctaFinalHeadline: isPersonal ? 'Gerencie seus alunos com o Reps Club.' : 'Treine com acompanhamento real, direto no seu bolso.',
+      ctaFinalSubheadline: isPersonal ? 'Fale com a gente e comece a usar a plataforma hoje.' : 'Fale com a gente e comece a treinar com acompanhamento de verdade.',
+      modalSubtitle: isPersonal ? 'Conte um pouco sobre você e nosso time retorna.' : 'Deixe seus dados e nosso time retorna.',
+      contactOpen: this.state.contactOpen,
+      contactSent: this.state.contactSent,
+      contactFormVisible: !this.state.contactSent,
+      contactError: this.state.contactError,
+      f: this.state.f,
+      setPersonaPersonal: this.setPersonaPersonal,
+      setPersonaAluno: this.setPersonaAluno,
+      openContact: this.openContact,
+      closeContact: this.closeContact,
+      stop: this.stop,
+      submitContact: this.submitContact,
+      onField_nome: e => this.field('nome', e),
+      onField_email: e => this.field('email', e),
+      onField_telefone: e => this.field('telefone', e),
+      onField_qtdAlunos: e => this.field('qtdAlunos', e),
+      onField_plataformaAtual: e => this.field('plataformaAtual', e),
+      setPossuiPersonalSim: () => this.setPossuiPersonal('sim'),
+      setPossuiPersonalNao: () => this.setPossuiPersonal('nao'),
+      possuiPersonalSimBg: this.state.f.possuiPersonal === 'sim' ? '#E8342A' : '#fff',
+      possuiPersonalSimColor: this.state.f.possuiPersonal === 'sim' ? '#fff' : '#3a3a3d',
+      possuiPersonalSimBorder: this.state.f.possuiPersonal === 'sim' ? '#E8342A' : '#e4e4e5',
+      possuiPersonalNaoBg: this.state.f.possuiPersonal === 'nao' ? '#E8342A' : '#fff',
+      possuiPersonalNaoColor: this.state.f.possuiPersonal === 'nao' ? '#fff' : '#3a3a3d',
+      possuiPersonalNaoBorder: this.state.f.possuiPersonal === 'nao' ? '#E8342A' : '#e4e4e5',
+      onToggle_objetivoPerderPeso: () => this.toggle('objetivoPerderPeso'),
+      onToggle_objetivoGanharMassa: () => this.toggle('objetivoGanharMassa'),
+      onToggle_objetivoVoltarTreinar: () => this.toggle('objetivoVoltarTreinar'),
+      onToggle_objetivoPersonalDecide: () => this.toggle('objetivoPersonalDecide'),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

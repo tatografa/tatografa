@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <style>
+    html,body{margin:0;background:#e9e9e6}
+    body{font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
+    a{color:#F23030;text-decoration:none}
+    a:hover{color:#c92323}
+    input{font-family:inherit}
+    input::placeholder{color:#a3a3ad}
+    input:focus{outline:none;border-color:#F23030!important;box-shadow:0 0 0 3px rgba(242,48,48,.12)}
+    .lg-btn{transition:transform .15s}
+    .lg-btn:hover{transform:translateY(-1px)}
+  </style>
+</helmet>
+
+<div style="min-height:100vh;padding:34px 30px 60px;overflow-x:auto">
+  <div style="width:max-content;margin-inline:auto;display:flex;flex-direction:column;align-items:center;gap:18px">
+
+  <div style="width:1100px;max-width:100%;display:flex;align-items:center;justify-content:space-between">
+    <span style="font:800 15px Inter,sans-serif;color:#16161a;letter-spacing:-0.01em">Reps Club — Fluxo do Personal</span>
+    <span onClick="{{ reset }}" style="font:600 11px Inter,sans-serif;letter-spacing:0.06em;color:#71717a;cursor:pointer;text-transform:uppercase">reiniciar</span>
+  </div>
+
+  <x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ 1100 }}" height="{{ 680 }}" url="{{ url }}" hint-size="1100px,680px">
+
+    <div style="height:100%;display:grid;grid-template-columns:1fr 1fr;background:#fff;color:#16161a">
+
+      <!-- BRAND PANEL -->
+      <div style="background:#16161a;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:40px 46px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <img src="assets/logo.svg" style="width:30px;height:30px;border-radius:8px">
+          <span style="font:800 17px Inter,sans-serif;letter-spacing:-0.01em">reps club</span>
+        </div>
+        <div style="max-width:400px">
+          <div style="font:700 12px Inter,sans-serif;letter-spacing:.08em;color:#ff6b6b;margin-bottom:14px">ÁREA DO PERSONAL TRAINER</div>
+          <h1 style="font:800 32px/1.2 Inter,sans-serif;letter-spacing:-0.02em;margin:0 0 16px">Seus alunos, seus treinos, um só painel.</h1>
+          <p style="font:500 14.5px/1.6 Inter,sans-serif;color:#a3a3ad;margin:0">Monte planilhas, acompanhe execuções e veja a evolução de cada aluno em tempo real.</p>
+        </div>
+        <div style="display:flex;gap:26px">
+          <div><div style="font:800 20px Inter,sans-serif">38</div><div style="font:500 12px Inter,sans-serif;color:#71717a">alunos ativos</div></div>
+          <div><div style="font:800 20px Inter,sans-serif">1.2k</div><div style="font:500 12px Inter,sans-serif;color:#71717a">treinos/mês</div></div>
+        </div>
+      </div>
+
+      <!-- FORM PANEL -->
+      <div style="display:flex;align-items:center;justify-content:center;padding:40px;overflow:auto">
+        <div style="width:100%;max-width:372px">
+
+          <!-- 1 · LOGIN -->
+          <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <h2 style="font:800 25px Inter,sans-serif;letter-spacing:-0.02em;margin:0 0 8px">Entrar como personal</h2>
+              <p style="font:500 14px Inter,sans-serif;color:#6b6b73;margin:0 0 28px">Use o e-mail cadastrado na sua assessoria.</p>
+              <div style="display:flex;flex-direction:column;gap:15px">
+                <div>
+                  <label style="display:block;font:600 12.5px Inter,sans-serif;color:#52525b;margin-bottom:7px">E-mail</label>
+                  <input type="email" value="{{ email }}" onChange="{{ onEmail }}" placeholder="voce@assessoria.com" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:11px;border:1.5px solid #ededf0;font:500 14px Inter,sans-serif;color:#16161a">
+                </div>
+                <div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+                    <label style="font:600 12.5px Inter,sans-serif;color:#52525b">Senha</label>
+                    <span onClick="{{ goEsqueci }}" style="font:600 12.5px Inter,sans-serif;color:#F23030;cursor:pointer;white-space:nowrap">Esqueci minha senha</span>
+                  </div>
+                  <input type="password" value="{{ senha }}" onChange="{{ onSenha }}" placeholder="••••••••" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:11px;border:1.5px solid #ededf0;font:500 14px Inter,sans-serif;color:#16161a">
+                </div>
+                <sc-if value="{{ erro }}" hint-placeholder-val="{{ false }}">
+                  <div style="font:600 12.5px Inter,sans-serif;color:#F23030;background:#FFECEC;border-radius:9px;padding:9px 12px">{{ erro }}</div>
+                </sc-if>
+                <label style="display:flex;align-items:center;gap:9px;font:500 13px Inter,sans-serif;color:#52525b;cursor:pointer">
+                  <input type="checkbox" checked="{{ lembrar }}" onChange="{{ toggleLembrar }}" style="width:15px;height:15px;accent-color:#F23030">
+                  Manter conectado neste computador
+                </label>
+                <button onClick="{{ entrar }}" class="lg-btn" style="margin-top:4px;padding:13px;border:none;border-radius:12px;background:#F23030;color:#fff;font:700 14.5px Inter,sans-serif;cursor:pointer;box-shadow:0 10px 22px rgba(242,48,48,.28)">Entrar no painel</button>
+                <div style="display:flex;align-items:center;gap:12px;margin:2px 0">
+                  <div style="flex:1;height:1px;background:#ededf0"></div>
+                  <span style="font:600 12px Inter,sans-serif;color:#a3a3ad">ou</span>
+                  <div style="flex:1;height:1px;background:#ededf0"></div>
+                </div>
+                <button onClick="{{ entrarGoogle }}" class="lg-btn" style="padding:13px;border:1.5px solid #ededf0;border-radius:12px;background:#fff;color:#16161a;font:600 14px Inter,sans-serif;cursor:pointer">Continuar com Google</button>
+              </div>
+              <p style="font:500 13.5px Inter,sans-serif;color:#6b6b73;margin-top:26px;text-align:center">Ainda não é parceiro? <a href="./Landing Page.dc.html">Fale com a gente</a></p>
+            </div>
+          </sc-if>
+
+          <!-- 2 · 2FA -->
+          <sc-if value="{{ isCodigo }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <span onClick="{{ goLogin }}" style="display:inline-block;font:600 12.5px Inter,sans-serif;color:#71717a;cursor:pointer;margin-bottom:18px">← Voltar</span>
+              <h2 style="font:800 25px Inter,sans-serif;letter-spacing:-0.02em;margin:0 0 8px">Confirme que é você</h2>
+              <p style="font:500 14px/1.6 Inter,sans-serif;color:#6b6b73;margin:0 0 26px">Enviamos um código de 6 dígitos para <strong style="color:#16161a">{{ emailMasked }}</strong>.</p>
+              <label style="display:block;font:600 12.5px Inter,sans-serif;color:#52525b;margin-bottom:7px">Código de verificação</label>
+              <input value="{{ codigo }}" onChange="{{ onCodigo }}" placeholder="000000" maxLength="6" style="width:100%;box-sizing:border-box;padding:14px;border-radius:11px;border:1.5px solid #ededf0;font:700 22px Inter,sans-serif;letter-spacing:0.3em;text-align:center;color:#16161a">
+              <sc-if value="{{ erro }}" hint-placeholder-val="{{ false }}">
+                <div style="font:600 12.5px Inter,sans-serif;color:#F23030;background:#FFECEC;border-radius:9px;padding:9px 12px;margin-top:14px">{{ erro }}</div>
+              </sc-if>
+              <button onClick="{{ verificar }}" class="lg-btn" style="width:100%;margin-top:18px;padding:13px;border:none;border-radius:12px;background:#F23030;color:#fff;font:700 14.5px Inter,sans-serif;cursor:pointer;box-shadow:0 10px 22px rgba(242,48,48,.28)">Verificar e entrar</button>
+              <p style="font:500 13px Inter,sans-serif;color:#6b6b73;margin-top:20px;text-align:center">Não recebeu? <span onClick="{{ reenviar }}" style="color:#F23030;font-weight:600;cursor:pointer">Reenviar código</span></p>
+              <div style="font:500 12px Inter,sans-serif;color:#a3a3ad;text-align:center;margin-top:10px">Dica do protótipo: qualquer 6 dígitos funciona.</div>
+            </div>
+          </sc-if>
+
+          <!-- 3 · ESQUECI -->
+          <sc-if value="{{ isEsqueci }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <span onClick="{{ goLogin }}" style="display:inline-block;font:600 12.5px Inter,sans-serif;color:#71717a;cursor:pointer;margin-bottom:18px">← Voltar ao login</span>
+              <h2 style="font:800 25px Inter,sans-serif;letter-spacing:-0.02em;margin:0 0 8px">Recuperar acesso</h2>
+              <p style="font:500 14px/1.6 Inter,sans-serif;color:#6b6b73;margin:0 0 26px">Informe seu e-mail e enviamos um link para criar uma nova senha.</p>
+              <label style="display:block;font:600 12.5px Inter,sans-serif;color:#52525b;margin-bottom:7px">E-mail</label>
+              <input type="email" value="{{ email }}" onChange="{{ onEmail }}" placeholder="voce@assessoria.com" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:11px;border:1.5px solid #ededf0;font:500 14px Inter,sans-serif;color:#16161a">
+              <sc-if value="{{ erro }}" hint-placeholder-val="{{ false }}">
+                <div style="font:600 12.5px Inter,sans-serif;color:#F23030;background:#FFECEC;border-radius:9px;padding:9px 12px;margin-top:14px">{{ erro }}</div>
+              </sc-if>
+              <button onClick="{{ enviarLink }}" class="lg-btn" style="width:100%;margin-top:18px;padding:13px;border:none;border-radius:12px;background:#F23030;color:#fff;font:700 14.5px Inter,sans-serif;cursor:pointer;box-shadow:0 10px 22px rgba(242,48,48,.28)">Enviar link</button>
+            </div>
+          </sc-if>
+
+          <!-- 4 · LINK ENVIADO -->
+          <sc-if value="{{ isEnviado }}" hint-placeholder-val="{{ false }}">
+            <div style="text-align:center">
+              <div style="width:52px;height:52px;border-radius:15px;background:#FFECEC;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font:700 22px Inter,sans-serif;color:#F23030">✓</div>
+              <h2 style="font:800 24px Inter,sans-serif;letter-spacing:-0.02em;margin:0 0 10px">Link enviado</h2>
+              <p style="font:500 14px/1.6 Inter,sans-serif;color:#6b6b73;margin:0 0 26px">Verifique a caixa de entrada de <strong style="color:#16161a">{{ emailMasked }}</strong>. O link expira em 30 minutos.</p>
+              <button onClick="{{ goNovaSenha }}" class="lg-btn" style="width:100%;padding:13px;border:none;border-radius:12px;background:#F23030;color:#fff;font:700 14.5px Inter,sans-serif;cursor:pointer;box-shadow:0 10px 22px rgba(242,48,48,.28)">Abrir o link</button>
+              <button onClick="{{ goLogin }}" style="width:100%;margin-top:10px;padding:13px;border:1.5px solid #ededf0;border-radius:12px;background:#fff;color:#16161a;font:600 14px Inter,sans-serif;cursor:pointer">Voltar ao login</button>
+            </div>
+          </sc-if>
+
+          <!-- 5 · NOVA SENHA -->
+          <sc-if value="{{ isNovaSenha }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <h2 style="font:800 25px Inter,sans-serif;letter-spacing:-0.02em;margin:0 0 8px">Criar nova senha</h2>
+              <p style="font:500 14px Inter,sans-serif;color:#6b6b73;margin:0 0 26px">Mínimo de 8 caracteres.</p>
+              <div style="display:flex;flex-direction:column;gap:15px">
+                <div>
+                  <label style="display:block;font:600 12.5px Inter,sans-serif;color:#52525b;margin-bottom:7px">Nova senha</label>
+                  <input type="password" value="{{ nova }}" onChange="{{ onNova }}" placeholder="••••••••" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:11px;border:1.5px solid #ededf0;font:500 14px Inter,sans-serif;color:#16161a">
+                  <div style="display:flex;gap:5px;margin-top:9px">
+                    <div style="{{ bar1 }}"></div><div style="{{ bar2 }}"></div><div style="{{ bar3 }}"></div>
+                  </div>
+                  <div style="font:500 11.5px Inter,sans-serif;color:#a3a3ad;margin-top:6px">{{ forcaLabel }}</div>
+                </div>
+                <div>
+                  <label style="display:block;font:600 12.5px Inter,sans-serif;color:#52525b;margin-bottom:7px">Confirmar senha</label>
+                  <input type="password" value="{{ conf }}" onChange="{{ onConf }}" placeholder="••••••••" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:11px;border:1.5px solid #ededf0;font:500 14px Inter,sans-serif;color:#16161a">
+                </div>
+                <sc-if value="{{ erro }}" hint-placeholder-val="{{ false }}">
+                  <div style="font:600 12.5px Inter,sans-serif;color:#F23030;background:#FFECEC;border-radius:9px;padding:9px 12px">{{ erro }}</div>
+                </sc-if>
+                <button onClick="{{ salvarSenha }}" class="lg-btn" style="margin-top:4px;padding:13px;border:none;border-radius:12px;background:#F23030;color:#fff;font:700 14.5px Inter,sans-serif;cursor:pointer;box-shadow:0 10px 22px rgba(242,48,48,.28)">Salvar e entrar</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- 6 · SUCESSO -->
+          <sc-if value="{{ isSucesso }}" hint-placeholder-val="{{ false }}">
+            <div style="text-align:center">
+              <div style="width:52px;height:52px;border-radius:15px;background:#16161a;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font:700 22px Inter,sans-serif;color:#fff">✓</div>
+              <h2 style="font:800 24px Inter,sans-serif;letter-spacing:-0.02em;margin:0 0 10px">Tudo pronto</h2>
+              <p style="font:500 14px/1.6 Inter,sans-serif;color:#6b6b73;margin:0 0 26px">Acesso liberado. Você será levado ao painel dos seus alunos.</p>
+              <a href="./Painel do Personal - Dashboard.dc.html" class="lg-btn" style="display:block;padding:13px;border-radius:12px;background:#F23030;color:#fff;font:700 14.5px Inter,sans-serif;text-align:center;box-shadow:0 10px 22px rgba(242,48,48,.28)">Ir para o painel</a>
+            </div>
+          </sc-if>
+
+        </div>
+      </div>
+    </div>
+  </x-import>
+
+  <div style="font:500 12px Inter,sans-serif;color:#84847f">Etapa {{ stepNum }} de 6 · {{ stepLabel }}</div>
+
+  <sc-if value="{{ toastMsg }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:#16161a;color:#fff;font:600 13px Inter,sans-serif;padding:11px 18px;border-radius:11px;box-shadow:0 12px 30px rgba(0,0,0,.25)">{{ toastMsg }}</div>
+  </sc-if>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { step: 'login', email: '', senha: '', codigo: '', nova: '', conf: '', lembrar: true, erro: '', toastMsg: '' };
+
+  toast = (m) => { this.setState({ toastMsg: m }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toastMsg: '' }), 2200); };
+  go = (step) => this.setState({ step, erro: '' });
+
+  onEmail = e => this.setState({ email: e.target.value, erro: '' });
+  onSenha = e => this.setState({ senha: e.target.value, erro: '' });
+  onCodigo = e => this.setState({ codigo: e.target.value.replace(/\D/g, '').slice(0, 6), erro: '' });
+  onNova = e => this.setState({ nova: e.target.value, erro: '' });
+  onConf = e => this.setState({ conf: e.target.value, erro: '' });
+  toggleLembrar = () => this.setState(s => ({ lembrar: !s.lembrar }));
+
+  entrar = () => {
+    const { email, senha } = this.state;
+    if (!email || !senha) return this.setState({ erro: 'Informe e-mail e senha para continuar.' });
+    if (!email.includes('@')) return this.setState({ erro: 'E-mail inválido.' });
+    if (senha.length < 6) return this.setState({ erro: 'Senha ou e-mail incorretos.' });
+    this.go('codigo');
+  };
+  entrarGoogle = () => { this.setState({ email: this.state.email || 'marina@assessoria.com' }); this.go('codigo'); };
+  verificar = () => {
+    if (this.state.codigo.length < 6) return this.setState({ erro: 'Digite os 6 dígitos do código.' });
+    this.go('sucesso');
+  };
+  reenviar = () => this.toast('Novo código enviado');
+  enviarLink = () => {
+    if (!this.state.email || !this.state.email.includes('@')) return this.setState({ erro: 'Informe um e-mail válido.' });
+    this.go('enviado');
+  };
+  salvarSenha = () => {
+    const { nova, conf } = this.state;
+    if (nova.length < 8) return this.setState({ erro: 'A senha precisa de pelo menos 8 caracteres.' });
+    if (nova !== conf) return this.setState({ erro: 'As senhas não coincidem.' });
+    this.go('sucesso');
+  };
+  reset = () => this.setState({ step: 'login', email: '', senha: '', codigo: '', nova: '', conf: '', erro: '' });
+
+  renderVals() {
+    const s = this.state;
+    const steps = { login: [1, 'Login'], codigo: [2, 'Verificação em duas etapas'], esqueci: [3, 'Recuperar acesso'], enviado: [4, 'Link enviado'], novaSenha: [5, 'Nova senha'], sucesso: [6, 'Acesso liberado'] };
+    const urls = { login: 'app.repsclub.com.br/entrar', codigo: 'app.repsclub.com.br/entrar/verificacao', esqueci: 'app.repsclub.com.br/recuperar', enviado: 'app.repsclub.com.br/recuperar/enviado', novaSenha: 'app.repsclub.com.br/recuperar/nova-senha', sucesso: 'app.repsclub.com.br/entrar/sucesso' };
+    const masked = (() => {
+      const e = s.email || 'voce@assessoria.com';
+      const [u, d] = e.split('@');
+      if (!d) return e;
+      return u.slice(0, 2) + '•••@' + d;
+    })();
+    const n = s.nova.length;
+    const forca = n === 0 ? 0 : n < 8 ? 1 : (/[^a-zA-Z]/.test(s.nova) ? 3 : 2);
+    const bar = (i) => `flex:1;height:4px;border-radius:3px;background:${forca >= i ? (forca === 1 ? '#F23030' : forca === 2 ? '#E9A23B' : '#22A06B') : '#ededf0'}`;
+
+    return {
+      url: urls[s.step], stepNum: steps[s.step][0], stepLabel: steps[s.step][1],
+      isLogin: s.step === 'login', isCodigo: s.step === 'codigo', isEsqueci: s.step === 'esqueci',
+      isEnviado: s.step === 'enviado', isNovaSenha: s.step === 'novaSenha', isSucesso: s.step === 'sucesso',
+      email: s.email, senha: s.senha, codigo: s.codigo, nova: s.nova, conf: s.conf, lembrar: s.lembrar,
+      erro: s.erro, toastMsg: s.toastMsg, emailMasked: masked,
+      bar1: bar(1), bar2: bar(2), bar3: bar(3),
+      forcaLabel: forca === 0 ? 'Use letras, números e um símbolo.' : forca === 1 ? 'Muito curta' : forca === 2 ? 'Razoável' : 'Forte',
+      onEmail: this.onEmail, onSenha: this.onSenha, onCodigo: this.onCodigo, onNova: this.onNova, onConf: this.onConf,
+      toggleLembrar: this.toggleLembrar, entrar: this.entrar, entrarGoogle: this.entrarGoogle, verificar: this.verificar,
+      reenviar: this.reenviar, enviarLink: this.enviarLink, salvarSenha: this.salvarSenha, reset: this.reset,
+      goLogin: () => this.go('login'), goEsqueci: () => this.go('esqueci'), goNovaSenha: () => this.go('novaSenha'),
+    };
+  }
+}
+
+</script>
+</body>
+</html>
