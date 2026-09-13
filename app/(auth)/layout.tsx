@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Logo } from "@/components/logo";
+import { RodapeLegal } from "@/components/rodape-legal";
 
 /**
  * Moldura das telas de autenticação do personal.
@@ -36,8 +37,9 @@ export default function AuthLayout({
         </p>
       </aside>
 
-      <main className="flex items-center justify-center px-7 py-12 lg:px-10">
+      <main className="flex flex-col items-center justify-center gap-8 px-7 py-12 lg:px-10">
         <div className="w-full max-w-[372px]">{children}</div>
+        <RodapeLegal />
       </main>
     </div>
   );

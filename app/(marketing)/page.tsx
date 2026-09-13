@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Badge, Button } from "@/components/ui";
+import { RodapeLegal } from "@/components/rodape-legal";
 
 /**
  * Espaço reservado da landing. A landing de verdade é da fase 4 — o protótipo
@@ -31,6 +32,8 @@ export default function LandingPage() {
           </Button>
         </Link>
       </div>
+
+      <RodapeLegal className="mt-4" />
     </main>
   );
 }

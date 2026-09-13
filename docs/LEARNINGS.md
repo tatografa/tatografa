@@ -287,3 +287,22 @@ Três consequências para os próximos milestones:
   `borderColor` no mesmo instante do `focus()` — com `transition` na classe, o valor ainda
   era o antigo. Esperar a transição mostrou borda vermelha e halo, corretos desde sempre.
   Quase "consertei" o que não estava quebrado: com animação no elemento, medir depois.
+- [2026-09-13] [banco] **Prova de aceite não mora em coluna que o aceitante pode editar.**
+  `students_update` deixa o aluno alterar a própria linha, então `termos_aceitos_em` ali
+  seria um registro que o próprio interessado reescreve — inútil justamente no dia em que
+  alguém perguntar. Log append-only em tabela separada, com policy de select e insert e
+  **nenhuma** de update ou delete: com RLS ligado, a ausência da policy é a proibição.
+- [2026-09-13] [banco] **`default now()` não protege data que o cliente pode mandar.**
+  Default só vale para quem **omite** a coluna, e um POST direto ao PostgREST não omite —
+  manda a data que quiser, inclusive anterior a uma mudança de texto, "provando" aceite de
+  algo que ainda não existia. Quem garante é gatilho `before insert` sobrescrevendo o
+  campo. Provado gravando 2020-01-01 e recebendo de volta a hora do banco.
+- [2026-09-13] [produto] **Pedir aceite de documento que não existe é defeito, não
+  pendência.** O onboarding trazia "Aceito os termos e a política" desde o M1, sem os
+  documentos e sem gravar nada. Passou por três rodadas de teste de campo sem ninguém
+  reparar, porque o checkbox *parecia* funcionar. Texto de interface que promete um
+  artefato precisa que o artefato exista — vale para link, para e-mail e para política.
+- [2026-09-13] [dados-pessoais] **Não publicar o e-mail pessoal do dono numa página
+  aberta.** Era o único endereço disponível e caberia na política sem ninguém questionar.
+  Virou `[DEFINIR]` visível na tela: marcador gritante é mais difícil de esquecer que um
+  endereço plausível, e escolher o que fica exposto publicamente é decisão do dono.

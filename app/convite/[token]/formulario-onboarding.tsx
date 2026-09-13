@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 
 import { Button, EscolhaCards, Input } from "@/components/ui";
 import { Logo } from "@/components/logo";
+import { VERSAO_DOS_DOCUMENTOS } from "@/lib/legal/documentos";
 import { NIVEL, OBJETIVO } from "@/lib/rotulos";
 import { cn } from "@/lib/utils";
 
@@ -124,6 +125,17 @@ export function FormularioOnboarding({
       <form action={acao} noValidate className="space-y-6">
         <input type="hidden" name="token" value={token} />
         <input type="hidden" name="nome" value={nome} />
+        {/*
+          A versão do texto vai junto com o aceite. O servidor não confia neste
+          campo para saber qual é a vigente — ele lê a própria constante —, mas
+          mandá-lo deixa registrado **qual texto estava na tela** de quem
+          aceitou, que é a pergunta que importa se um dia alguém perguntar.
+        */}
+        <input
+          type="hidden"
+          name="termos_versao"
+          value={VERSAO_DOS_DOCUMENTOS}
+        />
 
         <header className="space-y-3.5">
           <p className="eyebrow text-ink-5">Etapa {etapa} de 2</p>
@@ -224,8 +236,34 @@ export function FormularioOnboarding({
               }}
               className="mt-0.5 size-4 shrink-0 accent-brand"
             />
+            {/*
+              Os links abrem em aba nova: clicar num deles no meio do
+              onboarding não pode custar a senha já digitada e a etapa já
+              vencida. `stopPropagation` porque o link está dentro da `<label>`
+              — sem isso, tocar nele marcaria o checkbox de tabela.
+            */}
             <span className="text-[12.5px] leading-[1.5] text-ink-3">
-              Aceito os termos de uso e a política de privacidade do Reps Club.
+              Aceito os{" "}
+              <a
+                href="/termos"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="font-semibold text-brand underline underline-offset-2 transition hover:text-brand-hover"
+              >
+                termos de uso
+              </a>{" "}
+              e a{" "}
+              <a
+                href="/privacidade"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="font-semibold text-brand underline underline-offset-2 transition hover:text-brand-hover"
+              >
+                política de privacidade
+              </a>{" "}
+              do Reps Club.
             </span>
           </label>
           {(erroLocal.termos ?? estado.errosPorCampo?.termos) && (

@@ -319,8 +319,8 @@ suposição.
 | M4-01 | PWA: instalar, funcionar sem sinal, alarme de descanso | senior | feito · checkpoint aprovado |
 | M4-02 | E-mails transacionais (convite, recuperação, link mágico) | pleno | **bloqueado** |
 | M4-03 | Erros, estados vazios e de carregamento | pleno | feito |
-| M4-04 | Acessibilidade: teclado, leitor de tela, contraste | pleno | feito · **1 critério aberto** |
-| M4-05 | Termos de uso e privacidade | junior | **bloqueado** |
+| M4-04 | Acessibilidade: teclado, leitor de tela, contraste | pleno | feito · VoiceOver dispensado pelo Otávio |
+| M4-05 | Termos de uso e privacidade | junior | feito · **texto é rascunho** |
 
 ### Riscos que exigem checkpoint
 
@@ -380,9 +380,40 @@ Também caiu uma armadilha de design system: **`bg-X/15 text-X` reprova sempre**
 A cor diluída sobre si mesma estaciona em 4.1, para verde, vermelho e âmbar
 igualmente. Fundo claro precisa de token próprio.
 
-**O critério que fica aberto** é o que o card marca como obrigatório: teste com
-leitor de tela de verdade (VoiceOver no iOS). Não há iPhone neste ambiente, e
-emular não é testar. Roteiro pronto em `docs/plan/M4-04-roteiro-voiceover.md`.
+**O critério do leitor de tela não foi cumprido, e não vai ser.** O card pedia
+teste com VoiceOver no iOS; o Otávio decidiu em 13/09 que não vai executá-lo.
+Fica registrado como limite conhecido, não como pendência: o que a auditoria
+automática, a árvore de acessibilidade e o passeio de teclado cobrem está
+conferido; o que só o uso real com leitor de tela revelaria, não está. O
+roteiro continua em `docs/plan/M4-04-roteiro-voiceover.md` caso ele mude de
+ideia ou apareça alguém para rodá-lo.
+
+### O que o M4-05 entregou
+
+`/termos` e `/privacidade` públicas, o checkbox do onboarding linkando para
+elas, rodapé nas telas públicas, e o aceite gravado.
+
+**A decisão de schema é o miolo do card.** `students_update` deixa o aluno
+editar a própria linha, então uma coluna `termos_aceitos_em` ali seria prova
+que o próprio aceitante pode reescrever. `term_acceptances` (migration 0017) é
+append-only: select e insert têm policy, update e delete **não têm nenhuma** —
+com RLS ligado, a ausência é a proibição. Uma linha por versão, porque texto
+novo exige aceite novo e o antigo precisa continuar existindo.
+
+A data vem do gatilho `private.carimba_aceite`, não do cliente. O `default` da
+coluna não bastava: default só vale para quem omite o campo, e um POST direto
+não omite. Provado com um insert de data forjada (2020) que saiu carimbado com
+a hora do banco.
+
+**O texto é rascunho de dev, não peça jurídica.** Escrito a partir do
+inventário real do banco — cada dado citado existe como coluna. O e-mail de
+contato ficou como `[DEFINIR]` **visível na página**: não publiquei o e-mail
+pessoal do Otávio numa página aberta, e um marcador gritante é mais difícil de
+esquecer que um endereço plausível.
+
+**Buraco declarado:** o personal não aceita nada. O cadastro dele não tem
+checkbox, o card só pedia o do aluno, e adicionar atrito a um fluxo já validado
+em campo é decisão de produto. São ~20 linhas quando o Otávio decidir.
 
 ### Checkpoint do M4-01 — aprovado
 
@@ -419,6 +450,9 @@ Dois cards não podem começar sem decisão dele:
 
 ### Ordem
 
-M4-01, M4-03 e M4-04 estão feitos — o M4-04 com um critério aberto que depende
-de um iPhone, não de código. Sobram **M4-02** e **M4-05**, que esperam o Otávio:
-provedor de e-mail com domínio próprio, e o texto dos termos.
+M4-01, M4-03, M4-04 e M4-05 estão feitos. Sobra **M4-02** (e-mails
+transacionais), que é o único genuinamente bloqueado: depende de provedor e de
+domínio próprio, e os dois custam dinheiro do Otávio.
+
+Duas pendências não-dev viajam junto: o `[DEFINIR]` do e-mail de contato nos
+documentos legais (sai com o domínio) e a revisão do rascunho jurídico.

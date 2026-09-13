@@ -6,6 +6,7 @@ import { z } from "zod";
 import { traduzErro } from "@/lib/auth/mensagens";
 import { getSiteOrigin } from "@/lib/auth/site-url";
 import { createClient } from "@/lib/supabase/server";
+import { VERSAO_DOS_DOCUMENTOS } from "@/lib/legal/documentos";
 
 /** Os campos do formulário, como texto, para devolver o que o aluno digitou. */
 export type CamposDoOnboarding = {
@@ -154,6 +155,14 @@ export async function criarAcesso(
         birth_date: analise.data.nascimento,
         weight_kg: String(analise.data.peso),
         height_cm: String(Math.round(analise.data.altura)),
+        /*
+         * A versão do texto aceito, para o gatilho gravar em
+         * `term_acceptances`. Vem da constante do servidor, **não** do
+         * formulário: o campo escondido diz o que estava na tela, mas quem
+         * decide qual versão vale é quem serve o texto. A data do aceite nem
+         * passa por aqui — é o relógio do banco que carimba.
+         */
+        termos_versao: VERSAO_DOS_DOCUMENTOS,
       },
     },
   });

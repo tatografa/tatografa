@@ -292,6 +292,30 @@ export type Database = {
           },
         ]
       }
+      term_acceptances: {
+        Row: {
+          aceito_em: string
+          documento: string
+          id: string
+          user_id: string
+          versao: string
+        }
+        Insert: {
+          aceito_em?: string
+          documento: string
+          id?: string
+          user_id: string
+          versao: string
+        }
+        Update: {
+          aceito_em?: string
+          documento?: string
+          id?: string
+          user_id?: string
+          versao?: string
+        }
+        Relationships: []
+      }
       trainers: {
         Row: {
           avatar_url: string | null
