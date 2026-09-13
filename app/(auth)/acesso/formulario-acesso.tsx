@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 
-import { Button, Input } from "@/components/ui";
+import { Button, classesDeBotao, Input } from "@/components/ui";
 
 import { enviarLinkDeAcesso, type EstadoAuth } from "../actions";
 
@@ -31,17 +31,45 @@ export function FormularioAcesso() {
   }
 
   return (
-    <form action={acao} noValidate className="space-y-7">
+    <div className="space-y-6">
       <header className="space-y-2">
         <h1 className="text-[25px] font-extrabold tracking-[-0.02em] text-ink">
           Entrar
         </h1>
         <p className="text-[14px] font-medium text-ink-3">
-          Mandamos um link para o seu e-mail. Sem senha, sem complicação.
+          Use a senha que você criou quando aceitou o convite.
         </p>
       </header>
 
-      <div className="space-y-4">
+      {/*
+        **A senha vem primeiro, e fora do formulário.**
+
+        Esta é a porta de entrada do aluno: `requireStudent()` manda todo aluno
+        deslogado para cá. Ele **tem** senha — criou no onboarding do convite —,
+        então é a ação que sempre funciona. O link por e-mail depende de SMTP, e
+        quando ele falha a tela diz "link enviado" e o aluno espera na academia
+        por um e-mail que não vem. Já parou um teste de campo assim.
+
+        O botão fica **antes** do campo de e-mail de propósito: dentro do
+        formulário, quem digitasse o e-mail e clicasse aqui perderia o que
+        digitou ao navegar.
+      */}
+      <Link href="/entrar" className={classesDeBotao({ block: true, size: "lg" })}>
+        Entrar com senha
+      </Link>
+
+      <div className="flex items-center gap-3" aria-hidden>
+        <span className="h-px flex-1 bg-border" />
+        <span className="eyebrow text-ink-5">ou</span>
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
+      <form action={acao} noValidate className="space-y-4">
+        <p className="text-[13.5px] leading-relaxed text-ink-3">
+          Esqueceu a senha? Recebe um link de acesso por e-mail — ele vale por
+          1 hora.
+        </p>
+
         <Input
           label="E-mail"
           name="email"
@@ -62,26 +90,10 @@ export function FormularioAcesso() {
           </p>
         )}
 
-        <Button type="submit" block disabled={enviando}>
-          {enviando ? "Enviando…" : "Receber link de acesso"}
+        <Button type="submit" block variant="secondary" disabled={enviando}>
+          {enviando ? "Enviando…" : "Receber link por e-mail"}
         </Button>
-      </div>
-
-      <p className="text-center text-[13.5px] font-medium text-ink-3">
-        {/*
-          O aluno tem senha — ele a criou no onboarding. A frase anterior dizia
-          "É personal trainer?", o que manda o aluno embora justamente quando o
-          link mágico não chega (limite de e-mail do plano gratuito). Foi assim
-          que o primeiro teste de campo parou.
-        */}
-        Prefere a senha que você criou?{" "}
-        <Link
-          href="/entrar"
-          className="font-semibold text-brand transition hover:text-brand-hover"
-        >
-          Entrar com senha
-        </Link>
-      </p>
-    </form>
+      </form>
+    </div>
   );
 }

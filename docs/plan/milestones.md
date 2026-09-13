@@ -13,7 +13,7 @@
 | M1 | Fatia vertical | Convite → treino → execução → histórico | Roteiro completo com duas contas, treino executado na academia | **validado em campo** |
 | M2 | Utilidade contínua | Macrotreino, referência histórica, PRs, progresso, painel | Aluno usa duas semanas seguidas sem faltar nada | **validado em campo** |
 | M3 | Social e reavaliação | Feed, foto do treino, reavaliação física | Postar treino, comentar, comparar antes/depois | planejado (cortável) |
-| M4 | Pronto para o piloto | PWA, estados vazios e de erro, e-mails, termos, acessibilidade | Alguém que não conhece o produto usa sem ajuda | **em andamento** |
+| M4 | Pronto para o piloto | PWA, estados vazios e de erro, e-mails, termos, acessibilidade | Alguém que não conhece o produto usa sem ajuda | **código feito · piloto começando** |
 
 ---
 
