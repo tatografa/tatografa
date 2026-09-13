@@ -343,3 +343,14 @@ Três consequências para os próximos milestones:
   nascendo com o endereço antigo, e **nada na tela denuncia**: os dois endereços
   respondem. Quando um valor fixo vence um valor observado, vale comparar os dois e gritar
   na divergência — uma vez por combinação, não a cada requisição.
+- [2026-09-13] [auth] **Erro de envio de e-mail se diagnostica em três logs, não em um.**
+  A tela mostra a frase genérica de propósito; o motivo real está em Supabase → Auth Logs
+  (`535 authentication failed` diz credencial recusada, `Email address not authorized` diz
+  que o SMTP próprio nem foi ligado); e o provedor tem os dele. Cruzar os dois lados
+  descarta metade das hipóteses antes de tocar em qualquer campo — foi assim que o
+  "reconfigurar por cima" deixou de ser a primeira tentativa.
+- [2026-09-13] [infra] **Troca de senha de caixa de e-mail não vale no mesmo minuto.** A
+  API respondeu `Request accepted` e o log de ação marcou `OK` às 20:46:46; o SMTP foi
+  configurado às 20:47:46 e recusou autenticação por minutos. "Aceito" é a fila, não o
+  efeito. Depois de trocar credencial em serviço gerenciado, esperar antes de concluir que
+  está errada.

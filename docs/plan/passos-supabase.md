@@ -120,6 +120,42 @@ foi o que escondeu esse defeito até agora.
 
 ---
 
+## Se der erro no envio — diagnóstico
+
+A tela agora mostra *"Não conseguimos enviar o e-mail agora"* quando o envio
+falha de verdade. O motivo exato **não** aparece para o usuário (seria vazar
+detalhe de servidor), mas fica no log do Supabase.
+
+**Onde ler:** Supabase → **Logs** → **Auth Logs**. Procure `level: error` e o
+campo `error`.
+
+| O que o log disser | Causa | Correção |
+|---|---|---|
+| `535 ... authentication failed` | usuário ou senha do SMTP recusados | ver abaixo |
+| `Email address not authorized` | SMTP próprio **não** está ligado; ainda no serviço embutido | ligar o Custom SMTP (Passo 2) |
+| `connection refused` / `timeout` | host ou porta errados | tentar `587` no lugar de `465` |
+| `553` / `550` sender rejected | o *Sender email* não é a caixa autenticada | Sender e Username têm de ser o mesmo endereço |
+
+### O `535` e o tempo de propagação
+
+Trocar a senha da caixa na Hostinger **não vale instantaneamente** nos
+servidores de envio. A troca registrada em log como `OK` pode levar alguns
+minutos para valer no SMTP.
+
+Se o SMTP foi configurado logo depois de uma troca de senha, o `535` costuma
+ser só isso. **Espere uns minutos e tente de novo antes de mexer em qualquer
+campo** — reconfigurar por cima reinicia a espera e confunde o diagnóstico.
+
+Se persistir depois de ~10 minutos:
+
+1. No Supabase, apague o campo **Password** e digite a senha **à mão**, sem
+   colar — espaço invisível no fim é a causa mais comum depois da propagação.
+2. Confira que **Username** e **Sender email** são os dois
+   `contato@repsclub.com.br`.
+3. Troque a porta de `465` para `587` e salve de novo.
+4. Se nada resolver, me avise: eu redefino a senha da caixa para uma sem
+   caractere especial complicado e a gente tenta com ela.
+
 ## Depois
 
 Me diga o que aconteceu no Passo 0 e no Passo 3. Com esses dois, o M4 fecha e
