@@ -136,7 +136,26 @@ campo `error`.
 | `connection refused` / `timeout` | host ou porta errados | tentar `587` no lugar de `465` |
 | `553` / `550` sender rejected | o *Sender email* não é a caixa autenticada | Sender e Username têm de ser o mesmo endereço |
 
-### O `535` e o tempo de propagação
+### O `535` persistente — qual lado está errado
+
+`535` quer dizer que a conexão chegou e o servidor **rejeitou a credencial**.
+Isso descarta host, porta e TLS: em `465` e em `587` o erro é o mesmo.
+
+Sobra saber de que lado está a senha errada, e há um teste que separa os dois
+em 30 segundos:
+
+**Entre no webmail da Hostinger com a mesma senha** que está no campo do
+Supabase — `mail.hostinger.com`, usuário `contato@repsclub.com.br`.
+
+| Resultado | Onde está o erro | Correção |
+|---|---|---|
+| O webmail **aceita** | a senha está certa na Hostinger; o campo do Supabase é que está diferente | reescrever o campo **digitando**, nunca colando |
+| O webmail **recusa** | a senha da caixa não é essa | redefinir a senha da caixa e usar a nova nos dois lugares |
+
+A causa mais comum do primeiro caso é espaço invisível colado no fim. Colar de
+uma mensagem de chat traz isso com frequência.
+
+### O tempo de propagação
 
 Trocar a senha da caixa na Hostinger **não vale instantaneamente** nos
 servidores de envio. A troca registrada em log como `OK` pode levar alguns
