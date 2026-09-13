@@ -4,78 +4,49 @@
 > A primeira versão deste roteiro mandava sobrescrever o registro `A` do domínio.
 > **Isso teria derrubado um site que está no ar.** Corrigido abaixo.
 
-## O que eu encontrei ao inspecionar
+## Situação em 13/09/2026
 
-| Achado | Consequência |
+**Decisão do Otávio:** o app fica na raiz, `repsclub.com.br`. O site que estava
+lá desde nov/2025 sai do ar — é exatamente o site que este app substitui.
+
+### Parte 1 — feita
+
+| Passo | Situação |
 |---|---|
-| `repsclub.com.br` **já serve um site** (hospedagem Hostinger, `147.93.38.127`, no ar desde 05/11/2025) | Mexer no registro `A` do domínio raiz derruba esse site |
-| `www` é um `CNAME` que segue a raiz | Segue a raiz no que acontecer com ela |
-| Subdomínios `n8n`, `easypanel`, `evolutionapi`, `wahaapi` apontam para um VPS (`165.227.29.107`) | Não se mexe neles |
-| **`contato@repsclub.com.br` já existe**, ativa, com 8 mensagens | **Passo da caixa de e-mail: já feito.** Não precisa criar nada |
-| `MX`, `SPF`, `DKIM` (3 registros) e `DMARC` já configurados | Entrega de e-mail vai funcionar bem assim que o SMTP for ligado |
+| Domínio adicionado no projeto da Vercel | feito pelo Otávio (não consigo confirmar — meu token da Vercel dá 403 no escopo do time) |
+| `A @ → 76.76.21.21` (Vercel) | **feito por mim**, substituiu `147.93.38.127` |
+| `www` | já era `CNAME` para a raiz; segue junto, sem mexer |
+| Propagação | **já resolvendo**: raiz e `www` devolvem `76.76.21.21` |
 
-## A decisão que vem antes de tudo
+**O que foi preservado, conferido registro a registro depois da escrita:**
+`MX`, `SPF`, `DMARC`, os três `DKIM`, `autodiscover`, `autoconfig` — e os
+subdomínios do VPS (`n8n`, `easypanel`, `evolutionapi`, `wahaapi`,
+`165.227.29.107`). A Hostinger guarda snapshot da zona a cada alteração, então
+há caminho de volta.
 
-O app precisa de um endereço, e há dois caminhos:
+> A escrita usou `overwrite` por **nome + tipo**, não por zona inteira: só o par
+> `@`/`A` foi substituído. Foi por isso que o e-mail não caiu junto.
 
-**A) `app.repsclub.com.br`** — recomendado. Registro **novo**, não toca em nada
-do que existe. O site atual continua no ar em `repsclub.com.br`, e o app do
-Reps Club ganha um endereço próprio. Risco zero.
+### O que conferir agora — 30 segundos, e só você consegue
 
-**B) `repsclub.com.br` (a raiz)** — o app passa a atender o domínio principal, e
-**o site que está lá hoje sai do ar**. Só faz sentido se aquele site for
-descartável ou se for justamente a landing que o app vai substituir.
+Abra **`repsclub.com.br`** no navegador. O ambiente onde eu rodo bloqueia
+acesso externo (mesma política que barra o Supabase), então essa checagem é sua.
 
-O resto deste roteiro assume **A**. Para **B**, os passos são os mesmos trocando
-o nome do registro — mas confirme antes o que existe em
-`/home/u411270671/domains/repsclub.com.br/public_html`.
+| O que aparecer | O que significa | O que fazer |
+|---|---|---|
+| A landing do Reps Club | funcionou | seguir para a Parte 2 |
+| Erro da Vercel (404 / `DEPLOYMENT_NOT_FOUND`) | o DNS chegou, mas o domínio **não** está no projeto | Vercel → Settings → Domains → adicionar `repsclub.com.br` |
+| Aviso de certificado | a Vercel ainda está emitindo o SSL | esperar alguns minutos |
+| O site antigo | cache do seu navegador ou do provedor | aba anônima, ou esperar |
 
----
+### Parte 1.3 — Supabase, e só você consegue
 
-# Parte 1 · O app num endereço do produto
+O MCP do Supabase não expõe configuração de autenticação.
 
-Hoje o app vive em `tatografa.vercel.app`. Funciona, mas o aluno que recebe o
-link no WhatsApp vê "vercel.app".
-
-**Nada no código precisa mudar.** O app descobre sozinho em que endereço está.
-
-## 1.1 Na Vercel — só você consegue fazer
-
-Eu tenho acesso à sua Vercel nesta sessão, mas **a ferramenta de adicionar
-domínio a um projeto não existe** no que me foi disponibilizado. Só dá para
-comprar domínio novo, o que não é o caso. Então este passo é seu:
-
-1. Abra o projeto do Reps Club na Vercel.
-2. **Settings → Domains**.
-3. Digite **`app.repsclub.com.br`** e clique em **Add**.
-4. A Vercel vai mostrar o registro de DNS a criar. Para subdomínio costuma ser
-   um `CNAME` apontando para `cname.vercel-dns.com`.
-5. **Me mande o que apareceu na tela** — ou só diga que adicionou.
-
-## 1.2 O DNS — eu faço
-
-Tenho acesso de escrita ao DNS da sua Hostinger. Assim que você terminar o 1.1,
-eu crio o registro. É um comando, e leva segundos.
-
-**Não fiz antes de você adicionar o domínio na Vercel de propósito:** um
-registro apontando para lá antes disso faz a Vercel responder erro 404, e aí
-`app.repsclub.com.br` fica no ar mostrando página de erro.
-
-Se preferir fazer você mesmo: **Domínios → repsclub.com.br → Zona DNS**, criar
-o `CNAME` com nome `app` e o valor que a Vercel deu.
-
-> **Não mexa nos registros `MX`, `SPF`, `DKIM` nem `DMARC`.** São eles que fazem
-> seu e-mail funcionar, e a Parte 2 depende deles.
-
-## 1.3 Avisar o Supabase do endereço novo — só você consegue
-
-O MCP do Supabase não expõe configuração de autenticação, então não consigo
-fazer daqui.
-
-1. Supabase → projeto **reps-club-dev** → **Authentication → URL Configuration**.
-2. **Site URL:** `https://app.repsclub.com.br`
-3. Em **Redirect URLs**, deixe as duas (a antiga não atrapalha):
-   - `https://app.repsclub.com.br/**`
+1. Supabase → **reps-club-dev** → **Authentication → URL Configuration**.
+2. **Site URL:** `https://repsclub.com.br`
+3. **Redirect URLs** (deixe as duas):
+   - `https://repsclub.com.br/**`
    - `https://tatografa.vercel.app/**`
 4. Salvar.
 
@@ -182,11 +153,11 @@ para o que não tem alternativa — recuperar senha e link de acesso.
 
 | # | O quê | Quem | Situação |
 |---|---|---|---|
-| 1 | Adicionar `app.repsclub.com.br` na Vercel | **Otávio** | a ferramenta de domínio não existe na Vercel MCP |
-| 2 | Criar o `CNAME` no DNS | **eu** | tenho acesso de escrita; espero o passo 1 |
+| 1 | Adicionar `repsclub.com.br` na Vercel | **Otávio** | feito (não consigo confirmar: 403 no escopo do time) |
+| 2 | Apontar o DNS para a Vercel | **eu** | ✅ **feito** em 13/09, já resolvendo |
 | 3 | Site URL e Redirect URLs no Supabase | **Otávio** | MCP do Supabase não expõe config de auth |
 | 4 | Caixa `contato@repsclub.com.br` | — | **já existe**, ativa desde nov/2025 |
 | 5 | Preencher o SMTP no Supabase | **Otávio** | mesmo motivo do 3, e eu não tenho a senha da caixa |
 | 6 | Testar `/recuperar` com e-mail de fora | **Otávio** | depende de 1 a 5 |
 
-Os passos que dependem de mim são rápidos. Me avise quando o 1 estiver feito.
+Só sobram passos de Supabase. Abra `repsclub.com.br` e me diga o que apareceu.
