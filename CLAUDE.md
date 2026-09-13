@@ -69,7 +69,7 @@ Fatias verticais do `docs/plan/milestones.md`. Todo milestone é validável pelo
 | M1 | Fase 1 · Fatia vertical | Convite → treino → execução → histórico | **validado em campo** |
 | M2 | Fase 2 · Utilidade contínua | Macrotreino, PRs, progresso, painel completo | **validado em campo** |
 | M3 | Fase 3 · Social e reavaliação | Feed, fotos, reavaliação física | planejado (cortável) |
-| M4 | Fase 4 · Pronto para o piloto | PWA, estados vazios/erro, e-mails, termos | planejado |
+| M4 | Fase 4 · Pronto para o piloto | PWA, estados vazios/erro, e-mails, termos | **feito · piloto em curso** |
 
 > **M1 e M2 foram validados em campo em 10-11/09/2026** — 50 dos 51 passos do roteiro,
 > com Supabase de verdade, treino executado no celular e conferência no painel.
@@ -166,8 +166,10 @@ Provar que funciona sem o Otávio ler código:
   `Email address not authorized`. Não é limite de volume, é lista de convidados — e
   nenhum aluno de verdade jamais receberia nada. O motivo bom do link copiável é outro
   e é de produto: aluno de academia abre WhatsApp, não abre e-mail.
-- **[2026-09-13]** **E-mail transacional sai pelo SMTP da Hostinger**, que o Otávio já
-  paga, não por provedor novo. Recuperação de senha e link mágico são os únicos fluxos
+- **[2026-09-13]** **E-mail transacional sai pelo SMTP da Hostinger** (`smtp.hostinger.com`,
+  remetente `contato@repsclub.com.br`), que o Otávio já paga, não por provedor novo.
+  Ligado e validado em 13/09: `/recuperar` entrega de verdade. Limite da caixa: 100
+  e-mails por dia. Recuperação de senha e link mágico são os únicos fluxos
   que dependem de e-mail — não há como um terceiro gerar esses links sem a chave de
   serviço do banco, e guardá-la na Vercel ampliaria o estrago de um vazamento para o
   banco inteiro. O convite segue no WhatsApp.

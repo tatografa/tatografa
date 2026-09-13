@@ -317,7 +317,7 @@ suposição.
 | Card | Escopo | Etiqueta | Status |
 |---|---|---|---|
 | M4-01 | PWA: instalar, funcionar sem sinal, alarme de descanso | senior | feito · checkpoint aprovado |
-| M4-02 | E-mail que chega de verdade | pleno | código feito · **configuração com o Otávio** |
+| M4-02 | E-mail que chega de verdade | pleno | **feito e validado em 13/09** |
 | M4-03 | Erros, estados vazios e de carregamento | pleno | feito |
 | M4-04 | Acessibilidade: teclado, leitor de tela, contraste | pleno | feito · VoiceOver dispensado pelo Otávio |
 | M4-05 | Termos de uso e privacidade | junior | feito · **texto é rascunho** |
@@ -439,9 +439,14 @@ Isso corrigiu também uma **decisão de arquitetura errada** no `CLAUDE.md`: o
 motivo registrado para o convite por WhatsApp era "~2 e-mails/hora". Nunca foi
 volume, era lista de convidados. A decisão continua certa; o motivo, não.
 
-Falta o que é do Otávio: ligar o SMTP e apontar o domínio.
-`docs/plan/configurar-dominio-e-email.md` é o passo a passo, escrito para quem
-não entende de DNS nem de SMTP.
+**Fechado em 13/09.** Domínio `repsclub.com.br` apontando para a Vercel, SMTP
+da Hostinger ligado, e `/recuperar` entregando: o log do Supabase registra
+`200` às 21:34, depois de cinco tentativas com `535`.
+
+A causa do `535` não era propagação nem porta — era a senha no campo do
+Supabase, que continuava sendo a antiga da caixa. Diagnóstico registrado no
+card: hipóteses sobre o mecanismo vieram antes da pergunta mais simples, que
+era **qual** credencial estava lá.
 
 ### Checkpoint do M4-01 — aprovado
 

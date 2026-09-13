@@ -361,3 +361,9 @@ Três consequências para os próximos milestones:
   tinha consertado, em nova roupagem. Invertido: cala-se o que revela **quem tem conta**
   (lista curta e conhecida) e mostra-se todo o resto. Quando o default é "esconder", cada
   erro novo nasce escondido.
+- [2026-09-13] [processo] **Confirmar qual credencial está no campo antes de teorizar sobre
+  o mecanismo.** O `535 authentication failed` do SMTP levou três rodadas: testei
+  propagação de senha, depois porta 465 contra 587, depois TLS. A causa era que a senha no
+  campo do Supabase não era a que eu tinha acabado de definir na caixa. "Qual valor exato
+  está aí?" é mais barato que qualquer hipótese sobre o sistema, e vem antes delas — ainda
+  mais quando fui **eu** que troquei a credencial e só assumi que seria a usada.

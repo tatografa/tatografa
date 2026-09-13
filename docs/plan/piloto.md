@@ -1,8 +1,9 @@
 # Piloto — primeiro aluno de verdade
 
-> Decisão do Otávio em 13/09: começar o piloto agora, com o e-mail ainda
-> quebrado. É a opção certa — o M4 inteiro existe para isso, e o que falta não
-> bloqueia o caminho principal.
+> Decisão do Otávio em 13/09: começar o piloto. O M4 inteiro existe para isso.
+>
+> **O e-mail entrou em funcionamento em 13/09 às 21:34**, depois de o SMTP da
+> Hostinger ser ligado no Supabase. Nada do produto fica de fora do piloto.
 
 ## O que funciona e o que não funciona
 
@@ -13,15 +14,15 @@
 | ✅ Entrar | por senha |
 | ✅ Treinar, registrar série, histórico, progresso | tudo |
 | ✅ Instalar na tela inicial (PWA) e treinar sem sinal | tudo |
-| ❌ **"Esqueci minha senha"** | SMTP recusando (`535`). Nenhum e-mail sai |
+| ✅ **"Esqueci minha senha"** | funciona — SMTP da Hostinger, remetente `contato@repsclub.com.br` |
 
-**A única coisa que o aluno não pode fazer sozinho é recuperar a senha.** Se
-acontecer, ele te avisa e você resolve com ele — e vale registrar, porque é
-informação sobre a frequência real do problema.
+**Nada fica de fora.** O limite que sobra é de volume: a caixa entrega **100
+e-mails por dia**, o que para um piloto é folga enorme.
 
-Por isso a tela de entrada do aluno mudou hoje: **"Entrar com senha" é o botão
-principal**, e o link por e-mail virou a saída secundária, com o rótulo
-"Esqueceu a senha?". Antes o botão grande era o caminho quebrado.
+A tela de entrada do aluno mudou hoje e continua assim: **"Entrar com senha" é
+o botão principal**, e o link por e-mail é a saída secundária, com o rótulo
+"Esqueceu a senha?". O aluno cria senha no onboarding, então é o caminho que
+ele conhece — e o botão grande não deve convidar para o caminho mais frágil.
 
 ## Antes de convidar
 
@@ -76,7 +77,6 @@ em bordas que revisão de código não pega.
 
 | Pendência | Efeito no piloto |
 |---|---|
-| SMTP (`535`) | só "esqueci a senha" |
 | Revisão jurídica do rascunho de termos | nenhum — os textos estão no ar |
 | Personal não aceita termos ao criar conta | nenhum — decisão de produto |
 | Teste com leitor de tela | nenhum — dispensado pelo Otávio |

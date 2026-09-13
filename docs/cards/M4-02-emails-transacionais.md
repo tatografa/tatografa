@@ -36,9 +36,9 @@ Otávio está na equipe do projeto.
 - [x] Um 500 genérico em outra tela não vira "não conseguimos enviar o e-mail"
 - [x] Roteiro de configuração escrito para quem não entende de DNS nem de SMTP
 - [x] A decisão errada no `CLAUDE.md` ("~2 e-mails/hora") corrigida
-- [ ] **SMTP da Hostinger ligado no Supabase** — do Otávio
-- [ ] **`repsclub.com.br` apontando para a Vercel** — do Otávio
-- [ ] `/recuperar` testado com e-mail fora da equipe do projeto — do Otávio
+- [x] **SMTP da Hostinger ligado no Supabase** — feito em 13/09
+- [x] **`repsclub.com.br` apontando para a Vercel** — feito em 13/09
+- [x] `/recuperar` entregando de verdade — `200` no log às 21:34, e-mail recebido
 
 ## Delta técnico
 
@@ -63,3 +63,16 @@ Otávio está na equipe do projeto.
 ## Roteiro para o Otávio
 
 `docs/plan/configurar-dominio-e-email.md`
+
+## Como terminou
+
+O `535 authentication failed` persistiu por três rodadas de diagnóstico. Não
+era propagação de senha, não era porta — em `465` e `587` o erro foi idêntico,
+o que já dizia que a conexão chegava e a credencial é que era recusada.
+
+**A senha no campo do Supabase não era a da caixa.** A troca de senha que eu
+fiz às 20:46 invalidou a anterior, e o campo seguia com a antiga.
+
+O que custou tempo: eu testei hipóteses sobre o *mecanismo* (propagação, porta,
+TLS) antes de confirmar o dado mais simples — **qual** senha estava no campo.
+Uma pergunta no começo teria pulado duas rodadas.
