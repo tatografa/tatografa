@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Handoff de design: os protótipos são referência, não código do app.
+    // `BottomNav.tsx` importa react-router-dom, que este projeto não usa.
+    "docs/design/**",
   ]),
 ]);
 

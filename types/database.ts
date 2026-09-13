@@ -182,6 +182,109 @@ export type Database = {
           },
         ]
       }
+      post_comments: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          post_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          post_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_likes: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          photo_path: string | null
+          session_id: string | null
+          student_id: string
+          visibility: Database["public"]["Enums"]["post_visibility"]
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          photo_path?: string | null
+          session_id?: string | null
+          student_id: string
+          visibility?: Database["public"]["Enums"]["post_visibility"]
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          photo_path?: string | null
+          session_id?: string | null
+          student_id?: string
+          visibility?: Database["public"]["Enums"]["post_visibility"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "workout_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       session_sets: {
         Row: {
           completed_at: string
@@ -545,6 +648,7 @@ export type Database = {
       exercise_source: "catalog" | "custom"
       experience_level: "iniciante" | "intermediario" | "avancado"
       mesocycle_status: "ativo" | "concluido" | "arquivado"
+      post_visibility: "personal" | "publico"
       muscle_group:
         | "peito"
         | "costas"
@@ -600,6 +704,7 @@ export const Constants = {
       exercise_source: ["catalog", "custom"],
       experience_level: ["iniciante", "intermediario", "avancado"],
       mesocycle_status: ["ativo", "concluido", "arquivado"],
+      post_visibility: ["personal", "publico"],
       muscle_group: [
         "peito",
         "costas",
