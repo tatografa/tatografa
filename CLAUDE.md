@@ -173,6 +173,18 @@ Provar que funciona sem o Otávio ler código:
   que dependem de e-mail — não há como um terceiro gerar esses links sem a chave de
   serviço do banco, e guardá-la na Vercel ampliaria o estrago de um vazamento para o
   banco inteiro. O convite segue no WhatsApp.
+- **[2026-09-13]** **O personal não monta treino antes de o aluno se cadastrar, e por ora
+  fica assim.** `students.id` **é** o id de `auth.users`, então a linha do aluno não pode
+  existir antes da conta — e o macrotreino pendura em `student_id`. A ordem é convite →
+  aceite → montar → abrir. O enum tem `status = 'convidado'` como padrão da tabela e
+  ninguém o usa: resquício de um desenho em que o personal preparava antes; a permissão
+  existe (`students_insert` aceita o personal), a chave estrangeira é que fecha.
+  **Não desacoplar agora** (decisão do Otávio, 13/09): `students.id` é usado por
+  `mesocycles`, `workout_sessions` e por toda policy que compara `id = auth.uid()`, e
+  mexer na camada de acesso inteira às vésperas do primeiro aluno real custa mais do que
+  entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
+  problema; com dez, vira.
+
 - **[2026-08-31]** Leitura do convite sem sessão usa a função estreita
   `convite_por_token`, não a chave de serviço: a chave ignoraria o RLS do banco inteiro
   se vazasse do ambiente.

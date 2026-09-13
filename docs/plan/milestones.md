@@ -300,6 +300,20 @@ M2-01 primeiro (desbloqueia 05 e 06). M2-02 e M2-03 são independentes. M2-04 de
 
 ---
 
+## O que o piloto precisa responder
+
+Além de "ele volta?", três perguntas que só o uso real decide — e que estão
+propositalmente sem resposta até lá:
+
+1. **A espera entre convite e treino incomoda?** O aluno só existe no banco
+   depois de criar a senha, então o personal não monta nada antes. Com um aluno
+   por vez é irrelevante; com dez, vira fila. Desacoplar `students.id` de
+   `auth.users` resolveria, e mexe em toda policy de acesso — por isso espera.
+2. **O personal precisa aceitar termos ao criar a conta?** Hoje só o aluno
+   aceita. São ~20 linhas, mas é atrito num fluxo já validado.
+3. **O M3 (feed, fotos, reavaliação) tem demanda?** Foi adiado justamente para
+   esta pergunta sair do piloto em vez de suposição.
+
 ## M4 · Pronto para o piloto (em andamento)
 
 O que separa "funciona" de "outra pessoa consegue usar".
