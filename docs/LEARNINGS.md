@@ -354,3 +354,10 @@ Três consequências para os próximos milestones:
   configurado às 20:47:46 e recusou autenticação por minutos. "Aceito" é a fila, não o
   efeito. Depois de trocar credencial em serviço gerenciado, esperar antes de concluir que
   está errada.
+- [2026-09-13] [auth] **Lista de exibição erra; lista de silêncio erra menos.** A primeira
+  correção listava as frases de erro que **deviam aparecer** — e quando o SMTP passou a
+  recusar com `535 authentication failed`, frase que não estava na lista, a tela voltou a
+  dizer "link enviado" para um e-mail que nunca saiu. Exatamente o defeito que a correção
+  tinha consertado, em nova roupagem. Invertido: cala-se o que revela **quem tem conta**
+  (lista curta e conhecida) e mostra-se todo o resto. Quando o default é "esconder", cada
+  erro novo nasce escondido.

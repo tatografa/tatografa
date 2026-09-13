@@ -4,10 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { getSiteOrigin } from "@/lib/auth/site-url";
-import {
-  FALHA_DE_ENVIO_DE_EMAIL,
-  traduzErro,
-} from "@/lib/auth/mensagens";
+import { falhaDeEnvioVisivel, traduzErro } from "@/lib/auth/mensagens";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -143,26 +140,6 @@ function registraFalhaDeEnvio(mensagem: string): void {
   console.error("[auth] falha ao enviar link:", mensagem);
 }
 
-/**
- * O erro do envio de link deve aparecer para quem pediu?
- *
- * **Sim** para o que é nosso — limite de envio, SMTP fora do ar, endereço
- * recusado pelo provedor. **Não** para o que responde "esse e-mail tem conta?",
- * que é o que estas duas telas precisam calar.
- *
- * O que motivou separar: sem SMTP próprio o Supabase entrega só para endereços
- * da equipe do projeto e recusa o resto com `Email address not authorized`.
- * Isso não cabia no filtro antigo, então as telas devolviam "link enviado" e o
- * aluno esperava um e-mail que nunca tinha saído. A recusa vale para qualquer
- * endereço fora da equipe, com ou sem conta, então mostrá-la não vaza nada.
- */
-function falhaQueOUsuarioPrecisaVer(mensagem: string): boolean {
-  return (
-    /rate limit|for security purposes/i.test(mensagem) ||
-    FALHA_DE_ENVIO_DE_EMAIL.test(mensagem)
-  );
-}
-
 export async function enviarLinkDeRecuperacao(
   _anterior: EstadoAuth,
   formData: FormData,
@@ -187,7 +164,7 @@ export async function enviarLinkDeRecuperacao(
   // Sem SMTP próprio o Supabase recusa todo endereço fora da equipe do projeto,
   // e esta tela dizia "link enviado" para um e-mail que nunca saiu.
   if (error) registraFalhaDeEnvio(error.message);
-  if (error && falhaQueOUsuarioPrecisaVer(error.message)) {
+  if (error && falhaDeEnvioVisivel(error.message)) {
     return { erro: traduzErro(error.message), campos: bruto };
   }
 
@@ -225,7 +202,7 @@ export async function enviarLinkDeAcesso(
 
   // Mesma regra do `enviarLinkDeRecuperacao`.
   if (error) registraFalhaDeEnvio(error.message);
-  if (error && falhaQueOUsuarioPrecisaVer(error.message)) {
+  if (error && falhaDeEnvioVisivel(error.message)) {
     return { erro: traduzErro(error.message), campos: bruto };
   }
 

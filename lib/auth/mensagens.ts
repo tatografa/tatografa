@@ -7,22 +7,32 @@
  */
 
 /**
- * Falha de **envio**, que é nossa — não resposta sobre quem tem conta.
+ * A resposta do provedor revela **se aquele e-mail tem conta**?
  *
- * A distinção importa porque `/recuperar` e `/acesso` calam quase todo erro de
- * propósito: responder diferente para e-mail com e sem conta entregaria ao
- * atacante quais endereços existem. Só que isso vinha calando também o que não
- * tem nada a ver com o usuário.
+ * Só essas ficam caladas em `/recuperar` e `/acesso`: responder diferente para
+ * endereço com e sem conta entrega ao atacante quais e-mails existem.
  *
- * O caso concreto: sem SMTP próprio, o Supabase **só entrega para endereços da
- * equipe do projeto** e recusa todo o resto com `Email address not authorized`.
- * A tela dizia "link enviado" e nada chegava — para todo aluno de verdade.
+ * **É lista de silêncio, não lista de exibição** — e a diferença custou um
+ * teste de campo. Antes era o contrário: só um punhado de frases conhecidas
+ * aparecia, e tudo o mais virava "link enviado". Quando o SMTP passou a
+ * recusar com `535 authentication failed`, essa frase não estava na lista, e a
+ * tela voltou a mentir exatamente como antes da correção.
  *
- * Mostrar isto não vaza nada: a recusa acontece para qualquer endereço fora da
- * equipe, tenha ele conta ou não.
+ * Invertido, o silêncio é a exceção: qualquer erro que não seja um destes é
+ * problema nosso e aparece. E inverter não vaza nada, porque nenhum outro erro
+ * depende de quem é o destinatário — SMTP recusado, limite estourado e 500
+ * acontecem igual para endereço com e sem conta.
  */
-export const FALHA_DE_ENVIO_DE_EMAIL =
-  /not authorized|error sending|failed to send|smtp|email provider|unexpected failure/i;
+const RESPOSTA_SOBRE_O_DESTINATARIO =
+  /signups? not allowed|user not found|user is unauthorized/i;
+
+/**
+ * O erro do envio de link deve aparecer para quem pediu?
+ */
+export function falhaDeEnvioVisivel(mensagem: string | undefined | null): boolean {
+  if (!mensagem) return true;
+  return !RESPOSTA_SOBRE_O_DESTINATARIO.test(mensagem);
+}
 
 const TRADUCOES: Array<[RegExp, string]> = [
   [/invalid login credentials/i, "E-mail ou senha incorretos."],
@@ -35,12 +45,13 @@ const TRADUCOES: Array<[RegExp, string]> = [
   [/unable to validate email|invalid email/i, "E-mail inválido."],
   [/signups? not allowed|disabled/i, "O cadastro está desativado no momento."],
   /*
-    Padrão estreito de propósito, mais estreito que `FALHA_DE_ENVIO_DE_EMAIL`:
-    esta lista traduz erro de **toda** a autenticação, e um 500 genérico no
-    login não pode virar "não conseguimos enviar o e-mail".
+    Estreito de propósito: esta lista traduz erro de **toda** a autenticação, e
+    um 500 no login não pode virar "não conseguimos enviar o e-mail". Quem
+    decide o que aparece nas telas de link é `falhaDeEnvioVisivel`; aqui é só a
+    frase em português quando o erro é reconhecidamente de envio.
   */
   [
-    /not authorized|error sending|failed to send|smtp|email provider/i,
+    /not authorized|error sending|failed to send|smtp|email provider|5\.7\.\d|\b535\b/i,
     "Não conseguimos enviar o e-mail agora. O problema é nosso, não seu — tente de novo em alguns minutos ou peça ajuda ao seu personal.",
   ],
 ];
