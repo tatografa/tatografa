@@ -65,6 +65,12 @@ Terminado o deploy, a Vercel mostra o endereço do projeto — algo como
 1. Na Vercel: **Project Settings → Environment Variables**.
 2. Edite `NEXT_PUBLIC_SITE_URL` e coloque o endereço do passo 2, **sem barra no final**.
    Ex.: `https://tatografa.vercel.app`
+
+> **Atualizado em 13/09/2026:** o app passou a servir em `https://repsclub.com.br`, e
+> esta variável precisa acompanhar. Ela **vence** o endereço da requisição de propósito
+> (é o que impede forjar o cabeçalho `Host` e sequestrar o link de recuperação de senha),
+> então enquanto ficar com o valor antigo todo link nasce com `tatografa.vercel.app`.
+> Detalhes em `docs/plan/configurar-dominio-e-email.md`.
 3. Vá em **Deployments**, três pontinhos do último → **Redeploy**.
 
 > Por que isso importa: é esse valor que monta os links dos e-mails de confirmação e do

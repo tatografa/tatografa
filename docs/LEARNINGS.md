@@ -336,3 +336,10 @@ Três consequências para os próximos milestones:
   não expõe configuração de auth. Vale checar qual operação existe antes de prometer
   execução — e antes de declarar que não dá, porque eu já tinha dito que não tinha acesso
   à Vercel quando tinha.
+- [2026-09-13] [infra] **Variável de ambiente que sobrepõe detecção automática envelhece
+  em silêncio.** `NEXT_PUBLIC_SITE_URL` vence o cabeçalho `host` por um motivo bom — sem
+  isso, forjar `Host:` faz o servidor gerar link de recuperação de senha apontando para o
+  site do atacante. O preço é que trocar o domínio sem trocar a variável mantém todo link
+  nascendo com o endereço antigo, e **nada na tela denuncia**: os dois endereços
+  respondem. Quando um valor fixo vence um valor observado, vale comparar os dois e gritar
+  na divergência — uma vez por combinação, não a cada requisição.

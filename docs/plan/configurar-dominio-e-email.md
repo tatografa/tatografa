@@ -39,6 +39,33 @@ acesso externo (mesma política que barra o Supabase), então essa checagem é s
 | Aviso de certificado | a Vercel ainda está emitindo o SSL | esperar alguns minutos |
 | O site antigo | cache do seu navegador ou do provedor | aba anônima, ou esperar |
 
+### ⚠️ Parte 1.2 — a variável que ficou para trás
+
+**Confirmado em 13/09: `repsclub.com.br` está no ar e servindo o app.**
+
+Mas falta um campo, e ele é invisível: o guia de publicação original mandou
+preencher `NEXT_PUBLIC_SITE_URL` com `https://tatografa.vercel.app`. Essa
+variável **vence** a detecção automática de endereço, de propósito — é o que
+impede um ataque em que alguém forja o cabeçalho `Host` e faz o link de
+recuperação de senha apontar para o site dele.
+
+O preço é que ela envelhece calada. Enquanto estiver com o valor antigo:
+
+- o link de convite que você copia para o WhatsApp nasce com `tatografa.vercel.app`
+- os links dos e-mails de recuperação também
+
+Funciona — os dois endereços respondem —, mas o aluno vê "vercel.app".
+
+**O que fazer (2 minutos):**
+
+1. Vercel → **Project Settings → Environment Variables**.
+2. Editar `NEXT_PUBLIC_SITE_URL` → `https://repsclub.com.br` (sem barra no fim).
+3. **Deployments** → três pontinhos do último → **Redeploy**.
+
+> Desde hoje, se essa variável discordar do endereço por onde a requisição
+> chegou, o app escreve um aviso no log da Vercel dizendo exatamente isso. Não
+> muda o comportamento — só deixa de ser silencioso.
+
 ### Parte 1.3 — Supabase, e só você consegue
 
 O MCP do Supabase não expõe configuração de autenticação.
@@ -154,7 +181,8 @@ para o que não tem alternativa — recuperar senha e link de acesso.
 | # | O quê | Quem | Situação |
 |---|---|---|---|
 | 1 | Adicionar `repsclub.com.br` na Vercel | **Otávio** | feito (não consigo confirmar: 403 no escopo do time) |
-| 2 | Apontar o DNS para a Vercel | **eu** | ✅ **feito** em 13/09, já resolvendo |
+| 2 | Apontar o DNS para a Vercel | **eu** | ✅ **feito** em 13/09, confirmado no ar |
+| 2b | `NEXT_PUBLIC_SITE_URL` → `https://repsclub.com.br` + redeploy | **Otávio** | 2 min; sem isso os links nascem com o endereço antigo |
 | 3 | Site URL e Redirect URLs no Supabase | **Otávio** | MCP do Supabase não expõe config de auth |
 | 4 | Caixa `contato@repsclub.com.br` | — | **já existe**, ativa desde nov/2025 |
 | 5 | Preencher o SMTP no Supabase | **Otávio** | mesmo motivo do 3, e eu não tenho a senha da caixa |
