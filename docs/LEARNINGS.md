@@ -367,3 +367,12 @@ Três consequências para os próximos milestones:
   campo do Supabase não era a que eu tinha acabado de definir na caixa. "Qual valor exato
   está aí?" é mais barato que qualquer hipótese sobre o sistema, e vem antes delas — ainda
   mais quando fui **eu** que troquei a credencial e só assumi que seria a usada.
+- [2026-09-13] [produto] **O personal não consegue montar treino antes de o aluno se
+  cadastrar**, e a causa é a chave: `students.id` **é** o id de `auth.users`, então a
+  linha do aluno não pode existir antes da conta. O enum tem `status = 'convidado'` como
+  padrão da tabela e ninguém nunca o usa — resquício de um desenho em que o personal
+  preparava antes. A permissão até existe (`students_insert` aceita o personal), mas a FK
+  fecha a porta. Consequência real: a ordem é convite → aceite → montar → abrir, e quem
+  abrir fora de ordem vê um app vazio na primeira impressão. Desacoplar `students.id` de
+  `auth.users` resolveria, mas mexe em `mesocycles`, `workout_sessions` e em toda policy
+  que compara `id = auth.uid()`.

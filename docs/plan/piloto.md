@@ -28,9 +28,16 @@ ele conhece — e o botão grande não deve convidar para o caminho mais frágil
 
 1. **Limpe o ruído.** Você criou alunos e convites de teste. Não atrapalham,
    mas o painel fica mais legível para você ler o piloto.
-2. **Monte o programa antes do convite.** O aluno que abre o app e vê "nenhum
-   treino por aqui ainda" perde o impulso. Crie o macrotreino e pelo menos o
-   treino A antes de mandar o link.
+2. **Combine o momento — o treino não pode ser montado antes do convite.**
+   O aluno só existe no banco depois de criar a senha (`students.id` **é** o id
+   do usuário de autenticação), então não há a quem pendurar o programa antes
+   disso. A ordem obrigatória é: convite → ele aceita → você monta → ele abre.
+
+   Na prática, para um piloto de um aluno: mande o link e avise que você monta
+   o treino em seguida. Ele aceita em dois minutos, você monta em dez, e ele
+   abre o app já com treino. Se ele abrir antes, vê *"{personal} ainda não
+   montou nenhum treino para você"* — que é honesto, mas é uma primeira
+   impressão vazia.
 3. **Escolha alguém que vá dizer a verdade.** Aluno educado diz que está tudo
    ótimo. O piloto só vale com quem reclama.
 
