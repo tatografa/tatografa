@@ -9,13 +9,32 @@ import { useMontado } from "@/lib/usar-montado";
  * apareceria como 21h20 para o aluno. E formatar já no render de hidratação
  * faria o HTML dos dois lados discordar. Por isso o texto só aparece depois de
  * montar — o resto da frase é escrito para fazer sentido sem ele.
+ *
+ * `prefixo` existe por causa disso: quem escreve "Hoje · 19h30" precisa que o
+ * separador **suma junto** com a hora, senão o card aparece como "Hoje · " até
+ * hidratar, com o ponto pendurado no fim.
  */
-export function HoraLocal({ iso }: { iso: string }) {
+export function HoraLocal({
+  iso,
+  prefixo,
+  className,
+}: {
+  iso: string;
+  prefixo?: string;
+  className?: string;
+}) {
   const montado = useMontado();
   if (!montado) return null;
 
   const data = new Date(iso);
   const hora = `${String(data.getHours()).padStart(2, "0")}h${String(data.getMinutes()).padStart(2, "0")}`;
 
-  return <time dateTime={iso}>{hora}</time>;
+  return (
+    <>
+      {prefixo}
+      <time dateTime={iso} className={className}>
+        {hora}
+      </time>
+    </>
+  );
 }
