@@ -32,15 +32,16 @@ export const VERSAO_DOS_DOCUMENTOS = "2026-09-13";
 export const OPERADOR = {
   nome: "Reps Club",
   /*
-   * **Marcador de propósito, e visível na página.** A política precisa de um
-   * canal de contato, mas publicar o e-mail pessoal do Otávio numa página
-   * aberta convida spam e é decisão dele, não do dev. O endereço do produto
-   * sai junto com o domínio próprio, que é o M4-02.
+   * Endereço do produto, no domínio próprio (`repsclub.com.br`, na Hostinger).
+   * Não é o e-mail pessoal do Otávio de propósito: página aberta com endereço
+   * pessoal convida spam, e a política precisa de um canal que sobreviva a
+   * quem opera o serviço mudar.
    *
-   * Aparece assim na tela para que a pendência não passe despercebida: é mais
-   * fácil esquecer de trocar um endereço plausível do que um `[DEFINIR]`.
+   * **A caixa precisa existir de verdade antes do piloto** — é para cá que vêm
+   * pedido de exclusão e de cópia de dados, com prazo de resposta escrito na
+   * própria política.
    */
-  contato: "[DEFINIR: e-mail de contato do Reps Club]",
+  contato: "contato@repsclub.com.br",
 } as const;
 
 export type Documento = {

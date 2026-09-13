@@ -306,3 +306,19 @@ Três consequências para os próximos milestones:
   aberta.** Era o único endereço disponível e caberia na política sem ninguém questionar.
   Virou `[DEFINIR]` visível na tela: marcador gritante é mais difícil de esquecer que um
   endereço plausível, e escolher o que fica exposto publicamente é decisão do dono.
+- [2026-09-13] [auth] **O e-mail embutido do Supabase não é "limitado", é fechado.** Ele
+  entrega **só para endereços da equipe do projeto** e recusa o resto com `Email address
+  not authorized` — não é cota de volume, é lista de convidados. Quem testa com o próprio
+  e-mail nunca descobre, porque o próprio e-mail está na equipe. Todo fluxo de e-mail
+  precisa de um teste com endereço de fora antes de contar como validado.
+- [2026-09-13] [auth] **Calar erro para não vazar quem tem conta é certo; calar erro de
+  envio é bug.** As duas coisas chegam pelo mesmo `error.message` e vinham tratadas
+  juntas: o filtro só deixava passar `rate limit`, então `Email address not authorized`
+  caía no ramo de sucesso e a tela dizia "link enviado" para um e-mail que nunca saiu. A
+  regra é a origem do erro: falha **do provedor** aparece (não distingue quem tem conta,
+  então não vaza), resposta **sobre o destinatário** cala.
+- [2026-09-13] [processo] **Motivo registrado errado numa decisão de arquitetura sobrevive
+  por meses.** O `CLAUDE.md` dizia que o convite virou link de WhatsApp por causa de "~2
+  e-mails/hora" do plano gratuito. A decisão era certa, o motivo era falso — e ninguém
+  reconfere um motivo que já está escrito. Vale reabrir o *porquê* quando o assunto volta,
+  não só o *o quê*.

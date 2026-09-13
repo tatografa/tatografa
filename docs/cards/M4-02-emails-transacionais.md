@@ -1,47 +1,65 @@
-# M4-02 · E-mails que o produto precisa mandar
+# M4-02 · E-mail que chega de verdade
 
 **Etiqueta:** `pleno`
 
-**Objetivo:** convite, recuperação de senha e link mágico param de depender do limite de
-e-mail do Supabase. Sem isso, cada aluno novo do piloto é um problema.
+**Objetivo:** os fluxos que dependem de e-mail — recuperar senha e link de acesso
+do aluno — param de falhar em silêncio.
 
 **Milestone:** M4 · **Brief:** `docs/plan/M4-brief.md`
 
-**Checkpoint técnico:** **obrigatório, e depende do Otávio antes de começar.** Escolher
-provedor e configurar domínio são decisões dele (ver "Bloqueios" abaixo).
+**Checkpoint técnico:** nenhum.
+
+> **Reescrito em 13/09/2026.** O card original pedia provedor de e-mail novo
+> (Resend) e domínio próprio, e estava marcado como bloqueado esperando dinheiro
+> do Otávio. Duas coisas mudaram: ele já tem `repsclub.com.br` e conta paga na
+> Hostinger (que inclui SMTP), e apareceu um defeito mais grave que o escopo
+> original.
+
+## O defeito que motivou o card
+
+`/recuperar` e `/acesso` diziam **"link enviado"** mesmo quando o envio falhava.
+
+O serviço de e-mail embutido do Supabase não é apenas limitado em volume: ele
+**só entrega para endereços da equipe do projeto** e recusa todo o resto com
+`Email address not authorized`. O filtro das duas ações só deixava passar
+`rate limit|for security purposes`, então essa recusa caía no ramo de sucesso.
+
+Resultado: para qualquer aluno de verdade, "Esqueci minha senha" mostrava
+confirmação e nada acontecia. Não apareceu no teste de campo porque o e-mail do
+Otávio está na equipe do projeto.
 
 ## Critérios de aceite
 
-- [ ] Convite do aluno pode ser **enviado por e-mail**, além do link copiável — o link
-      continua existindo, porque é ele que funciona quando o e-mail falha
-- [ ] Recuperação de senha chega de forma confiável
-- [ ] Link mágico do aluno (`/acesso`) chega de forma confiável
-- [ ] E-mail em português, com a identidade do produto, não o template cru do Supabase
-- [ ] Remetente é o domínio do produto, com SPF/DKIM configurados — senão cai em spam
-- [ ] Falha de envio **não** trava a ação: o convite é criado e o link copiável aparece
-      mesmo se o e-mail não sair
-- [ ] Limite de envio tratado com mensagem que diz o que fazer, não só "tente de novo"
-- [ ] SQL: o disparo não expõe token de convite a quem não deveria vê-lo
+- [x] Falha de **envio** aparece para quem pediu; "esse e-mail não existe"
+      continua calado — as duas coisas são diferentes e vinham juntas
+- [x] O erro real vai para o log do servidor, sem o endereço junto
+- [x] Um 500 genérico em outra tela não vira "não conseguimos enviar o e-mail"
+- [x] Roteiro de configuração escrito para quem não entende de DNS nem de SMTP
+- [x] A decisão errada no `CLAUDE.md` ("~2 e-mails/hora") corrigida
+- [ ] **SMTP da Hostinger ligado no Supabase** — do Otávio
+- [ ] **`repsclub.com.br` apontando para a Vercel** — do Otávio
+- [ ] `/recuperar` testado com e-mail fora da equipe do projeto — do Otávio
 
 ## Delta técnico
 
-- **O token do convite é a credencial.** Mandá-lo por e-mail é aceitável (é o que todo
-  produto faz), mas ele não pode aparecer em log, em painel de provedor nem em
-  `docs/`. Conferir o que o provedor guarda do corpo da mensagem.
-- **A confirmação de e-mail está desligada** desde o teste de campo, e o convite é a
-  prova do canal. Este card **não** a religa: reativar exigiria que o e-mail funcionasse
-  antes, e a ordem certa é essa.
-- O envio é efeito colateral, não pré-condição: a Server Action de convite já devolve o
-  link, e continua devolvendo mesmo com o e-mail fora do ar.
+- `FALHA_DE_ENVIO_DE_EMAIL` em `lib/auth/mensagens.ts` separa "erro nosso" de
+  "resposta sobre quem tem conta". Mostrar o primeiro não vaza nada: a recusa do
+  provedor acontece para qualquer endereço, com ou sem conta.
+- O padrão que **traduz** é mais estreito que o que **decide mostrar**, de
+  propósito: `traduzErro` atende a autenticação inteira.
+- Nenhuma mudança para o domínio: `getSiteOrigin()` deriva do host da
+  requisição, e `NEXT_PUBLIC_SITE_URL` continua opcional.
 
-## Bloqueios — precisam do Otávio antes do card começar
+## O que **não** entra
 
-1. **Qual provedor.** Resend é o caminho natural com Next (free tier de 3 mil/mês, SDK
-   simples). Alternativas: Postmark, SES.
-2. **Qual domínio.** Sem domínio próprio não há SPF/DKIM, e o e-mail cai em spam. Custa
-   ~R$40/ano.
+- **Convite por e-mail.** Continua como link copiado no WhatsApp — decisão do
+  Otávio em 13/09, e é a certa: aluno de academia abre WhatsApp.
+- **Link de acesso gerado pelo personal no painel.** Exigiria a chave de serviço
+  do Supabase na Vercel, e um vazamento daria o banco inteiro, ignorando o RLS.
+  Com SMTP funcionando, o aluno se recupera sozinho.
+- Template de e-mail com identidade visual. O padrão do Supabase entrega; o
+  bonito é depois do piloto.
 
-## Fora do escopo
+## Roteiro para o Otávio
 
-- E-mail de aluno inativo, de recorde batido ou qualquer notificação de engajamento.
-- Fila de reenvio de e-mail com retry.
+`docs/plan/configurar-dominio-e-email.md`

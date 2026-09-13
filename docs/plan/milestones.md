@@ -317,7 +317,7 @@ suposição.
 | Card | Escopo | Etiqueta | Status |
 |---|---|---|---|
 | M4-01 | PWA: instalar, funcionar sem sinal, alarme de descanso | senior | feito · checkpoint aprovado |
-| M4-02 | E-mails transacionais (convite, recuperação, link mágico) | pleno | **bloqueado** |
+| M4-02 | E-mail que chega de verdade | pleno | código feito · **configuração com o Otávio** |
 | M4-03 | Erros, estados vazios e de carregamento | pleno | feito |
 | M4-04 | Acessibilidade: teclado, leitor de tela, contraste | pleno | feito · VoiceOver dispensado pelo Otávio |
 | M4-05 | Termos de uso e privacidade | junior | feito · **texto é rascunho** |
@@ -327,8 +327,8 @@ suposição.
 - **M4-01** — o service worker decide o que o navegador serve. Cache de rota autenticada
   mostra o treino de um aluno para outro. Checkpoint antes de qualquer estratégia que
   toque `/app` ou `/painel`.
-- **M4-02** — depende de provedor e domínio, e o token do convite passa a viajar por
-  e-mail.
+- **M4-02** — resolvido sem provedor novo: SMTP da Hostinger, que o Otávio já paga. O
+  token do convite **não** passa a viajar por e-mail; o convite segue no WhatsApp.
 
 ### O que o M4-03 entregou
 
@@ -415,6 +415,34 @@ esquecer que um endereço plausível.
 checkbox, o card só pedia o do aluno, e adicionar atrito a um fluxo já validado
 em campo é decisão de produto. São ~20 linhas quando o Otávio decidir.
 
+### O que o M4-02 entregou
+
+O card foi **reescrito**: pedia provedor de e-mail novo e estava bloqueado
+esperando dinheiro. O Otávio já tem `repsclub.com.br` e conta paga na Hostinger,
+que inclui SMTP — e apareceu um defeito mais grave que o escopo original.
+
+**`/recuperar` e `/acesso` diziam "link enviado" quando o envio falhava.** O
+serviço embutido do Supabase não é só limitado em volume: ele **só entrega para
+endereços da equipe do projeto** e recusa o resto com `Email address not
+authorized`. O filtro das duas ações só deixava passar `rate limit`, então a
+recusa caía no ramo de sucesso. Para qualquer aluno de verdade, "Esqueci minha
+senha" mostrava confirmação e nada acontecia — e o teste de campo não pegou
+porque o e-mail do Otávio está na equipe.
+
+A correção separa duas coisas que vinham juntas: **falha de envio é nossa e
+aparece**; "esse e-mail tem conta?" continua calado, que é o que protege contra
+enumeração. Mostrar a primeira não vaza nada — a recusa vale para qualquer
+endereço, com ou sem conta. Conferido com dez mensagens reais do Supabase,
+incluindo as duas que precisam continuar mudas.
+
+Isso corrigiu também uma **decisão de arquitetura errada** no `CLAUDE.md`: o
+motivo registrado para o convite por WhatsApp era "~2 e-mails/hora". Nunca foi
+volume, era lista de convidados. A decisão continua certa; o motivo, não.
+
+Falta o que é do Otávio: ligar o SMTP e apontar o domínio.
+`docs/plan/configurar-dominio-e-email.md` é o passo a passo, escrito para quem
+não entende de DNS nem de SMTP.
+
 ### Checkpoint do M4-01 — aprovado
 
 A estratégia escolhida é a conservadora que o card autorizava: **nenhuma
@@ -443,16 +471,22 @@ Dois cards não podem começar sem decisão dele:
 
 | O quê | Trava qual card | Custa? |
 |---|---|---|
-| Provedor de e-mail (Resend ou similar) | M4-02 | Free tier serve |
-| Domínio próprio (SPF/DKIM, e endereço de produto) | M4-02 | ~R$40/ano |
+| ~~Provedor de e-mail~~ | ~~M4-02~~ | **resolvido**: SMTP da Hostinger, já pago |
+| ~~Domínio próprio~~ | ~~M4-02~~ | **resolvido**: `repsclub.com.br`, já tem |
 | Texto de termos e privacidade | M4-05 | Advogado, se quiser revisão |
 | Projeto Supabase separado para produção | nenhum card, mas trava o piloto | Free tier serve |
 
 ### Ordem
 
-M4-01, M4-03, M4-04 e M4-05 estão feitos. Sobra **M4-02** (e-mails
-transacionais), que é o único genuinamente bloqueado: depende de provedor e de
-domínio próprio, e os dois custam dinheiro do Otávio.
+**Todo o código do M4 está feito.** O que falta é configuração e decisão, não
+programação:
 
-Duas pendências não-dev viajam junto: o `[DEFINIR]` do e-mail de contato nos
-documentos legais (sai com o domínio) e a revisão do rascunho jurídico.
+| Pendência | De quem | Custo |
+|---|---|---|
+| Ligar o SMTP da Hostinger no Supabase | Otávio | zero (já paga) |
+| Apontar `repsclub.com.br` para a Vercel | Otávio | zero (já tem) |
+| Criar a caixa `contato@repsclub.com.br` | Otávio | zero |
+| Revisar o rascunho de termos e privacidade | advogado | a decidir |
+| Decidir se o personal também aceita os termos | Otávio | ~20 linhas |
+
+Roteiro das três primeiras: `docs/plan/configurar-dominio-e-email.md`.

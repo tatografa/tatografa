@@ -30,6 +30,9 @@ Interface inteira em **português do Brasil**.
   milestone. Não trocar de branch sem o Otávio pedir.
 - **Preview/produção:** **Vercel conectada** em `tatografa.vercel.app`, publicando a
   branch de trabalho. Todo push vira deploy. O Supabase é o `reps-club-dev`.
+  O domínio próprio é **`repsclub.com.br`** (registrado na Hostinger); apontá-lo para a
+  Vercel não exige mudança de código — `getSiteOrigin()` deriva do host da requisição.
+  Roteiro: `docs/plan/configurar-dominio-e-email.md`.
 - **Piloto:** ainda não decidido se usa projeto Supabase separado (pendência do M4).
 
 ## Stack
@@ -152,9 +155,18 @@ Provar que funciona sem o Otávio ler código:
 - **[2026-08-23]** Linha de `trainers` criada por gatilho no banco, não pelo cliente: com
   confirmação de e-mail ligada o `signUp` não devolve sessão, e um insert do cliente
   esbarraria no RLS.
-- **[2026-08-31]** Convite do aluno chega por **link copiável** (WhatsApp), não por e-mail:
-  o plano gratuito do Supabase limita a ~2 e-mails/hora, o que inviabiliza o piloto.
-  Envio por e-mail entra na Fase 4, junto com os demais transacionais.
+- **[2026-08-31, corrigido em 2026-09-13]** Convite do aluno chega por **link copiável**
+  (WhatsApp), não por e-mail. A decisão continua valendo; **o motivo registrado estava
+  errado.** Não era "~2 e-mails/hora": o serviço de e-mail embutido do Supabase
+  **só entrega para endereços da equipe do projeto** e recusa todo o resto com
+  `Email address not authorized`. Não é limite de volume, é lista de convidados — e
+  nenhum aluno de verdade jamais receberia nada. O motivo bom do link copiável é outro
+  e é de produto: aluno de academia abre WhatsApp, não abre e-mail.
+- **[2026-09-13]** **E-mail transacional sai pelo SMTP da Hostinger**, que o Otávio já
+  paga, não por provedor novo. Recuperação de senha e link mágico são os únicos fluxos
+  que dependem de e-mail — não há como um terceiro gerar esses links sem a chave de
+  serviço do banco, e guardá-la na Vercel ampliaria o estrago de um vazamento para o
+  banco inteiro. O convite segue no WhatsApp.
 - **[2026-08-31]** Leitura do convite sem sessão usa a função estreita
   `convite_por_token`, não a chave de serviço: a chave ignoraria o RLS do banco inteiro
   se vazasse do ambiente.
