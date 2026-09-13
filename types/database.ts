@@ -605,6 +605,13 @@ export type Database = {
           dia: string
         }[]
       }
+      nomes_no_feed: {
+        Args: { p_ids: string[] }
+        Returns: {
+          id: string
+          name: string
+        }[]
+      }
       sessoes_na_semana: {
         Args: { p_ate: string; p_de: string }
         Returns: {

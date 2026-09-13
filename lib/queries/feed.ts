@@ -1,6 +1,7 @@
 import "server-only";
 
 import { rotuloDoDia } from "@/lib/domain/historico";
+import { pareceUuid } from "@/lib/domain/id";
 import { createClient } from "@/lib/supabase/server";
 import type { Enums } from "@/types/database";
 
@@ -86,7 +87,11 @@ export async function lerFeed(
   // Tudo em lote, em paralelo: uma consulta por tipo de dado, nunca uma por
   // post. São quatro idas ao servidor para trinta posts.
   const [nomes, curtidas, minhasCurtidas, comentarios, urls] = await Promise.all([
-    supabase.from("students").select("id, name").in("id", autores),
+    // RPC e não `from("students")`: `students_select` devolve ao aluno **só a
+    // própria linha**, então buscar direto trazia um nome e deixava todo colega
+    // como "Aluno". `nomes_no_feed` (migration 0020) devolve só `(id, name)` e
+    // só de quem compartilha turma com quem pergunta.
+    supabase.rpc("nomes_no_feed", { p_ids: autores }),
     supabase.from("post_likes").select("post_id").in("post_id", ids),
     supabase
       .from("post_likes")
@@ -101,8 +106,6 @@ export async function lerFeed(
       : Promise.resolve({ data: [] as { path: string | null; signedUrl: string }[] }),
   ]);
 
-  // As contagens e os nomes podem falhar sozinhos sem derrubar o feed — um
-  // card sem contador ainda é um card. Já a foto não: é o conteúdo do post.
   if (nomes.error) throw nomes.error;
 
   const nomePor = new Map((nomes.data ?? []).map((a) => [a.id, a.name]));
@@ -155,4 +158,123 @@ export function iniciaisDe(nome: string): string {
   const primeira = partes[0][0];
   const ultima = partes.length > 1 ? partes[partes.length - 1][0] : "";
   return (primeira + ultima).toUpperCase();
+}
+
+export type ComentarioDoPost = {
+  id: string;
+  autorNome: string;
+  autorIniciais: string;
+  /** O personal da turma comentando — vira selo, como no card do feed. */
+  doPersonal: boolean;
+  meu: boolean;
+  texto: string;
+  criadoEm: string;
+  rotuloDoDia: string;
+};
+
+export type PostDetalhado = PostDoFeed & {
+  comentarios: number;
+  listaDeComentarios: ComentarioDoPost[];
+};
+
+/**
+ * Um post com os comentários.
+ *
+ * Devolve `null` para id inexistente, post de fora da turma e id fora do
+ * formato — os três são "não existe" para quem está olhando, e distinguir
+ * contaria a um estranho que aquele post existe. Mesma regra do histórico.
+ *
+ * **O nome do autor do comentário vem de duas fontes**, porque o comentário
+ * pode ser do personal: `post_comments.author_id` aponta para `auth.users`, não
+ * para `students`. O personal é resolvido pelo `personal` que a sessão já traz;
+ * os alunos, pelo mesmo `nomes_no_feed` do feed.
+ */
+export async function lerPost(
+  alunoId: string,
+  postId: string,
+  personal: { id: string; nome: string },
+): Promise<PostDetalhado | null> {
+  if (!pareceUuid(postId)) return null;
+
+  const supabase = await createClient();
+
+  const { data: post, error } = await supabase
+    .from("posts")
+    .select("id, student_id, caption, photo_path, visibility, created_at")
+    .eq("id", postId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!post) return null;
+
+  const [nomes, curtidas, minhaCurtida, comentarios, url] = await Promise.all([
+    supabase.rpc("nomes_no_feed", { p_ids: [post.student_id] }),
+    supabase.from("post_likes").select("post_id").eq("post_id", postId),
+    supabase
+      .from("post_likes")
+      .select("post_id")
+      .eq("post_id", postId)
+      .eq("user_id", alunoId)
+      .maybeSingle(),
+    supabase
+      .from("post_comments")
+      .select("id, author_id, body, created_at")
+      .eq("post_id", postId)
+      .order("created_at"),
+    post.photo_path
+      ? supabase.storage
+          .from("treinos")
+          .createSignedUrl(post.photo_path, MINUTOS_DA_URL * 60)
+      : Promise.resolve({ data: null }),
+  ]);
+
+  if (nomes.error) throw nomes.error;
+  if (comentarios.error) throw comentarios.error;
+
+  const autoresDeComentario = [
+    ...new Set((comentarios.data ?? []).map((c) => c.author_id)),
+  ].filter((id) => id !== personal.id);
+
+  const { data: nomesDosComentarios } = autoresDeComentario.length
+    ? await supabase.rpc("nomes_no_feed", { p_ids: autoresDeComentario })
+    : { data: [] };
+
+  const nomePor = new Map<string, string>([
+    ...(nomes.data ?? []).map((a) => [a.id, a.name] as const),
+    ...(nomesDosComentarios ?? []).map((a) => [a.id, a.name] as const),
+    [personal.id, personal.nome],
+  ]);
+
+  const nomeDoAutor = nomePor.get(post.student_id) ?? "Aluno";
+
+  return {
+    id: post.id,
+    autor: {
+      id: post.student_id,
+      nome: nomeDoAutor,
+      iniciais: iniciaisDe(nomeDoAutor),
+    },
+    meu: post.student_id === alunoId,
+    legenda: post.caption,
+    fotoUrl: url.data?.signedUrl ?? null,
+    visibilidade: post.visibility,
+    criadoEm: post.created_at,
+    rotuloDoDia: rotuloDoDia(post.created_at),
+    curtidas: curtidas.data?.length ?? 0,
+    curtiPor: minhaCurtida.data !== null,
+    comentarios: comentarios.data?.length ?? 0,
+    listaDeComentarios: (comentarios.data ?? []).map((c) => {
+      const nome = nomePor.get(c.author_id) ?? "Alguém da turma";
+      return {
+        id: c.id,
+        autorNome: nome,
+        autorIniciais: iniciaisDe(nome),
+        doPersonal: c.author_id === personal.id,
+        meu: c.author_id === alunoId,
+        texto: c.body,
+        criadoEm: c.created_at,
+        rotuloDoDia: rotuloDoDia(c.created_at),
+      };
+    }),
+  };
 }

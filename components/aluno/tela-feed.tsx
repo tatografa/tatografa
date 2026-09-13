@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, Lock, MessageCircle, Users } from "lucide-react";
+import { Heart, Lock, MessageCircle, Plus, Users } from "lucide-react";
 import Link from "next/link";
 
 import { Carregando, Esqueleto } from "@/components/esqueleto";
@@ -52,9 +52,23 @@ export function TelaFeed({
   return (
     <div className="space-y-4">
       <header className="space-y-3">
-        <h1 className="text-[21px] font-extrabold tracking-[-0.02em] text-ink">
-          Feed
-        </h1>
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-[21px] font-extrabold tracking-[-0.02em] text-ink">
+            Feed
+          </h1>
+          {/*
+            Publicar mora no cabeçalho e não numa barra flutuante: a barra de
+            navegação já ocupa o rodapé, e botão flutuante em cima dela tapa a
+            aba do meio no polegar.
+          */}
+          <Link
+            href="/app/feed/novo"
+            className="flex h-10 items-center gap-1.5 rounded-pill bg-brand px-3.5 text-[13px] font-bold text-white shadow-cta transition hover:bg-brand-hover"
+          >
+            <Plus size={15} aria-hidden />
+            Publicar
+          </Link>
+        </div>
 
         <div
           role="tablist"

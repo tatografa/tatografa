@@ -116,6 +116,10 @@ Hex solto em componente reprova na revisão.
   `public`; helper de autorização exposto é superfície de ataque sem ganho.
 - **Server Action valida com zod** e devolve `errosPorCampo` para o formulário. Todo
   formulário leva `noValidate` — a validação nativa do navegador aparece em inglês.
+- **Módulo `"use server"` só exporta função assíncrona.** Uma constante exportada no
+  meio das ações **zera as exportações do arquivo inteiro**, e o erro do build aponta
+  para as ações que sumiram, não para a constante. Valor compartilhado entre a ação e o
+  formulário vai para `lib/domain/`.
 - **Comentário explica o porquê, não o quê.** Em português.
 - **Segredo nunca vai ao git.** `.env.local` é ignorado; `.env.example` é o template.
 
@@ -188,6 +192,24 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-13]** **Nome de quem aparece no feed sai da RPC estreita
+  `nomes_no_feed`** (migration 0020), não de `students`. `students_select` devolve ao
+  aluno **só a própria linha**, então buscar direto trazia um nome e deixava todo colega
+  como "Aluno" — defeito encontrado por SQL, não na tela. Abrir o `students_select`
+  entregaria e-mail, peso, altura e objetivo dos colegas para escrever um nome; a chave
+  de serviço ignoraria o RLS do banco inteiro. A função **recebe os ids** em vez de
+  listar a turma: é preciso já conhecer o id, e o único jeito de conhecê-lo é ter lido
+  um post ou comentário que o RLS deixou passar. A regra de turma dela é a mesma de
+  `private.pode_ver_post` — se as duas discordarem, aparece post sem nome ou nome sem
+  post.
+- **[2026-09-13]** **A foto do feed é reduzida no aparelho antes de subir**
+  (`lib/imagem.ts`): no máximo 1600px no maior lado, JPEG a 0,82. Medido: 11,8 MB e
+  4032×3024 viraram 924 kB e 1600×1200 no pior caso (ruído puro). Resolve três coisas de
+  uma vez — a internet da academia, o limite de corpo da Server Action (1 MB por padrão
+  no Next; o `next.config.ts` sobe para 6 MB só como rede de segurança) e o **HEIC do
+  iPhone**, que não está entre os tipos do bucket e às vezes escapa do conversor do iOS:
+  o canvas do Safari decodifica e devolve JPEG. Por isso o `accept` do campo é
+  `image/*`, e não a lista do bucket — é a conversão que normaliza.
 - **[2026-09-13]** **O personal treina virando aluno de si mesmo**, e não publicando
   "como personal". Decisão do Otávio. Uma linha em `students` com `id` e
   `trainer_id` iguais ao próprio usuário — `students.id` já é o id de

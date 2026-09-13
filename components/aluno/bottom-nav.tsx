@@ -13,12 +13,14 @@ type Aba = {
 };
 
 /**
- * As quatro abas do doc 05. Feed continua sem `href`, e agora não é mais por
- * falta de rota: `/app/feed` existe e funciona. É porque o aluno ainda não tem
- * como **publicar** — o vazio da aba promete "ao terminar um treino você pode
- * registrar uma foto", e hoje não pode. Aba que promete o que não existe é o
- * mesmo defeito que um link para 404, com uma volta a mais. Acende junto com o
- * compositor.
+ * As quatro abas do doc 05, todas com destino.
+ *
+ * Feed ficou sem `href` em duas etapas — primeiro por não ter rota, depois por
+ * não ter como publicar, que é o que o estado vazio da aba promete. `href`
+ * segue opcional no tipo porque a barra vai ter item sem destino de novo
+ * quando a próxima tela chegar antes da sua rota: um link que leva a 404, ou
+ * uma aba que promete o que não existe, é pior que um item visivelmente
+ * indisponível.
  *
  * Perfil ganhou destino porque é onde mora o **sair**, e sem ele a conta de
  * aluno não tinha saída: o proxy devolve para `/app` quem tenta abrir uma tela
@@ -27,7 +29,7 @@ type Aba = {
 const ABAS: Aba[] = [
   { rotulo: "Treinar", href: "/app", Icone: Dumbbell },
   { rotulo: "Progresso", href: "/app/progresso", Icone: TrendingUp },
-  { rotulo: "Feed", Icone: Users },
+  { rotulo: "Feed", href: "/app/feed", Icone: Users },
   { rotulo: "Perfil", href: "/app/perfil", Icone: User },
 ];
 

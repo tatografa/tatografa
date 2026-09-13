@@ -13,6 +13,20 @@ const nextConfig: NextConfig = {
      * Esta opção cobre o resto das idas ao servidor.
      */
     useOffline: true,
+
+    serverActions: {
+      /*
+       * O padrão do Next é 1 MB, e foto de celular passa disso com folga — a
+       * publicação no feed falharia em quase todo aparelho.
+       *
+       * É uma **rede de segurança**, não o caminho normal: `lib/imagem.ts`
+       * encolhe a foto no aparelho antes de enviar, e o resultado costuma ficar
+       * abaixo de 500 kB. Este teto acompanha o limite do bucket `treinos`
+       * (5 MB, migration 0018) com folga para o resto do formulário, para o
+       * caso de a redução falhar e o arquivo original seguir.
+       */
+      bodySizeLimit: "6mb",
+    },
   },
 
   async headers() {
