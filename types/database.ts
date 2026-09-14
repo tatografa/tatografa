@@ -19,6 +19,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      assessments: {
+        Row: {
+          body_fat_pct: number | null
+          created_at: string
+          id: string
+          notes: string | null
+          photo_back_path: string | null
+          photo_front_path: string | null
+          photo_side_path: string | null
+          released_at: string
+          student_id: string
+          submitted_at: string | null
+          trainer_id: string
+          weight_kg: number | null
+        }
+        Insert: {
+          body_fat_pct?: number | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          photo_back_path?: string | null
+          photo_front_path?: string | null
+          photo_side_path?: string | null
+          released_at?: string
+          student_id: string
+          submitted_at?: string | null
+          trainer_id: string
+          weight_kg?: number | null
+        }
+        Update: {
+          body_fat_pct?: number | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          photo_back_path?: string | null
+          photo_front_path?: string | null
+          photo_side_path?: string | null
+          released_at?: string
+          student_id?: string
+          submitted_at?: string | null
+          trainer_id?: string
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessments_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exercises: {
         Row: {
           created_at: string
@@ -333,6 +393,32 @@ export type Database = {
           },
         ]
       }
+      student_measurements: {
+        Row: {
+          assessment_id: string
+          region: Database["public"]["Enums"]["body_region"]
+          value_cm: number
+        }
+        Insert: {
+          assessment_id: string
+          region: Database["public"]["Enums"]["body_region"]
+          value_cm: number
+        }
+        Update: {
+          assessment_id?: string
+          region?: Database["public"]["Enums"]["body_region"]
+          value_cm?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_measurements_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       students: {
         Row: {
           avatar_url: string | null
@@ -605,6 +691,19 @@ export type Database = {
           dia: string
         }[]
       }
+      enviar_reavaliacao: {
+        Args: {
+          p_assessment_id: string
+          p_body_fat_pct: number
+          p_medidas: Json
+          p_notes: string
+          p_photo_back: string
+          p_photo_front: string
+          p_photo_side: string
+          p_weight_kg: number
+        }
+        Returns: undefined
+      }
       nomes_no_feed: {
         Args: { p_ids: string[] }
         Returns: {
@@ -642,6 +741,7 @@ export type Database = {
       }
     }
     Enums: {
+      body_region: "braco" | "peito" | "cintura" | "quadril" | "coxa"
       equipment:
         | "barra"
         | "halter"
@@ -697,6 +797,7 @@ export type Enums<T extends keyof DefaultSchema["Enums"]> =
 export const Constants = {
   public: {
     Enums: {
+      body_region: ["braco", "peito", "cintura", "quadril", "coxa"],
       equipment: [
         "barra",
         "halter",
