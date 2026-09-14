@@ -1,6 +1,6 @@
 # Roteiro · testar o feed e o personal-aluno (M3)
 
-> Tudo o que entrou desde a sua última validação. Leva ~25 minutos.
+> Tudo o que entrou desde a sua última validação. Leva ~30 minutos.
 >
 > **Por que precisa ser você:** o host do Supabase é bloqueado pela política de
 > rede deste ambiente. Eu conferi cada tela no navegador com dados fixos e provei
@@ -135,6 +135,29 @@ coisa.
 > Me avise imediatamente e não continue o teste.
 
 ---
+
+---
+
+## Parte 5 · O painel Social (4 min) — **no computador**
+
+A tela que faltava: é aqui que o post marcado "só o meu personal" chega.
+
+42. No painel, o menu tem **Social**. Abra.
+43. Os posts que você publicou como aluno aparecem — **inclusive o que você
+    marcou como privado**, com o selo **"SÓ PARA VOCÊ"**.
+44. O post que foi para a turma tem o selo **"TURMA"**.
+45. O cabeçalho conta os posts e quantos estão **"sem sua resposta"**.
+46. Os comentários aparecem **dentro do cartão**, sem precisar abrir o post.
+47. Escreva uma resposta num post e envie. Ela aparece na lista, com **"Você"**
+    em vermelho.
+48. Troque o período para **7 dias** e depois **Tudo**. A lista muda, e a URL
+    também.
+49. No celular, como aluno, abra o post que você respondeu: **a resposta do
+    personal está lá**.
+
+> ❌ se o post privado **não** aparecer no painel Social — é o defeito que esta
+> tela existe para consertar.
+
 
 ## Depois
 
