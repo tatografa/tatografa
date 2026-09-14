@@ -359,8 +359,8 @@
 
 <main class="envelope">
   <div class="abertura">
-    <h1>Testar o feed e o personal-aluno</h1>
-    <p class="sub">Tudo o que entrou desde a sua última validação: o feed, você como aluno de si mesmo, o portão de aceite, o painel Social e a edição do perfil. Leva cerca de <strong>40 minutos</strong>.</p>
+    <h1>Testar o feed, a reavaliação e a agenda</h1>
+    <p class="sub">Tudo o que entrou desde a sua última validação: o feed, você como aluno de si mesmo, o portão de aceite, o painel Social, a edição do perfil, a <strong>reavaliação física</strong>, o <strong>WhatsApp do personal</strong> e a <strong>agenda</strong>. Leva cerca de <strong>1h10</strong>.</p>
     <p class="sub">Em cada passo, marque <strong>ok</strong> ou <strong>✗</strong>. Quando marcar ✗, escreva <strong>a frase que apareceu na tela</strong> — os quatro defeitos do M1 e do M2 estavam todos em borda de sessão, e nenhum deles apareceria num “não funcionou” sem o texto.</p>
     <div class="aviso-salvo" id="aviso">
       <span class="ponto"></span>
@@ -378,7 +378,7 @@
       <div class="ficha"><span class="n" id="f-resta">—</span><span class="r">a fazer</span></div>
     </div>
     <p>Me diga que terminou — eu leio as marcações e as notas direto daqui, você não precisa copiar nada.</p>
-    <p>Se passar tudo, o M3 fecha. O que sobra da Fase 3 é a reavaliação física, que é cortável — aí decidimos se vale ou se o próximo pedaço é outro.</p>
+    <p>Se passar tudo, <strong>o M3 fecha</strong> — a Fase 3 inteira estará validada, feed e reavaliação. Com isso <strong>todo o handoff de telas está construído</strong> — não sobra tela nenhuma dos docs 05 e 06 por fazer.</p>
   </div>
 </main>
 
@@ -386,10 +386,11 @@
 const PARTES = [
   {
     n: "Parte 1", titulo: "O portão de aceite", duracao: "2 min",
-    nota: "Você vai bater nele porque a política de privacidade mudou de versão.",
+    nota: "Você vai bater nele porque os documentos mudaram de versão duas vezes: primeiro pelo feed, depois pela reavaliação. A versão vigente é 2026-09-15.",
     passos: [
-      "Abra o app do aluno no celular. Antes de qualquer tela aparece <strong>“Atualizamos a política de privacidade”</strong>, com um parágrafo explicando o feed.",
-      "Toque em <strong>“Ler a política de privacidade”</strong>. Ela abre. Procure a seção <strong>“A foto do feed”</strong> — é a nova.",
+      "Abra o app do aluno no celular. Antes de qualquer tela aparece <strong>“Atualizamos a política de privacidade”</strong>. O parágrafo fala da <strong>reavaliação</strong> — medidas e três fotos, que só você e o personal veem.",
+      "Toque em <strong>“Ler a política de privacidade”</strong>. Ela abre. Procure <strong>“As fotos e as medidas da reavaliação”</strong> e <strong>“A foto do feed”</strong> — as duas seções novas.",
+      "No rodapé da política, a versão é <strong>15 de setembro de 2026</strong>.",
       "Volte e toque em <strong>“Ler os termos de uso”</strong>. Procure <strong>“O que você publica no feed”</strong>.",
       "Nenhum texto dos dois documentos mostra <strong>asterisco</strong> solto na tela (<code>*assim*</code>).",
       "Volte e toque em <strong>“Li e aceito”</strong>. O app abre normalmente.",
@@ -473,6 +474,73 @@ const PARTES = [
       "Escreva uma resposta num post e envie. Ela aparece na lista, com <strong>“Voc\u00ea”</strong> em vermelho.",
       "Troque o per\u00edodo para <strong>7 dias</strong> e depois <strong>Tudo</strong>. A lista muda, e a URL tamb\u00e9m.",
       "No celular, como aluno, abra o post que voc\u00ea respondeu: <strong>a resposta do personal est\u00e1 l\u00e1</strong>.",
+    ],
+  },
+  {
+    n: "Parte 6", titulo: "A reavaliação", duracao: "15 min", critica: true,
+    nota: "O maior pedaço novo. Tenha uma fita métrica por perto, ou invente os números — o que importa é o caminho. Comece no computador.",
+    passos: [
+      "No painel, o menu tem <strong>Reavaliações</strong>. Abra. Está vazio, com o texto explicando que o aluno preenche pelo app.",
+      "Clique <strong>“Nova reavaliação”</strong>, escolha <strong>você mesmo</strong> na lista e clique <strong>Liberar</strong>. O diálogo <strong>fecha sozinho</strong>.",
+      "Ela aparece em <strong>“Esperando resposta”</strong>, com o selo <strong>PENDENTE</strong> e a data de hoje. O cabeçalho diz <strong>“1 esperando resposta”</strong>.",
+      "Clique <strong>“Nova reavaliação”</strong> e escolha o mesmo aluno de novo. Aparece <strong>“Esse aluno já tem uma reavaliação esperando resposta.”</strong> — e nada é criado.",
+      "<strong>No celular, como aluno.</strong> A home mostra um card de fundo amarelado: <strong>“Reavaliação disponível”</strong>, com o seu nome embaixo e a pílula <strong>“Fazer agora”</strong>. Ele fica <strong>depois</strong> do card de treino.",
+      "Toque. Abre o formulário: peso, gordura, cinco medidas, três fotos e uma observação.",
+      "Cada medida traz a dica de <strong>onde passar a fita</strong> (“No meio do braço, contraído”). Na primeira vez não há “na última”, porque não existe anterior.",
+      "Toque <strong>“Enviar reavaliação”</strong> com tudo em branco. Aparece <strong>“Preencha ao menos uma medida ou envie uma foto antes de enviar.”</strong>",
+      "Escreva <code>abc</code> no peso e envie. O erro aparece <strong>no campo do peso</strong>, em português: “Peso inválido.”",
+      "Apague e escreva o peso <strong>com vírgula</strong> (por exemplo <code>82,4</code>). Ele aceita.",
+      "Preencha ao menos três medidas e tire as <strong>três fotos</strong> — de frente, de lado, de costas. Cada uma mostra a prévia; o <strong>×</strong> no canto remove.",
+      "Repare na linha com o cadeado: <strong>“Só você e seu personal veem estas fotos. Elas não vão para o feed.”</strong>",
+      "Envie. A tela volta com <strong>“Reavaliação enviada”</strong> em verde, e a comparação aparece em <strong>“Suas reavaliações”</strong> — <strong>sem</strong> a coluna “Antes”, porque é a primeira.",
+      "Abra o <strong>Perfil</strong>. O peso é o que você acabou de informar — a reavaliação atualizou o perfil sozinha.",
+      "<strong>De volta ao computador.</strong> Em Reavaliações, ela saiu de “Esperando” e está em <strong>“Respondidas”</strong>, com o resumo (peso · % · nº de medidas · nº de fotos).",
+      "Clique <strong>“Ver comparação”</strong>. As <strong>fotos aparecem</strong> — é a única tela que as mostra.",
+      "Libere uma <strong>segunda</strong> reavaliação para você e responda com números <strong>diferentes</strong>.",
+      "Agora a comparação tem <strong>Antes → Agora → Variação</strong>, com <code>+1,5</code> e <code>−2,5</code>. <strong>Nenhum número está pintado de verde ou vermelho</strong> — é de propósito: só você sabe se subir é bom.",
+      "Onde houver foto nas duas, elas aparecem <strong>lado a lado</strong> com a seta no meio.",
+      "No celular, na reavaliação enviada, toque <strong>“Apagar as fotos”</strong>. O aviso diz que <strong>as medidas continuam</strong>. Confirme.",
+      "As fotos somem e <strong>os números ficam</strong>. No computador, a comparação também já não mostra fotos.",
+    ],
+  },
+  {
+    n: "Parte 7", titulo: "As duas costuras", duracao: "6 min",
+    nota: "Coisas que já existiam mas não tinham por onde ser alcançadas.",
+    passos: [
+      "No painel, abra <strong>Alunos</strong> e clique num aluno. Na ficha, abaixo de “Evolução por exercício”, tem a seção <strong>Reavaliações</strong>.",
+      "Ela mostra <strong>a última comparada com a anterior</strong> — só os números, <strong>sem fotos</strong>. Se houver uma esperando resposta, aparece a faixa <strong>PENDENTE</strong> em cima.",
+      "O link <strong>“Ver as N”</strong> (canto direito) leva à tela de comparação completa. <strong>“Ver as fotos”</strong>, embaixo, leva ao mesmo lugar.",
+      "Abra a ficha de um aluno <strong>sem nenhuma reavaliação</strong>. A seção diz que não há nenhuma e oferece o caminho para liberar.",
+      "Vá em <strong>Configurações</strong>. A primeira seção agora é <strong>“Seu WhatsApp”</strong>, dizendo “Sem número”.",
+      "Clique <strong>Informar</strong>, digite o seu com DDD (<code>(11) 99999-9999</code>) e salve. Ele volta <strong>formatado</strong>, e o texto explica que seus alunos passam a ver o botão.",
+      "Teste a validação: entre em Editar, escreva <code>123</code> e salve. Aparece <strong>“Informe um número com DDD, como (11) 99999-9999.”</strong>",
+      "<strong>No celular, como aluno</strong>, abra o <strong>Perfil</strong>. Tem um card com as suas iniciais, o seu nome, “Seu personal trainer” e o botão <strong>WhatsApp</strong>.",
+      "Toque no botão. <strong>Abre o WhatsApp na conversa com você</strong>, sem mensagem pronta.",
+      "No mesmo Perfil, abaixo do card, tem o link <strong>Reavaliação</strong> — a porta de entrada por onde o aluno chega sem depender do aviso na home.",
+      "Volte às Configurações no computador, <strong>apague o número</strong> e salve. No celular, o card do personal <strong>continua lá, sem o botão</strong>.",
+    ],
+  },
+  {
+    n: "Parte 8", titulo: "A agenda", duracao: "8 min",
+    nota: "Sessões presenciais: marcar, e depois registrar quem veio. Comece no computador.",
+    passos: [
+      "No painel, o menu tem <strong>Agenda</strong>. Abra. O título é a semana por extenso (<strong>“14 a 20 de setembro”</strong>) e o dia de hoje tem a borda vermelha e a etiqueta <strong>HOJE</strong>.",
+      "Sem nada marcado, a semana mostra <strong>um único cartão</strong> explicando para que serve — e não sete dias vazios.",
+      "Clique <strong>“Nova sessão”</strong>. O dia já vem preenchido com hoje, a hora com 18:00 e a duração com 60.",
+      "Escolha um aluno e marque. A sessão aparece no dia certo, com a hora em destaque.",
+      "Marque <strong>outra sessão no mesmo horário</strong>, com outro aluno. Antes de salvar aparece um aviso amarelo dizendo <strong>com quem bate</strong> — e o botão continua funcionando, porque atender em dupla é normal.",
+      "Marque uma <strong>às 23h30</strong>. Ela aparece no dia que você escolheu, e não no seguinte. (É a conta que já errou duas vezes neste projeto.)",
+      "Use <strong>“Semana seguinte”</strong> e <strong>“Semana anterior”</strong>. O título muda e a URL também. <strong>“Esta semana”</strong> volta para hoje.",
+      "Numa sessão futura, clique no <strong>ícone de lixeira</strong>. O aviso explica que ela some sem registro, e sugere “Cancelar” para manter rastro. Confirme.",
+      "Em outra, clique <strong>Cancelar</strong>. Ela fica na agenda, <strong>riscada</strong>, com o selo CANCELADA.",
+      "Clique <strong>Desfazer</strong> nessa mesma: ela volta a ser agendada.",
+      "Numa sessão, clique <strong>Veio</strong>. Ela ganha o selo verde REALIZADA. Em outra, <strong>Faltou</strong> — selo amarelo.",
+      "Tente apagar (lixeira) uma já marcada como <strong>Faltou</strong>: o botão nem aparece. Faltar é registro e não some.",
+      "Marque uma sessão para <strong>ontem</strong> (use “Semana anterior” se precisar) e deixe sem marcar. Volte para esta semana: ela aparece no topo, em <strong>“1 sessão esperando sua marcação”</strong>.",
+      "Clique no nome do aluno em qualquer sessão: abre a ficha dele.",
+      "<strong>No celular, como aluno</strong>, abra a home. Tem a linha <strong>“Sessão com {seu nome} · qui, 17 de set, 18h · 1h”</strong>, com ícone de calendário.",
+      "Ela mostra <strong>a próxima</strong>, não a de ontem. E sessão <strong>cancelada</strong> não aparece ali.",
+      "Não há botão nenhum nessa linha — o aluno não marca nem desmarca. É lembrete, e é de propósito.",
     ],
   },
 ];

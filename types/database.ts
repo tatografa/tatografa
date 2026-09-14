@@ -19,6 +19,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          created_at: string
+          duration_minutes: number
+          id: string
+          notes: string | null
+          starts_at: string
+          status: Database["public"]["Enums"]["appointment_status"]
+          student_id: string
+          trainer_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          notes?: string | null
+          starts_at: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          student_id: string
+          trainer_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          notes?: string | null
+          starts_at?: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          student_id?: string
+          trainer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessments: {
         Row: {
           body_fat_pct: number | null
@@ -741,6 +789,7 @@ export type Database = {
       }
     }
     Enums: {
+      appointment_status: "agendada" | "realizada" | "faltou" | "cancelada"
       body_region: "braco" | "peito" | "cintura" | "quadril" | "coxa"
       equipment:
         | "barra"
@@ -797,6 +846,7 @@ export type Enums<T extends keyof DefaultSchema["Enums"]> =
 export const Constants = {
   public: {
     Enums: {
+      appointment_status: ["agendada", "realizada", "faltou", "cancelada"],
       body_region: ["braco", "peito", "cintura", "quadril", "coxa"],
       equipment: [
         "barra",

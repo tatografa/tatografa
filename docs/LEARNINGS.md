@@ -437,3 +437,24 @@ Três consequências para os próximos milestones:
   formatar treze dígitos — o personal vê um bloco de números nas próprias configurações
   para sempre. Cortar o `55` só vale com doze ou treze dígitos: abaixo disso ele é o DDD de
   Caxias do Sul, e cortá-lo destrói o número.
+- [2026-09-15] [banco] **Filtrar faixa de datas por dia solto manda meia-noite UTC ao
+  banco.** `gte("starts_at", "2026-09-14")` parece certo e traz a sessão de domingo 21h
+  como se fosse da semana seguinte, porque meia-noite UTC em São Paulo ainda é 21h do dia
+  anterior. A faixa tem de ser convertida em instante **medindo** o deslocamento do fuso
+  naquele dia (`inicioDoDiaEmUtc`), e não fixando "-03:00" — o Brasil já teve -02 e pode
+  ter de novo.
+- [2026-09-15] [ui] **Comparação de horário feita no cliente não pode usar instante.**
+  `new Date("2026-09-15T18:00")` no navegador usa o fuso **do navegador**, então o aviso de
+  conflito apareceria deslocado para quem estivesse fora do Brasil. Eu escrevi um comentário
+  dizendo que "o fuso cancela dos dois lados" e não cancelava. O que funciona é comparar
+  relógio com relógio: dia de calendário mais minuto do dia, os dois convertidos **no
+  servidor**.
+- [2026-09-15] [ux] **Vazio não vira sete cartões dizendo "vazio".** A semana sem sessão
+  renderizava os sete dias com "Sem sessão." e ainda um cartão explicando que a semana
+  estava vazia — ruído com a forma de conteúdo. O estado vazio **substitui** a lista e
+  explica para que serve a tela, que é a pergunta de quem abre pela primeira vez.
+- [2026-09-15] [processo] **Texto de diálogo é promessa igual a texto legal.** A caixa de
+  agendar diz "o aluno vê a próxima sessão na tela inicial do app dele" — e no momento em
+  que escrevi isso não havia linha nenhuma na home do aluno. A regra que já valia para a
+  política de privacidade vale para qualquer copy: **conferir cada verbo contra uma tela que
+  faz aquilo**, inclusive quando o verbo está num `descricao` de dialog.

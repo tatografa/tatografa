@@ -18,19 +18,19 @@ AQUI = pathlib.Path(__file__).parent
 FONTE = AQUI / "M3-roteiro.html"
 DESTINO = AQUI / "M3-roteiro.md"
 
-CABECALHO = """# Roteiro · validar o M3 (feed, personal-aluno, perfil)
+CABECALHO = """# Roteiro · validar o M3 (feed, reavaliação, agenda)
 
 > **Este arquivo é gerado** por `docs/plan/gerar-roteiro.py`, a partir de
 > `M3-roteiro.html` — a página que o Otávio abre para marcar. Editar os passos
 > aqui não muda a página; edite o HTML e rode o script.
 >
-> Tudo o que entrou desde a última validação. Leva cerca de 40 minutos.
+> Tudo o que entrou desde a última validação. Leva cerca de 1h10.
 >
 > **Por que precisa ser o Otávio:** o host do Supabase é bloqueado pela política
 > de rede do ambiente remoto. Cada tela foi conferida no navegador com dados
 > fixos e cada regra de banco foi provada por SQL, mas **nenhum fluxo com sessão
-> de verdade passou por lá**. Publicar uma foto, de ponta a ponta, só acontece
-> aqui.
+> de verdade passou por lá**. Publicar uma foto ou responder uma reavaliação,
+> de ponta a ponta, só acontece aqui.
 
 ## O que anotar
 

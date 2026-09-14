@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarCheck } from "lucide-react";
+import { CalendarCheck, CalendarClock } from "lucide-react";
 
 import { classesDeBotao } from "@/components/ui";
 import { horaDaSessao, rotuloDoDia } from "@/lib/domain/historico";
@@ -35,6 +35,21 @@ export type TelaHomeProps = {
    * card, e é a tela que menos pode ser lenta — o aluno a abre na academia.
    */
   reavaliacaoAberta: boolean;
+  /**
+   * A próxima sessão presencial com o personal, se houver.
+   *
+   * O aluno não marca nem desmarca nada — quem combina horário são duas
+   * pessoas conversando. Isto é lembrete, e existe porque a tela de agendar do
+   * personal promete que o aluno vê a próxima sessão aqui: promessa de tela
+   * sem tela é o defeito que este projeto já cometeu três vezes.
+   */
+  proximaSessao: ProximaSessao | null;
+};
+
+export type ProximaSessao = {
+  rotuloDoDia: string;
+  hora: string;
+  duracao: string;
 };
 
 /**
@@ -57,6 +72,7 @@ export function TelaHome({
   indicadores,
   sessaoAberta,
   reavaliacaoAberta,
+  proximaSessao,
 }: TelaHomeProps) {
   return (
     <div className="space-y-4">
@@ -120,6 +136,21 @@ export function TelaHome({
         </section>
       ) : (
         <SemTreino nomeDoPersonal={nomeDoPersonal} />
+      )}
+
+      {/*
+        A próxima sessão presencial. Linha discreta, e não card: é informação
+        para conferir de relance, não uma ação — o aluno não faz nada com ela
+        dentro do app, e um card com botão sugeriria que faz.
+      */}
+      {proximaSessao && (
+        <div className="flex items-center gap-2.5 rounded-card border border-border-soft bg-surface px-4 py-3">
+          <CalendarClock size={16} className="shrink-0 text-ink-4" aria-hidden />
+          <p className="text-[12.5px] text-ink-3">
+            <span className="font-semibold text-ink">Sessão com {primeiroNome(nomeDoPersonal)}</span>{" "}
+            · {proximaSessao.rotuloDoDia}, {proximaSessao.hora} · {proximaSessao.duracao}
+          </p>
+        </div>
       )}
 
       {/*

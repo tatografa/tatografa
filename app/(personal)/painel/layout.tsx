@@ -52,6 +52,12 @@ export default async function PainelLayout({
               Exercícios
             </Link>
             <Link
+              href="/painel/agenda"
+              className="rounded-[9px] px-3 py-1.5 text-[13px] font-semibold text-ink-3 transition hover:bg-canvas-sunken hover:text-ink"
+            >
+              Agenda
+            </Link>
+            <Link
               href="/painel/reavaliacoes"
               className="rounded-[9px] px-3 py-1.5 text-[13px] font-semibold text-ink-3 transition hover:bg-canvas-sunken hover:text-ink"
             >

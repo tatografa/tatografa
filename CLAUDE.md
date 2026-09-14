@@ -68,7 +68,7 @@ Fatias verticais do `docs/plan/milestones.md`. Todo milestone é validável pelo
 | M0 | Fase 0 · Fundação | Conta de personal, login, `/painel` protegido | validado |
 | M1 | Fase 1 · Fatia vertical | Convite → treino → execução → histórico | **validado em campo** |
 | M2 | Fase 2 · Utilidade contínua | Macrotreino, PRs, progresso, painel completo | **validado em campo** |
-| M3 | Fase 3 · Social e reavaliação | Feed, fotos, reavaliação física | **construído · falta validar** |
+| M3 | Fase 3 · Social e reavaliação | Feed, fotos, reavaliação física, agenda | **construído · falta validar** |
 | M4 | Fase 4 · Pronto para o piloto | PWA, estados vazios/erro, e-mails, termos | **feito · piloto em curso** |
 
 > **M1 e M2 foram validados em campo em 10-11/09/2026** — 50 dos 51 passos do roteiro,
@@ -192,6 +192,31 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-15]** **A agenda é o registro de quem veio, não um convite.** O personal marca
+  a sessão e depois marca o que aconteceu (`realizada`, `faltou`, `cancelada`); o aluno
+  **lê** a própria e não escreve nada — marcar a própria presença é assinar a própria
+  chamada. Quem combina horário são duas pessoas conversando, e transformar isso em fluxo
+  de aceite dentro do app criaria um estado ("pendente") capaz de discordar do que já foi
+  combinado no WhatsApp. A tela do personal promete que o aluno vê a próxima sessão na home
+  dele, então a linha na home do aluno **faz parte da mesma fatia** — promessa de tela sem
+  tela é o defeito que este projeto já cometeu três vezes.
+- **[2026-09-15]** **Horário sobreposto é avisado pela tela, não impedido pelo banco.** Duas
+  sessões no mesmo horário podem ser erro de digitação ou dois alunos treinando juntos, e só
+  o personal sabe qual — uma constraint de exclusão recusaria o atendimento em dupla, que é
+  comum, para evitar um engano que ele enxerga na hora. O aviso compara **relógio local**
+  (dia + minuto do dia), nunca instante: quem avisa é componente cliente, e
+  `new Date("2026-09-15T18:00")` no navegador usa o fuso **do navegador**.
+- **[2026-09-15]** **A semana da agenda começa na segunda do calendário**, ao contrário da
+  semana do macrotreino, que sai do `started_at` do programa. Não é inconsistência: a do
+  macrotreino é uma janela de sete dias corridos daquele aluno; a agenda é um calendário, e
+  "essa semana" para quem olha uma agenda começa na segunda. As duas convivem em
+  `lib/domain/` com nomes diferentes (`janelaDaSemana` e `semanaDe`) para ninguém trocar uma
+  pela outra.
+- **[2026-09-15]** **Sessão presencial fechada não se apaga** (`appointments_delete` exige
+  `status = 'agendada'`). "Faltou" é o registro mais incômodo da agenda e por isso o mais
+  fácil de querer sumir depois — e é ele que dá sentido à aderência. Desmarcar de verdade é
+  mudar o status para `cancelada`, que deixa rastro. Mesma decisão de
+  `workout_sessions_delete`.
 - **[2026-09-15]** **O WhatsApp do personal é a única via do aluno para falar com ele, e
   mora em `trainers.phone`** — coluna que existia desde a 0001 e que **nenhuma tela
   escrevia**. O app não tem mensagem e nem deveria ter: a conversa já acontece onde essas
