@@ -146,6 +146,45 @@
   }
   .aviso-salvo[data-estado="offline"] .ponto { background: var(--fail); }
 
+  .preparo {
+    margin-top: 18px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+    padding: 16px 16px 14px;
+  }
+  .preparo h2 { font-size: 15px; margin: 0 0 10px; }
+  .preparo ul {
+    margin: 0;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .preparo li {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+  .preparo li b { color: var(--text); font-weight: 600; }
+  .preparo code {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12.5px;
+    color: var(--text);
+    background: var(--surface-2);
+    border-radius: 5px;
+    padding: 1px 5px;
+  }
+  .preparo .ressalva {
+    margin: 12px 0 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--text-dim);
+  }
+  .preparo .ressalva b { color: var(--text-2); font-weight: 600; }
+
   /* -------------------------------------------------------------- partes -- */
 
   section { margin-top: 34px; }
@@ -365,6 +404,19 @@
     <div class="aviso-salvo" id="aviso">
       <span class="ponto"></span>
       <span id="aviso-texto">Marque à vontade: cada toque é salvo e eu leio daqui quando você terminar.</span>
+    </div>
+
+    <div class="preparo">
+      <h2>Antes de começar</h2>
+      <ul>
+        <li><b>Onde:</b> <code>repsclub.com.br</code>. O painel no computador, o app no celular — e os <b>dois abertos ao mesmo tempo</b>, porque quase toda parte troca de lado.</li>
+        <li><b>O banco é o de desenvolvimento.</b> Pode marcar, apagar, errar e refazer à vontade: nada aqui é dado de aluno de verdade.</li>
+        <li><b>Uma fita métrica</b> para a Parte 6 — ou invente os números, o que importa é o caminho.</li>
+        <li><b>A segunda conta de aluno</b> (raul ou Vinicius) para a Parte 4. Se não tiver a senha, marque ✗ naquele passo escrevendo “sem a senha” e siga: a regra foi provada por SQL, mas ver com os olhos é outra coisa.</li>
+        <li><b>Faça na ordem.</b> As partes se apoiam: a reavaliação que você responde na 6 é a que a 7 confere na ficha do aluno.</li>
+        <li><b>Travou feio? Pare e me chame.</b> Não precisa chegar ao fim para o teste valer — um defeito grave no meio vale mais cedo do que tarde.</li>
+      </ul>
+      <p class="ressalva">Uma coisa que eu <b>não</b> consegui conferir daqui: se o último deploy subiu. A rede deste ambiente bloqueia o domínio. Ao abrir o site, olhe se a <b>Agenda</b> aparece no menu do painel — se aparecer, é o código de agora.</p>
     </div>
   </div>
 

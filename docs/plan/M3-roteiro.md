@@ -12,6 +12,20 @@
 > de verdade passou por lá**. Publicar uma foto ou responder uma reavaliação,
 > de ponta a ponta, só acontece aqui.
 
+## Antes de começar
+
+- **Onde:** `repsclub.com.br`. Painel no computador, app no celular, os **dois abertos
+  ao mesmo tempo** — quase toda parte troca de lado.
+- **O banco é o de desenvolvimento.** Pode marcar, apagar, errar e refazer à vontade.
+- **Uma fita métrica** para a Parte 6, ou invente os números.
+- **A segunda conta de aluno** para a Parte 4. Sem a senha, marque ✗ ali e siga.
+- **Faça na ordem.** As partes se apoiam.
+- **Travou feio? Pare e chame.** Não precisa chegar ao fim para o teste valer.
+
+Uma coisa que não dá para conferir do ambiente remoto: se o último deploy subiu — a rede
+bloqueia o domínio. Ao abrir o site, a **Agenda** no menu do painel é o sinal de que é o
+código de agora.
+
 ## O que anotar
 
 Em cada passo: **aconteceu o que está escrito?**
