@@ -34,14 +34,33 @@ mais. Fica.
 
 ## O que vale consertar, e quando
 
-### 1. Proteção contra senha vazada — **do Otávio, 1 minuto**
+### 1. Senha — **eu errei duas vezes aqui; leia antes de procurar**
 
-Supabase → **Authentication → Policies** → ligar *Leaked Password Protection*.
-Confere a senha contra a base do HaveIBeenPwned no momento em que ela é criada.
+Eu escrevi "Authentication → **Policies**, 1 minuto, zero custo". Está errado
+nos dois pontos, e o segundo é o que importa:
 
-O aluno cria senha no onboarding, e o app guarda dado de saúde sob LGPD. É a
-melhoria com melhor relação custo-benefício que existe hoje aqui: zero código,
-zero risco, e bloqueia a classe de senha que aparece em todo vazamento.
+1. **O caminho é outro.** "Policies" é onde moram as policies de RLS. A
+   configuração de senha fica em **Authentication → Sign In / Providers →
+   Email** (`/dashboard/project/<ref>/auth/providers?provider=Email`).
+2. **A proteção contra senha vazada exige o plano Pro.** A organização `REP`
+   está no **free**, então o botão não existe na tela — não é você que não
+   achou. Não é "zero custo": é ~US$ 25/mês.
+
+**O que dá para fazer de graça, na mesma tela, e vale a pena:** subir a
+exigência de força da senha. Hoje o app pede 8 caracteres, uma letra e um
+número — mas **só no formulário**, em JavaScript. Quem manda um POST direto
+passa com o mínimo que o Supabase aceitar. Ajustar ali é a trava de verdade:
+
+- comprimento mínimo: **8** (o mesmo que a tela promete);
+- caracteres exigidos: letras minúsculas, maiúsculas e dígitos.
+
+Isso não substitui a checagem contra vazamento — uma senha pode ser forte e
+estar em toda base vazada do mundo —, mas fecha a distância entre o que a tela
+pede e o que o servidor aceita, que hoje está aberta.
+
+**A decisão do Pro fica com o Otávio**, e ela não é só sobre senha: o item 3
+abaixo (projeto de produção separado) empurra para o mesmo lugar. Se for
+assinar, assinar uma vez resolve os dois.
 
 ### 2. ~~`auth.uid()` avaliado por linha~~ — **resolvido em 14/09, migration 0021**
 
