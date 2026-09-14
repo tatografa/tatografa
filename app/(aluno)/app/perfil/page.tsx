@@ -3,39 +3,28 @@ import type { Metadata } from "next";
 import { BotaoSair } from "@/components/botao-sair";
 import { Card } from "@/components/ui";
 import { requireStudent } from "@/lib/auth/session";
-import { NIVEL, OBJETIVO } from "@/lib/rotulos";
+
+import { FormularioDePerfil } from "./formulario-de-perfil";
 
 export const metadata: Metadata = { title: "Perfil" };
 
 /**
- * Perfil do aluno — mínimo, e existe por um motivo específico: **sair**.
+ * Perfil do aluno: ver, **corrigir** e sair.
  *
- * Até o primeiro teste de campo o app do aluno não tinha saída nenhuma, e o
- * proxy devolve todo usuário logado que abre `/entrar`, `/cadastro` ou
- * `/acesso` para a sua própria área. Resultado: quem entrava como aluno ficava
- * preso até limpar os cookies do navegador. Num produto usado em celular
+ * Nasceu (M1) só com o **sair**, porque até o primeiro teste de campo o app do
+ * aluno não tinha saída nenhuma: o proxy devolve todo usuário logado que abre
+ * `/entrar`, `/cadastro` ou `/acesso` para a sua própria área, e quem entrava
+ * como aluno ficava preso até limpar os cookies. Num produto usado em celular
  * emprestado na academia, isso não é detalhe.
  *
- * Editar dados, foto e reavaliação continuam fora do escopo (M3/M4). Esta tela
- * mostra o que o aluno já informou e devolve a porta.
+ * A **edição** entrou depois, e não por pedido de tela: a política de
+ * privacidade publicada promete, em "Seus direitos", que o perfil é editável —
+ * corrigir dado errado sobre si é direito da LGPD. A tela só de leitura fazia
+ * dessa frase uma promessa vazia. O peso, além disso, muda com o tempo, e é
+ * dele que o personal parte para montar o treino.
  */
 export default async function PerfilDoAluno() {
   const { student, personal } = await requireStudent();
-
-  const linhas: { rotulo: string; valor: string }[] = [
-    { rotulo: "E-mail", valor: student.email },
-    { rotulo: "Personal", valor: personal.name },
-    {
-      rotulo: "Objetivo",
-      valor: student.goal ? OBJETIVO[student.goal] : "Não informado",
-    },
-    {
-      rotulo: "Nível",
-      valor: student.experience_level
-        ? NIVEL[student.experience_level]
-        : "Não informado",
-    },
-  ];
 
   return (
     <div className="space-y-4">
@@ -50,23 +39,14 @@ export default async function PerfilDoAluno() {
           <h1 className="truncate text-[21px] font-extrabold tracking-[-0.02em] text-ink">
             {student.name}
           </h1>
+          <p className="truncate text-[13px] text-ink-4">
+            Treina com {personal.name}
+          </p>
         </div>
       </header>
 
       <Card>
-        <dl className="divide-y divide-border-soft">
-          {linhas.map((linha) => (
-            <div
-              key={linha.rotulo}
-              className="flex items-baseline justify-between gap-3 py-2.5 first:pt-0 last:pb-0"
-            >
-              <dt className="eyebrow shrink-0 text-ink-4">{linha.rotulo}</dt>
-              <dd className="min-w-0 truncate text-right text-[13.5px] font-semibold text-ink">
-                {linha.valor}
-              </dd>
-            </div>
-          ))}
-        </dl>
+        <FormularioDePerfil aluno={student} />
       </Card>
 
       <Card className="space-y-3">

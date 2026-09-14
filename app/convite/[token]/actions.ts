@@ -4,6 +4,13 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { traduzErro } from "@/lib/auth/mensagens";
+import {
+  alturaDoAluno,
+  nascimentoDoAluno,
+  nivelDoAluno,
+  objetivoDoAluno,
+  pesoDoAluno,
+} from "@/lib/domain/perfil";
 import { getSiteOrigin } from "@/lib/auth/site-url";
 import { createClient } from "@/lib/supabase/server";
 import { VERSAO_DOS_DOCUMENTOS } from "@/lib/legal/documentos";
@@ -58,30 +65,13 @@ const esquema = z.object({
   termos: z.literal("on", {
     error: "É preciso aceitar os termos para continuar.",
   }),
-  objetivo: z.enum(["massa", "gordura", "condicionamento", "saude"], {
-    error: "Escolha um objetivo.",
-  }),
-  nivel: z.enum(["iniciante", "intermediario", "avancado"], {
-    error: "Escolha seu nível.",
-  }),
-  nascimento: z
-    .string()
-    .min(1, "Informe sua data de nascimento.")
-    .refine((valor) => {
-      const data = new Date(valor);
-      if (Number.isNaN(data.getTime())) return false;
-      const anos =
-        (Date.now() - data.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
-      return anos >= 12 && anos <= 100;
-    }, "Data de nascimento inválida."),
-  peso: z.coerce
-    .number({ error: "Informe seu peso." })
-    .gt(0, "Informe seu peso.")
-    .lt(500, "Peso inválido."),
-  altura: z.coerce
-    .number({ error: "Informe sua altura." })
-    .gt(0, "Informe sua altura.")
-    .lt(300, "Altura inválida."),
+  // As cinco regras de campo vêm de `lib/domain/perfil.ts`: o aluno edita os
+  // mesmos campos depois, em `/app/perfil`, e duas cópias divergiriam.
+  objetivo: objetivoDoAluno,
+  nivel: nivelDoAluno,
+  nascimento: nascimentoDoAluno,
+  peso: pesoDoAluno,
+  altura: alturaDoAluno,
 });
 
 export async function criarAcesso(

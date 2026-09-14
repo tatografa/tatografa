@@ -192,6 +192,17 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-14]** **A política de privacidade é um contrato com a tela, não só um
+  texto.** Ela promete em "Seus direitos" que o perfil é editável — e `/app/perfil` era
+  só leitura, com um comentário dizendo que editar estava fora de escopo. Corrigir dado
+  errado sobre si é direito da LGPD, então a frase publicada fazia da tela um defeito,
+  não o contrário. É a segunda vez na mesma semana: "você apaga o post quando quiser"
+  também foi escrito antes de o botão existir. **Ao mexer no texto legal, conferir cada
+  verbo contra uma tela que faz aquilo.** O que o perfil **não** edita: `trainer_id`
+  (`students_update` recusa, e a tela nem envia — mandar para ser recusado seria um erro
+  na cara do aluno por algo que nunca foi oferecido) e o e-mail, que é a identidade em
+  `auth.users` e muda por fluxo de confirmação, não por update de linha; a tela diz isso
+  e dá o canal.
 - **[2026-09-14]** **Reescrita mecânica de policy se gera, não se digita** (migration
   0021). As 30 policies com `auth.uid()` solto passaram a `(select auth.uid())` — o
   Postgres deixa de reavaliar a identidade por linha e passa a uma vez por consulta. O

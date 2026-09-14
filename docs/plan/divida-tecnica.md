@@ -118,6 +118,13 @@ de teste.
 **Mínimo para o piloto:** saber que os dados de teste estão lá e não confundir
 os números do painel com os do aluno de verdade.
 
+## Decidido
+
+- **[14/09] Não assinar o Pro por enquanto** (Otávio). Consequências aceitas: sem
+  checagem contra senha vazada (mitigada pelas regras de força da senha, que ele
+  configurou no mesmo dia) e o piloto segue no projeto `reps-club-dev`, com os
+  dados de teste dentro. Reabrir quando houver mais de um aluno de verdade.
+
 ## O que **não** se decide sem o piloto
 
 - Desacoplar `students.id` de `auth.users` (personal montar treino antes do
