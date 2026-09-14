@@ -17,7 +17,7 @@ export const TERMOS: Documento = {
     {
       titulo: "O que é o Reps Club",
       paragrafos: [
-        "Uma ferramenta onde personal trainers montam treinos e alunos registram o que executaram — carga e repetições, série por série. Nada mais que isso.",
+        "Uma ferramenta onde personal trainers montam treinos e alunos registram o que executaram — carga e repetições, série por série. Tem também um feed, onde o aluno pode publicar o treino para o próprio personal ou para os outros alunos dele. Nada mais que isso.",
         `Quem opera o serviço é ${OPERADOR.nome}. Para falar com a gente: ${OPERADOR.contato}.`,
       ],
     },
@@ -43,6 +43,7 @@ export const TERMOS: Documento = {
         "Usar a conta de outra pessoa, ou tentar ver dado de quem não é seu aluno.",
         "Tentar burlar as regras de acesso do sistema, sobrecarregar o serviço ou automatizar uso em massa.",
         "Usar o Reps Club para qualquer coisa ilegal, ou para prescrever treino sem ser habilitado para isso.",
+        "No feed: publicar foto de outra pessoa sem que ela saiba e concorde, nudez, conteúdo ofensivo ou discriminatório, propaganda, ou prescrição de treino para quem não é seu aluno.",
         "Conta que fizer qualquer uma dessas coisas é encerrada, sem aviso prévio quando houver risco a outra pessoa.",
       ],
     },
@@ -51,6 +52,15 @@ export const TERMOS: Documento = {
       paragrafos: [
         "O treino que o personal monta é dele. O histórico do que você executou é seu. Nenhum dos dois é nosso: guardamos para vocês, e a política de privacidade explica com quem isso é compartilhado.",
         "Não usamos seu conteúdo para outra finalidade, não vendemos e não publicamos.",
+      ],
+    },
+    {
+      titulo: "O que você publica no feed",
+      paragrafos: [
+        "**A foto e o texto continuam seus.** Você só nos dá permissão para guardar e mostrar aquilo para quem você escolheu no próprio post — só o seu personal, ou também os outros alunos dele. Nada vai para a internet aberta, e essa permissão acaba quando você apaga o post.",
+        "**Você responde pelo que publica.** Foto de outra pessoa, só com o consentimento dela. Isso vale especialmente em academia, onde entra gente no fundo do enquadramento.",
+        `**Só você apaga o seu post.** Seu personal pode comentar, mas não pode apagar. Se alguém publicar algo que fere estas regras, avise em ${OPERADOR.contato} — quem opera o Reps Club pode remover o conteúdo e, se for o caso, encerrar a conta.`,
+        "**O feed é opcional.** Dá para usar o Reps Club inteiro sem publicar nada e sem nunca abrir a aba.",
       ],
     },
     {

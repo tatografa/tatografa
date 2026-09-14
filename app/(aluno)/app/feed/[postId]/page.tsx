@@ -5,6 +5,7 @@ import { TelaDoPost } from "@/components/aluno/tela-do-post";
 import { requireStudent } from "@/lib/auth/session";
 import { lerPost } from "@/lib/queries/feed";
 
+import { ApagarPost } from "./apagar-post";
 import { BotaoDeCurtir } from "./botao-de-curtir";
 import { FormularioDeComentario } from "./formulario-de-comentario";
 
@@ -36,6 +37,11 @@ export default async function PostDoFeedPage(
           curtidas={post.curtidas}
           curtiPor={post.curtiPor}
         />
+      }
+      exclusao={
+        post.meu ? (
+          <ApagarPost postId={post.id} temFoto={post.fotoUrl !== null} />
+        ) : null
       }
       formulario={<FormularioDeComentario postId={post.id} />}
     />

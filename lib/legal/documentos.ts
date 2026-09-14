@@ -17,7 +17,17 @@
  * Corrigir uma vírgula não é mudar a versão. Mudar o que se coleta, com quem
  * se compartilha ou por quanto tempo se guarda, é.
  */
-export const VERSAO_DOS_DOCUMENTOS = "2026-09-13";
+export const VERSAO_DOS_DOCUMENTOS = "2026-09-14";
+
+/**
+ * O que mudou nesta versão, em uma frase, para o portão de re-aceite.
+ *
+ * Fica junto da versão porque é a mesma decisão: quem sobe a data escreve a
+ * frase. Portão que diz "atualizamos os documentos" e mais nada faz o usuário
+ * clicar sem ler, o que é o contrário de consentimento.
+ */
+export const O_QUE_MUDOU =
+  "Agora o app tem um feed: dá para publicar foto e legenda do treino, escolhendo a cada post se aquilo fica só com o seu personal ou também com os outros alunos dele. Antes, nada seu era visível para outro aluno.";
 
 /**
  * Quem responde pelo dado.

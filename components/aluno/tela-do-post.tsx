@@ -18,6 +18,7 @@ export function TelaDoPost({
   idDoPersonal,
   acoes,
   formulario,
+  exclusao,
 }: {
   post: PostDetalhado;
   idDoPersonal: string;
@@ -25,6 +26,8 @@ export function TelaDoPost({
   acoes: React.ReactNode;
   /** O campo de comentar. */
   formulario: React.ReactNode;
+  /** Apagar, só no post do próprio aluno. Fica à direita, separado do coração. */
+  exclusao?: React.ReactNode;
 }) {
   const autorEPersonal = post.autor.id === idDoPersonal;
 
@@ -82,7 +85,10 @@ export function TelaDoPost({
             </p>
           ) : null}
 
-          {acoes}
+          <div className="flex items-center justify-between gap-3">
+            {acoes}
+            {exclusao}
+          </div>
         </div>
       </article>
 

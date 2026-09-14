@@ -1,7 +1,10 @@
 import { AvisoDeOffline } from "@/components/aluno/aviso-de-offline";
 import { BarraDeVoltaAoPainel } from "@/components/aluno/barra-de-volta-ao-painel";
 import { BottomNav } from "@/components/aluno/bottom-nav";
+import { PortaoDeAceite } from "@/components/aluno/portao-de-aceite";
 import { requireStudent } from "@/lib/auth/session";
+import { O_QUE_MUDOU, VERSAO_DOS_DOCUMENTOS } from "@/lib/legal/documentos";
+import { aceiteEstaEmDia } from "@/lib/queries/aceite";
 
 /**
  * Moldura do app do aluno (celular, na academia).
@@ -22,6 +25,26 @@ export default async function AlunoLayout({
   // de saber que existe painel do outro lado — nenhuma consulta a mais, porque
   // `requireStudent()` já traz os dois e é memoizada por requisição.
   const tambemEPersonal = student.id === personal.id;
+
+  /*
+   * O portão de re-aceite mora aqui, no layout, pelo mesmo motivo que a
+   * autorização mora: é o único lugar por onde toda tela do aluno passa. Num
+   * componente de página ele seria contornável por uma URL digitada.
+   *
+   * `/termos` e `/privacidade` ficam **fora** deste grupo de rotas, então
+   * continuam abertos — ler o que se está aceitando não pode depender de
+   * aceitar.
+   */
+  if (!(await aceiteEstaEmDia(student.id))) {
+    return (
+      <div className="min-h-dvh bg-canvas">
+        <PortaoDeAceite
+          versao={VERSAO_DOS_DOCUMENTOS}
+          oQueMudou={O_QUE_MUDOU}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-dvh bg-canvas">

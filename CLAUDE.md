@@ -192,6 +192,17 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-14]** **Documento novo exige aceite novo, e o portão mora no layout do
+  app do aluno.** `term_acceptances` já guardava uma linha por (usuário, documento,
+  versão), append-only (0017) — mas **nada conferia** essa versão depois do onboarding.
+  Eu afirmei que o mecanismo existia; existia metade dele. Agora `aceiteEstaEmDia()`
+  roda no layout, pelo mesmo motivo que `requireStudent()` roda: é o único lugar por
+  onde toda tela passa, e num componente de página o portão seria contornável por uma
+  URL digitada. `/termos` e `/privacidade` ficam fora do grupo de rotas do aluno de
+  propósito — ler o que se está aceitando não pode depender de aceitar. O portão é
+  bloqueante e não faixa dispensável: faixa que se fecha é notificação, não
+  consentimento. `O_QUE_MUDOU` vive junto da versão porque quem sobe a data escreve a
+  frase — portão que diz só "atualizamos os documentos" faz clicar sem ler.
 - **[2026-09-13]** **Nome de quem aparece no feed sai da RPC estreita
   `nomes_no_feed`** (migration 0020), não de `students`. `students_select` devolve ao
   aluno **só a própria linha**, então buscar direto trazia um nome e deixava todo colega

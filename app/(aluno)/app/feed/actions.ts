@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import { requireStudent } from "@/lib/auth/session";
 import { LIMITE_DA_LEGENDA } from "@/lib/domain/feed";
+import { pareceUuid } from "@/lib/domain/id";
 import { createClient } from "@/lib/supabase/server";
 
 export type EstadoDaPublicacao = {
@@ -222,4 +223,59 @@ export async function alternarCurtida(
   revalidatePath(`/app/feed/${postId}`);
   revalidatePath("/app/feed");
   return { ok: true };
+}
+
+export type EstadoDaExclusao = { erro?: string };
+
+/**
+ * Apaga um post do próprio aluno.
+ *
+ * **A linha sai antes do arquivo, e é de propósito.** Ao contrário, uma falha
+ * no meio deixaria o post no feed apontando para uma foto que não existe mais —
+ * card quebrado, e pior: o aluno acharia que apagou e a foto ainda estaria lá.
+ * Nesta ordem, o pior caso é um objeto órfão no Storage, que ninguém alcança
+ * porque a policy de leitura exige um post visível apontando para ele.
+ *
+ * Curtidas e comentários vão junto por cascata. Quem apaga é só o autor: o
+ * personal não apaga post de aluno (`posts_delete`, migration 0018).
+ */
+export async function apagarPost(
+  _anterior: EstadoDaExclusao,
+  formData: FormData,
+): Promise<EstadoDaExclusao> {
+  const postId = String(formData.get("postId") ?? "");
+  if (!pareceUuid(postId)) return { erro: "Post inválido." };
+
+  const { student } = await requireStudent();
+  const supabase = await createClient();
+
+  // O caminho da foto precisa ser lido antes: depois do delete ele não existe
+  // mais em lugar nenhum, e o arquivo ficaria no Storage sem ninguém saber.
+  const { data: post } = await supabase
+    .from("posts")
+    .select("photo_path")
+    .eq("id", postId)
+    .eq("student_id", student.id)
+    .maybeSingle();
+
+  if (!post) return { erro: "Este post não existe mais." };
+
+  // `delete` barrado pelo RLS não levanta erro: afeta zero linhas em silêncio.
+  // Por isso o `select` de volta — é ele que prova que a linha saiu.
+  const { data: apagados, error } = await supabase
+    .from("posts")
+    .delete()
+    .eq("id", postId)
+    .select("id");
+
+  if (error || !apagados?.length) {
+    return { erro: "Não conseguimos apagar agora. Tente de novo." };
+  }
+
+  if (post.photo_path) {
+    await supabase.storage.from("treinos").remove([post.photo_path]);
+  }
+
+  revalidatePath("/app/feed");
+  redirect("/app/feed");
 }
