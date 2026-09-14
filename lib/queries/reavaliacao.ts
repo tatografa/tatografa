@@ -35,6 +35,14 @@ export type Reavaliacao = {
   medidas: Partial<Record<Regiao, number>>;
   /** Nulo quando não há foto naquele ângulo, ou quando a URL não foi pedida. */
   fotos: Record<Slot, string | null>;
+  /**
+   * Existe foto gravada nesta reavaliação?
+   *
+   * Sai do caminho na linha, não de `fotos` — quem lê sem `comFotos` recebe
+   * tudo nulo e não teria como distinguir "não pedi" de "não tem". É o que
+   * deixa a ficha do aluno dizer "com fotos" e mandar para a tela que as mostra.
+   */
+  temFoto: boolean;
 };
 
 /** As fotos são caras de assinar; só quem vai mostrá-las pede. */
@@ -269,6 +277,7 @@ async function monta(linhas: Linha[], { comFotos }: Opcoes): Promise<Reavaliacao
     gordura: l.body_fat_pct,
     observacao: l.notes,
     medidas: porReavaliacao.get(l.id) ?? {},
+    temFoto: SLOTS.some((s) => l[COLUNA_DA_FOTO[s]] !== null),
     fotos: Object.fromEntries(
       SLOTS.map((s) => {
         const caminho = l[COLUNA_DA_FOTO[s]];

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
 import { BotaoSair } from "@/components/botao-sair";
+import { CardDoPersonal } from "@/components/aluno/card-do-personal";
 import { Card } from "@/components/ui";
 import { requireStudent } from "@/lib/auth/session";
 
@@ -50,6 +51,22 @@ export default async function PerfilDoAluno() {
       <Card>
         <FormularioDePerfil aluno={student} />
       </Card>
+
+      {/*
+        O card do personal (doc 05 §11). O botão de WhatsApp é o único canal do
+        aluno para falar com quem o treina — o app não tem mensagem, e nem
+        deveria ter: a conversa já acontece onde essas duas pessoas se falam.
+
+        `trainers.phone` existe desde a primeira migration e ficou vazia até
+        agora, porque nenhuma tela do painel pedia o número. Sem o formulário em
+        /painel/configuracoes, este botão nunca apareceria para ninguém — e é
+        por isso que o personal sem número informado não vira um botão quebrado,
+        vira card sem botão.
+      */}
+      <CardDoPersonal
+        nome={personal.name}
+        telefone={personal.phone}
+      />
 
       {/*
         A porta da reavaliação (doc 05, tela 11: "acesso à reavaliação e às

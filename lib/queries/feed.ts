@@ -7,6 +7,7 @@ import {
 } from "@/lib/domain/historico";
 import { pareceUuid } from "@/lib/domain/id";
 import { volumeDaSessao } from "@/lib/domain/treino";
+import { iniciaisDe } from "@/lib/domain/nome";
 import { createClient } from "@/lib/supabase/server";
 import type { Enums } from "@/types/database";
 
@@ -159,21 +160,6 @@ export async function lerFeed(
       treino: p.session_id ? (treinos.get(p.session_id) ?? null) : null,
     };
   });
-}
-
-/**
- * Iniciais do nome, no máximo duas.
- *
- * Fica aqui e não numa função de tela porque o avatar do feed e o do detalhe
- * precisam da mesma regra — duas cópias divergiriam na primeira pessoa com
- * nome composto.
- */
-export function iniciaisDe(nome: string): string {
-  const partes = nome.trim().split(/\s+/).filter(Boolean);
-  if (!partes.length) return "?";
-  const primeira = partes[0][0];
-  const ultima = partes.length > 1 ? partes[partes.length - 1][0] : "";
-  return (primeira + ultima).toUpperCase();
 }
 
 export type ComentarioDoPost = {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { EvolucaoDoAluno } from "@/components/personal/evolucao-do-aluno";
+import { Comparacao } from "@/components/reavaliacao/comparacao";
 import { Badge, Card } from "@/components/ui";
 import {
   duracaoCurta,
@@ -13,6 +14,7 @@ import type { SessaoDoHistorico } from "@/lib/queries/historico";
 import { LIMITE_DO_HISTORICO } from "@/lib/queries/historico";
 import type { Macrotreino } from "@/lib/queries/macrotreinos";
 import type { ExercicioComProgresso } from "@/lib/queries/progresso";
+import { comparar, type Reavaliacao } from "@/lib/queries/reavaliacao";
 import { NIVEL, OBJETIVO, STATUS_DO_ALUNO } from "@/lib/rotulos";
 
 export type FichaDoAlunoProps = {
@@ -20,6 +22,13 @@ export type FichaDoAlunoProps = {
   programa: Macrotreino | null;
   sessoes: SessaoDoHistorico[];
   exercicios: ExercicioComProgresso[];
+  /**
+   * As reavaliações do aluno, da mais recente para a mais antiga — **sem as
+   * URLs das fotos**. Ver a foto do corpo de alguém exige intenção: aqui a
+   * ficha mostra os números, que é com o que o personal trabalha, e a tela de
+   * reavaliações mostra as fotos, onde ele foi de propósito.
+   */
+  reavaliacoes: Reavaliacao[];
 };
 
 /**
@@ -34,6 +43,7 @@ export function FichaDoAluno({
   programa,
   sessoes,
   exercicios,
+  reavaliacoes,
 }: FichaDoAlunoProps) {
   return (
     <div className="space-y-8">
@@ -74,6 +84,8 @@ export function FichaDoAluno({
           <EvolucaoDoAluno exercicios={exercicios} />
         </Card>
       </section>
+
+      <Reavaliacoes reavaliacoes={reavaliacoes} alunoId={aluno.id} />
 
       <Historico sessoes={sessoes} alunoId={aluno.id} nome={aluno.name} />
     </div>
@@ -153,6 +165,97 @@ function ProgramaAtivo({
             : `${programa.total_treinos} treinos no programa`}
         </p>
       </Card>
+    </section>
+  );
+}
+
+/**
+ * "Medidas e reavaliações, com comparação" (doc 06 §4).
+ *
+ * A ficha mostra **a última**, comparada com a anterior. O histórico inteiro
+ * fica em `/painel/reavaliacoes/<aluno>`: são N quadros iguais, e empilhá-los
+ * aqui empurraria o histórico de treino — que é o que o personal abre esta
+ * página para ver — para fora da tela.
+ *
+ * Sem esta seção, a tela de comparação existia e só se chegava a ela pela fila
+ * de reavaliações. Era o mesmo buraco de `/painel/social`: a metade que faltou.
+ *
+ * A largura do quadro é limitada **aqui, no consumidor**, e não dentro de
+ * `Comparacao`: na tela de reavaliações o mesmo quadro convive com as fotos em
+ * três colunas e quer a largura toda. Solto nos 6xl da ficha, o rótulo da
+ * medida fica a meia tela do número, que é o oposto de comparar.
+ */
+function Reavaliacoes({
+  reavaliacoes,
+  alunoId,
+}: {
+  reavaliacoes: Reavaliacao[];
+  alunoId: string;
+}) {
+  const aberta = reavaliacoes.find((r) => r.enviadaEm === null) ?? null;
+  const enviadas = reavaliacoes.filter((r) => r.enviadaEm !== null);
+  const [ultima, penultima] = enviadas;
+
+  return (
+    <section className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="eyebrow text-ink-4">Reavaliações</h2>
+        {enviadas.length > 1 && (
+          <Link
+            href={`/painel/reavaliacoes/${alunoId}`}
+            className="text-[12.5px] font-semibold text-brand transition hover:underline"
+          >
+            Ver as {enviadas.length}
+          </Link>
+        )}
+      </div>
+
+      {aberta && (
+        <Card className="flex flex-wrap items-center gap-2.5">
+          <Badge tone="atencao">Pendente</Badge>
+          <p className="text-[13px] text-ink-3">
+            Liberada {aberta.rotuloDaLiberacao} · esperando a resposta do aluno.
+          </p>
+        </Card>
+      )}
+
+      {ultima ? (
+        <div className="max-w-2xl space-y-2.5">
+          <p className="text-[12.5px] text-ink-4">
+            Respondida {ultima.rotuloDoEnvio}
+            {penultima ? ` · comparada com ${penultima.rotuloDoEnvio}` : ""}
+            {ultima.temFoto ? " · com fotos" : ""}
+          </p>
+          <Comparacao
+            atual={ultima}
+            anterior={penultima ?? null}
+            linhas={comparar(ultima, penultima ?? null)}
+          />
+          {ultima.temFoto && (
+            <Link
+              href={`/painel/reavaliacoes/${alunoId}`}
+              className="inline-block text-[12.5px] font-semibold text-brand transition hover:underline"
+            >
+              Ver as fotos
+            </Link>
+          )}
+        </div>
+      ) : (
+        !aberta && (
+          <Card>
+            <p className="text-[13px] text-ink-4">
+              Nenhuma reavaliação ainda. Libere uma em{" "}
+              <Link
+                href="/painel/reavaliacoes"
+                className="font-semibold text-brand hover:underline"
+              >
+                Reavaliações
+              </Link>
+              .
+            </p>
+          </Card>
+        )
+      )}
     </section>
   );
 }

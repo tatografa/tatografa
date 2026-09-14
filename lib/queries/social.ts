@@ -2,7 +2,8 @@ import "server-only";
 
 import type { PeriodoDoSocial } from "@/lib/domain/feed";
 import { rotuloDoDia } from "@/lib/domain/historico";
-import { iniciaisDe, type ComentarioDoPost } from "@/lib/queries/feed";
+import { iniciaisDe } from "@/lib/domain/nome";
+import { type ComentarioDoPost } from "@/lib/queries/feed";
 import { createClient } from "@/lib/supabase/server";
 import type { Enums } from "@/types/database";
 

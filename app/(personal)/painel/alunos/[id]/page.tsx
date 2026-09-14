@@ -7,6 +7,7 @@ import { lerAluno } from "@/lib/queries/alunos";
 import { listarHistorico } from "@/lib/queries/historico";
 import { programaAtivoDoAluno } from "@/lib/queries/macrotreinos";
 import { progressoDoAluno } from "@/lib/queries/progresso";
+import { lerReavaliacoesDeUmAluno } from "@/lib/queries/reavaliacao";
 
 export const metadata: Metadata = { title: "Aluno" };
 
@@ -24,17 +25,21 @@ export default async function AlunoDoPainel(
   props: PageProps<"/painel/alunos/[id]">,
 ) {
   const { id } = await props.params;
-  await requireTrainer();
+  const { trainer } = await requireTrainer();
 
   // Aluno de outro personal e id inexistente dão o mesmo 404: distinguir
   // contaria a um estranho que aquele id existe.
   const aluno = await lerAluno(id);
   if (!aluno) notFound();
 
-  const [programa, sessoes, exercicios] = await Promise.all([
+  // Sem `comFotos`: a ficha mostra os números, e a foto do corpo do aluno fica
+  // na tela de reavaliações, onde o personal foi de propósito. Assinar três
+  // URLs por ciclo aqui seria pagar por imagem que ninguém abriu.
+  const [programa, sessoes, exercicios, reavaliacoes] = await Promise.all([
     programaAtivoDoAluno(aluno.id),
     listarHistorico(aluno.id),
     progressoDoAluno(aluno.id),
+    lerReavaliacoesDeUmAluno(trainer.id, aluno.id),
   ]);
 
   return (
@@ -43,6 +48,7 @@ export default async function AlunoDoPainel(
       programa={programa}
       sessoes={sessoes}
       exercicios={exercicios}
+      reavaliacoes={reavaliacoes}
     />
   );
 }

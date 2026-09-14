@@ -192,6 +192,15 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-15]** **O WhatsApp do personal é a única via do aluno para falar com ele, e
+  mora em `trainers.phone`** — coluna que existia desde a 0001 e que **nenhuma tela
+  escrevia**. O app não tem mensagem e nem deveria ter: a conversa já acontece onde essas
+  duas pessoas se falam. O número é guardado só com dígitos e **sem o 55**, para o mesmo
+  número não entrar de duas formas e para a leitura conseguir formatar "(11) 99999-9999";
+  `lib/domain/telefone.ts` recoloca o código do país ao montar o link. Personal sem número
+  informado não vira botão quebrado, vira card sem botão. Sem número o card continua — ele
+  diz quem treina o aluno, e sumir por falta de telefone faria a tela mudar de forma por um
+  dado que não é do aluno.
 - **[2026-09-15]** **A reavaliação é um formulário de mão dupla numa linha só, e ela
   congela ao ser enviada.** O personal cria a linha com `released_at` e mais nada; o aluno
   preenche peso, percentual, medidas, fotos e observação e fecha com `submitted_at`.

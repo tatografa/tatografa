@@ -419,3 +419,21 @@ Três consequências para os próximos milestones:
   da pessoa. Separar as duas coisas — números travados, fotos apagáveis a qualquer momento
   — atende os dois lados; travar tudo obrigaria a escrever na política "para apagar,
   escreva para o suporte", que é a resposta que ninguém usa.
+- [2026-09-15] [verificacao] **O selo "1 Issue" do overlay do Next apareceu no meu próprio
+  screenshot e eu quase passei batido.** Era erro de compilação de verdade: um comentário
+  JSX somado a um elemento dentro de um ramo de ternário são **dois filhos** onde cabe um,
+  e a página servia a versão anterior em cache. Screenshot serve para ler a tela inteira,
+  inclusive o que o framework escreve por cima dela — e `npm run build` teria pego, mas eu
+  fotografei antes de rodar. Porquê de layout vai no doc do componente, não em comentário
+  dentro do JSX.
+- [2026-09-15] [produto] **Coluna que existe e ninguém escreve é promessa parada, e já é a
+  terceira.** `posts.session_id` (0018), `students.status = 'convidado'` (0001) e agora
+  `trainers.phone` (0001) — esta última desde a primeira migration, esperando o formulário
+  que nunca veio. O doc 05 §11 pedia o botão de WhatsApp no perfil do aluno, e sem a metade
+  do painel ele nunca apareceria para ninguém. **Costura tem duas pontas:** ao ligar um
+  dado a uma tela, conferir quem o escreve antes de desenhar quem o lê.
+- [2026-09-15] [banco] **Telefone se guarda normalizado, não como foi digitado.** Sem tirar
+  o `55`, o mesmo número entra duas vezes de formas diferentes e a leitura desiste de
+  formatar treze dígitos — o personal vê um bloco de números nas próprias configurações
+  para sempre. Cortar o `55` só vale com doze ou treze dígitos: abaixo disso ele é o DDD de
+  Caxias do Sul, e cortá-lo destrói o número.
