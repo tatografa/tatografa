@@ -192,6 +192,18 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-14]** **Reescrita mecânica de policy se gera, não se digita** (migration
+  0021). As 30 policies com `auth.uid()` solto passaram a `(select auth.uid())` — o
+  Postgres deixa de reavaliar a identidade por linha e passa a uma vez por consulta. O
+  SQL saiu de `pg_get_expr` sobre `pg_policy` do banco vivo, com duas trocas de texto;
+  digitar 30 policies à mão é como o `and` da 0019 vira `or` sem ninguém notar.
+  Embrulhar `private.my_trainer_id()` também vale (não recebe nada da linha); os outros
+  helpers recebem uma coluna, então rodar por linha é o trabalho deles. **Prova em dois
+  níveis:** um diff mecânico das 40 policies antes/depois com o subselect desembrulhado
+  (0 diferenças), e 18 casos de comportamento — dez de burla e **sete de caminho
+  legítimo**, porque afrouxar e apertar são os dois jeitos de errar isto. E
+  `comment on policy` não sobrevive a `drop policy`: os sete comentários que guardam o
+  motivo de cada trava foram reescritos na mesma migration.
 - **[2026-09-14]** **`/painel/social` é a outra ponta de `visibility = 'personal'`.**
   O compositor do aluno já nascia com "só o meu personal" como padrão — e a política
   de privacidade recomenda essa opção —, mas **nenhuma tela do painel lia posts**: o RLS
