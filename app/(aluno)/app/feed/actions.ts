@@ -9,6 +9,11 @@ import { z } from "zod";
 import { requireStudent } from "@/lib/auth/session";
 import { LIMITE_DA_LEGENDA } from "@/lib/domain/feed";
 import { pareceUuid } from "@/lib/domain/id";
+import {
+  esquemaDeComentario,
+  gravarComentario,
+  gravarCurtida,
+} from "@/lib/feed/escrita";
 import { createClient } from "@/lib/supabase/server";
 
 export type EstadoDaPublicacao = {
@@ -145,15 +150,6 @@ export type EstadoDoComentario = {
   texto?: string;
 };
 
-const esquemaDeComentario = z.object({
-  postId: z.string().uuid("Post inválido."),
-  texto: z
-    .string()
-    .trim()
-    .min(1, "Escreva alguma coisa.")
-    .max(LIMITE_DA_LEGENDA, `O comentário pode ter até ${LIMITE_DA_LEGENDA} caracteres.`),
-});
-
 /**
  * Comenta num post.
  *
@@ -177,15 +173,9 @@ export async function comentar(
   }
 
   const { student } = await requireStudent();
-  const supabase = await createClient();
+  const ok = await gravarComentario(student.id, analise.data.postId, analise.data.texto);
 
-  const { error } = await supabase.from("post_comments").insert({
-    post_id: analise.data.postId,
-    author_id: student.id,
-    body: analise.data.texto,
-  });
-
-  if (error) {
+  if (!ok) {
     return { erro: "Não conseguimos enviar seu comentário agora.", texto: bruto.texto };
   }
 
@@ -206,19 +196,8 @@ export async function alternarCurtida(
   curtido: boolean,
 ): Promise<{ ok: boolean }> {
   const { student } = await requireStudent();
-  const supabase = await createClient();
-
-  const { error } = curtido
-    ? await supabase
-        .from("post_likes")
-        .delete()
-        .eq("post_id", postId)
-        .eq("user_id", student.id)
-    : await supabase
-        .from("post_likes")
-        .insert({ post_id: postId, user_id: student.id });
-
-  if (error) return { ok: false };
+  const ok = await gravarCurtida(student.id, postId, curtido);
+  if (!ok) return { ok: false };
 
   revalidatePath(`/app/feed/${postId}`);
   revalidatePath("/app/feed");

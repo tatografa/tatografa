@@ -14,3 +14,20 @@
  * mensagem sair em português antes de a requisição partir.
  */
 export const LIMITE_DA_LEGENDA = 500;
+
+/**
+ * Os recortes de período da tela Social do personal (doc 06).
+ *
+ * Mora aqui, e não em `lib/queries/social.ts`, porque o rótulo é **texto de
+ * tela**: a lista de links do cabeçalho o renderiza, e um componente cliente
+ * que importe do módulo de consulta arrasta o `server-only` junto — o build
+ * quebra com "'server-only' cannot be imported from a Client Component".
+ * Mesma regra do `LIMITE_DA_LEGENDA` acima.
+ */
+export type PeriodoDoSocial = "7" | "30" | "tudo";
+
+export const PERIODOS: { valor: PeriodoDoSocial; rotulo: string }[] = [
+  { valor: "7", rotulo: "7 dias" },
+  { valor: "30", rotulo: "30 dias" },
+  { valor: "tudo", rotulo: "Tudo" },
+];

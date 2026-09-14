@@ -192,6 +192,28 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-14]** **`/painel/social` é a outra ponta de `visibility = 'personal'`.**
+  O compositor do aluno já nascia com "só o meu personal" como padrão — e a política
+  de privacidade recomenda essa opção —, mas **nenhuma tela do painel lia posts**: o RLS
+  liberava e o post caía num poço. Não era escopo novo, era a metade que faltou da
+  fatia anterior; achado relendo o doc 06 antes de escolher o próximo passo, não por
+  bug. A tela também é o único lugar onde o personal responde sem virar aluno. Os
+  comentários vêm inteiros e não contados: o valor é a conversa, e abrir post a post
+  para ler duas linhas seria um toque a mais em cada um. `semResposta` (nenhum
+  comentário do personal) é o que a tela destaca no cabeçalho — é a fila de trabalho
+  dele.
+- **[2026-09-14]** **Escrita que os dois papéis dividem vive em `lib/feed/escrita.ts`**,
+  com `import "server-only"`, recebendo o id do usuário pronto. `post_comments.author_id`
+  e `post_likes.user_id` apontam para `auth.users`, não para `students`, e as policies da
+  0018 tratam aluno e personal igual — mas a **autorização** continua no layout de cada
+  lado (`requireStudent()` / `requireTrainer()`), e cada Server Action passa adiante o id
+  que ele devolveu. Sem isso seriam duas cópias da mesma regra, que é como elas divergem.
+- **[2026-09-14]** **Dado de tela não mora em módulo `server-only`, nem quando "pertence"
+  à consulta.** `PERIODOS` (os rótulos "7 dias/30 dias/Tudo") nasceu em
+  `lib/queries/social.ts` e quebrou o build assim que um componente cliente importou o
+  componente que os renderiza: `'server-only' cannot be imported from a Client Component`.
+  Foi para `lib/domain/feed.ts`. A regra já estava escrita em Convenções; o que faltava
+  era aplicá-la a **dado**, e não só a texto.
 - **[2026-09-14]** **Documento novo exige aceite novo, e o portão mora no layout do
   app do aluno.** `term_acceptances` já guardava uma linha por (usuário, documento,
   versão), append-only (0017) — mas **nada conferia** essa versão depois do onboarding.
