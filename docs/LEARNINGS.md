@@ -376,3 +376,46 @@ Três consequências para os próximos milestones:
   abrir fora de ordem vê um app vazio na primeira impressão. Desacoplar `students.id` de
   `auth.users` resolveria, mas mexe em `mesocycles`, `workout_sessions` e em toda policy
   que compara `id = auth.uid()`.
+- [2026-09-15] [seguranca] **Referência solta a coluna dentro de um `exists` sobre outra
+  tabela liga na tabela de dentro, e a policy falha calada.** Na 0023 escrevi
+  `exists (select 1 from public.students s where ... and (storage.foldername(name))[1] =
+  s.id::text)` querendo `storage.objects.name`; `students` também tem `name`, e a
+  comparação virou `foldername(<nome do aluno>)` — falsa sempre. Não vazou: falhou para o
+  lado fechado, e o personal simplesmente não via a foto do próprio aluno. **Qualificar
+  sempre** — a policy do bucket `treinos` (0018) já fazia isso (`p.photo_path =
+  storage.objects.name`) e eu não segui o próprio precedente.
+- [2026-09-15] [verificacao] **Quem achou esse buraco foi um caso de caminho legítimo, não
+  um de burla.** Trinta casos de "fulano não pode" passariam com a policy inteira negando
+  tudo. É o mesmo motivo de a 0021 ter sete casos de caminho legítimo entre os dezoito:
+  afrouxar e apertar são os dois jeitos de errar uma policy, e só os casos legítimos pegam
+  o segundo.
+- [2026-09-15] [verificacao] **Expectativa errada na prova não é defeito no código, mas
+  expectativa vaga esconde defeito.** Três casos "FALHARAM" por minha conta: um `update`
+  recusado pelo RLS **levanta** 42501 quando o `with check` é violado e afeta zero linhas
+  em silêncio quando é o `using` — escrevi "OK:0" onde era erro. E a RPC chamada por um
+  estranho barra na primeira escrita (42501), não na contagem de linhas; o P0001 da
+  contagem só aparece quando não há medida nenhuma para inserir. Valeu escrever o caso
+  sem medida de propósito: é o único que exercita aquela trava.
+- [2026-09-15] [banco] **Gatilho de `insert` não tem `old`.** `coalesce(new, old)` e
+  `old.campo` levantam "record old is not assigned yet" em PL/pgSQL, não devolvem nulo. O
+  que funciona nos três eventos é ramificar por `tg_op`.
+- [2026-09-15] [banco] **Parâmetro de função sem `default` vira tipo não-nulo no gerador
+  do Supabase**, e o TypeScript passa a recusar o `null` que o banco aceita. A saída fácil
+  é um molde no cliente ("confie em mim"); a saída certa é `default null` na assinatura
+  (0025) — aí o tipo gerado vira opcional e o cliente omite o que não tem, que é o que ele
+  quer dizer mesmo.
+- [2026-09-15] [ui] **`setState` dentro de `useEffect` para fechar dialog depois de uma
+  Server Action é recusado pelo lint** (`react-hooks/set-state-in-effect`), e com razão:
+  é render em cascata. `useActionState` não devolve nada para encadear no handler. O que
+  passa é **ajustar o estado no render**, comparando com o que já foi visto — e por isso
+  liberar duas vezes seguidas continua funcionando.
+- [2026-09-15] [ux] **Dica de campo não é escolha entre duas.** No formulário de medidas,
+  "onde passar a fita" e "na última: 37,5 cm" resolvem problemas diferentes: sem a
+  primeira, quem mede pela primeira vez põe a fita num lugar diferente a cada ciclo e a
+  comparação compara nada; sem a segunda, ninguém percebe que digitou 8 onde queria 80.
+  Cabem as duas na mesma linha.
+- [2026-09-15] [produto] **Direito de apagar se resolve por recorte, não por sim ou não.**
+  A reavaliação enviada congela porque é a base da comparação, mas as fotos são do corpo
+  da pessoa. Separar as duas coisas — números travados, fotos apagáveis a qualquer momento
+  — atende os dois lados; travar tudo obrigaria a escrever na política "para apagar,
+  escreva para o suporte", que é a resposta que ninguém usa.

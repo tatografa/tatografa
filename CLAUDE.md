@@ -68,7 +68,7 @@ Fatias verticais do `docs/plan/milestones.md`. Todo milestone é validável pelo
 | M0 | Fase 0 · Fundação | Conta de personal, login, `/painel` protegido | validado |
 | M1 | Fase 1 · Fatia vertical | Convite → treino → execução → histórico | **validado em campo** |
 | M2 | Fase 2 · Utilidade contínua | Macrotreino, PRs, progresso, painel completo | **validado em campo** |
-| M3 | Fase 3 · Social e reavaliação | Feed, fotos, reavaliação física | planejado (cortável) |
+| M3 | Fase 3 · Social e reavaliação | Feed, fotos, reavaliação física | **construído · falta validar** |
 | M4 | Fase 4 · Pronto para o piloto | PWA, estados vazios/erro, e-mails, termos | **feito · piloto em curso** |
 
 > **M1 e M2 foram validados em campo em 10-11/09/2026** — 50 dos 51 passos do roteiro,
@@ -192,6 +192,38 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-15]** **A reavaliação é um formulário de mão dupla numa linha só, e ela
+  congela ao ser enviada.** O personal cria a linha com `released_at` e mais nada; o aluno
+  preenche peso, percentual, medidas, fotos e observação e fecha com `submitted_at`.
+  **O personal não digita medida do corpo de ninguém** — o número tem que vir de quem
+  mediu, e `student_measurements_insert` recusa o personal. Congelar importa porque o
+  valor da reavaliação é a comparação com a anterior: resposta reescrita depois de lida
+  transforma a seta "72,0 → 74,5 kg" que o personal viu em outra coisa, sem aviso. É a
+  mesma regra de `workout_sessions` — registro fechado é histórico. **RLS não congela
+  nada**: ele olha a linha nova, não a antiga; quem compara é o gatilho
+  `assessments_imutavel`. Uma aberta por aluno é índice parcial, pelo mesmo motivo de
+  `mesocycles_um_ativo_por_aluno_idx`. Responder é uma transação só
+  (`enviar_reavaliacao`): N medidas mais o fechamento em passos soltos deixam metade
+  gravada e a tela sem saber o que já foi.
+- **[2026-09-15]** **Congelou, menos as fotos** (migration 0026). Depois do envio a única
+  escrita aceita é os três caminhos de foto virarem **nulos** — trocar uma foto por outra
+  não passa, nem apagar a foto e corrigir o peso na mesma escrita. O motivo é a política
+  de privacidade: ela promete, para a foto do feed, que "você apaga quando quiser", e
+  abrir uma segunda tela que tira três fotos do corpo sem o mesmo botão seria a terceira
+  vez que o texto legal andaria à frente da tela aqui. Os números ficam: são a comparação
+  que o personal usa. Com isso o `using` da policy de update largou o `submitted_at is
+  null` — duas travas para a mesma regra, em lugares diferentes, é como uma afrouxa sem
+  ninguém notar, e a do gatilho é a que sabe comparar com o valor antigo.
+- **[2026-09-15]** **A variação da medida não é pintada de verde nem de vermelho.** Dois
+  centímetros a menos na cintura é vitória para quem quer perder gordura e prejuízo para
+  quem quer ganhar massa; dois a mais no braço, o contrário. Só o personal sabe o que foi
+  combinado, e colorir seria o app dando um parecer que não é dele. A tela mostra a seta e
+  o número; o julgamento vai no comentário.
+- **[2026-09-15]** **Bucket `reavaliacoes` separado do `treinos`.** Não é organização: a
+  regra de leitura é outra. No feed, a policy casa o caminho com `posts.photo_path` e a
+  visibilidade do post; aqui alcança o aluno dono e o personal dele, e mais ninguém —
+  nem o colega de turma. Misturar as duas regras num bucket só é como uma afrouxa a outra.
+  Foto de reavaliação **nunca** vira post: são tabelas, buckets e telas separados.
 - **[2026-09-14]** **A foto é oferecida no fim do treino, e o post carrega o treino que
   o gerou.** `posts.session_id` existia desde a 0018, com a intenção escrita no schema,
   e **ninguém preenchia**: o doc 05 §6 pedia "Tirar foto do treino" e "Concluir sem

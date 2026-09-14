@@ -694,13 +694,13 @@ export type Database = {
       enviar_reavaliacao: {
         Args: {
           p_assessment_id: string
-          p_body_fat_pct: number
-          p_medidas: Json
-          p_notes: string
-          p_photo_back: string
-          p_photo_front: string
-          p_photo_side: string
-          p_weight_kg: number
+          p_body_fat_pct?: number
+          p_medidas?: Json
+          p_notes?: string
+          p_photo_back?: string
+          p_photo_front?: string
+          p_photo_side?: string
+          p_weight_kg?: number
         }
         Returns: undefined
       }

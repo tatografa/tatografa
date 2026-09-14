@@ -4,6 +4,7 @@ import { TelaHome } from "@/components/aluno/tela-home";
 import { requireStudent } from "@/lib/auth/session";
 import { lerAgendaDoAluno, lerIndicadoresDoAluno } from "@/lib/queries/aluno";
 import { sessaoAbertaDoAluno } from "@/lib/queries/execucao";
+import { temReavaliacaoAberta } from "@/lib/queries/reavaliacao";
 
 export const metadata: Metadata = { title: "Treinar" };
 
@@ -12,11 +13,12 @@ export default async function HomeDoAluno() {
 
   // As duas leituras são independentes: a agenda olha o programa ativo, os
   // indicadores olham o histórico. Em série, a home esperaria as duas em fila.
-  const [{ macrotreino, treinos, sugerido }, indicadores, sessaoAberta] =
+  const [{ macrotreino, treinos, sugerido }, indicadores, sessaoAberta, reavaliacaoAberta] =
     await Promise.all([
       lerAgendaDoAluno(student.id),
       lerIndicadoresDoAluno(student.id),
       sessaoAbertaDoAluno(student.id),
+      temReavaliacaoAberta(student.id),
     ]);
 
   return (
@@ -28,6 +30,7 @@ export default async function HomeDoAluno() {
       proximo={sugerido}
       indicadores={indicadores}
       sessaoAberta={sessaoAberta}
+      reavaliacaoAberta={reavaliacaoAberta}
     />
   );
 }

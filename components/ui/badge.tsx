@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-type Tone = "neutro" | "brand" | "brand-solido" | "sucesso";
+type Tone = "neutro" | "brand" | "brand-solido" | "sucesso" | "atencao";
 
 const tones: Record<Tone, string> = {
   neutro: "bg-badge-neutral text-ink-2",
@@ -11,6 +11,8 @@ const tones: Record<Tone, string> = {
   // branco sobre a marca).
   "brand-solido": "bg-brand text-white",
   sucesso: "bg-success-soft text-success",
+  // `warning-bg` é o par do doc 04 para o aviso de reavaliação.
+  atencao: "bg-warning-bg text-warning",
 };
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {

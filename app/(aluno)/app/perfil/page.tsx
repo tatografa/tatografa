@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
 import { BotaoSair } from "@/components/botao-sair";
 import { Card } from "@/components/ui";
@@ -48,6 +50,27 @@ export default async function PerfilDoAluno() {
       <Card>
         <FormularioDePerfil aluno={student} />
       </Card>
+
+      {/*
+        A porta da reavaliação (doc 05, tela 11: "acesso à reavaliação e às
+        configurações"). Fica no perfil, e não na bottom nav: a nav tem quatro
+        abas e são as quatro coisas do dia a dia — reavaliação acontece uma vez
+        por ciclo. Quando há uma esperando, a home é que avisa.
+      */}
+      <Link
+        href="/app/reavaliacao"
+        className="flex items-center justify-between gap-3 rounded-card border border-border-soft bg-surface px-4 py-3.5 transition hover:border-border-strong"
+      >
+        <span className="min-w-0">
+          <span className="block text-[13.5px] font-semibold text-ink">
+            Reavaliação
+          </span>
+          <span className="block text-[11.5px] text-ink-4">
+            Medidas, fotos e a comparação com a anterior
+          </span>
+        </span>
+        <ChevronRight size={16} className="shrink-0 text-ink-5" aria-hidden />
+      </Link>
 
       <Card className="space-y-3">
         <p className="text-[13px] leading-[1.6] text-ink-3">

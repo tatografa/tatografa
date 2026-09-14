@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CalendarCheck } from "lucide-react";
 
 import { classesDeBotao } from "@/components/ui";
 import { horaDaSessao, rotuloDoDia } from "@/lib/domain/historico";
@@ -27,6 +28,13 @@ export type TelaHomeProps = {
    * registradas presas numa sessão invisível.
    */
   sessaoAberta: SessaoAberta | null;
+  /**
+   * O personal liberou uma reavaliação e ela ainda não foi respondida.
+   *
+   * Um booleano, e não a reavaliação inteira: a home só decide se mostra o
+   * card, e é a tela que menos pode ser lenta — o aluno a abre na academia.
+   */
+  reavaliacaoAberta: boolean;
 };
 
 /**
@@ -48,6 +56,7 @@ export function TelaHome({
   proximo,
   indicadores,
   sessaoAberta,
+  reavaliacaoAberta,
 }: TelaHomeProps) {
   return (
     <div className="space-y-4">
@@ -111,6 +120,34 @@ export function TelaHome({
         </section>
       ) : (
         <SemTreino nomeDoPersonal={nomeDoPersonal} />
+      )}
+
+      {/*
+        O aviso de reavaliação (doc 05, tela 2, item 5).
+
+        Fica **depois** do card de treino, não antes: quem abre o app está na
+        academia para treinar, e uma fita métrica no topo empurraria a ação do
+        dia para baixo. Mas fica antes do histórico, porque é uma coisa a fazer
+        e o histórico é uma coisa a consultar.
+      */}
+      {reavaliacaoAberta && (
+        <Link
+          href="/app/reavaliacao"
+          className="flex items-center gap-3 rounded-card bg-warning-bg px-4 py-3.5 transition hover:brightness-[0.98]"
+        >
+          <CalendarCheck size={18} className="shrink-0 text-warning" aria-hidden />
+          <span className="min-w-0 flex-1">
+            <span className="block text-[13px] font-bold text-ink">
+              Reavaliação disponível
+            </span>
+            <span className="block text-[11px] text-ink-3">
+              {primeiroNome(nomeDoPersonal)} quer ver suas medidas
+            </span>
+          </span>
+          <span className="shrink-0 rounded-pill border border-ink px-2.5 py-1 text-[11px] font-bold text-ink">
+            Fazer agora
+          </span>
+        </Link>
       )}
 
       {/*
