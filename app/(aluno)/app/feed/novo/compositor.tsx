@@ -4,9 +4,11 @@ import { Camera, ImageOff, X } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 
-import { Button, EscolhaCards, Textarea } from "@/components/ui";
+import { Badge, Button, EscolhaCards, Textarea } from "@/components/ui";
 import { LIMITE_DA_LEGENDA } from "@/lib/domain/feed";
+import { formatarNumero } from "@/lib/domain/historico";
 import { prepararFoto } from "@/lib/imagem";
+import type { TreinoDoPost } from "@/lib/queries/feed";
 
 import { publicarPost, type EstadoDaPublicacao } from "../actions";
 
@@ -31,7 +33,16 @@ const INICIAL: EstadoDaPublicacao = {};
  * Apple entra e sai JPEG. O arquivo volta para o `input` por `DataTransfer`,
  * então o envio continua sendo o do `<form>`, sem FormData montado à mão.
  */
-export function Compositor({ nomeDoPersonal }: { nomeDoPersonal: string }) {
+export function Compositor({
+  nomeDoPersonal,
+  sessaoId,
+  treino,
+}: {
+  nomeDoPersonal: string;
+  /** Presente quando o post nasce da tela de conclusão do treino. */
+  sessaoId?: string;
+  treino?: TreinoDoPost | null;
+}) {
   const [estado, acao, enviando] = useActionState(publicarPost, INICIAL);
 
   const entrada = useRef<HTMLInputElement>(null);
@@ -95,6 +106,26 @@ export function Compositor({ nomeDoPersonal }: { nomeDoPersonal: string }) {
 
   return (
     <form action={acao} noValidate className="space-y-5">
+      {/*
+        O resumo do treino aparece **antes** da foto, e não como detalhe no fim:
+        é ele que diz por que este post é diferente de uma foto qualquer. O id da
+        sessão vai num campo escondido, mas quem decide se ele vale é o servidor
+        — a ação confere de novo que a sessão é do aluno e está concluída.
+      */}
+      {sessaoId && treino ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-card border border-border-soft bg-surface px-3.5 py-3">
+          <input type="hidden" name="sessao" value={sessaoId} />
+          <Badge tone="brand">{treino.rotulo}</Badge>
+          <span className="text-[13.5px] font-bold text-ink">{treino.nome}</span>
+          <span className="text-[12.5px] text-ink-4">
+            {treino.series} {treino.series === 1 ? "série" : "séries"}
+            {treino.volumeKg > 0
+              ? ` · ${formatarNumero(treino.volumeKg)} kg`
+              : ""}
+          </span>
+        </div>
+      ) : null}
+
       <div className="space-y-2">
         <input
           ref={entrada}

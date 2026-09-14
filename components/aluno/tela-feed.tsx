@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { Carregando, Esqueleto } from "@/components/esqueleto";
 import { Badge } from "@/components/ui";
+import { formatarNumero } from "@/lib/domain/historico";
 import type { AbaDoFeed, PostDoFeed } from "@/lib/queries/feed";
 import { cn } from "@/lib/utils";
 
@@ -207,6 +208,25 @@ function CardDePost({
       ) : null}
 
       <div className="space-y-2.5 px-3.5 py-3">
+        {/*
+          O que separa este feed de qualquer outro: o post carrega o que foi
+          levantado. Só aparece quando o post nasceu da tela de conclusão — e
+          só para quem pode ler a sessão, que é o dono e o personal dele.
+        */}
+        {post.treino ? (
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-ink-4">
+            <Badge tone="brand">{post.treino.rotulo}</Badge>
+            <span className="font-bold text-ink-2">{post.treino.nome}</span>
+            <span>
+              {post.treino.series}{" "}
+              {post.treino.series === 1 ? "série" : "séries"}
+              {post.treino.volumeKg > 0
+                ? ` · ${formatarNumero(post.treino.volumeKg)} kg`
+                : ""}
+            </span>
+          </p>
+        ) : null}
+
         {post.legenda ? (
           <p className="text-[14px] leading-relaxed text-ink-2">{post.legenda}</p>
         ) : null}

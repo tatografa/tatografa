@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Check, Medal } from "lucide-react";
+import { Camera, Check, Medal } from "lucide-react";
 
 import { duracaoCurta, formatarNumero } from "@/lib/domain/historico";
 import { textoDoRecorde, type RecordeBatido } from "@/lib/domain/recordes";
@@ -20,6 +20,13 @@ export interface ResumoDoTreinoProps {
    * celebração vazia".
    */
   recordes?: RecordeNaTela[];
+  /**
+   * A sessão que acabou. Presente, a tela oferece a foto — é o momento de maior
+   * intenção que existe no produto: o aluno acabou de terminar, está suado e com
+   * o celular na mão. Navegar até o Feed e tocar em "Publicar" meia hora depois
+   * é outro momento, e muito pior.
+   */
+  sessaoId?: string;
 }
 
 /**
@@ -28,8 +35,8 @@ export interface ResumoDoTreinoProps {
  * Componente puro, sem banco: é o que permite conferir a tela no navegador
  * numa rota descartável, já que o host do Supabase é bloqueado neste ambiente.
  *
- * Foto do treino e post no feed são M3. Os recordes chegam prontos: quem
- * decide o que é recorde é `lib/domain/recordes.ts`, e a tela só desenha.
+ * Os recordes chegam prontos: quem decide o que é recorde é
+ * `lib/domain/recordes.ts`, e a tela só desenha.
  */
 export function ResumoDoTreino({
   label,
@@ -37,6 +44,7 @@ export function ResumoDoTreino({
   duracaoSegundos,
   series,
   recordes = [],
+  sessaoId,
 }: ResumoDoTreinoProps) {
   const realizadas = series.filter((s) => !s.skipped);
   const volume = volumeDaSessao(series);
@@ -106,12 +114,35 @@ export function ResumoDoTreino({
         </div>
 
         <div className="mt-8 space-y-3">
-          <Link
-            href="/app"
-            className="flex h-[52px] w-full items-center justify-center rounded-[13px] bg-brand text-[16px] font-bold text-white shadow-cta transition active:scale-[0.99]"
-          >
-            Concluir
-          </Link>
+          {/*
+            Duas ações, como o doc 05 pede. A foto é a primária porque é aqui
+            que ela tem chance de existir; "concluir sem foto" precisa estar do
+            lado, e não escondido, para publicar nunca virar pedágio de sair.
+          */}
+          {sessaoId ? (
+            <>
+              <Link
+                href={`/app/feed/novo?sessao=${sessaoId}`}
+                className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[13px] bg-brand text-[16px] font-bold text-white shadow-cta transition active:scale-[0.99]"
+              >
+                <Camera aria-hidden size={19} />
+                Tirar foto do treino
+              </Link>
+              <Link
+                href="/app"
+                className="flex h-[52px] w-full items-center justify-center rounded-[13px] border-[1.5px] border-dark-border-2 text-[15px] font-bold text-dark-text transition active:scale-[0.99]"
+              >
+                Concluir sem foto
+              </Link>
+            </>
+          ) : (
+            <Link
+              href="/app"
+              className="flex h-[52px] w-full items-center justify-center rounded-[13px] bg-brand text-[16px] font-bold text-white shadow-cta transition active:scale-[0.99]"
+            >
+              Concluir
+            </Link>
+          )}
 
           {/*
             O treino que acabou de ser gravado é justamente o que o aluno quer

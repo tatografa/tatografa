@@ -1,7 +1,12 @@
 import "server-only";
 
-import { rotuloDoDia } from "@/lib/domain/historico";
+import {
+  contarFeitas,
+  rotuloDoDia,
+  type SerieDoHistorico,
+} from "@/lib/domain/historico";
 import { pareceUuid } from "@/lib/domain/id";
+import { volumeDaSessao } from "@/lib/domain/treino";
 import { createClient } from "@/lib/supabase/server";
 import type { Enums } from "@/types/database";
 
@@ -44,6 +49,12 @@ export type PostDoFeed = {
   /** Se quem está olhando já curtiu — decide o estado do botão. */
   curtiPor: boolean;
   comentarios: number;
+  /**
+   * O treino que gerou o post, quando ele nasceu da tela de conclusão. Nulo
+   * para post avulso e para post de colega — o RLS não devolve a sessão alheia,
+   * e quanto o colega levantou não é assunto da turma.
+   */
+  treino: TreinoDoPost | null;
 };
 
 /**
@@ -67,7 +78,7 @@ export async function lerFeed(
 
   let consulta = supabase
     .from("posts")
-    .select("id, student_id, caption, photo_path, visibility, created_at")
+    .select("id, student_id, caption, photo_path, visibility, created_at, session_id")
     .order("created_at", { ascending: false })
     .limit(LIMITE_DO_FEED);
 
@@ -83,10 +94,13 @@ export async function lerFeed(
   const ids = posts.map((p) => p.id);
   const autores = [...new Set(posts.map((p) => p.student_id))];
   const caminhos = posts.map((p) => p.photo_path).filter((c) => c !== null);
+  const sessoes = [
+    ...new Set(posts.map((p) => p.session_id).filter((s) => s !== null)),
+  ];
 
   // Tudo em lote, em paralelo: uma consulta por tipo de dado, nunca uma por
   // post. São quatro idas ao servidor para trinta posts.
-  const [nomes, curtidas, minhasCurtidas, comentarios, urls] = await Promise.all([
+  const [nomes, curtidas, minhasCurtidas, comentarios, urls, treinos] = await Promise.all([
     // RPC e não `from("students")`: `students_select` devolve ao aluno **só a
     // própria linha**, então buscar direto trazia um nome e deixava todo colega
     // como "Aluno". `nomes_no_feed` (migration 0020) devolve só `(id, name)` e
@@ -104,6 +118,7 @@ export async function lerFeed(
           .from("treinos")
           .createSignedUrls(caminhos, MINUTOS_DA_URL * 60)
       : Promise.resolve({ data: [] as { path: string | null; signedUrl: string }[] }),
+    resumosDasSessoes(sessoes),
   ]);
 
   if (nomes.error) throw nomes.error;
@@ -141,6 +156,7 @@ export async function lerFeed(
       curtidas: totalCurtidas.get(p.id) ?? 0,
       curtiPor: curti.has(p.id),
       comentarios: totalComentarios.get(p.id) ?? 0,
+      treino: p.session_id ? (treinos.get(p.session_id) ?? null) : null,
     };
   });
 }
@@ -200,7 +216,7 @@ export async function lerPost(
 
   const { data: post, error } = await supabase
     .from("posts")
-    .select("id, student_id, caption, photo_path, visibility, created_at")
+    .select("id, student_id, caption, photo_path, visibility, created_at, session_id")
     .eq("id", postId)
     .maybeSingle();
 
@@ -263,6 +279,9 @@ export async function lerPost(
     curtidas: curtidas.data?.length ?? 0,
     curtiPor: minhaCurtida.data !== null,
     comentarios: comentarios.data?.length ?? 0,
+    treino: post.session_id
+      ? ((await resumosDasSessoes([post.session_id])).get(post.session_id) ?? null)
+      : null,
     listaDeComentarios: (comentarios.data ?? []).map((c) => {
       const nome = nomePor.get(c.author_id) ?? "Alguém da turma";
       return {
@@ -277,4 +296,106 @@ export async function lerPost(
       };
     }),
   };
+}
+
+/**
+ * O treino que deu origem a um post: rótulo, nome, séries feitas e volume.
+ *
+ * `posts.session_id` existe desde a 0018 com a intenção escrita no schema — "o
+ * post nasce quase sempre de um treino" —, mas **nada preenchia a coluna** até a
+ * tela de conclusão passar a oferecer a foto. Sem isto o post é uma foto com
+ * legenda, como em qualquer rede; com isto ele carrega o que foi levantado, que
+ * é a única coisa que este feed tem e as outras não.
+ */
+export type TreinoDoPost = {
+  rotulo: string;
+  nome: string;
+  series: number;
+  volumeKg: number;
+};
+
+/**
+ * Os resumos de um lote de sessões, para a lista do feed.
+ *
+ * Duas consultas fixas — sessões com o treino embutido, e as séries de todas
+ * elas — e o agrupamento em memória. Uma por post seria N+1 numa tela que cresce
+ * com o uso.
+ *
+ * O RLS já limita: `workout_sessions_select` só devolve a sessão do próprio
+ * aluno ou a de quem ele treina. Post de colega vem sem resumo, e é o certo —
+ * quanto ele levantou não é assunto da turma.
+ */
+export async function resumosDasSessoes(
+  ids: string[],
+): Promise<Map<string, TreinoDoPost>> {
+  if (!ids.length) return new Map();
+
+  const supabase = await createClient();
+
+  const [{ data: sessoes }, { data: series }] = await Promise.all([
+    supabase
+      .from("workout_sessions")
+      .select("id, workouts(label, name)")
+      .in("id", ids),
+    supabase
+      .from("session_sets")
+      .select("session_id, set_number, load_kg, reps, skipped")
+      .in("session_id", ids),
+  ]);
+
+  const porSessao = new Map<string, SerieDoHistorico[]>();
+  for (const linha of series ?? []) {
+    const lista = porSessao.get(linha.session_id) ?? [];
+    lista.push({
+      set_number: linha.set_number,
+      // `load_kg` é `numeric` e chega como texto: sem o `Number()` o volume
+      // vira concatenação.
+      load_kg: linha.load_kg === null ? null : Number(linha.load_kg),
+      reps: linha.reps,
+      skipped: linha.skipped,
+    });
+    porSessao.set(linha.session_id, lista);
+  }
+
+  const resumos = new Map<string, TreinoDoPost>();
+  for (const sessao of sessoes ?? []) {
+    if (!sessao.workouts) continue;
+    const daSessao = porSessao.get(sessao.id) ?? [];
+    resumos.set(sessao.id, {
+      rotulo: sessao.workouts.label,
+      nome: sessao.workouts.name,
+      series: contarFeitas(daSessao),
+      volumeKg: volumeDaSessao(daSessao),
+    });
+  }
+
+  return resumos;
+}
+
+/**
+ * O resumo de **uma** sessão, para o compositor.
+ *
+ * Devolve `null` para id fora do formato, sessão inexistente, sessão de outro
+ * aluno e sessão em andamento. A última importa: só se publica treino que
+ * terminou, senão o número na foto muda depois de publicado.
+ */
+export async function resumoDaSessaoConcluida(
+  alunoId: string,
+  sessaoId: string,
+): Promise<TreinoDoPost | null> {
+  if (!pareceUuid(sessaoId)) return null;
+
+  const supabase = await createClient();
+
+  const { data: sessao } = await supabase
+    .from("workout_sessions")
+    .select("id")
+    .eq("id", sessaoId)
+    .eq("student_id", alunoId)
+    .not("finished_at", "is", null)
+    .maybeSingle();
+
+  if (!sessao) return null;
+
+  return (await resumosDasSessoes([sessaoId])).get(sessaoId) ?? null;
 }

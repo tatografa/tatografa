@@ -14,6 +14,7 @@ import {
   gravarComentario,
   gravarCurtida,
 } from "@/lib/feed/escrita";
+import { resumoDaSessaoConcluida } from "@/lib/queries/feed";
 import { createClient } from "@/lib/supabase/server";
 
 export type EstadoDaPublicacao = {
@@ -109,6 +110,16 @@ export async function publicarPost(
   const { student } = await requireStudent();
   const supabase = await createClient();
 
+  /*
+   * A sessão vem de um campo escondido, então **não se confia nela**: é
+   * conferida aqui de novo, como sendo do aluno e concluída. Um id inválido não
+   * derruba a publicação — vira post avulso, que é o que ele já era antes desta
+   * ligação existir. Recusar o post inteiro puniria o aluno por uma URL torta.
+   */
+  const sessao = String(formData.get("sessao") ?? "");
+  const sessaoValida =
+    sessao && (await resumoDaSessaoConcluida(student.id, sessao)) ? sessao : null;
+
   let caminho: string | null = null;
 
   if (temFoto) {
@@ -133,6 +144,7 @@ export async function publicarPost(
     caption: legenda || null,
     photo_path: caminho,
     visibility: alcance,
+    session_id: sessaoValida,
   });
 
   if (error) {

@@ -2,6 +2,7 @@ import { Lock } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui";
+import { formatarNumero } from "@/lib/domain/historico";
 import type { PostDetalhado } from "@/lib/queries/feed";
 
 import { HoraLocal } from "./hora-local";
@@ -74,6 +75,25 @@ export function TelaDoPost({
         ) : null}
 
         <div className="space-y-3.5 px-3.5 py-3.5">
+          {/*
+          O que separa este feed de qualquer outro: o post carrega o que foi
+          levantado. Só aparece quando o post nasceu da tela de conclusão — e
+          só para quem pode ler a sessão, que é o dono e o personal dele.
+        */}
+          {post.treino ? (
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-ink-4">
+              <Badge tone="brand">{post.treino.rotulo}</Badge>
+              <span className="font-bold text-ink-2">{post.treino.nome}</span>
+              <span>
+                {post.treino.series}{" "}
+                {post.treino.series === 1 ? "série" : "séries"}
+                {post.treino.volumeKg > 0
+                  ? ` · ${formatarNumero(post.treino.volumeKg)} kg`
+                  : ""}
+              </span>
+            </p>
+          ) : null}
+
           {post.legenda ? (
             <p className="text-[14.5px] leading-relaxed text-ink-2">{post.legenda}</p>
           ) : null}

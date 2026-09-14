@@ -56,6 +56,7 @@ export default async function FimDoTreino(
       duracaoSegundos={sessao.duration_seconds}
       series={series}
       recordes={recordesDaTela(treino.exercicios, series, recordeAnterior)}
+      sessaoId={sessao.id}
     />
   );
 }

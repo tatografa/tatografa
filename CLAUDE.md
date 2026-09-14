@@ -192,6 +192,29 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-14]** **A foto é oferecida no fim do treino, e o post carrega o treino que
+  o gerou.** `posts.session_id` existia desde a 0018, com a intenção escrita no schema,
+  e **ninguém preenchia**: o doc 05 §6 pedia "Tirar foto do treino" e "Concluir sem
+  foto" na tela de conclusão, e ela só tinha "Concluir". Duas consequências. A de
+  produto: o momento de maior intenção do app — acabou de terminar, celular na mão — não
+  oferecia nada, e publicar exigia navegar até o Feed meia hora depois. A de identidade:
+  sem a sessão, o post é uma foto com legenda como em qualquer rede; com ela, o card
+  mostra "A · Peito e tríceps · 16 séries · 4.275 kg", que é a única coisa que este feed
+  tem e os outros não. O resumo **não aparece para o colega**: o RLS de
+  `workout_sessions` não devolve sessão alheia, e quanto o outro levantou não é assunto
+  da turma. A sessão é validada **duas vezes** — na página, que decide o que a tela
+  mostra, e na Server Action, que decide o que o banco grava; id inválido não derruba a
+  publicação, vira post avulso, porque recusar o post puniria o aluno por uma URL torta.
+- **[2026-09-14]** **Quinta vez do mesmo furo** (migration 0022): `posts_insert` conferia
+  `student_id` e deixava `session_id` solto. Não tinha consequência enquanto nada
+  preenchia a coluna; passou a ter no mesmo dia em que a tela de conclusão começou a
+  preenchê-la. Um POST direto criava post legítimo do próprio atacante **apontando para a
+  sessão de um colega** — e como o RLS protege o atacante de ler aquela sessão, o selo
+  não aparecia para ele, mas **o personal lê as duas** e veria o post do aluno A rotulado
+  com o treino e o volume do aluno B. Não vaza para quem não podia ver: **mente para quem
+  podia**, que num produto cujo valor é o registro do que foi levantado é pior. Depois de
+  0007, 0009, 0010 e 0019 — e o achado veio de uma prova de comportamento que eu escrevi
+  esperando "1" e que revelou o buraco, não de uma releitura da policy.
 - **[2026-09-14]** **A política de privacidade é um contrato com a tela, não só um
   texto.** Ela promete em "Seus direitos" que o perfil é editável — e `/app/perfil` era
   só leitura, com um comentário dizendo que editar estava fora de escopo. Corrigir dado
