@@ -1,0 +1,730 @@
+<title>Reteste M3 · Reps Club</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+  /* Tema único, escuro de propósito: é a mesma cara da tela de execução do
+     treino, que é onde este roteiro vai ser lido — no celular, na academia.
+     Todas as cores são pintadas explicitamente para a página não herdar o
+     fundo do hospedeiro. */
+  :root {
+    --ground: #14120f;
+    --surface: #1e1b17;
+    --surface-2: #262219;
+    --line: #332e26;
+    --line-strong: #4a4337;
+    --text: #f3f0ea;
+    --text-2: #cbc4b8;
+    --text-dim: #a39c91;
+    --accent: #ff2a2a;      /* --color-brand-on-dark do app */
+    --ok: #6cc08a;
+    --ok-bg: #1b2b21;
+    --fail: #ff6a5c;
+    --fail-bg: #2e1c19;
+
+    --passo: clamp(15px, 4vw, 15.5px);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .envelope {
+    max-width: 580px;
+    margin: 0 auto;
+    padding-inline: 18px;
+    padding-block: 0 72px;
+  }
+
+  /* ---------------------------------------------------------- cabeçalho -- */
+
+  .topo {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: color-mix(in srgb, var(--ground) 94%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .topo-interno {
+    max-width: 580px;
+    margin: 0 auto;
+    padding-inline: 18px;
+    padding-block: 11px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .topo-linha {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .marca {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .marca b { color: var(--accent); font-weight: 700; }
+
+  .contagens {
+    display: flex;
+    gap: 12px;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .c-ok { color: var(--ok); }
+  .c-fail { color: var(--fail); }
+  .c-resta { color: var(--text-dim); }
+
+  .barra {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--line);
+    overflow: hidden;
+    display: flex;
+  }
+  .barra span { display: block; height: 100%; transition: width .25s ease; }
+  .barra .b-ok { background: var(--ok); }
+  .barra .b-fail { background: var(--fail); }
+
+  /* ------------------------------------------------------------ abertura -- */
+
+  .abertura { padding-block: 26px 6px; }
+
+  h1 {
+    font-size: clamp(25px, 6.6vw, 30px);
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    font-weight: 800;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+
+  .sub {
+    margin: 0;
+    color: var(--text-2);
+    font-size: 14.5px;
+    line-height: 1.6;
+  }
+  .sub + .sub { margin-top: 10px; }
+  .sub strong { color: var(--text); font-weight: 600; }
+
+  .aviso-salvo {
+    margin-top: 16px;
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    padding: 12px 13px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+  .aviso-salvo .ponto {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--ok); margin-top: 6px; flex: none;
+  }
+  .aviso-salvo[data-estado="offline"] .ponto { background: var(--fail); }
+
+  .preparo {
+    margin-top: 18px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+    padding: 16px 16px 14px;
+  }
+  .preparo h2 { font-size: 15px; margin: 0 0 10px; }
+  .preparo ul {
+    margin: 0;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .preparo li {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+  .preparo li b { color: var(--text); font-weight: 600; }
+  .preparo code {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12.5px;
+    color: var(--text);
+    background: var(--surface-2);
+    border-radius: 5px;
+    padding: 1px 5px;
+  }
+  .preparo .ressalva {
+    margin: 12px 0 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--text-dim);
+  }
+  .preparo .ressalva b { color: var(--text-2); font-weight: 600; }
+
+  /* -------------------------------------------------------------- partes -- */
+
+  section { margin-top: 34px; }
+
+  .cabeca {
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+    margin-bottom: 4px;
+  }
+  .parte-n {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+  }
+  h2 {
+    font-size: 18.5px;
+    font-weight: 800;
+    letter-spacing: -0.015em;
+    margin: 0;
+  }
+  .duracao {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-left: auto;
+    flex: none;
+  }
+  .nota-parte {
+    margin: 0 0 14px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+
+  section.critica .lista {
+    border-left: 2px solid var(--accent);
+    padding-left: 13px;
+    margin-left: 1px;
+  }
+
+  .lista { display: flex; flex-direction: column; gap: 8px; }
+
+  /* --------------------------------------------------------------- passo -- */
+
+  .passo {
+    border: 1px solid var(--line);
+    border-radius: 13px;
+    background: var(--surface);
+    padding: 12px 13px;
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    gap: 4px 10px;
+    align-items: start;
+  }
+  .passo[data-estado="ok"] { border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); }
+  .passo[data-estado="fail"] { border-color: color-mix(in srgb, var(--fail) 55%, var(--line)); }
+
+  .num {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-dim);
+    padding-top: 2px;
+  }
+  .passo[data-estado="ok"] .num { color: var(--ok); }
+  .passo[data-estado="fail"] .num { color: var(--fail); }
+
+  .texto {
+    font-size: var(--passo);
+    line-height: 1.5;
+    color: var(--text-2);
+  }
+  .texto strong { color: var(--text); font-weight: 600; }
+
+  .marcas {
+    grid-column: 2;
+    display: flex;
+    gap: 7px;
+    margin-top: 9px;
+  }
+
+  .marcar {
+    flex: 1;
+    min-height: 40px;
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    background: var(--surface-2);
+    color: var(--text-dim);
+    font-family: Inter, sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transition: background .14s ease, color .14s ease, border-color .14s ease;
+  }
+  .marcar:hover { border-color: var(--text-dim); color: var(--text-2); }
+  .marcar:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .marcar[aria-pressed="true"][data-tipo="ok"] {
+    background: var(--ok-bg); border-color: var(--ok); color: var(--ok);
+  }
+  .marcar[aria-pressed="true"][data-tipo="fail"] {
+    background: var(--fail-bg); border-color: var(--fail); color: var(--fail);
+  }
+
+  .glifo { font-family: "JetBrains Mono", monospace; font-size: 14px; font-weight: 700; }
+
+  .caixa-nota { grid-column: 2; margin-top: 9px; }
+  .caixa-nota[hidden] { display: none; }
+
+  label.rotulo {
+    display: block;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--fail);
+    margin-bottom: 6px;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 74px;
+    resize: vertical;
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    background: var(--ground);
+    color: var(--text);
+    font-family: Inter, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 10px 11px;
+  }
+  textarea::placeholder { color: #7a736a; }
+  textarea:focus { outline: none; border-color: var(--fail); }
+  textarea:focus-visible { outline: 2px solid var(--fail); outline-offset: 1px; }
+
+  /* ----------------------------------------------------------------- fim -- */
+
+  .fim {
+    margin-top: 38px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+    padding: 18px 16px;
+  }
+  .fim h2 { margin-bottom: 8px; }
+  .fim p { margin: 0 0 10px; font-size: 14px; line-height: 1.6; color: var(--text-2); }
+  .fim p:last-child { margin-bottom: 0; }
+
+  .placar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 14px 0 4px;
+  }
+  .ficha {
+    flex: 1 1 96px;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: var(--surface-2);
+    padding: 10px 12px;
+  }
+  .ficha .n {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 22px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+    display: block;
+  }
+  .ficha .r {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .ficha.f-ok .n { color: var(--ok); }
+  .ficha.f-fail .n { color: var(--fail); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 1ms !important; animation-duration: 1ms !important; }
+  }
+</style>
+
+<header class="topo">
+  <div class="topo-interno">
+    <div class="topo-linha">
+      <span class="marca"><b>Reps Club</b> · Reteste</span>
+      <span class="contagens">
+        <span class="c-ok" id="n-ok">0 ok</span>
+        <span class="c-fail" id="n-fail">0 ✗</span>
+        <span class="c-resta" id="n-resta">— a fazer</span>
+      </span>
+    </div>
+    <div class="barra" role="img" aria-label="Progresso do roteiro" id="barra">
+      <span class="b-ok" id="b-ok" style="width:0%"></span>
+      <span class="b-fail" id="b-fail" style="width:0%"></span>
+    </div>
+  </div>
+</header>
+
+<main class="envelope">
+  <div class="abertura">
+    <h1>Reteste: os consertos e as pontas soltas</h1>
+    <p class="sub">A sua rodada de 115 passos passou em <strong>106</strong>. Este roteiro cobre só o que sobrou: os <strong>dois defeitos já corrigidos</strong>, os <strong>dois que eu não consegui reproduzir</strong> e os <strong>quatro onde o roteiro errou a expectativa</strong>. Leva cerca de <strong>22 minutos</strong>.</p>
+    <p class="sub">Em cada passo, marque <strong>ok</strong> ou <strong>✗</strong>. Quando marcar ✗, escreva <strong>a frase que apareceu na tela</strong> — os quatro defeitos do M1 e do M2 estavam todos em borda de sessão, e nenhum deles apareceria num “não funcionou” sem o texto.</p>
+    <div class="aviso-salvo" id="aviso">
+      <span class="ponto"></span>
+      <span id="aviso-texto">Marque à vontade: cada toque é salvo e eu leio daqui quando você terminar.</span>
+    </div>
+
+    <div class="preparo">
+      <h2>Antes de começar</h2>
+      <ul>
+        <li><b>Onde:</b> <code>repsclub.com.br</code>, com painel no computador e app no celular ao mesmo tempo.</li>
+        <li><b>Recarregue o app</b> antes de começar: as correções das Partes 1 subiram agora.</li>
+        <li><b>As Partes 2 e 3 são as mais importantes</b>, e não pelo ✓ — é onde eu <b>não sei</b> o que aconteceu. As suas anotações ali valem mais que a marcação.</li>
+        <li><b>A senha do raul</b> é necessária na Parte 3.</li>
+      </ul>
+      <p class="ressalva">O roteiro completo de 115 passos continua no outro link, com as suas 106 marcações — este aqui não o substitui, cobre só o que ficou pendente.</p>
+    </div>
+  </div>
+
+  <div id="partes"></div>
+
+  <div class="fim">
+    <h2>Quando terminar</h2>
+    <div class="placar">
+      <div class="ficha f-ok"><span class="n" id="f-ok">0</span><span class="r">passaram</span></div>
+      <div class="ficha f-fail"><span class="n" id="f-fail">0</span><span class="r">falharam</span></div>
+      <div class="ficha"><span class="n" id="f-resta">—</span><span class="r">a fazer</span></div>
+    </div>
+    <p>Me diga que terminou — eu leio as marcações e as notas direto daqui.</p>
+    <p>Se a Parte 1 passar, os dois defeitos estão mortos. Se as Partes 2 e 3 vierem com anotação, eu tenho o que faltava para fechar os outros dois — e aí o <strong>M3 fecha</strong>.</p>
+  </div>
+</main>
+
+<script>
+const PARTES = [
+  {
+    n: "Parte 1", titulo: "Os dois consertos de hoje", duracao: "5 min", critica: true,
+    nota: "<strong>No computador, logado como personal.</strong> Os dois defeitos que a sua rodada encontrou. O passo 2 é o que importa: era ali que o diálogo ficava aberto.",
+    passos: [
+      "Painel → <strong>Reavaliações</strong> → “Nova reavaliação”. Escolha um aluno e clique <strong>Liberar</strong>. O diálogo <strong>fecha sozinho</strong>.",
+      "Clique “Nova reavaliação” de novo, escolha <strong>outro aluno</strong> e libere. <strong>Fecha sozinho outra vez.</strong> <em>Era exatamente aqui que ele ficava aberto: o segundo sucesso seguido.</em>",
+      "Uma terceira vez, agora com o <strong>mesmo aluno da primeira</strong>. Aparece “Esse aluno já tem uma reavaliação esperando resposta” e o diálogo <strong>continua aberto</strong> — erro tem que ficar na tela para ser lido.",
+      "Painel → <strong>Alunos</strong> → clique num aluno que já informou os dados. Na linha abaixo do nome aparecem <strong>o peso e a altura</strong>, junto do objetivo, do nível e do e-mail.",
+      "Abra a ficha de um aluno que <strong>nunca informou peso</strong>. A linha simplesmente pula o dado — sem “null”, sem espaço vazio estranho.",
+      "No celular, no app do aluno, mude o <strong>peso</strong> em Perfil → “Editar meus dados”. Volte à ficha dele no painel: <strong>o peso novo está lá.</strong> <em>Era o passo 27, que falhou porque a ficha nunca mostrou peso.</em>",
+    ],
+  },
+  {
+    n: "Parte 2", titulo: "O aviso de conflito", duracao: "5 min", critica: true,
+    nota: "<strong>No computador.</strong> Este eu <b>não consegui reproduzir</b> — no meu teste o aviso aparece. Os passos abaixo servem para descobrir por que não apareceu para você, então as anotações aqui valem mais que o ✓.",
+    passos: [
+      "Painel → <strong>Agenda</strong>. Anote qual semana está no título (ex.: “14 a 20 de setembro”).",
+      "Clique <strong>“Nova sessão”</strong>. Repare no <strong>dia que já vem preenchido</strong> — é hoje. Escolha um aluno, deixe a hora em <strong>18:00</strong> e marque.",
+      "Clique “Nova sessão” de novo, escolha <strong>outro aluno</strong> e <strong>não mude nada</strong> — nem o dia, nem a hora. Antes de salvar deve aparecer uma <strong>faixa amarela</strong> dizendo com quem bate.",
+      "Se apareceu: ela fica <strong>entre o campo de duração e o de observação</strong>. Role o diálogo todo e diga se ela estava visível sem precisar rolar.",
+      "Se <strong>não</strong> apareceu: escreva no ✗ <strong>qual dia estava no campo</strong> nas duas vezes. É a informação que me falta.",
+      "Agora repita mudando o dia para <strong>outra semana</strong> (duas semanas à frente), no mesmo horário de uma sessão que já exista lá. <strong>Espero que o aviso NÃO apareça</strong> — ele só enxerga a semana que está na tela. Quero confirmar esse limite antes de decidir se conserto.",
+    ],
+  },
+  {
+    n: "Parte 3", titulo: "A etiqueta PERSONAL", duracao: "4 min",
+    nota: "O outro que eu não consegui fechar. A lógica está certa no código, então quero saber <b>em que tela</b> você estava. Atenção a quem está logado em cada passo.",
+    passos: [
+      "<strong>No app do aluno</strong> (celular), logado como <strong>você mesmo</strong>: publique um post <strong>para a turma</strong>, com legenda reconhecível.",
+      "Confirme que você está no app do aluno e não no painel: a <strong>barra de baixo</strong> tem Treinar · Progresso · Feed · Perfil.",
+      "Saia e entre <strong>na conta do raul</strong>. Vá em <strong>Feed → aba “Da turma”</strong>.",
+      "No post que <strong>você</strong> publicou, ao lado do seu nome, tem a etiqueta vermelha <strong>PERSONAL</strong>.",
+      "Nos posts do próprio raul ou do Vinicius <strong>não</strong> há essa etiqueta — e está certo, ela marca só o post de quem treina a turma.",
+      "Se você viu etiquetas escritas <strong>“SÓ PARA VOCÊ”</strong> ou <strong>“TURMA”</strong>, escreva isso no ✗: essas são as do <strong>painel</strong>, não as do app — e aí eu sei que a tela era outra.",
+    ],
+  },
+  {
+    n: "Parte 4", titulo: "A próxima sessão na home", duracao: "4 min",
+    nota: "Na rodada passada o <b>roteiro</b> atrapalhou: mandava marcar tudo como realizada ou faltou <b>antes</b> de conferir a linha. Sem sessão agendada no futuro não há o que mostrar. Agora na ordem certa.",
+    passos: [
+      "Painel → Agenda → <strong>“Nova sessão”</strong> para <strong>você mesmo</strong>, num dia <strong>futuro</strong>. <strong>Deixe como agendada</strong> — não clique em Veio nem em Faltou.",
+      "No celular, no app do aluno, abra a <strong>home</strong>. Tem a linha <strong>“Sessão com {seu nome} · {dia}, {hora} · 1h”</strong>, com ícone de calendário.",
+      "<strong>Não há botão nenhum</strong> nessa linha. É lembrete, e é de propósito: quem marca presença é o personal.",
+      "No painel, <strong>cancele</strong> essa sessão. Volte à home do aluno: <strong>a linha sumiu</strong>.",
+      "Marque outra sessão futura como <strong>realizada</strong>. A linha também não volta — só sessão <strong>agendada e no futuro</strong> aparece ali.",
+    ],
+  },
+  {
+    n: "Parte 5", titulo: "As pontas soltas", duracao: "4 min",
+    nota: "Três coisas onde a expectativa do roteiro estava errada, e uma que ficou sem marcar.",
+    passos: [
+      "Do painel, o caminho para o app do aluno é <strong>menu “Treinar” → “Abrir o app do aluno”</strong>. Confirme que funciona. <em>Era o passo 16: funcionou para você, mas o roteiro não dizia o caminho.</em>",
+      "No Perfil do aluno → <strong>“Editar meus dados”</strong>: se você virou aluno de si mesmo pelo painel, nascimento, objetivo, nível, peso e altura vêm <strong>em branco</strong> — você nunca passou pelo convite, que é onde isso é preenchido. <strong>Isso está certo.</strong> Preencha e salve.",
+      "Depois de salvar, abra a sua ficha no painel: <strong>os dados aparecem</strong> na linha do cabeçalho.",
+      "Execute um treino e, na tela de conclusão, use <strong>“Tirar foto do treino”</strong>. Publique. No feed, o card mostra o <strong>resumo do treino acima da legenda</strong> (letra, nome, séries, kg). <em>Esse ficou sem marcar na rodada passada.</em>",
+    ],
+  },
+];
+
+const TOTAL = PARTES.reduce((s, p) => s + p.passos.length, 0);
+
+/* Estado local. A chave de cada passo é o número que aparece na tela, para a
+   nota que o Otávio escrever e o passo que ele cita conversarem sem tradução. */
+let estado = {};
+let db = null;
+let gravando = null;
+
+/*
+ * O que foi marcado aqui e o servidor ainda não confirmou.
+ *
+ * Existe por causa de um defeito real: o `onSnapshot` substituía `estado` pelo
+ * que vinha do servidor, e `hasPendingWrites` só protege enquanto uma escrita
+ * está em voo — **não durante o intervalo do debounce**, quando ainda não há
+ * escrita nenhuma. Um retrato do servidor chegando nessa janela apagava a marca
+ * recém-feita, e a escrita seguinte gravava o estado já atropelado. Para quem
+ * está marcando, isso é "clico e não acontece nada".
+ *
+ * Agora o retrato do servidor é a **base**, e o que foi tocado aqui é aplicado
+ * por cima. `null` guarda o caso de desmarcar: é uma ausência deliberada, e sem
+ * ele o servidor ressuscitaria a marca que acabou de ser tirada.
+ */
+let meus = {};
+/* Cresce a cada toque. Serve para saber se algo mudou enquanto a escrita ia. */
+let edicoes = 0;
+
+function contar() {
+  let ok = 0, fail = 0;
+  for (const v of Object.values(estado)) {
+    if (v && v.marca === "ok") ok++;
+    if (v && v.marca === "fail") fail++;
+  }
+  return { ok, fail, resta: TOTAL - ok - fail };
+}
+
+function pintarContagens() {
+  const { ok, fail, resta } = contar();
+  document.getElementById("n-ok").textContent = ok + " ok";
+  document.getElementById("n-fail").textContent = fail + " ✗";
+  document.getElementById("n-resta").textContent = resta + " a fazer";
+  document.getElementById("b-ok").style.width = (ok / TOTAL * 100) + "%";
+  document.getElementById("b-fail").style.width = (fail / TOTAL * 100) + "%";
+  document.getElementById("f-ok").textContent = ok;
+  document.getElementById("f-fail").textContent = fail;
+  document.getElementById("f-resta").textContent = resta;
+}
+
+function pintarPasso(n) {
+  const linha = document.getElementById("passo-" + n);
+  if (!linha) return;
+  const marca = (estado[n] && estado[n].marca) || null;
+  linha.dataset.estado = marca || "";
+  for (const botao of linha.querySelectorAll(".marcar")) {
+    botao.setAttribute("aria-pressed", String(botao.dataset.tipo === marca));
+  }
+  const caixa = document.getElementById("nota-caixa-" + n);
+  caixa.hidden = marca !== "fail";
+  const campo = document.getElementById("nota-" + n);
+  const texto = (estado[n] && estado[n].nota) || "";
+  // Não reescreve o campo em foco: sobrescrever o que está sendo digitado é
+  // como um salvamento automático engole o texto de quem escreve devagar.
+  if (document.activeElement !== campo && campo.value !== texto) campo.value = texto;
+}
+
+function pintarTudo() {
+  for (let n = 1; n <= TOTAL; n++) pintarPasso(n);
+  pintarContagens();
+}
+
+function salvar() {
+  if (!db) return;
+  clearTimeout(gravando);
+  gravando = setTimeout(async () => {
+    const naEscrita = edicoes;
+    try {
+      await db
+        .doc("roteiro/m3")
+        .set({ passos: estado, atualizadoEm: new Date().toISOString() });
+
+      // Só solta o que foi enviado se nada mudou enquanto a escrita ia e
+      // voltava — senão o toque dado no meio do caminho perderia a proteção.
+      if (edicoes === naEscrita) meus = {};
+      avisar(null);
+    } catch {
+      // Fica pendente de propósito: a próxima escrita leva tudo junto, e a
+      // tela avisa em vez de fingir que gravou.
+      avisar("Não consegui salvar a última marcação. Ela continua na tela e eu tento de novo no próximo toque.");
+    }
+  }, 300);
+}
+
+/** Registra um toque: na tela, e na lista do que o servidor ainda não sabe. */
+function registrar(n, valor) {
+  if (valor) {
+    estado[n] = valor;
+    meus[n] = valor;
+  } else {
+    delete estado[n];
+    meus[n] = null;
+  }
+  edicoes += 1;
+  salvar();
+}
+
+function marcar(n, tipo) {
+  const atual = (estado[n] && estado[n].marca) || null;
+  const nova = atual === tipo ? null : tipo;
+  const nota = (estado[n] && estado[n].nota) || "";
+  registrar(n, nova || nota ? { marca: nova, nota } : null);
+  pintarPasso(n);
+  pintarContagens();
+  if (nova === "fail") {
+    const campo = document.getElementById("nota-" + n);
+    requestAnimationFrame(() => campo.focus());
+  }
+}
+
+function anotar(n, texto) {
+  registrar(n, { marca: (estado[n] && estado[n].marca) || "fail", nota: texto });
+}
+
+/* ------------------------------------------------------------- montagem -- */
+
+const alvo = document.getElementById("partes");
+let numero = 0;
+
+for (const parte of PARTES) {
+  const secao = document.createElement("section");
+  if (parte.critica) secao.className = "critica";
+
+  const cabeca = document.createElement("div");
+  cabeca.className = "cabeca";
+  cabeca.innerHTML =
+    '<span class="parte-n">' + parte.n + '</span>' +
+    '<h2>' + parte.titulo + '</h2>' +
+    '<span class="duracao">' + parte.duracao + '</span>';
+  secao.appendChild(cabeca);
+
+  const nota = document.createElement("p");
+  nota.className = "nota-parte";
+  nota.innerHTML = parte.nota;
+  secao.appendChild(nota);
+
+  const lista = document.createElement("div");
+  lista.className = "lista";
+
+  for (const texto of parte.passos) {
+    numero += 1;
+    const n = numero;
+
+    const linha = document.createElement("div");
+    linha.className = "passo";
+    linha.id = "passo-" + n;
+    linha.innerHTML =
+      '<span class="num">' + n + '</span>' +
+      '<div class="texto">' + texto + '</div>' +
+      '<div class="marcas">' +
+        '<button type="button" class="marcar" data-tipo="ok" id="ok-' + n + '" aria-pressed="false">' +
+          '<span class="glifo" aria-hidden="true">✓</span>ok</button>' +
+        '<button type="button" class="marcar" data-tipo="fail" id="fail-' + n + '" aria-pressed="false">' +
+          '<span class="glifo" aria-hidden="true">✗</span>deu errado</button>' +
+      '</div>' +
+      '<div class="caixa-nota" id="nota-caixa-' + n + '" hidden>' +
+        '<label class="rotulo" for="nota-' + n + '">O que apareceu na tela?</label>' +
+        '<textarea id="nota-' + n + '" placeholder="A frase exata, mesmo que pareça bobo."></textarea>' +
+      '</div>';
+
+    linha.querySelector('[data-tipo="ok"]').setAttribute("aria-label", "Passo " + n + " passou");
+    linha.querySelector('[data-tipo="fail"]').setAttribute("aria-label", "Passo " + n + " deu errado");
+    lista.appendChild(linha);
+  }
+
+  secao.appendChild(lista);
+  alvo.appendChild(secao);
+}
+
+alvo.addEventListener("click", (evento) => {
+  const botao = evento.target.closest(".marcar");
+  if (!botao) return;
+  marcar(Number(botao.id.split("-")[1]), botao.dataset.tipo);
+});
+
+alvo.addEventListener("input", (evento) => {
+  const campo = evento.target.closest("textarea");
+  if (!campo) return;
+  anotar(Number(campo.id.split("-")[1]), campo.value);
+});
+
+pintarTudo();
+
+/* ---------------------------------------------------------- persistência -- */
+
+const aviso = document.getElementById("aviso");
+const avisoTexto = document.getElementById("aviso-texto");
+const AVISO_NORMAL = avisoTexto.textContent;
+
+/** `null` devolve o aviso ao normal; texto o põe em estado de problema. */
+function avisar(texto) {
+  aviso.dataset.estado = texto ? "offline" : "";
+  avisoTexto.textContent = texto || AVISO_NORMAL;
+}
+
+(async () => {
+
+  db = await window.claude?.use?.("db");
+
+  if (!db) {
+    avisar("As marcações desta sessão não estão sendo salvas. Dá para usar o roteiro assim mesmo, mas não feche a aba — e me conte o resultado por mensagem.");
+    return;
+  }
+
+  db.doc("roteiro/m3-reteste").onSnapshot(
+    (snapshot) => {
+      // Enquanto a escrita própria não confirma, a tela local já está certa:
+      // adotar a volta do servidor aqui faria o toque piscar para trás.
+      if (snapshot.metadata.hasPendingWrites) return;
+
+      // O servidor é a base; o que foi tocado aqui e ainda não foi confirmado
+      // vai por cima. Substituir direto era o defeito — apagava a marca feita
+      // durante o intervalo do debounce.
+      const dados = snapshot.data();
+      const doServidor = { ...((dados && dados.passos) || {}) };
+      for (const [n, valor] of Object.entries(meus)) {
+        if (valor) doServidor[n] = valor;
+        else delete doServidor[n];
+      }
+      estado = doServidor;
+      pintarTudo();
+    },
+    () => {
+      avisar("Perdemos a conexão com o armazenamento. O que você marcar agora fica só nesta aba.");
+    },
+  );
+})();
+</script>

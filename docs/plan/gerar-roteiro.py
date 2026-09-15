@@ -12,13 +12,16 @@ lista, e ela mora no HTML.
 import html
 import pathlib
 import re
+import sys
 import textwrap
 
 AQUI = pathlib.Path(__file__).parent
-FONTE = AQUI / "M3-roteiro.html"
-DESTINO = AQUI / "M3-roteiro.md"
+# Qual roteiro gerar: o completo por padrão, ou o que vier no argumento.
+NOME = sys.argv[1] if len(sys.argv) > 1 else "M3-roteiro"
+FONTE = AQUI / f"{NOME}.html"
+DESTINO = AQUI / f"{NOME}.md"
 
-CABECALHO = """# Roteiro · validar o M3 (feed, reavaliação, agenda)
+CABECALHO_COMPLETO = """# Roteiro · validar o M3 (feed, reavaliação, agenda)
 
 > **Este arquivo é gerado** por `docs/plan/gerar-roteiro.py`, a partir de
 > `M3-roteiro.html` — a página que o Otávio abre para marcar. Editar os passos
@@ -59,6 +62,24 @@ deles apareceria num "não funcionou" sem o texto.
 
 ---
 """
+
+CABECALHO_RETESTE = """# Reteste do M3 — os consertos e as pontas soltas
+
+> **Este arquivo é gerado** por `docs/plan/gerar-roteiro.py M3-reteste`, a partir
+> de `M3-reteste.html`. Editar os passos aqui não muda a página.
+>
+> Rodada curta, depois dos 115 passos do `M3-roteiro`: os dois defeitos que
+> aquela rodada encontrou e que já foram corrigidos, os dois que eu não
+> consegui reproduzir, e os quatro em que a expectativa do roteiro é que estava
+> errada. Cerca de 22 minutos.
+
+## O que anotar
+
+Nas Partes 2 e 3 a **anotação vale mais que a marcação**: são os dois casos em
+que eu não sei o que aconteceu, e a frase que aparece na tela é o que falta.
+"""
+
+CABECALHO = CABECALHO_RETESTE if NOME == "M3-reteste" else CABECALHO_COMPLETO
 
 RODAPE = """
 ---
