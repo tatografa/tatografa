@@ -414,6 +414,7 @@
         <li><b>Uma fita métrica</b> para a Parte 6 — ou invente os números, o que importa é o caminho.</li>
         <li><b>A segunda conta de aluno</b> (raul ou Vinicius) para a Parte 4. Se não tiver a senha, marque ✗ naquele passo escrevendo “sem a senha” e siga: a regra foi provada por SQL, mas ver com os olhos é outra coisa.</li>
         <li><b>Faça na ordem.</b> As partes se apoiam: a reavaliação que você responde na 6 é a que a 7 confere na ficha do aluno.</li>
+        <li><b>Você já rodou parte disto.</b> Os passos com borda verde estão validados e não precisam ser refeitos — o feed e a separação de quem vê o quê passaram. <b>Comece pela Parte 2</b>, que é onde o teste travou: não havia saída para montar o segundo treino, e agora há.</li>
         <li><b>Travou feio? Pare e me chame.</b> Não precisa chegar ao fim para o teste valer — um defeito grave no meio vale mais cedo do que tarde.</li>
       </ul>
       <p class="ressalva">Uma coisa que eu <b>não</b> consegui conferir daqui: se o último deploy subiu. A rede deste ambiente bloqueia o domínio. Ao abrir o site, olhe se a <b>Agenda</b> aparece no menu do painel — se aparecer, é o código de agora.</p>
@@ -451,16 +452,20 @@ const PARTES = [
   },
   {
     n: "Parte 2", titulo: "Você como aluno de si mesmo", duracao: "11 min",
-    nota: "O perfil você já criou. Falta o que estava bloqueado: montar o seu próprio treino pelo caminho normal.",
+    nota: "<strong>No computador, logado como personal</strong> — e depois no celular, na mesma conta, pelo app do aluno. É aqui que o teste anterior travou: dava para montar o primeiro treino e não havia saída visível para o segundo. Isso foi consertado, e os passos 12 a 14 são a prova.",
     passos: [
       "No painel, <strong>Macrotreinos → Novo programa</strong>. No seletor “Aluno”, <strong>o seu nome está na lista</strong>. (Era isso que não aparecia.)",
       "Escolha você mesmo, dê um nome ao programa, deixe as semanas e salve.",
       "Ative o programa.",
-      "Crie um treino dentro dele, com 2 ou 3 exercícios — os mesmos passos de sempre.",
+      "Monte o <strong>treino A</strong> dentro dele, com 2 ou 3 exercícios — os mesmos passos de sempre. Salve.",
+      "Na faixa verde de <strong>“Treino salvo”</strong> aparece, à direita, o botão <strong>“Montar o próximo treino”</strong>. <em>Era exatamente isto que faltava no teste anterior.</em>",
+      "Clique nele e monte o <strong>treino B</strong>, com outros 2 ou 3 exercícios. Salve.",
+      "No cabeçalho, a volta agora é <strong>“← {nome do programa}”</strong>, e não “← Treinos”. Clique: abre o programa, dizendo <strong>“2 treinos montados”</strong>.",
       "No painel principal, na lista de alunos, <strong>a sua linha tem a etiqueta “VOCÊ”</strong> ao lado do status.",
-      "No celular, abra o app do aluno. No topo aparece a faixa <strong>“Você está treinando como aluno”</strong>, com o link de voltar ao painel.",
-      "A home mostra <strong>o treino que você acabou de montar</strong>.",
-      "Execute o treino: confirme algumas séries e conclua. A tela de conclusão agora oferece <strong>“Tirar foto do treino”</strong> e <strong>“Concluir sem foto”</strong> — toque em concluir sem foto por ora.",
+      "<strong>Agora no celular</strong>, abra o app do aluno. No topo aparece a faixa <strong>“Você está treinando como aluno”</strong>, com o link de voltar ao painel.",
+      "A home mostra <strong>um dos dois treinos</strong> que você montou, e abaixo do botão o link <strong>“Fazer outro treino”</strong> — que só existe porque agora há dois.",
+      "Execute esse treino: confirme algumas séries e conclua. A tela de conclusão agora oferece <strong>“Tirar foto do treino”</strong> e <strong>“Concluir sem foto”</strong> — toque em concluir sem foto por ora.",
+      "Volte para a home. Agora ela sugere <strong>o outro treino</strong>, porque o primeiro já foi feito nesta semana. É a rotação funcionando.",
       "Toque em <strong>“Voltar ao painel”</strong> na faixa do topo. Você cai no painel.",
       "No painel, abra a sua própria ficha de aluno. <strong>A sessão que você acabou de fazer está lá</strong>, com carga e repetições.",
       "No app do aluno, toque na aba <strong>Perfil</strong>. Seus dados aparecem: nome, e-mail, nascimento, objetivo, n\u00edvel, peso e altura.",
@@ -473,7 +478,7 @@ const PARTES = [
   },
   {
     n: "Parte 3", titulo: "O feed", duracao: "14 min",
-    nota: "Ainda como aluno, no celular.",
+    nota: "<strong>No celular, logado como você mesmo</strong> — a mesma conta do painel, mas pelo app do aluno. Se você sair e entrar com outra conta aqui, os passos 50 a 54 da próxima parte deixam de fazer sentido.",
     passos: [
       "Toque na aba <strong>Feed</strong> na barra de baixo. Ela está clicável.",
       "As duas abas de cima — <strong>“Da turma”</strong> e <strong>“Com meu personal”</strong> — trocam na hora, e a lista pisca um esqueleto cinza enquanto carrega.",
@@ -499,16 +504,16 @@ const PARTES = [
   },
   {
     n: "Parte 4", titulo: "Quem vê o quê", duracao: "5 min", critica: true,
-    nota: "O teste que mais importa. Precisa de uma segunda conta de aluno (raul ou Vinicius). Se não tiver a senha, marque ✗ no passo 34 escrevendo “sem a senha” e pule o resto — a regra foi provada por SQL, mas ver com os olhos é outra coisa.",
+    nota: "O teste que mais importa, e o que mais exige atenção a <b>quem está logado</b>. Os dois primeiros passos são <strong>na sua conta</strong> (app do aluno); do terceiro em diante, <strong>na conta do outro aluno</strong>. Precisa da senha dessa segunda conta — sem ela, marque ✗ no passo em que ela entra, escrevendo “sem a senha”, e siga.",
     passos: [
-      "Como <strong>você</strong>, publique um post <strong>para a turma</strong>, com foto e legenda reconhecíveis (“post da turma”).",
-      "Publique outro <strong>só para o personal</strong> (“post privado”).",
+      "<strong>Na sua conta, no app do aluno</strong> (não na do raul): publique um post <strong>para a turma</strong>, com foto e legenda reconhecíveis (“post da turma”).",
+      "Ainda na sua conta, publique outro <strong>só para o personal</strong> (“post privado”).",
       "Saia e entre com a <strong>conta do outro aluno</strong>, no celular ou numa janela anônima.",
       "Esse aluno também bate no portão de aceite. Aceite.",
       "No Feed, aba <strong>“Da turma”</strong>: o <strong>“post da turma” aparece</strong>.",
       "Na mesma aba: o <strong>“post privado” NÃO aparece</strong>. Qualquer aparição dele aqui é grave — marque ✗ e pare o teste.",
-      "Seu nome aparece escrito certo, <strong>não</strong> como “Aluno”.",
-      "Ao lado do seu nome há a etiqueta vermelha <strong>PERSONAL</strong>.",
+      "<strong>O seu</strong> nome aparece escrito certo no post, <strong>não</strong> como “Aluno”. (Depende de os dois posts acima terem sido publicados na sua conta — se você os publicou com outra, este passo não tem o que mostrar.)",
+      "Ao lado do seu nome há a etiqueta vermelha <strong>PERSONAL</strong>. Ela só aparece em post <strong>do personal da turma</strong> — post de aluno comum não tem, e está certo.",
       "Aba <strong>“Com meu personal”</strong>: aparecem só os posts <strong>desse</strong> aluno, nenhum seu.",
       "Abra o “post da turma” e comente nele.",
       "Volte para a sua conta e abra o mesmo post: <strong>o comentário dele está lá, com o nome dele</strong>.",
@@ -516,11 +521,11 @@ const PARTES = [
   },
   {
     n: "Parte 5", titulo: "O painel Social", duracao: "4 min",
-    nota: "No computador. A tela que faltava: \u00e9 aqui que o post marcado \u201cs\u00f3 o meu personal\u201d chega.",
+    nota: "<strong>No computador, logado como personal.</strong> A tela que faltava: é aqui que o post marcado “só o meu personal” chega — o seu e o dos seus alunos.",
     passos: [
       "No painel, o menu tem <strong>Social</strong>. Abra.",
-      "Os posts que voc\u00ea publicou como aluno aparecem — <strong>inclusive o que voc\u00ea marcou como privado</strong>, com o selo <strong>“S\u00d3 PARA VOC\u00ca”</strong>. Se ele n\u00e3o estiver a\u00ed, \u00e9 o defeito que esta tela existe para consertar.",
-      "O post que foi para a turma tem o selo <strong>“TURMA”</strong>.",
+      "Aparecem os posts <strong>de todos os seus alunos</strong>, inclusive os seus (você é aluno de si mesmo) — e <strong>inclusive os marcados como privados</strong>, com o selo <strong>“SÓ PARA VOCÊ”</strong>. Se a lista vier vazia, é o defeito que esta tela existe para consertar.",
+      "Todo post tem selo: <strong>“SÓ PARA VOCÊ”</strong> (cinza, com cadeado) nos privados e <strong>“TURMA”</strong> (vermelho) nos que foram para os colegas. Eles ficam no canto direito de cada cartão.",
       "O cabe\u00e7alho conta os posts e quantos est\u00e3o <strong>“sem sua resposta”</strong>.",
       "Os coment\u00e1rios aparecem <strong>dentro do cart\u00e3o</strong>, sem precisar abrir o post.",
       "Escreva uma resposta num post e envie. Ela aparece na lista, com <strong>“Voc\u00ea”</strong> em vermelho.",

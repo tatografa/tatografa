@@ -40,6 +40,7 @@ CABECALHO = """# Roteiro · validar o M3 (feed, reavaliação, agenda)
 - **Uma fita métrica** para a Parte 6, ou invente os números.
 - **A segunda conta de aluno** para a Parte 4. Sem a senha, marque ✗ ali e siga.
 - **Faça na ordem.** As partes se apoiam.
+- **Parte dos passos já foi validada** numa rodada anterior; retomar pela Parte 2.
 - **Travou feio? Pare e chame.** Não precisa chegar ao fim para o teste valer.
 
 Uma coisa que não dá para conferir do ambiente remoto: se o último deploy subiu — a rede

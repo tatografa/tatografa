@@ -20,6 +20,7 @@
 - **Uma fita métrica** para a Parte 6, ou invente os números.
 - **A segunda conta de aluno** para a Parte 4. Sem a senha, marque ✗ ali e siga.
 - **Faça na ordem.** As partes se apoiam.
+- **Parte dos passos já foi validada** numa rodada anterior; retomar pela Parte 2.
 - **Travou feio? Pare e chame.** Não precisa chegar ao fim para o teste valer.
 
 Uma coisa que não dá para conferir do ambiente remoto: se o último deploy subiu — a rede
@@ -58,241 +59,259 @@ Você vai bater nele porque os documentos mudaram de versão duas vezes: primeir
 
 ## Parte 2 · Você como aluno de si mesmo (11 min)
 
-O perfil você já criou. Falta o que estava bloqueado: montar o seu próprio treino pelo caminho normal.
+**No computador, logado como personal** — e depois no celular, na mesma conta, pelo app do aluno. É aqui que o teste anterior travou: dava para montar o primeiro treino e não havia saída visível para o segundo. Isso foi consertado, e os passos 12 a 14 são a prova.
 
 8. No painel, **Macrotreinos → Novo programa**. No seletor “Aluno”, **o
    seu nome está na lista**. (Era isso que não aparecia.)
 9. Escolha você mesmo, dê um nome ao programa, deixe as semanas e salve.
 10. Ative o programa.
-11. Crie um treino dentro dele, com 2 ou 3 exercícios — os mesmos passos
-    de sempre.
-12. No painel principal, na lista de alunos, **a sua linha tem a etiqueta
+11. Monte o **treino A** dentro dele, com 2 ou 3 exercícios — os mesmos
+    passos de sempre. Salve.
+12. Na faixa verde de **“Treino salvo”** aparece, à direita, o botão
+    **“Montar o próximo treino”**. Era exatamente isto que faltava no
+    teste anterior.
+13. Clique nele e monte o **treino B**, com outros 2 ou 3 exercícios.
+    Salve.
+14. No cabeçalho, a volta agora é **“← {nome do programa}”**, e não “←
+    Treinos”. Clique: abre o programa, dizendo **“2 treinos montados”**.
+15. No painel principal, na lista de alunos, **a sua linha tem a etiqueta
     “VOCÊ”** ao lado do status.
-13. No celular, abra o app do aluno. No topo aparece a faixa **“Você está
-    treinando como aluno”**, com o link de voltar ao painel.
-14. A home mostra **o treino que você acabou de montar**.
-15. Execute o treino: confirme algumas séries e conclua. A tela de
+16. **Agora no celular**, abra o app do aluno. No topo aparece a faixa
+    **“Você está treinando como aluno”**, com o link de voltar ao painel.
+17. A home mostra **um dos dois treinos** que você montou, e abaixo do
+    botão o link **“Fazer outro treino”** — que só existe porque agora há
+    dois.
+18. Execute esse treino: confirme algumas séries e conclua. A tela de
     conclusão agora oferece **“Tirar foto do treino”** e **“Concluir sem
     foto”** — toque em concluir sem foto por ora.
-16. Toque em **“Voltar ao painel”** na faixa do topo. Você cai no painel.
-17. No painel, abra a sua própria ficha de aluno. **A sessão que você
+19. Volte para a home. Agora ela sugere **o outro treino**, porque o
+    primeiro já foi feito nesta semana. É a rotação funcionando.
+20. Toque em **“Voltar ao painel”** na faixa do topo. Você cai no painel.
+21. No painel, abra a sua própria ficha de aluno. **A sessão que você
     acabou de fazer está lá**, com carga e repetições.
-18. No app do aluno, toque na aba **Perfil**. Seus dados aparecem: nome,
+22. No app do aluno, toque na aba **Perfil**. Seus dados aparecem: nome,
     e-mail, nascimento, objetivo, n\u00edvel, peso e altura.
-19. Toque em **\u201cEditar meus dados\u201d**. Os campos abrem **j\u00e1
+23. Toque em **\u201cEditar meus dados\u201d**. Os campos abrem **j\u00e1
     preenchidos** com o que estava na leitura — nenhum em branco.
-20. O e-mail **n\u00e3o** \u00e9 um dos campos: no lugar dele h\u00e1 uma
+24. O e-mail **n\u00e3o** \u00e9 um dos campos: no lugar dele h\u00e1 uma
     frase explicando que ele \u00e9 o endere\u00e7o de entrada e n\u00e3o
     muda por ali.
-21. Mude o **peso** e toque em Salvar. A tela volta para a leitura, com o
+25. Mude o **peso** e toque em Salvar. A tela volta para a leitura, com o
     valor novo.
-22. Toque em Editar de novo e depois em **Cancelar**: volta para a leitura
+26. Toque em Editar de novo e depois em **Cancelar**: volta para a leitura
     e **nada mudou**.
-23. No painel, abra a sua ficha de aluno: **o peso novo est\u00e1
+27. No painel, abra a sua ficha de aluno: **o peso novo est\u00e1
     l\u00e1**.
 
 ## Parte 3 · O feed (14 min)
 
-Ainda como aluno, no celular.
+**No celular, logado como você mesmo** — a mesma conta do painel, mas pelo app do aluno. Se você sair e entrar com outra conta aqui, os passos 50 a 54 da próxima parte deixam de fazer sentido.
 
-24. Toque na aba **Feed** na barra de baixo. Ela está clicável.
-25. As duas abas de cima — **“Da turma”** e **“Com meu personal”** —
+28. Toque na aba **Feed** na barra de baixo. Ela está clicável.
+29. As duas abas de cima — **“Da turma”** e **“Com meu personal”** —
     trocam na hora, e a lista pisca um esqueleto cinza enquanto carrega.
-26. Estando vazias, cada aba mostra um texto diferente. Leia os dois:
+30. Estando vazias, cada aba mostra um texto diferente. Leia os dois:
     fazem sentido?
-27. Toque em **“Publicar”**, no canto superior direito.
-28. Toque no quadro da foto. **Abre a câmera** (ou a galeria, se você
+31. Toque em **“Publicar”**, no canto superior direito.
+32. Toque no quadro da foto. **Abre a câmera** (ou a galeria, se você
     escolher). Tire uma foto do que estiver na sua frente.
-29. A foto aparece como prévia, quadrada. Em cima dela há um **×** para
+33. A foto aparece como prévia, quadrada. Em cima dela há um **×** para
     tirar. Teste o × e escolha outra.
-30. Escreva uma legenda.
-31. Em **“Quem pode ver”**, deixe a opção de cima — que já vem marcada — e
+34. Escreva uma legenda.
+35. Em **“Quem pode ver”**, deixe a opção de cima — que já vem marcada — e
     publique.
-32. Você volta ao feed, na aba **“Com meu personal”**, e o post está lá,
+36. Você volta ao feed, na aba **“Com meu personal”**, e o post está lá,
     com **um cadeado e “Só o seu personal vê”**.
-33. Publique um segundo post com a **segunda opção de alcance** (a turma).
+37. Publique um segundo post com a **segunda opção de alcance** (a turma).
     Ele aparece na aba **“Da turma”**, e **sem** o cadeado.
-34. Publique um terceiro **sem foto**, só com legenda. Funciona.
-35. Tente publicar **sem foto e sem legenda**: o botão “Publicar” fica
+38. Publique um terceiro **sem foto**, só com legenda. Funciona.
+39. Tente publicar **sem foto e sem legenda**: o botão “Publicar” fica
     apagado e não dá para tocar.
-36. Abra um dos posts. Toque no coração — **o número muda na hora**. Toque
+40. Abra um dos posts. Toque no coração — **o número muda na hora**. Toque
     de novo e volta.
-37. Escreva um comentário e envie. Ele aparece na lista, com a hora.
-38. Volte ao feed: o contador de comentários do card subiu.
-39. Abra o post de novo e toque em **“Apagar”**. Aparece um aviso dizendo
+41. Escreva um comentário e envie. Ele aparece na lista, com a hora.
+42. Volte ao feed: o contador de comentários do card subiu.
+43. Abra o post de novo e toque em **“Apagar”**. Aparece um aviso dizendo
     que os comentários vão junto. Confirme — e o post some do feed.
-40. Agora o caminho que importa: execute um treino e, na tela de
+44. Agora o caminho que importa: execute um treino e, na tela de
     conclusão, toque em **“Tirar foto do treino”**.
-41. O compositor abre com o **resumo do treino no topo**: a letra do
+45. O compositor abre com o **resumo do treino no topo**: a letra do
     treino, o nome, quantas séries e o volume em kg.
-42. Publique. No feed, o card mostra **esse mesmo resumo acima da
+46. Publique. No feed, o card mostra **esse mesmo resumo acima da
     legenda** — é o que separa este feed de qualquer outro.
-43. Publique outro post pelo botão **Publicar** do feed, sem vir de um
+47. Publique outro post pelo botão **Publicar** do feed, sem vir de um
     treino. Esse **não** tem resumo, e está certo.
 
 ## Parte 4 · Quem vê o quê (5 min) — **o teste que mais importa**
 
-O teste que mais importa. Precisa de uma segunda conta de aluno (raul ou Vinicius). Se não tiver a senha, marque ✗ no passo 34 escrevendo “sem a senha” e pule o resto — a regra foi provada por SQL, mas ver com os olhos é outra coisa.
+O teste que mais importa, e o que mais exige atenção a quem está logado. Os dois primeiros passos são **na sua conta** (app do aluno); do terceiro em diante, **na conta do outro aluno**. Precisa da senha dessa segunda conta — sem ela, marque ✗ no passo em que ela entra, escrevendo “sem a senha”, e siga.
 
-44. Como **você**, publique um post **para a turma**, com foto e legenda
-    reconhecíveis (“post da turma”).
-45. Publique outro **só para o personal** (“post privado”).
-46. Saia e entre com a **conta do outro aluno**, no celular ou numa janela
+48. **Na sua conta, no app do aluno** (não na do raul): publique um post
+    **para a turma**, com foto e legenda reconhecíveis (“post da turma”).
+49. Ainda na sua conta, publique outro **só para o personal** (“post
+    privado”).
+50. Saia e entre com a **conta do outro aluno**, no celular ou numa janela
     anônima.
-47. Esse aluno também bate no portão de aceite. Aceite.
-48. No Feed, aba **“Da turma”**: o **“post da turma” aparece**.
-49. Na mesma aba: o **“post privado” NÃO aparece**. Qualquer aparição dele
+51. Esse aluno também bate no portão de aceite. Aceite.
+52. No Feed, aba **“Da turma”**: o **“post da turma” aparece**.
+53. Na mesma aba: o **“post privado” NÃO aparece**. Qualquer aparição dele
     aqui é grave — marque ✗ e pare o teste.
-50. Seu nome aparece escrito certo, **não** como “Aluno”.
-51. Ao lado do seu nome há a etiqueta vermelha **PERSONAL**.
-52. Aba **“Com meu personal”**: aparecem só os posts **desse** aluno,
+54. **O seu** nome aparece escrito certo no post, **não** como “Aluno”.
+    (Depende de os dois posts acima terem sido publicados na sua conta —
+    se você os publicou com outra, este passo não tem o que mostrar.)
+55. Ao lado do seu nome há a etiqueta vermelha **PERSONAL**. Ela só
+    aparece em post **do personal da turma** — post de aluno comum não
+    tem, e está certo.
+56. Aba **“Com meu personal”**: aparecem só os posts **desse** aluno,
     nenhum seu.
-53. Abra o “post da turma” e comente nele.
-54. Volte para a sua conta e abra o mesmo post: **o comentário dele está
+57. Abra o “post da turma” e comente nele.
+58. Volte para a sua conta e abra o mesmo post: **o comentário dele está
     lá, com o nome dele**.
 
 ## Parte 5 · O painel Social (4 min)
 
-No computador. A tela que faltava: \u00e9 aqui que o post marcado \u201cs\u00f3 o meu personal\u201d chega.
+**No computador, logado como personal.** A tela que faltava: é aqui que o post marcado “só o meu personal” chega — o seu e o dos seus alunos.
 
-55. No painel, o menu tem **Social**. Abra.
-56. Os posts que voc\u00ea publicou como aluno aparecem — **inclusive o
-    que voc\u00ea marcou como privado**, com o selo **“S\u00d3 PARA
-    VOC\u00ca”**. Se ele n\u00e3o estiver a\u00ed, \u00e9 o defeito que
-    esta tela existe para consertar.
-57. O post que foi para a turma tem o selo **“TURMA”**.
-58. O cabe\u00e7alho conta os posts e quantos est\u00e3o **“sem sua
+59. No painel, o menu tem **Social**. Abra.
+60. Aparecem os posts **de todos os seus alunos**, inclusive os seus (você
+    é aluno de si mesmo) — e **inclusive os marcados como privados**, com
+    o selo **“SÓ PARA VOCÊ”**. Se a lista vier vazia, é o defeito que esta
+    tela existe para consertar.
+61. Todo post tem selo: **“SÓ PARA VOCÊ”** (cinza, com cadeado) nos
+    privados e **“TURMA”** (vermelho) nos que foram para os colegas. Eles
+    ficam no canto direito de cada cartão.
+62. O cabe\u00e7alho conta os posts e quantos est\u00e3o **“sem sua
     resposta”**.
-59. Os coment\u00e1rios aparecem **dentro do cart\u00e3o**, sem precisar
+63. Os coment\u00e1rios aparecem **dentro do cart\u00e3o**, sem precisar
     abrir o post.
-60. Escreva uma resposta num post e envie. Ela aparece na lista, com
+64. Escreva uma resposta num post e envie. Ela aparece na lista, com
     **“Voc\u00ea”** em vermelho.
-61. Troque o per\u00edodo para **7 dias** e depois **Tudo**. A lista muda,
+65. Troque o per\u00edodo para **7 dias** e depois **Tudo**. A lista muda,
     e a URL tamb\u00e9m.
-62. No celular, como aluno, abra o post que voc\u00ea respondeu: **a
+66. No celular, como aluno, abra o post que voc\u00ea respondeu: **a
     resposta do personal est\u00e1 l\u00e1**.
 
 ## Parte 6 · A reavaliação (15 min) — **o teste que mais importa**
 
 O maior pedaço novo. Tenha uma fita métrica por perto, ou invente os números — o que importa é o caminho. Comece no computador.
 
-63. No painel, o menu tem **Reavaliações**. Abra. Está vazio, com o texto
+67. No painel, o menu tem **Reavaliações**. Abra. Está vazio, com o texto
     explicando que o aluno preenche pelo app.
-64. Clique **“Nova reavaliação”**, escolha **você mesmo** na lista e
+68. Clique **“Nova reavaliação”**, escolha **você mesmo** na lista e
     clique **Liberar**. O diálogo **fecha sozinho**.
-65. Ela aparece em **“Esperando resposta”**, com o selo **PENDENTE** e a
+69. Ela aparece em **“Esperando resposta”**, com o selo **PENDENTE** e a
     data de hoje. O cabeçalho diz **“1 esperando resposta”**.
-66. Clique **“Nova reavaliação”** e escolha o mesmo aluno de novo. Aparece
+70. Clique **“Nova reavaliação”** e escolha o mesmo aluno de novo. Aparece
     **“Esse aluno já tem uma reavaliação esperando resposta.”** — e nada é
     criado.
-67. **No celular, como aluno.** A home mostra um card de fundo amarelado:
+71. **No celular, como aluno.** A home mostra um card de fundo amarelado:
     **“Reavaliação disponível”**, com o seu nome embaixo e a pílula
     **“Fazer agora”**. Ele fica **depois** do card de treino.
-68. Toque. Abre o formulário: peso, gordura, cinco medidas, três fotos e
+72. Toque. Abre o formulário: peso, gordura, cinco medidas, três fotos e
     uma observação.
-69. Cada medida traz a dica de **onde passar a fita** (“No meio do braço,
+73. Cada medida traz a dica de **onde passar a fita** (“No meio do braço,
     contraído”). Na primeira vez não há “na última”, porque não existe
     anterior.
-70. Toque **“Enviar reavaliação”** com tudo em branco. Aparece **“Preencha
+74. Toque **“Enviar reavaliação”** com tudo em branco. Aparece **“Preencha
     ao menos uma medida ou envie uma foto antes de enviar.”**
-71. Escreva `abc` no peso e envie. O erro aparece **no campo do peso**, em
+75. Escreva `abc` no peso e envie. O erro aparece **no campo do peso**, em
     português: “Peso inválido.”
-72. Apague e escreva o peso **com vírgula** (por exemplo `82,4`). Ele
+76. Apague e escreva o peso **com vírgula** (por exemplo `82,4`). Ele
     aceita.
-73. Preencha ao menos três medidas e tire as **três fotos** — de frente,
+77. Preencha ao menos três medidas e tire as **três fotos** — de frente,
     de lado, de costas. Cada uma mostra a prévia; o **×** no canto remove.
-74. Repare na linha com o cadeado: **“Só você e seu personal veem estas
+78. Repare na linha com o cadeado: **“Só você e seu personal veem estas
     fotos. Elas não vão para o feed.”**
-75. Envie. A tela volta com **“Reavaliação enviada”** em verde, e a
+79. Envie. A tela volta com **“Reavaliação enviada”** em verde, e a
     comparação aparece em **“Suas reavaliações”** — **sem** a coluna
     “Antes”, porque é a primeira.
-76. Abra o **Perfil**. O peso é o que você acabou de informar — a
+80. Abra o **Perfil**. O peso é o que você acabou de informar — a
     reavaliação atualizou o perfil sozinha.
-77. **De volta ao computador.** Em Reavaliações, ela saiu de “Esperando” e
+81. **De volta ao computador.** Em Reavaliações, ela saiu de “Esperando” e
     está em **“Respondidas”**, com o resumo (peso · % · nº de medidas · nº
     de fotos).
-78. Clique **“Ver comparação”**. As **fotos aparecem** — é a única tela
+82. Clique **“Ver comparação”**. As **fotos aparecem** — é a única tela
     que as mostra.
-79. Libere uma **segunda** reavaliação para você e responda com números
+83. Libere uma **segunda** reavaliação para você e responda com números
     **diferentes**.
-80. Agora a comparação tem **Antes → Agora → Variação**, com `+1,5` e
+84. Agora a comparação tem **Antes → Agora → Variação**, com `+1,5` e
     `−2,5`. **Nenhum número está pintado de verde ou vermelho** — é de
     propósito: só você sabe se subir é bom.
-81. Onde houver foto nas duas, elas aparecem **lado a lado** com a seta no
+85. Onde houver foto nas duas, elas aparecem **lado a lado** com a seta no
     meio.
-82. No celular, na reavaliação enviada, toque **“Apagar as fotos”**. O
+86. No celular, na reavaliação enviada, toque **“Apagar as fotos”**. O
     aviso diz que **as medidas continuam**. Confirme.
-83. As fotos somem e **os números ficam**. No computador, a comparação
+87. As fotos somem e **os números ficam**. No computador, a comparação
     também já não mostra fotos.
 
 ## Parte 7 · As duas costuras (6 min)
 
 Coisas que já existiam mas não tinham por onde ser alcançadas.
 
-84. No painel, abra **Alunos** e clique num aluno. Na ficha, abaixo de
+88. No painel, abra **Alunos** e clique num aluno. Na ficha, abaixo de
     “Evolução por exercício”, tem a seção **Reavaliações**.
-85. Ela mostra **a última comparada com a anterior** — só os números,
+89. Ela mostra **a última comparada com a anterior** — só os números,
     **sem fotos**. Se houver uma esperando resposta, aparece a faixa
     **PENDENTE** em cima.
-86. O link **“Ver as N”** (canto direito) leva à tela de comparação
+90. O link **“Ver as N”** (canto direito) leva à tela de comparação
     completa. **“Ver as fotos”**, embaixo, leva ao mesmo lugar.
-87. Abra a ficha de um aluno **sem nenhuma reavaliação**. A seção diz que
+91. Abra a ficha de um aluno **sem nenhuma reavaliação**. A seção diz que
     não há nenhuma e oferece o caminho para liberar.
-88. Vá em **Configurações**. A primeira seção agora é **“Seu WhatsApp”**,
+92. Vá em **Configurações**. A primeira seção agora é **“Seu WhatsApp”**,
     dizendo “Sem número”.
-89. Clique **Informar**, digite o seu com DDD (`(11) 99999-9999`) e salve.
+93. Clique **Informar**, digite o seu com DDD (`(11) 99999-9999`) e salve.
     Ele volta **formatado**, e o texto explica que seus alunos passam a
     ver o botão.
-90. Teste a validação: entre em Editar, escreva `123` e salve. Aparece
+94. Teste a validação: entre em Editar, escreva `123` e salve. Aparece
     **“Informe um número com DDD, como (11) 99999-9999.”**
-91. **No celular, como aluno**, abra o **Perfil**. Tem um card com as suas
+95. **No celular, como aluno**, abra o **Perfil**. Tem um card com as suas
     iniciais, o seu nome, “Seu personal trainer” e o botão **WhatsApp**.
-92. Toque no botão. **Abre o WhatsApp na conversa com você**, sem mensagem
+96. Toque no botão. **Abre o WhatsApp na conversa com você**, sem mensagem
     pronta.
-93. No mesmo Perfil, abaixo do card, tem o link **Reavaliação** — a porta
+97. No mesmo Perfil, abaixo do card, tem o link **Reavaliação** — a porta
     de entrada por onde o aluno chega sem depender do aviso na home.
-94. Volte às Configurações no computador, **apague o número** e salve. No
+98. Volte às Configurações no computador, **apague o número** e salve. No
     celular, o card do personal **continua lá, sem o botão**.
 
 ## Parte 8 · A agenda (8 min)
 
 Sessões presenciais: marcar, e depois registrar quem veio. Comece no computador.
 
-95. No painel, o menu tem **Agenda**. Abra. O título é a semana por
+99. No painel, o menu tem **Agenda**. Abra. O título é a semana por
     extenso (**“14 a 20 de setembro”**) e o dia de hoje tem a borda
     vermelha e a etiqueta **HOJE**.
-96. Sem nada marcado, a semana mostra **um único cartão** explicando para
-    que serve — e não sete dias vazios.
-97. Clique **“Nova sessão”**. O dia já vem preenchido com hoje, a hora com
-    18:00 e a duração com 60.
-98. Escolha um aluno e marque. A sessão aparece no dia certo, com a hora
-    em destaque.
-99. Marque **outra sessão no mesmo horário**, com outro aluno. Antes de
-    salvar aparece um aviso amarelo dizendo **com quem bate** — e o botão
-    continua funcionando, porque atender em dupla é normal.
-100. Marque uma **às 23h30**. Ela aparece no dia que você escolheu, e não
+100. Sem nada marcado, a semana mostra **um único cartão** explicando para
+     que serve — e não sete dias vazios.
+101. Clique **“Nova sessão”**. O dia já vem preenchido com hoje, a hora
+     com 18:00 e a duração com 60.
+102. Escolha um aluno e marque. A sessão aparece no dia certo, com a hora
+     em destaque.
+103. Marque **outra sessão no mesmo horário**, com outro aluno. Antes de
+     salvar aparece um aviso amarelo dizendo **com quem bate** — e o botão
+     continua funcionando, porque atender em dupla é normal.
+104. Marque uma **às 23h30**. Ela aparece no dia que você escolheu, e não
      no seguinte. (É a conta que já errou duas vezes neste projeto.)
-101. Use **“Semana seguinte”** e **“Semana anterior”**. O título muda e a
+105. Use **“Semana seguinte”** e **“Semana anterior”**. O título muda e a
      URL também. **“Esta semana”** volta para hoje.
-102. Numa sessão futura, clique no **ícone de lixeira**. O aviso explica
+106. Numa sessão futura, clique no **ícone de lixeira**. O aviso explica
      que ela some sem registro, e sugere “Cancelar” para manter rastro.
      Confirme.
-103. Em outra, clique **Cancelar**. Ela fica na agenda, **riscada**, com o
+107. Em outra, clique **Cancelar**. Ela fica na agenda, **riscada**, com o
      selo CANCELADA.
-104. Clique **Desfazer** nessa mesma: ela volta a ser agendada.
-105. Numa sessão, clique **Veio**. Ela ganha o selo verde REALIZADA. Em
+108. Clique **Desfazer** nessa mesma: ela volta a ser agendada.
+109. Numa sessão, clique **Veio**. Ela ganha o selo verde REALIZADA. Em
      outra, **Faltou** — selo amarelo.
-106. Tente apagar (lixeira) uma já marcada como **Faltou**: o botão nem
+110. Tente apagar (lixeira) uma já marcada como **Faltou**: o botão nem
      aparece. Faltar é registro e não some.
-107. Marque uma sessão para **ontem** (use “Semana anterior” se precisar)
+111. Marque uma sessão para **ontem** (use “Semana anterior” se precisar)
      e deixe sem marcar. Volte para esta semana: ela aparece no topo, em
      **“1 sessão esperando sua marcação”**.
-108. Clique no nome do aluno em qualquer sessão: abre a ficha dele.
-109. **No celular, como aluno**, abra a home. Tem a linha **“Sessão com
+112. Clique no nome do aluno em qualquer sessão: abre a ficha dele.
+113. **No celular, como aluno**, abra a home. Tem a linha **“Sessão com
      {seu nome} · qui, 17 de set, 18h · 1h”**, com ícone de calendário.
-110. Ela mostra **a próxima**, não a de ontem. E sessão **cancelada** não
+114. Ela mostra **a próxima**, não a de ontem. E sessão **cancelada** não
      aparece ali.
-111. Não há botão nenhum nessa linha — o aluno não marca nem desmarca. É
+115. Não há botão nenhum nessa linha — o aluno não marca nem desmarca. É
      lembrete, e é de propósito.
 
 ---
