@@ -605,6 +605,24 @@ let estado = {};
 let db = null;
 let gravando = null;
 
+/*
+ * O que foi marcado aqui e o servidor ainda não confirmou.
+ *
+ * Existe por causa de um defeito real: o `onSnapshot` substituía `estado` pelo
+ * que vinha do servidor, e `hasPendingWrites` só protege enquanto uma escrita
+ * está em voo — **não durante o intervalo do debounce**, quando ainda não há
+ * escrita nenhuma. Um retrato do servidor chegando nessa janela apagava a marca
+ * recém-feita, e a escrita seguinte gravava o estado já atropelado. Para quem
+ * está marcando, isso é "clico e não acontece nada".
+ *
+ * Agora o retrato do servidor é a **base**, e o que foi tocado aqui é aplicado
+ * por cima. `null` guarda o caso de desmarcar: é uma ausência deliberada, e sem
+ * ele o servidor ressuscitaria a marca que acabou de ser tirada.
+ */
+let meus = {};
+/* Cresce a cada toque. Serve para saber se algo mudou enquanto a escrita ia. */
+let edicoes = 0;
+
 function contar() {
   let ok = 0, fail = 0;
   for (const v of Object.values(estado)) {
@@ -651,21 +669,45 @@ function pintarTudo() {
 function salvar() {
   if (!db) return;
   clearTimeout(gravando);
-  gravando = setTimeout(() => {
-    db.doc("roteiro/m3")
-      .set({ passos: estado, atualizadoEm: new Date().toISOString() })
-      .catch(() => {});
-  }, 450);
+  gravando = setTimeout(async () => {
+    const naEscrita = edicoes;
+    try {
+      await db
+        .doc("roteiro/m3")
+        .set({ passos: estado, atualizadoEm: new Date().toISOString() });
+
+      // Só solta o que foi enviado se nada mudou enquanto a escrita ia e
+      // voltava — senão o toque dado no meio do caminho perderia a proteção.
+      if (edicoes === naEscrita) meus = {};
+      avisar(null);
+    } catch {
+      // Fica pendente de propósito: a próxima escrita leva tudo junto, e a
+      // tela avisa em vez de fingir que gravou.
+      avisar("Não consegui salvar a última marcação. Ela continua na tela e eu tento de novo no próximo toque.");
+    }
+  }, 300);
+}
+
+/** Registra um toque: na tela, e na lista do que o servidor ainda não sabe. */
+function registrar(n, valor) {
+  if (valor) {
+    estado[n] = valor;
+    meus[n] = valor;
+  } else {
+    delete estado[n];
+    meus[n] = null;
+  }
+  edicoes += 1;
+  salvar();
 }
 
 function marcar(n, tipo) {
   const atual = (estado[n] && estado[n].marca) || null;
   const nova = atual === tipo ? null : tipo;
-  estado[n] = { marca: nova, nota: (estado[n] && estado[n].nota) || "" };
-  if (!nova && !estado[n].nota) delete estado[n];
+  const nota = (estado[n] && estado[n].nota) || "";
+  registrar(n, nova || nota ? { marca: nova, nota } : null);
   pintarPasso(n);
   pintarContagens();
-  salvar();
   if (nova === "fail") {
     const campo = document.getElementById("nota-" + n);
     requestAnimationFrame(() => campo.focus());
@@ -673,8 +715,7 @@ function marcar(n, tipo) {
 }
 
 function anotar(n, texto) {
-  estado[n] = { marca: (estado[n] && estado[n].marca) || "fail", nota: texto };
-  salvar();
+  registrar(n, { marca: (estado[n] && estado[n].marca) || "fail", nota: texto });
 }
 
 /* ------------------------------------------------------------- montagem -- */
@@ -748,16 +789,22 @@ pintarTudo();
 
 /* ---------------------------------------------------------- persistência -- */
 
+const aviso = document.getElementById("aviso");
+const avisoTexto = document.getElementById("aviso-texto");
+const AVISO_NORMAL = avisoTexto.textContent;
+
+/** `null` devolve o aviso ao normal; texto o põe em estado de problema. */
+function avisar(texto) {
+  aviso.dataset.estado = texto ? "offline" : "";
+  avisoTexto.textContent = texto || AVISO_NORMAL;
+}
+
 (async () => {
-  const aviso = document.getElementById("aviso");
-  const avisoTexto = document.getElementById("aviso-texto");
 
   db = await window.claude?.use?.("db");
 
   if (!db) {
-    aviso.dataset.estado = "offline";
-    avisoTexto.textContent =
-      "As marcações desta sessão não estão sendo salvas. Dá para usar o roteiro assim mesmo, mas não feche a aba — e me conte o resultado por mensagem.";
+    avisar("As marcações desta sessão não estão sendo salvas. Dá para usar o roteiro assim mesmo, mas não feche a aba — e me conte o resultado por mensagem.");
     return;
   }
 
@@ -766,15 +813,21 @@ pintarTudo();
       // Enquanto a escrita própria não confirma, a tela local já está certa:
       // adotar a volta do servidor aqui faria o toque piscar para trás.
       if (snapshot.metadata.hasPendingWrites) return;
+
+      // O servidor é a base; o que foi tocado aqui e ainda não foi confirmado
+      // vai por cima. Substituir direto era o defeito — apagava a marca feita
+      // durante o intervalo do debounce.
       const dados = snapshot.data();
-      if (!dados || !dados.passos) return;
-      estado = dados.passos;
+      const doServidor = { ...((dados && dados.passos) || {}) };
+      for (const [n, valor] of Object.entries(meus)) {
+        if (valor) doServidor[n] = valor;
+        else delete doServidor[n];
+      }
+      estado = doServidor;
       pintarTudo();
     },
     () => {
-      aviso.dataset.estado = "offline";
-      avisoTexto.textContent =
-        "Perdemos a conexão com o armazenamento. O que você marcar agora fica só nesta aba.";
+      avisar("Perdemos a conexão com o armazenamento. O que você marcar agora fica só nesta aba.");
     },
   );
 })();

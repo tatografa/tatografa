@@ -458,3 +458,17 @@ Três consequências para os próximos milestones:
   que escrevi isso não havia linha nenhuma na home do aluno. A regra que já valia para a
   política de privacidade vale para qualquer copy: **conferir cada verbo contra uma tela que
   faz aquilo**, inclusive quando o verbo está num `descricao` de dialog.
+- [2026-09-15] [ui] **`hasPendingWrites` não cobre o intervalo do debounce.** No roteiro do
+  M3, o `onSnapshot` substituía o estado local pelo do servidor e a guarda de escrita
+  pendente parecia suficiente — mas durante os 450ms do debounce **não há escrita nenhuma
+  em voo**, então um retrato do servidor chegando nessa janela apagava a marca recém-feita,
+  e a escrita seguinte gravava o estado já atropelado. Para quem usa, isso é "clico e não
+  acontece nada". O primeiro toque grudava (documento vazio, a guarda `if (!dados.passos)`
+  barrava), o que faz o defeito parecer aleatório em vez de sistemático.
+  **O servidor é a base, o que foi tocado localmente vai por cima** — e desmarcar precisa
+  de um `null` explícito na lista local, senão o servidor ressuscita a marca tirada.
+- [2026-09-15] [verificacao] **Página com estado remoto não se confere só abrindo.** Em
+  `file://` o `window.claude` não existe, o caminho do banco nem roda, e os cliques
+  funcionam — foi exatamente o que eu vi antes de publicar. O defeito só aparece com um
+  **dublê do banco** que imite latência e reemissão de retrato. Vale a pena montá-lo: são
+  vinte linhas, e sem ele o teste passa por onde o usuário trava.
