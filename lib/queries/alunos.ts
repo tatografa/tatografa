@@ -88,6 +88,12 @@ export type AlunoDaFicha = Pick<
   | "status"
   | "created_at"
   | "onboarded_at"
+  // Peso e altura entram porque o personal monta o treino a partir deles, e a
+  // ficha era o único lugar onde ele iria procurar — e não mostrava nenhum dos
+  // dois. Achado no teste de campo: o roteiro afirmava que o peso novo
+  // aparecia aqui, e a tela nunca mostrou peso.
+  | "weight_kg"
+  | "height_cm"
 >;
 
 /**
@@ -106,7 +112,7 @@ export async function lerAluno(id: string): Promise<AlunoDaFicha | null> {
   const { data, error } = await supabase
     .from("students")
     .select(
-      "id, name, email, goal, experience_level, status, created_at, onboarded_at",
+      "id, name, email, goal, experience_level, status, created_at, onboarded_at, weight_kg, height_cm",
     )
     .eq("id", id)
     .maybeSingle();

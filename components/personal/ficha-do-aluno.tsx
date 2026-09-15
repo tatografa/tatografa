@@ -14,6 +14,7 @@ import type { SessaoDoHistorico } from "@/lib/queries/historico";
 import { LIMITE_DO_HISTORICO } from "@/lib/queries/historico";
 import type { Macrotreino } from "@/lib/queries/macrotreinos";
 import type { ExercicioComProgresso } from "@/lib/queries/progresso";
+import { formatarMedida } from "@/lib/domain/reavaliacao";
 import { comparar, type Reavaliacao } from "@/lib/queries/reavaliacao";
 import { NIVEL, OBJETIVO, STATUS_DO_ALUNO } from "@/lib/rotulos";
 
@@ -60,10 +61,20 @@ export function FichaDoAluno({
             <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
               {aluno.name}
             </h1>
+            {/*
+              Peso e altura entram na mesma linha do objetivo: é a partir deles
+              que o personal monta o treino, e a ficha era o único lugar onde
+              ele iria procurar — sem mostrar nenhum dos dois. Achado no teste
+              de campo.
+            */}
             <p className="text-[13.5px] text-ink-3">
               {[
                 aluno.goal ? OBJETIVO[aluno.goal] : null,
                 aluno.experience_level ? NIVEL[aluno.experience_level] : null,
+                aluno.weight_kg !== null
+                  ? `${formatarMedida(aluno.weight_kg)} kg`
+                  : null,
+                aluno.height_cm !== null ? `${aluno.height_cm} cm` : null,
                 aluno.email,
               ]
                 .filter(Boolean)

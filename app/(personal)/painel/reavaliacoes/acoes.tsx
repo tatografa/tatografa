@@ -31,13 +31,17 @@ export function NovaReavaliacao({ alunos }: { alunos: AlunoDaLista[] }) {
    * Fecha sozinho quando deu certo — **ajustando o estado no render**, não num
    * efeito. `useActionState` não devolve nada para encadear no handler (a ação
    * roda no servidor), e `setState` dentro de `useEffect` dispara um render em
-   * cascata; o lint do projeto recusa, com razão. O padrão aqui é o de "ajustar
-   * estado quando a entrada muda": compara com o que já foi visto, e por isso
-   * liberar duas vezes seguidas continua funcionando.
+   * cascata; o lint do projeto recusa, com razão.
+   *
+   * A comparação é pela **identidade do objeto**, não pelo valor de `ok`.
+   * Comparar o booleano parece equivalente e não é: `useActionState` devolve um
+   * objeto novo a cada ação, mas `ok` continua `true` entre dois sucessos
+   * seguidos — e aí a transição some, o bloco não roda e o diálogo fica aberto
+   * na segunda liberação. Foi encontrado em campo e reproduzido no navegador.
    */
-  const [ultimoOk, setUltimoOk] = useState(false);
-  if (Boolean(estado.ok) !== ultimoOk) {
-    setUltimoOk(Boolean(estado.ok));
+  const [ultimoEstado, setUltimoEstado] = useState(estado);
+  if (estado !== ultimoEstado) {
+    setUltimoEstado(estado);
     if (estado.ok) setAberto(false);
   }
 

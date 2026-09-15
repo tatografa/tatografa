@@ -485,3 +485,15 @@ Três consequências para os próximos milestones:
   um treino só era culpa do roteiro ("mandei criar um"). O Otávio corrigiu: ele **tentou**
   criar o segundo e não achou como. As duas coisas eram verdade, e só a dele explicava o
   comportamento. Confirmar no código antes de defender a própria análise.
+- [2026-09-15] [ui] **Ajustar estado no render tem de comparar a identidade do objeto, não
+  um valor dentro dele.** `useActionState` devolve um objeto novo a cada ação, mas o campo
+  `ok` continua `true` entre dois sucessos seguidos — então `if (estado.ok !== ultimoOk)`
+  não dispara na segunda vez e o diálogo fica aberto. `if (estado !== ultimoEstado)`
+  dispara sempre. Duas telas do projeto usavam a variante certa e uma a errada, e as três
+  pareciam iguais na leitura. **Reprodução exige dois envios seguidos**: o primeiro passa
+  em qualquer uma das variantes, e foi por isso que o meu teste original não pegou.
+- [2026-09-15] [verificacao] **Teste de campo encontra o que a leitura de código não
+  encontra, e vice-versa.** O roteiro afirmava que o peso novo do aluno aparecia na ficha
+  do personal; a ficha nunca mostrou peso nem altura, e ninguém tinha percebido porque o
+  texto do roteiro foi escrito olhando o que a tela *deveria* ter. Quem lê o próprio código
+  procurando confirmação acha confirmação.
