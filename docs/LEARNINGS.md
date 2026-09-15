@@ -472,3 +472,16 @@ Três consequências para os próximos milestones:
   funcionam — foi exatamente o que eu vi antes de publicar. O defeito só aparece com um
   **dublê do banco** que imite latência e reemissão de retrato. Vale a pena montá-lo: são
   vinte linhas, e sem ele o teste passa por onde o usuário trava.
+- [2026-09-15] [ux] **Um caminho que existe mas não parte de onde o usuário está é um
+  caminho que não existe.** Depois de salvar um treino, o redirect larga o personal no
+  editor daquele treino, cujo único botão é "+ adicionar exercício" e cuja volta era
+  "← Treinos" (a lista geral). Montar o treino seguinte exigia duas navegações até a
+  página do programa. No teste de campo isso virou "não dá para criar o treino B" — e o
+  personal parou de montar o programa. **O dado já estava na tela**: a página do editor
+  recebia `treino.macrotreino` e só usava para o formulário. Ler o código e concluir "o
+  caminho existe" foi o meu erro; quem descobre isto é quem usa.
+- [2026-09-15] [processo] **Quando o relato do usuário contradiz a minha leitura dos
+  dados, ele costuma estar vendo a tela e eu não.** Eu tinha concluído que o programa com
+  um treino só era culpa do roteiro ("mandei criar um"). O Otávio corrigiu: ele **tentou**
+  criar o segundo e não achou como. As duas coisas eram verdade, e só a dele explicava o
+  comportamento. Confirmar no código antes de defender a própria análise.

@@ -40,12 +40,20 @@ export default async function EditarTreinoPage({
 
   return (
     <div className="space-y-8">
+      {/*
+        A volta é para **o programa**, não para a lista geral de treinos.
+        Descoberto no teste de campo: depois de montar o treino B, a única
+        coisa visível nesta tela era "+ adicionar exercício", e o caminho para
+        montar o C — que existe em `/painel/macrotreinos/<id>` — ficava a duas
+        navegações de distância de onde o fluxo larga o personal. O programa já
+        estava em mãos aqui; faltava usá-lo.
+      */}
       <header className="space-y-2">
         <Link
-          href="/painel/treinos"
+          href={`/painel/macrotreinos/${treino.macrotreino.id}`}
           className="eyebrow text-ink-4 transition hover:text-ink-2"
         >
-          ← Treinos
+          ← {treino.macrotreino.name}
         </Link>
         <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
           {treino.label} · {treino.name}

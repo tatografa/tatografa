@@ -12,7 +12,16 @@ import {
 import Link from "next/link";
 import { ChevronDown, ChevronUp, Plus, Search, Trash2, X } from "lucide-react";
 
-import { Badge, Button, Card, Dialog, Input, Select, Textarea } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  Dialog,
+  Input,
+  Select,
+  Textarea,
+  classesDeBotao,
+} from "@/components/ui";
 import { LIMITES, mover } from "@/lib/domain/prescricao";
 import { duracaoEstimadaMin, totalDeSeries } from "@/lib/domain/treino";
 import type { ExercicioDisponivel } from "@/lib/queries/exercicios";
@@ -158,13 +167,28 @@ export function EditorDeTreino({
       <input type="hidden" name="programaId" value={programa.id} />
       <input type="hidden" name="exercicios" value={payload} />
 
+      {/*
+        A oferta do próximo treino vem **junto da confirmação**, porque é
+        exatamente aí que o personal pensa nele: acabou o A, falta o B. Sem
+        isto, a tela depois de salvar só oferecia "adicionar exercício", e quem
+        queria montar o treino seguinte concluía que não dava — foi o que
+        aconteceu no teste de campo.
+      */}
       {salvo && (
-        <p
+        <div
           role="status"
-          className="rounded-card border border-success/30 bg-success-soft px-4 py-3 text-[13.5px] font-semibold text-success-dark"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-success/30 bg-success-soft px-4 py-3"
         >
-          Treino salvo. O aluno já vê essa prescrição.
-        </p>
+          <p className="text-[13.5px] font-semibold text-success-dark">
+            Treino salvo. O aluno já vê essa prescrição.
+          </p>
+          <Link
+            href={`/painel/treinos/novo?programa=${programa.id}`}
+            className={classesDeBotao({ size: "sm", variant: "secondary" })}
+          >
+            <Plus size={14} aria-hidden /> Montar o próximo treino
+          </Link>
+        </div>
       )}
 
       <Card size="lg" className="space-y-5">
