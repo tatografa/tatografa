@@ -497,3 +497,14 @@ Três consequências para os próximos milestones:
   do personal; a ficha nunca mostrou peso nem altura, e ninguém tinha percebido porque o
   texto do roteiro foi escrito olhando o que a tela *deveria* ter. Quem lê o próprio código
   procurando confirmação acha confirmação.
+- [2026-09-16] [processo] **Passo de roteiro escrito para falhar vale tanto quanto o que é
+  escrito para passar.** Um dos 27 passos do reteste dizia "espero que o aviso NÃO apareça"
+  — e o ✓ do Otávio confirmou o limite (o aviso de conflito só enxerga a semana na tela)
+  sem que ele precisasse entender a implementação. Sem esse passo, a limitação continuaria
+  sendo suposição minha.
+- [2026-09-16] [processo] **Roteiro curto de reteste vale mais que repetir o completo.**
+  Depois de 106 de 115, mandar percorrer tudo de novo para conferir nove coisas desperdiça
+  a hora de quem testa e dilui a atenção justamente nos pontos incertos. Os 27 passos do
+  reteste foram escritos para **extrair o que me faltava** ("escreva qual dia estava no
+  campo") em vez de pedir um ✓ — e foi assim que os dois casos que eu não conseguia
+  reproduzir se resolveram.

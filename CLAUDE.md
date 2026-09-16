@@ -68,9 +68,14 @@ Fatias verticais do `docs/plan/milestones.md`. Todo milestone é validável pelo
 | M0 | Fase 0 · Fundação | Conta de personal, login, `/painel` protegido | validado |
 | M1 | Fase 1 · Fatia vertical | Convite → treino → execução → histórico | **validado em campo** |
 | M2 | Fase 2 · Utilidade contínua | Macrotreino, PRs, progresso, painel completo | **validado em campo** |
-| M3 | Fase 3 · Social e reavaliação | Feed, fotos, reavaliação física, agenda | **construído · falta validar** |
+| M3 | Fase 3 · Social e reavaliação | Feed, fotos, reavaliação física, agenda | **validado em campo** |
 | M4 | Fase 4 · Pronto para o piloto | PWA, estados vazios/erro, e-mails, termos | **feito · piloto em curso** |
 
+> **O M3 foi validado em campo em 15-16/09/2026**, em duas rodadas: 106 de 115 passos
+> na primeira e 27 de 27 no reteste. Os dois defeitos reais estavam em **caminho que
+> existe mas não parte de onde o usuário está** — nenhum na lógica de negócio nem nas
+> policies. Registro em `docs/plan/milestones.md`.
+>
 > **M1 e M2 foram validados em campo em 10-11/09/2026** — 50 dos 51 passos do roteiro,
 > com Supabase de verdade, treino executado no celular e conferência no painel.
 > Os quatro defeitos encontrados estavam todos em **bordas de autenticação e estado de

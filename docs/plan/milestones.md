@@ -12,7 +12,7 @@
 | M0 | Fundação | Conta de personal, login, painel protegido | Criar conta, entrar, ver `/painel` | validado |
 | M1 | Fatia vertical | Convite → treino → execução → histórico | Roteiro completo com duas contas, treino executado na academia | **validado em campo** |
 | M2 | Utilidade contínua | Macrotreino, referência histórica, PRs, progresso, painel | Aluno usa duas semanas seguidas sem faltar nada | **validado em campo** |
-| M3 | Social e reavaliação | Feed, foto do treino, reavaliação física, agenda | Postar treino, comentar, comparar antes/depois, marcar presença | construído · falta validar em campo |
+| M3 | Social e reavaliação | Feed, foto do treino, reavaliação física, agenda | Postar treino, comentar, comparar antes/depois, marcar presença | **validado em campo** |
 | M4 | Pronto para o piloto | PWA, estados vazios e de erro, e-mails, termos, acessibilidade | Alguém que não conhece o produto usa sem ajuda | **código feito · piloto começando** |
 
 ---
@@ -313,6 +313,42 @@ propositalmente sem resposta até lá:
    aceita. São ~20 linhas, mas é atrito num fluxo já validado.
 3. **O M3 (feed, fotos, reavaliação) tem demanda?** Foi adiado justamente para
    esta pergunta sair do piloto em vez de suposição.
+
+## M3 · O que o teste de campo achou (15-16/09/2026)
+
+Duas rodadas com Supabase de verdade, celular e painel abertos ao mesmo tempo.
+
+**Rodada 1 — 115 passos, 106 bateram.** Nove falhas, e só duas eram defeito:
+
+1. **Não havia saída para o segundo treino do programa.** Depois de salvar, o
+   personal cai no editor daquele treino, cuja única ação é "+ adicionar
+   exercício" e cuja volta era "← Treinos". Montar o próximo exigia duas
+   navegações até a página do programa — e na prática virou "não dá para criar o
+   treino B", com o programa parando em um treino só e a Parte 2 inteira
+   bloqueada. **O caminho existia e não partia de onde o fluxo larga o
+   personal.** Corrigido: a volta passou a ser "← {programa}" e "Montar o
+   próximo treino" entra junto da confirmação de salvo.
+2. **A ficha do aluno não mostrava peso nem altura.** O `Pick<>` da consulta nem
+   trazia as colunas. É a partir do peso que o personal monta o treino, e a
+   ficha é o único lugar onde ele procuraria. Corrigido.
+
+As outras sete não eram do produto: três vinham de o Otávio ter rodado as partes
+do feed como outro aluno (o roteiro assumia que ele seria aluno de si mesmo e
+nunca dizia isso), três de o próprio roteiro mandar marcar presença **antes** de
+conferir a linha de próxima sessão, e uma era falso negativo.
+
+**Rodada 2 — 27 passos de reteste, 27 bateram.** Os dois consertos confirmados,
+e os dois casos que eu não conseguia reproduzir resolvidos: o aviso de conflito
+aparece, e a etiqueta PERSONAL aparece — na rodada 1 a tela olhada era outra.
+
+### O limite que a rodada 2 confirmou de propósito
+
+Um passo do reteste foi escrito esperando **falhar**, e falhou como previsto: o
+aviso de sessão sobreposta **só enxerga a semana que está na tela**. Marcar para
+uma semana que não está sendo exibida não dispara aviso nenhum, mesmo havendo
+conflito. É limitação conhecida da implementação — o cliente só recebe as
+sessões da semana consultada —, agora confirmada em campo e **não corrigida**:
+fica como decisão do Otávio se vale ampliar a janela.
 
 ## M4 · Pronto para o piloto (em andamento)
 
