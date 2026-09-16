@@ -3,9 +3,9 @@ import Link from "next/link";
 
 import {
   AlunosQuePrecisamDeAtencao,
+  AtividadeRecente,
   Indicadores,
 } from "@/components/personal/blocos-do-painel";
-import { ListaDeAlunos } from "@/components/personal/lista-de-alunos";
 import { Button, Card } from "@/components/ui";
 import { requireTrainer } from "@/lib/auth/session";
 import { listarConvitesPendentes } from "@/lib/queries/alunos";
@@ -21,10 +21,11 @@ export default async function PainelPage() {
 
   // O limiar sai da linha do personal, não de uma constante: é ajuste dele,
   // editável em /painel/configuracoes.
-  const [{ alunos, alertas, indicadores }, convites] = await Promise.all([
-    lerResumoDaCarteira(trainer.dias_para_alerta),
-    listarConvitesPendentes(),
-  ]);
+  const [{ alunos, alertas, indicadores, atividade }, convites] =
+    await Promise.all([
+      lerResumoDaCarteira(trainer.id, trainer.dias_para_alerta),
+      listarConvitesPendentes(),
+    ]);
 
   const primeiroNome = trainer.name.split(" ")[0];
 
@@ -92,11 +93,21 @@ export default async function PainelPage() {
             </section>
           )}
 
-          <section className="space-y-3">
-            <h2 className="eyebrow text-ink-4">Alunos · {alunos.length}</h2>
+          {/*
+            A lista inteira não mora mais aqui: ela é `/painel/alunos` (doc 06
+            §3), com tabela, busca e filtro. O dashboard guarda o que é
+            decisão de hoje — quem parou, o que aconteceu, quem está
+            devendo reavaliação —, e a carteira fica a um clique.
+          */}
+          <AtividadeRecente sessoes={atividade} />
 
-            <ListaDeAlunos alunos={alunos} idDoPersonal={trainer.id} />
-          </section>
+          <Link
+            href="/painel/alunos"
+            className="inline-flex min-h-8 items-center text-[13px] font-semibold text-ink-3 transition hover:text-ink"
+          >
+            Ver todos os {alunos.length}{" "}
+            {alunos.length === 1 ? "aluno" : "alunos"} →
+          </Link>
         </div>
       )}
     </div>

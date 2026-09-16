@@ -79,17 +79,3 @@ export function mover<T>(itens: T[], de: number, para: number): T[] {
   copia.splice(para, 0, item);
   return copia;
 }
-
-/**
- * Texto sem acento e em minúsculas, para comparar nome de exercício.
- *
- * O personal digita "triceps" e espera achar "Tríceps testa". Comparar sem
- * normalizar transformaria o acento num filtro invisível.
- */
-export function normalizarParaBusca(texto: string): string {
-  return texto
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-}

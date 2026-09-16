@@ -4,14 +4,33 @@ import { Logo } from "@/components/logo";
 import { BotaoSair } from "@/components/botao-sair";
 import { requireTrainer } from "@/lib/auth/session";
 
+/** As seções do painel, na ordem do doc 06. */
+const NAVEGACAO = [
+  { href: "/painel", rotulo: "Painel" },
+  { href: "/painel/alunos", rotulo: "Alunos" },
+  { href: "/painel/macrotreinos", rotulo: "Macrotreinos" },
+  { href: "/painel/treinos", rotulo: "Treinos" },
+  { href: "/painel/exercicios", rotulo: "Exercícios" },
+  { href: "/painel/agenda", rotulo: "Agenda" },
+  { href: "/painel/reavaliacoes", rotulo: "Reavaliações" },
+  { href: "/painel/social", rotulo: "Social" },
+  { href: "/painel/treinar", rotulo: "Treinar" },
+  { href: "/painel/configuracoes", rotulo: "Configurações" },
+] as const;
+
 /**
  * Moldura do painel do personal (desktop).
  *
  * Aqui mora a autorização de verdade: `requireTrainer()` confirma que existe
  * linha em `trainers` para o usuário logado. O proxy só evita render à toa.
  *
- * A sidebar colapsável do doc 04 entra na fase 1, junto com as páginas que ela
- * navega. Enquanto só existe o dashboard, uma barra no topo basta.
+ * A sidebar colapsável do doc 04 continua não existindo: a barra no topo
+ * navega as mesmas páginas, e trocar de moldura não muda nada do que o
+ * personal consegue fazer. Fica como dívida conhecida, não como pendência.
+ *
+ * `NAVEGACAO` é uma lista e não dez `<Link>` escritos à mão porque nove deles
+ * eram a mesma linha de classes copiada — e foi assim que "Alunos" ficou
+ * apontando para `/painel` depois que a tela de alunos ganhou endereço próprio.
  */
 export default async function PainelLayout({
   children,
@@ -27,60 +46,15 @@ export default async function PainelLayout({
           </Link>
 
           <nav className="flex items-center gap-1" aria-label="Seções do painel">
-            <Link
-              href="/painel"
-              className="rounded-[9px] px-3 py-1.5 text-[13px] font-semibold text-ink-3 transition hover:bg-canvas-sunken hover:text-ink"
-            >
-              Alunos
-            </Link>
-            <Link
-              href="/painel/macrotreinos"
-              className="rounded-[9px] px-3 py-1.5 text-[13px] font-semibold text-ink-3 transition hover:bg-canvas-sunken hover:text-ink"
-            >
-              Macrotreinos
-            </Link>
-            <Link
-              href="/painel/treinos"
-              className="rounded-[9px] px-3 py-1.5 text-[13px] font-semibold text-ink-3 transition hover:bg-canvas-sunken hover:text-ink"
-            >
-              Treinos
-            </Link>
-            <Link
-              href="/painel/exercicios"
-              className="rounded-[9px] px-3 py-1.5 text-[13px] font-semibold text-ink-3 transition hover:bg-canvas-sunken hover:text-ink"
-            >
-              Exercícios
-            </Link>
-            <Link
-              href="/painel/agenda"
-              className="rounded-[9px] px-3 py-1.5 text-[13px] font-semibold text-ink-3 transition hover:bg-canvas-sunken hover:text-ink"
-            >
-              Agenda
-            </Link>
-            <Link
-              href="/painel/reavaliacoes"
-              className="rounded-[9px] px-3 py-1.5 text-[13px] font-semibold text-ink-3 transition hover:bg-canvas-sunken hover:text-ink"
-            >
-              Reavaliações
-            </Link>
-            <Link
-              href="/painel/social"
-              className="rounded-[9px] px-3 py-1.5 text-[13px] font-semibold text-ink-3 transition hover:bg-canvas-sunken hover:text-ink"
-            >
-              Social
-            </Link>
-            <Link
-              href="/painel/treinar"
-              className="rounded-[9px] px-3 py-1.5 text-[13px] font-semibold text-ink-3 transition hover:bg-canvas-sunken hover:text-ink"
-            >
-              Treinar
-            </Link>
-            <Link
-              href="/painel/configuracoes"
-              className="rounded-[9px] px-3 py-1.5 text-[13px] font-semibold text-ink-3 transition hover:bg-canvas-sunken hover:text-ink"
-            >
-              Configurações
-            </Link>
+            {NAVEGACAO.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-[9px] px-3 py-1.5 text-[13px] font-semibold text-ink-3 transition hover:bg-canvas-sunken hover:text-ink"
+              >
+                {item.rotulo}
+              </Link>
+            ))}
           </nav>
 
           <div className="flex items-center gap-3">

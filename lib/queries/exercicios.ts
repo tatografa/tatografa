@@ -1,6 +1,6 @@
 import "server-only";
 
-import { normalizarParaBusca } from "@/lib/domain/prescricao";
+import { normalizarParaBusca } from "@/lib/domain/texto";
 import { createClient } from "@/lib/supabase/server";
 import type { Enums } from "@/types/database";
 

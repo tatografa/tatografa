@@ -4,7 +4,7 @@ import { Dumbbell, Pencil, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Badge, Button, Card } from "@/components/ui";
-import { normalizarParaBusca } from "@/lib/domain/prescricao";
+import { normalizarParaBusca } from "@/lib/domain/texto";
 import type {
   ExercicioDisponivel,
   ExercicioProprio,

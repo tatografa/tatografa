@@ -197,6 +197,33 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-16]** **O dashboard responde "o que mudou hoje"; a carteira tem endereço
+  próprio.** A lista de alunos saiu de `/painel` para `/painel/alunos` (doc 06 §3), com
+  tabela, busca e filtro por status. Não é organização: enquanto a lista morava no
+  dashboard, ela empurrava tudo abaixo dela para fora da dobra **a cada aluno novo** — o
+  bloco mais útil da tela sumindo à medida que o produto dá certo. No lugar dela entraram
+  os dois pedaços que o doc 06 §2 pedia desde o começo e nunca foram feitos: o quarto
+  indicador (**reavaliações pendentes**, o único que vira link, porque é o único que é
+  fila de trabalho) e **atividade recente**. O menu tinha nove `<Link>` iguais escritos à
+  mão, e foi assim que "Alunos" continuou apontando para `/painel`; virou lista.
+  **O que o doc 06 pede aqui e não foi feito:** o "assistente de novo aluno". O aluno
+  preenche o próprio perfil no onboarding e o personal não monta treino antes do
+  cadastro (decisão de 13/09), então o assistente seria o diálogo de convite com mais
+  passos.
+- **[2026-09-16]** **Busca e filtro da carteira rodam na tela, não no banco** — e é por
+  isso que a conta de "há quantos dias" **não** roda junto. A lista inteira já veio para
+  montar a tabela, e um `ilike` por tecla digitada seria uma ida ao banco para reduzir o
+  que já está na memória (`filtrarAlunos`, `lib/domain/carteira.ts`). Mas dia de
+  calendário é outra coisa: `diasSemTreinar` conta no fuso do produto, e a tabela é
+  componente cliente — contar ali usaria o fuso e o relógio do aparelho, daria um número
+  diferente do bloco "precisam de atenção" na tela ao lado, e ainda arriscaria divergir
+  entre o render do servidor e o da hidratação. O servidor manda o número; a tela só
+  conjuga a frase.
+- **[2026-09-16]** **A linha da tabela é clicável pelo `::after` do link do nome**, não
+  por `onClick` no `<tr>`. `<tr onClick>` daria o clique e mais nada: sem foco pelo
+  teclado, sem menu de contexto, sem abrir em outra aba. E `<table>` de verdade, não
+  grade de `<div>`: o cabeçalho de coluna é o que dá nome a cada célula para quem usa
+  leitor de tela, e numa grade "72%" seria lido sem dizer 72% de quê.
 - **[2026-09-15]** **A agenda é o registro de quem veio, não um convite.** O personal marca
   a sessão e depois marca o que aconteceu (`realizada`, `faltou`, `cancelada`); o aluno
   **lê** a própria e não escreve nada — marcar a própria presença é assinar a própria

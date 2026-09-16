@@ -61,7 +61,7 @@ export type SessaoDetalhada = SessaoDoHistorico & {
   volume_kg: number;
 };
 
-type SerieComSessao = SerieDoHistorico & {
+export type SerieComSessao = SerieDoHistorico & {
   session_id: string;
   workout_exercise_id: string;
 };
@@ -278,8 +278,15 @@ async function seriesPrescritasPorTreino(
  * primeiras N linhas sem avisar, e o volume da sessão mais antiga da lista
  * apareceria menor do que foi. Varrer por `range` até a página vir curta é o
  * que torna a contagem confiável sem uma consulta por sessão.
+ *
+ * Exportada porque a atividade recente do painel soma o mesmo volume das
+ * mesmas séries: uma segunda varredura escrita à mão seria o lugar onde a
+ * paginação some, e o sintoma — um volume menor do que o real — é o tipo de
+ * erro que ninguém confere olhando a tela.
  */
-async function seriesDasSessoes(ids: string[]): Promise<SerieComSessao[]> {
+export async function seriesDasSessoes(
+  ids: string[],
+): Promise<SerieComSessao[]> {
   if (!ids.length) return [];
 
   const supabase = await createClient();

@@ -164,3 +164,20 @@ Para a fatia vertical do roadmap, só estas partes são necessárias:
 4. Atribuir o treino a um aluno.
 
 O resto vem depois. Não construa as 9 páginas antes de o loop funcionar.
+
+**Estado em 16/09/2026.** As nove páginas existem. O §2 e o §3 foram fechados nesta data:
+o dashboard ganhou o quarto indicador (reavaliações pendentes) e a atividade recente, e a
+lista de alunos saiu dele para `/painel/alunos`, com tabela, busca e filtro. O que este
+documento ainda pede e **não** existe, por decisão registrada no `CLAUDE.md`:
+
+| Onde | O quê | Por quê não |
+|---|---|---|
+| Layout base | Sidebar colapsável | A barra no topo navega as mesmas páginas |
+| §3 | Assistente de novo aluno | O aluno preenche o próprio perfil no onboarding |
+| §4 | Observações privadas do personal | Não construído ainda |
+| §5 | Reordenar por arraste, duplicar, rascunho | Não construídos ainda |
+
+A referência visual `prototipos/Painel do Personal - Dashboard.dc.html` desenha um
+dashboard **maior** que o §2 — receita mensal, ticket médio, churn, renovações,
+distribuição por plano. Esses cinco dependem de plano, preço e pagamento, que não existem
+no modelo de dados: são escopo de produto a decidir, não tela a construir.

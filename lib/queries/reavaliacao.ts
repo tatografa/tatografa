@@ -113,6 +113,34 @@ export async function temReavaliacaoAberta(alunoId: string): Promise<boolean> {
 
 /* -------------------------------------------------------- o personal ----- */
 
+/**
+ * Quantas reavaliações a carteira ainda não respondeu — o quarto indicador do
+ * doc 06 §2.
+ *
+ * Contagem no banco, não `lerReavaliacoesDaCarteira().filter()`: aquela leitura
+ * assina uma URL de foto por reavaliação, e o dashboard abre a cada navegação
+ * do personal. Assinar dezenas de URLs para mostrar um número seria pagar a
+ * tela mais cara do painel pela informação mais barata dele.
+ *
+ * O filtro por `trainer_id` está aqui mesmo com o RLS cobrindo, pelo mesmo
+ * motivo das outras consultas: a query não deve depender só da policy para
+ * saber de quem é o dado.
+ */
+export async function contarReavaliacoesPendentes(
+  trainerId: string,
+): Promise<number> {
+  const supabase = await createClient();
+
+  const { count, error } = await supabase
+    .from("assessments")
+    .select("id", { count: "exact", head: true })
+    .eq("trainer_id", trainerId)
+    .is("submitted_at", null);
+
+  if (error) throw error;
+  return count ?? 0;
+}
+
 export type ReavaliacaoNaCarteira = Reavaliacao & {
   aluno: { id: string; nome: string };
   pendente: boolean;
