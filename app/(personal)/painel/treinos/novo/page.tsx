@@ -3,7 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Button, Card } from "@/components/ui";
+import { proximaLetraLivre } from "@/lib/domain/treino";
 import { lerMacrotreino } from "@/lib/queries/macrotreinos";
+import { letrasDoPrograma } from "@/lib/queries/treinos";
 
 import { EditorDeTreino } from "../editor-de-treino";
 
@@ -32,6 +34,11 @@ export default async function NovoTreinoPage({
 
   if (programa.status !== "ativo") return <ProgramaArquivado nome={programa.name} />;
 
+  // O campo "Letra" nascia com "A" fixo, então montar o treino B começava com a
+  // letra do A na tela. A leitura é depois do 404 e do arquivado de propósito:
+  // consultar letras de um programa que a tela não vai desenhar é trabalho à toa.
+  const letraSugerida = proximaLetraLivre(await letrasDoPrograma(programa.id));
+
   return (
     <div className="space-y-8">
       <header className="space-y-2">
@@ -56,6 +63,7 @@ export default async function NovoTreinoPage({
           total_weeks: programa.total_weeks,
           aluno: programa.aluno,
         }}
+        letraSugerida={letraSugerida}
       />
     </div>
   );

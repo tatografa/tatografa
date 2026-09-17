@@ -103,3 +103,31 @@ export function comoRelogio(segundos: number): string {
   const seg = seguro % 60;
   return `${min}:${String(seg).padStart(2, "0")}`;
 }
+
+/** As letras que o produto usa para nomear treino: A, B, C… */
+const LETRAS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+/**
+ * A primeira letra livre do programa — o que o editor sugere ao montar um
+ * treino novo.
+ *
+ * O campo nascia com "A" fixo, então montar o treino B começava com a letra do
+ * treino A na tela e o personal tinha que apagar e digitar. Pequeno, mas é o
+ * primeiro campo do editor mais usado do painel.
+ *
+ * **Existe uma segunda implementação desta mesma regra, em SQL**, dentro de
+ * `duplicar_treino` (migration 0029) — e isso é deliberado, não descuido. Lá a
+ * letra é uma **atribuição** que precisa acontecer na mesma transação da cópia;
+ * aqui é uma **sugestão** que o personal sobrescreve digitando. Se as duas
+ * discordarem, o pior que acontece é o campo vir com uma letra diferente da que
+ * a cópia teria escolhido — ninguém fica sem treino, nada sai errado no banco.
+ * É o oposto de `nomes_no_feed`, onde duas regras discordando faziam aparecer
+ * post sem nome.
+ *
+ * Com as 26 ocupadas devolve string vazia: o campo fica em branco e o personal
+ * escreve o que quiser, em vez de receber uma letra repetida.
+ */
+export function proximaLetraLivre(usadas: string[]): string {
+  const ocupadas = new Set(usadas.map((letra) => letra.trim().toUpperCase()));
+  return LETRAS.find((letra) => !ocupadas.has(letra)) ?? "";
+}

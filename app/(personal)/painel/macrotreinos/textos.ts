@@ -39,3 +39,21 @@ export function textoDeAtivacao(aluno: string, nome: string, ativoAtual: string)
 export function primeiroNome(nome: string): string {
   return nome.trim().split(/\s+/)[0] ?? nome;
 }
+
+/**
+ * O texto do diálogo de duplicação.
+ *
+ * Diz **a consequência**, como o de arquivamento: a cópia nasce arquivada, e
+ * quem não souber disso sai daqui achando que o aluno já tem treino. A frase
+ * muda com o tamanho da carteira porque "para outro aluno" não faz sentido para
+ * quem só tem um — e uma frase que fala de uma opção que não existe faz o
+ * personal procurar o que não está lá.
+ */
+export function textoDeDuplicacao(quantosAlunos: number): string {
+  const destino =
+    quantosAlunos > 1
+      ? "Escolha para quem: o mesmo aluno ou outro da sua carteira."
+      : "A cópia fica com o mesmo aluno.";
+
+  return `${destino} Os treinos e a prescrição vêm junto; o histórico de execução, não. A cópia nasce arquivada — ative ela na lista para o aluno passar a ver.`;
+}

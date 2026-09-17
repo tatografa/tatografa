@@ -78,6 +78,12 @@ export type EditorDeTreinoProps = {
   programa: ProgramaDoEditor;
   treino?: TreinoEmEdicao;
   salvo?: boolean;
+  /**
+   * A letra que o campo já vem preenchido ao montar um treino novo — a primeira
+   * livre do programa, contada no servidor (`letrasDoPrograma`). O padrão "A"
+   * cobre a edição, onde a letra vem do próprio treino e isto não é usado.
+   */
+  letraSugerida?: string;
 };
 
 const INICIAL: EstadoDoEditor = {};
@@ -86,10 +92,11 @@ export function EditorDeTreino({
   programa,
   treino,
   salvo = false,
+  letraSugerida = "A",
 }: EditorDeTreinoProps) {
   const [estado, acao, enviando] = useActionState(salvarTreino, INICIAL);
 
-  const [label, setLabel] = useState(treino?.label ?? "A");
+  const [label, setLabel] = useState(treino?.label ?? letraSugerida);
   const [nome, setNome] = useState(treino?.nome ?? "");
   const [observacao, setObservacao] = useState(treino?.observacao ?? "");
   const [itens, setItens] = useState<ItemDoEditor[]>(treino?.itens ?? []);

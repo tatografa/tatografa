@@ -165,6 +165,17 @@ Para a fatia vertical do roadmap, só estas partes são necessárias:
 
 O resto vem depois. Não construa as 9 páginas antes de o loop funcionar.
 
+**Estado em 17/09/2026 (segunda leva).** O §5 ganhou **duplicar treino e duplicar
+macrotreino** (`duplicar_treino` e `duplicar_macrotreino`, migration 0029). Duplicar um
+programa para outro aluno **é** o "enviar/atribuir a um ou vários alunos" do mesmo
+parágrafo. O que resta do §5, com o motivo:
+
+| Item | Situação |
+|---|---|
+| Reordenar por arraste | Entregue por setas ↑↓ — mesmo resultado, melhor no teclado |
+| Salvar como rascunho | Já existe como status: o programa nasce arquivado e é ativado |
+| Sidebar colapsável | Não construída; a barra do topo navega as mesmas páginas |
+
 **Estado em 17/09/2026.** O §4 ganhou as observações privadas do personal — lista de
 anotações datadas, visíveis só para ele (`trainer_notes`, migration 0028). O aluno não
 tem policy de leitura, e a política de privacidade passou a declarar que elas existem.
@@ -178,7 +189,6 @@ documento ainda pede e **não** existe, por decisão registrada no `CLAUDE.md`:
 |---|---|---|
 | Layout base | Sidebar colapsável | A barra no topo navega as mesmas páginas |
 | §3 | Assistente de novo aluno | O aluno preenche o próprio perfil no onboarding |
-| §5 | Reordenar por arraste, duplicar, rascunho | Não construídos ainda |
 
 A referência visual `prototipos/Painel do Personal - Dashboard.dc.html` desenha um
 dashboard **maior** que o §2 — receita mensal, ticket médio, churn, renovações,

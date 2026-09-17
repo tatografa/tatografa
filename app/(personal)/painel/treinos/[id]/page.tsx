@@ -6,6 +6,8 @@ import { lerTreino } from "@/lib/queries/treinos";
 
 import { EditorDeTreino, type ItemDoEditor } from "../editor-de-treino";
 
+import { BotaoDuplicarTreino } from "./botao-duplicar";
+
 export const metadata: Metadata = { title: "Editar treino" };
 
 export default async function EditarTreinoPage({
@@ -58,9 +60,24 @@ export default async function EditarTreinoPage({
         <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
           {treino.label} · {treino.name}
         </h1>
-        <p className="text-[13.5px] text-ink-3">
-          {treino.aluno.name} · {treino.total_series} séries · ~{treino.duracao_min} min
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-[13.5px] text-ink-3">
+            {treino.aluno.name} · {treino.total_series} séries · ~
+            {treino.duracao_min} min
+          </p>
+          {/*
+            Duplicar mora aqui e não na lista de treinos: lá cada linha é um
+            `<Link>` inteiro, e um botão dentro de um link é aninhamento
+            inválido — o clique ficaria disputado entre os dois. Aqui o personal
+            já está olhando o treino que quer copiar.
+          */}
+          <BotaoDuplicarTreino
+            treinoId={treino.id}
+            programaId={treino.macrotreino.id}
+            label={treino.label}
+            nome={treino.name}
+          />
+        </div>
       </header>
 
       {/*

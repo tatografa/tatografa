@@ -781,6 +781,14 @@ export type Database = {
           dia: string
         }[]
       }
+      duplicar_macrotreino: {
+        Args: { p_mesocycle_id: string; p_name: string; p_student_id: string }
+        Returns: string
+      }
+      duplicar_treino: {
+        Args: { p_workout_id: string }
+        Returns: string
+      }
       enviar_reavaliacao: {
         Args: {
           p_assessment_id: string

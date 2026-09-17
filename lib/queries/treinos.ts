@@ -1,5 +1,6 @@
 import "server-only";
 
+import { pareceUuid } from "@/lib/domain/id";
 import { duracaoEstimadaMin, totalDeSeries } from "@/lib/domain/treino";
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
@@ -285,4 +286,28 @@ async function seriesRegistradas(treinoId: string): Promise<Map<string, number>>
     contagem.set(linha.workout_exercise_id, Number(linha.total));
   }
   return contagem;
+}
+
+/**
+ * As letras já usadas num programa — o que o editor precisa para sugerir a
+ * próxima ao montar um treino novo.
+ *
+ * Consulta própria e mínima, e não `lerTreinosDoPrograma()`: a tela de "novo
+ * treino" não mostra os treinos que já existem, só precisa saber quais letras
+ * estão ocupadas. Trazer nome, prescrição e contagem de séries de cada um para
+ * escolher uma letra seria pagar a leitura mais cara do painel pela informação
+ * mais barata dele — o mesmo raciocínio de `contarReavaliacoesPendentes`.
+ */
+export async function letrasDoPrograma(programaId: string): Promise<string[]> {
+  if (!pareceUuid(programaId)) return [];
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("workouts")
+    .select("label")
+    .eq("mesocycle_id", programaId);
+
+  if (error) throw error;
+  return (data ?? []).map((linha) => linha.label);
 }

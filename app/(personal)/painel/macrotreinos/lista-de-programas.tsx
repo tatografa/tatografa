@@ -6,7 +6,7 @@ import { diaLocal } from "@/lib/domain/fuso";
 import { semanaAtual } from "@/lib/domain/treino";
 import type { Macrotreino, ProgramasDoAluno } from "@/lib/queries/macrotreinos";
 
-import { BotaoArquivar, BotaoAtivar } from "./acoes-do-programa";
+import { BotaoArquivar, BotaoAtivar, BotaoDuplicar } from "./acoes-do-programa";
 import { primeiroNome } from "./textos";
 
 /**
@@ -17,6 +17,11 @@ import { primeiroNome } from "./textos";
  * ambiente — o host do Supabase é bloqueado pela rede.
  */
 export function ListaDeProgramas({ porAluno }: { porAluno: ProgramasDoAluno[] }) {
+  // A carteira inteira, para o seletor "para quem" de cada botão de duplicar.
+  // Montada aqui e não consultada de novo: `porAluno` já é a carteira, e uma
+  // segunda leitura seria a mesma lista podendo discordar desta.
+  const alunos = porAluno.map(({ aluno }) => aluno);
+
   return (
     <div className="space-y-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
@@ -46,7 +51,12 @@ export function ListaDeProgramas({ porAluno }: { porAluno: ProgramasDoAluno[] })
               </h2>
 
               {ativo ? (
-                <ProgramaAtivo programa={ativo} aluno={aluno.name} />
+                <ProgramaAtivo
+                  programa={ativo}
+                  aluno={aluno.name}
+                  alunoId={aluno.id}
+                  alunos={alunos}
+                />
               ) : (
                 <SemPrograma alunoId={aluno.id} aluno={aluno.name} />
               )}
@@ -58,6 +68,8 @@ export function ListaDeProgramas({ porAluno }: { porAluno: ProgramasDoAluno[] })
                       <ProgramaArquivado
                         programa={programa}
                         aluno={aluno.name}
+                        alunoId={aluno.id}
+                        alunos={alunos}
                         ativoAtual={ativo?.name ?? null}
                       />
                     </li>
@@ -72,7 +84,17 @@ export function ListaDeProgramas({ porAluno }: { porAluno: ProgramasDoAluno[] })
   );
 }
 
-function ProgramaAtivo({ programa, aluno }: { programa: Macrotreino; aluno: string }) {
+function ProgramaAtivo({
+  programa,
+  aluno,
+  alunoId,
+  alunos,
+}: {
+  programa: Macrotreino;
+  aluno: string;
+  alunoId: string;
+  alunos: { id: string; name: string }[];
+}) {
   // A semana sai de `semanaAtual` — derivada de `started_at`, nunca de coluna.
   // É o mesmo número que o aluno vê na home dele.
   const semana = semanaAtual(programa.started_at, programa.total_weeks);
@@ -98,6 +120,12 @@ function ProgramaAtivo({ programa, aluno }: { programa: Macrotreino; aluno: stri
           >
             Editar
           </Link>
+          <BotaoDuplicar
+            programaId={programa.id}
+            nome={programa.name}
+            alunos={alunos}
+            alunoAtual={alunoId}
+          />
           <BotaoArquivar id={programa.id} nome={programa.name} aluno={aluno} />
         </div>
       </div>
@@ -139,10 +167,14 @@ function ProgramaAtivo({ programa, aluno }: { programa: Macrotreino; aluno: stri
 function ProgramaArquivado({
   programa,
   aluno,
+  alunoId,
+  alunos,
   ativoAtual,
 }: {
   programa: Macrotreino;
   aluno: string;
+  alunoId: string;
+  alunos: { id: string; name: string }[];
   ativoAtual: string | null;
 }) {
   return (
@@ -157,12 +189,25 @@ function ProgramaArquivado({
           {contagemDeTreinos(programa.total_treinos)}
         </p>
       </div>
-      <BotaoAtivar
-        id={programa.id}
-        nome={programa.name}
-        aluno={aluno}
-        ativoAtual={ativoAtual}
-      />
+      <div className="flex shrink-0 items-center gap-2">
+        {/*
+          Duplicar também no arquivado, e não só no ativo: um programa
+          arquivado é justamente o modelo que o personal guardou para reusar.
+          Esconder o botão aqui tiraria o caso mais comum da funcionalidade.
+        */}
+        <BotaoDuplicar
+          programaId={programa.id}
+          nome={programa.name}
+          alunos={alunos}
+          alunoAtual={alunoId}
+        />
+        <BotaoAtivar
+          id={programa.id}
+          nome={programa.name}
+          aluno={aluno}
+          ativoAtual={ativoAtual}
+        />
+      </div>
     </div>
   );
 }

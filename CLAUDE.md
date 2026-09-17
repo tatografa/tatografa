@@ -197,6 +197,41 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-17]** **Duplicar programa é uma transação só, e a cópia nasce arquivada.**
+  Copiar um macrotreino é 1 `mesocycles` + N `workouts` + M `workout_exercises`
+  (`duplicar_macrotreino`, migration 0029). Em passos soltos pela Server Action, uma
+  falha no meio deixa um programa que **existe e parece real** — aparece na lista, abre,
+  e tem dois dos cinco treinos; o personal ativa, e o aluno vai à academia sem o treino
+  de quinta. Mesma decisão de `ativar_macrotreino` e de `enviar_reavaliacao`.
+  **`security invoker`**, como a 0012: leitura e escrita passam pelo RLS de quem chamou,
+  e a função não alarga o acesso de ninguém. Três coisas **não** se copiam, e cada uma
+  por um motivo: `started_at` (a semana da rotação sai dele, então herdar faria a cópia
+  nascer na semana 5 de 8), `trainer_id` (a cópia é de quem copiou) e o histórico de
+  execução — `workout_sessions` é o que o aluno levantou, e trazê-lo junto daria ao aluno
+  novo um passado que não é dele e ao personal um recorde inventado.
+- **[2026-09-17]** **Duplicar macrotreino É o "atribuir a um ou vários alunos" do doc 06
+  §5** — dar um programa a outro aluno é copiá-lo para ele, e duas telas para a mesma
+  operação seriam duas. Um aluno por vez, e não uma lista de caixinhas: cada cópia nasce
+  arquivada e quase sempre leva um ajuste antes de ativar, então "vários de uma vez" só
+  pareceria mais rápido — a segunda metade do trabalho continuaria uma a uma. O botão
+  aparece **também no programa arquivado**, que é justamente o modelo que o personal
+  guardou para reusar: escondê-lo lá tiraria o caso mais comum.
+- **[2026-09-17]** **A letra do treino tem duas implementações da mesma regra, e isso é
+  deliberado.** `proximaLetraLivre` (`lib/domain/treino.ts`) sugere a letra no campo do
+  editor; o SQL de `duplicar_treino` a atribui dentro da transação da cópia. São
+  trabalhos diferentes — sugestão que o personal sobrescreve digitando, contra atribuição
+  que precisa acontecer junto com o insert. Se discordarem, o pior é o campo vir com uma
+  letra diferente da que a cópia escolheria; ninguém fica sem treino. É o oposto de
+  `nomes_no_feed`, onde duas regras discordando faziam aparecer post sem nome — lá a
+  duplicata era proibida, aqui é barata.
+- **[2026-09-17]** **`no_data_found` em PL/pgSQL é `P0002`, não o `02000` do padrão SQL.**
+  Duas provas da 0029 "falharam" por expectativa minha errada, não por defeito: as burlas
+  recusaram certo. O código é o mesmo que `ativar_macrotreino` levanta desde a 0012.
+- **[2026-09-17]** **Reordenar exercício é por setas ↑↓, não por arraste** — o doc 06 §5
+  pede arraste e o editor entrega o mesmo resultado com dois botões. Divergência
+  consciente: arraste exige biblioteca ou muito código próprio, e é pior para teclado e
+  para leitor de tela num painel que já passou por auditoria de acessibilidade. O que o
+  doc quer é reordenar; o gesto é meio.
 - **[2026-09-17]** **A anotação do personal é tabela própria porque `students` é
   legível pelo aluno.** `students_select` devolve a ele a própria linha inteira, então
   uma coluna `observacoes` ali seria lida pelo app do aluno na primeira consulta — e a

@@ -204,6 +204,119 @@ function numero(formData: FormData, campo: string): number | undefined {
   return Number.isFinite(valor) ? valor : undefined;
 }
 
+export type EstadoDaCopia = {
+  erro?: string;
+  errosPorCampo?: { aluno?: string; nome?: string };
+};
+
+const esquemaDeCopia = z.object({
+  programaId: z.string().uuid("Programa inválido."),
+  alunoId: z.string().uuid("Escolha para quem copiar."),
+  nome: z
+    .string()
+    .trim()
+    .min(2, "Dê um nome ao programa novo.")
+    .max(80, "Nome muito longo."),
+});
+
+/**
+ * Copia um programa inteiro para um aluno — o mesmo ou outro.
+ *
+ * É o "duplicar macrotreino" e o "atribuir a um ou vários alunos" do doc 06 §5,
+ * que são a mesma operação: dar um programa a outro aluno é copiá-lo para ele.
+ * Um aluno por vez, e não uma lista de caixinhas: cada cópia nasce arquivada e
+ * quase sempre leva um ajuste antes de ativar, então "vários de uma vez" só
+ * pareceria mais rápido — a segunda metade do trabalho continuaria uma a uma.
+ *
+ * Quem copia é a RPC `duplicar_macrotreino` (migration 0029), numa transação:
+ * 1 programa + N treinos + M linhas de prescrição em passos soltos deixariam,
+ * numa falha no meio, um programa que existe, abre e está pela metade.
+ *
+ * **Não confere se o aluno é da carteira**, de propósito: a RPC roda com o RLS
+ * de quem chamou, e `mesocycles_write` já exige `trainer_id = auth.uid()` **e**
+ * `private.trainer_of(student_id)`. Repetir a regra aqui seria a segunda cópia
+ * que sai de sincronia.
+ */
+export async function duplicarPrograma(
+  _anterior: EstadoDaCopia,
+  formData: FormData,
+): Promise<EstadoDaCopia> {
+  const analise = esquemaDeCopia.safeParse({
+    programaId: String(formData.get("programaId") ?? ""),
+    alunoId: String(formData.get("alunoId") ?? ""),
+    nome: String(formData.get("nome") ?? ""),
+  });
+
+  if (!analise.success) {
+    const errosPorCampo: EstadoDaCopia["errosPorCampo"] = {};
+    for (const problema of analise.error.issues) {
+      const campo = String(problema.path[0]);
+      if (campo === "alunoId" && !errosPorCampo.aluno) {
+        errosPorCampo.aluno = problema.message;
+      }
+      if (campo === "nome" && !errosPorCampo.nome) {
+        errosPorCampo.nome = problema.message;
+      }
+      if (campo === "programaId" && !errosPorCampo.aluno) {
+        errosPorCampo.aluno = problema.message;
+      }
+    }
+    return { errosPorCampo };
+  }
+
+  await requireTrainer();
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc("duplicar_macrotreino", {
+    p_mesocycle_id: analise.data.programaId,
+    p_student_id: analise.data.alunoId,
+    p_name: analise.data.nome,
+  });
+
+  if (error) {
+    // `P0002` é o `no_data_found` que a RPC levanta quando o RLS escondeu o
+    // programa — id inexistente e programa de outro personal dão o mesmo, de
+    // propósito. `42501` é a policy recusando a cópia para quem não é aluno
+    // desta carteira. Os dois viram a mesma frase: a tela do personal está
+    // velha, não há o que ele conserte sabendo a diferença.
+    if (error.code === "P0002" || error.code === "42501") {
+      return { erro: "Esse programa ou esse aluno não está mais disponível." };
+    }
+    return { erro: "Não conseguimos copiar agora. Tente de novo." };
+  }
+
+  revalidatePath("/painel/macrotreinos");
+  return {};
+}
+
+/**
+ * Copia um treino dentro do mesmo programa.
+ *
+ * A cópia recebe a primeira letra livre e o sufixo "(cópia)" no nome, pela RPC
+ * `duplicar_treino`. É o caminho de "treino B parecido com o A": copiar e
+ * trocar dois exercícios, em vez de montar os outros dez de novo.
+ */
+export async function duplicarTreino(formData: FormData): Promise<void> {
+  const treinoId = String(formData.get("treinoId") ?? "");
+  const programaId = String(formData.get("programaId") ?? "");
+  if (!z.string().uuid().safeParse(treinoId).success) return;
+
+  await requireTrainer();
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc("duplicar_treino", {
+    p_workout_id: treinoId,
+  });
+
+  // Ação de formulário sem estado: o erro aqui é o programa ter sumido entre o
+  // render e o clique. `revalidatePath` redesenha a página com a verdade, que é
+  // o que o personal precisa ver — uma mensagem sobre um treino que não existe
+  // mais não o ajudaria a fazer nada diferente.
+  if (error) console.error("duplicarTreino", error);
+
+  revalidatePath(`/painel/macrotreinos/${programaId}`);
+}
+
 function comErros(erro: z.ZodError): EstadoDoPrograma {
   const errosPorCampo: EstadoDoPrograma["errosPorCampo"] = {};
 
