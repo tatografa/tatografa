@@ -6,6 +6,7 @@ import { useActionState } from "react";
 import { Button, Input } from "@/components/ui";
 
 import { cadastrar, type EstadoAuth } from "../actions";
+import { DICA_DA_SENHA, SENHA_MINIMA } from "@/lib/domain/senha";
 
 const INICIAL: EstadoAuth = {};
 
@@ -74,9 +75,9 @@ export function FormularioCadastro() {
           type="password"
           autoComplete="new-password"
           placeholder="••••••••"
-          hint="Mínimo de 8 caracteres."
+          hint={DICA_DA_SENHA}
           error={estado.errosPorCampo?.senha}
-          minLength={8}
+          minLength={SENHA_MINIMA}
           required
         />
 

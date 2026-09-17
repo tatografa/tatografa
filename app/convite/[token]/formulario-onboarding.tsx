@@ -9,6 +9,7 @@ import { NIVEL, OBJETIVO } from "@/lib/rotulos";
 import { cn } from "@/lib/utils";
 
 import { criarAcesso, type EstadoOnboarding } from "./actions";
+import { erroDaSenha, REGRAS_DA_SENHA } from "@/lib/domain/senha";
 
 const INICIAL: EstadoOnboarding = {};
 
@@ -75,13 +76,11 @@ export function FormularioOnboarding({
   function avancar() {
     const erros: typeof erroLocal = {};
 
-    if (senha.length < 8) {
-      erros.senha = "A senha precisa de pelo menos 8 caracteres.";
-    } else if (!/[a-zA-Z]/.test(senha)) {
-      erros.senha = "A senha precisa de pelo menos uma letra.";
-    } else if (!/[0-9]/.test(senha)) {
-      erros.senha = "A senha precisa de pelo menos um número.";
-    }
+    // A mesma função que a Server Action usa: a etapa 1 não pode aceitar uma
+    // senha que o servidor vai recusar na etapa 2, depois do aluno preencher
+    // mais cinco campos.
+    const erroDeSenha = erroDaSenha(senha);
+    if (erroDeSenha) erros.senha = erroDeSenha;
 
     if (!aceitouTermos) {
       erros.termos = "É preciso aceitar os termos para continuar.";
@@ -114,11 +113,10 @@ export function FormularioOnboarding({
 
   // A senha só some da tela ao trocar de etapa; os critérios abaixo dela
   // seguem o doc 05 (bolinha verde quando atendido).
-  const criterios = [
-    { ok: senha.length >= 8, texto: "Pelo menos 8 caracteres" },
-    { ok: /[a-zA-Z]/.test(senha), texto: "Uma letra" },
-    { ok: /[0-9]/.test(senha), texto: "Um número" },
-  ];
+  const criterios = REGRAS_DA_SENHA.map((regra) => ({
+    ok: regra.ok(senha),
+    texto: regra.texto,
+  }));
 
   return (
     <Moldura>

@@ -167,10 +167,12 @@ bloqueia a tela e o timer precisa continuar correto.
 Overlay `rgba(10,10,10,.6)`, painel `dark-surface-2`, raio 22px no topo, padding 22px.
 Ações: trocar exercício, ver histórico do exercício, adicionar observação, encerrar treino.
 
-**Construído em 17/09/2026, com três das quatro ações.** "Trocar exercício" ficou de fora:
-a leitura óbvia (substituir o prescrito por outro do catálogo) esbarra em
-`private.serie_no_treino_da_sessao` (migration 0009) e é decisão de produto sobre quem
-manda na prescrição, não ajuste de tela. O ⋮ divide o canto direito com o contador de
+**Construído em 17/09/2026, com três das quatro ações.** **"Trocar exercício" está
+descartado por decisão do Otávio (17/09)**, não adiado: o aluno não troca o exercício
+prescrito. Com a máquina ocupada ele pula ou espera. O banco já concordava —
+`private.serie_no_treino_da_sessao` (migration 0009) recusa série apontando para fora do
+treino da sessão. O caminho do "pulou" já existe no rodapé e grava as séries que faltam
+como `skipped`, que a tela de sessão mostra como "Série pulada". O ⋮ divide o canto direito com o contador de
 séries pendentes, que nasceu depois do handoff e não pode ficar atrás de um menu.
 
 ---

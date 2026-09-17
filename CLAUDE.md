@@ -224,13 +224,32 @@ Provar que funciona sem o Otávio ler código:
   observação é lida na **mesma tela** que os dois lados compartilham
   (`TelaSessaoDoHistorico`), com rótulo neutro: "sua observação" soaria errado para o
   personal, "observação do aluno" para o aluno.
-- **[2026-09-17]** **"Trocar exercício" do doc 05 §5 NÃO foi construído, e não é
-  esquecimento.** A leitura óbvia — substituir o exercício prescrito por outro do
-  catálogo quando a máquina está ocupada — esbarra em
-  `private.serie_no_treino_da_sessao` (migration 0009), que recusa série apontando para
-  fora do treino da sessão. Não é ajuste de tela: é decidir quem manda na prescrição
-  quando o aluno está na academia, e isso é do Otávio. As outras três ações do doc
-  entraram.
+- **[2026-09-17]** **Num conjunto de caminhos que chegam ao mesmo lugar, a força real é a
+  do mais frouxo.** Existiam **três** regras de senha: o cadastro do aluno exigia 8
+  caracteres, uma letra e um número; o do personal e a **troca de senha** exigiam só o
+  comprimento. Quem tinha senha forte podia trocá-la por "12345678" pela tela de verdade
+  — e ninguém olha a tela de recuperação quando pensa em "força de senha". Uma regra só,
+  em `lib/domain/senha.ts`, usada pelas três Server Actions, pelos dois textos de apoio e
+  pelo medidor do onboarding. **O `SENHA_MINIMA = 8` também estava em duas cópias**, uma
+  por arquivo de ação, e o comentário do onboarding já dizia (sobre os campos do perfil)
+  que "duas cópias divergiriam": divergiram, só não era o perfil.
+  **O que isto não resolve, e continua na dívida técnica:** a senha fraca ainda passa num
+  POST direto à API do Supabase, que não conhece estas regras. Fechar aquilo é
+  configuração no painel do Supabase, e a proteção contra senha vazada exige o plano Pro.
+
+- **[2026-09-17, decisão do Otávio]** **O aluno NÃO troca o exercício prescrito.** Com a
+  máquina ocupada ele **pula** ou **espera** — e só. O "trocar exercício" do doc 05 §5
+  está descartado, não adiado: **não construir, e não "consertar" depois achando que
+  faltou.** Quem monta o treino é o personal, e um exercício substituído pelo aluno faria
+  o histórico dizer que ele fez o que foi prescrito quando fez outra coisa. O banco já
+  concordava: `private.serie_no_treino_da_sessao` (migration 0009) recusa série apontando
+  para fora do treino da sessão. As outras três ações do doc entraram no menu.
+  **O caminho do "pulou" já existe e está certo:** "Pular exercício" grava as séries que
+  faltam como `skipped` — não as some, senão o exercício voltaria como pendente e a barra
+  de progresso nunca fecharia —, elas não contam para referência nem para recorde, e a
+  tela de sessão mostra **"Série pulada"** como estado próprio, diferente de "Não
+  registrada". O personal enxerga a diferença entre abandonar e não chegar lá; o **porquê**
+  vai na observação do treino, que agora existe.
 - **[2026-09-17]** **`BottomSheet` é componente à parte do `Dialog`, e a diferença não é
   de estilo.** O diálogo do painel é uma caixa centrada num desktop; a folha da execução
   encosta na borda de baixo, respeita a área segura do aparelho e se apoia no polegar —

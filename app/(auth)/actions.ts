@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { erroDaSenha } from "@/lib/domain/senha";
+
 import { getSiteOrigin } from "@/lib/auth/site-url";
 import { falhaDeEnvioVisivel, traduzErro } from "@/lib/auth/mensagens";
 import { createClient } from "@/lib/supabase/server";
@@ -20,8 +22,6 @@ export type EstadoAuth = {
   sucesso?: "confirme-email" | "link-enviado";
 };
 
-const SENHA_MINIMA = 8;
-
 const email = z
   .string()
   .trim()
@@ -29,9 +29,16 @@ const email = z
   .email("E-mail inválido.")
   .transform((valor) => valor.toLowerCase());
 
-const senha = z
-  .string()
-  .min(SENHA_MINIMA, `A senha precisa de pelo menos ${SENHA_MINIMA} caracteres.`);
+/*
+ * A regra vem de `lib/domain/senha.ts`, não escrita aqui. Antes este arquivo
+ * exigia só o comprimento enquanto o cadastro do aluno exigia letra e número —
+ * e como a **troca de senha** também passa por aqui, dava para sair de uma
+ * senha forte para "12345678" pela tela de verdade.
+ */
+const senha = z.string().superRefine((valor, ctx) => {
+  const erro = erroDaSenha(valor);
+  if (erro) ctx.addIssue({ code: "custom", message: erro });
+});
 
 const esquemaLogin = z.object({ email, senha: z.string().min(1, "Informe sua senha.") });
 const esquemaCadastro = z.object({

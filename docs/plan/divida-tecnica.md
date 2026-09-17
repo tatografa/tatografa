@@ -46,6 +46,13 @@ nos dois pontos, e o segundo é o que importa:
    está no **free**, então o botão não existe na tela — não é você que não
    achou. Não é "zero custo": é ~US$ 25/mês.
 
+**Corrigido pela metade em 17/09, do lado do app.** Havia **três** regras de
+senha, não uma: o cadastro do aluno exigia 8 caracteres + letra + número, e o
+cadastro do personal **e a troca de senha** exigiam só o comprimento — dava para
+sair de uma senha forte para "12345678" pela tela de recuperação. Agora a regra
+é uma só (`lib/domain/senha.ts`), usada pelas três Server Actions e pelas três
+telas. **O POST direto continua aberto** e depende do que está escrito abaixo.
+
 **O que dá para fazer de graça, na mesma tela, e vale a pena:** subir a
 exigência de força da senha. Hoje o app pede 8 caracteres, uma letra e um
 número — mas **só no formulário**, em JavaScript. Quem manda um POST direto

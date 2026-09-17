@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { Button, Input } from "@/components/ui";
 
 import { definirNovaSenha, type EstadoAuth } from "../../actions";
+import { DICA_DA_SENHA } from "@/lib/domain/senha";
 
 const INICIAL: EstadoAuth = {};
 
@@ -17,9 +18,7 @@ export function FormularioNovaSenha() {
         <h2 className="text-[25px] font-extrabold tracking-[-0.02em] text-ink">
           Criar nova senha
         </h2>
-        <p className="text-[14px] font-medium text-ink-3">
-          Mínimo de 8 caracteres.
-        </p>
+        <p className="text-[14px] font-medium text-ink-3">{DICA_DA_SENHA}</p>
       </header>
 
       <div className="space-y-4">

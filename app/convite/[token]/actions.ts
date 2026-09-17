@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { erroDaSenha } from "@/lib/domain/senha";
+
 import { traduzErro } from "@/lib/auth/mensagens";
 import {
   alturaDoAluno,
@@ -47,7 +49,6 @@ export type EstadoOnboarding = {
   sucesso?: "confirme-email";
 };
 
-const SENHA_MINIMA = 8;
 
 /**
  * As duas etapas chegam juntas num submit só.
@@ -57,11 +58,12 @@ const SENHA_MINIMA = 8;
  * etapas. Juntando, o gatilho grava a linha de `students` completa de uma vez.
  */
 const esquema = z.object({
-  senha: z
-    .string()
-    .min(SENHA_MINIMA, `A senha precisa de pelo menos ${SENHA_MINIMA} caracteres.`)
-    .regex(/[a-zA-Z]/, "A senha precisa de pelo menos uma letra.")
-    .regex(/[0-9]/, "A senha precisa de pelo menos um número."),
+  // A regra vive em `lib/domain/senha.ts`: o personal e a troca de senha usam
+  // a mesma, e era aqui que ela estava escrita a mais.
+  senha: z.string().superRefine((valor, ctx) => {
+    const erro = erroDaSenha(valor);
+    if (erro) ctx.addIssue({ code: "custom", message: erro });
+  }),
   termos: z.literal("on", {
     error: "É preciso aceitar os termos para continuar.",
   }),
