@@ -1,9 +1,15 @@
 import { AvisoDeOffline } from "@/components/aluno/aviso-de-offline";
 import { BarraDeVoltaAoPainel } from "@/components/aluno/barra-de-volta-ao-painel";
 import { BottomNav } from "@/components/aluno/bottom-nav";
-import { PortaoDeAceite } from "@/components/aluno/portao-de-aceite";
+import { PortaoDeAceite } from "@/components/portao-de-aceite";
+
+import { aceitarAtualizacao } from "./acoes-de-aceite";
 import { requireStudent } from "@/lib/auth/session";
-import { O_QUE_MUDOU, VERSAO_DOS_DOCUMENTOS } from "@/lib/legal/documentos";
+import {
+  O_QUE_MUDOU,
+  O_QUE_NAO_MUDA,
+  VERSAO_DOS_DOCUMENTOS,
+} from "@/lib/legal/documentos";
 import { aceiteEstaEmDia } from "@/lib/queries/aceite";
 
 /**
@@ -40,7 +46,9 @@ export default async function AlunoLayout({
       <div className="min-h-dvh bg-canvas">
         <PortaoDeAceite
           versao={VERSAO_DOS_DOCUMENTOS}
-          oQueMudou={O_QUE_MUDOU}
+          oQueMudou={O_QUE_MUDOU.aluno}
+          oQueNaoMuda={O_QUE_NAO_MUDA.aluno}
+          aoAceitar={aceitarAtualizacao}
         />
       </div>
     );

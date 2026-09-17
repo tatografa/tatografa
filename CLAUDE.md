@@ -37,7 +37,11 @@ Interface inteira em **português do Brasil**.
   E-mail do domínio (MX, SPF, DKIM, DMARC) e os subdomínios do VPS (`n8n`, `easypanel`,
   `evolutionapi`, `wahaapi`) **não foram tocados**.
   Roteiro e quem faz o quê: `docs/plan/configurar-dominio-e-email.md`.
-- **Piloto:** ainda não decidido se usa projeto Supabase separado (pendência do M4).
+- **Piloto:** **usa o mesmo projeto** `reps-club-dev` (decisão do Otávio, 17/09). A
+  pendência do M4 fecha aqui. O limite aceito e conhecido: dado de aluno real convive com
+  o dado de teste que já está lá, e é nesse mesmo projeto que eu aplico migration e rodo
+  prova de burla. Nada mistura entre carteiras — o RLS separa por personal —, mas os
+  números do painel somam os alunos de teste, e apagar lixo exige saber o que é lixo.
 
 ## Stack
 
@@ -224,6 +228,36 @@ Provar que funciona sem o Otávio ler código:
   observação é lida na **mesma tela** que os dois lados compartilham
   (`TelaSessaoDoHistorico`), com rótulo neutro: "sua observação" soaria errado para o
   personal, "observação do aluno" para o aluno.
+- **[2026-09-17, decisão do Otávio]** **O personal também aceita os termos** — e o
+  caminho não existia. `private.handle_new_user` gravava `term_acceptances` a partir de
+  `termos_versao`, mas **dentro do ramo do aluno**, e o ramo do personal dá `return new`
+  antes de chegar lá: nenhum personal jamais teve linha de aceite, embora os termos falem
+  dele em cada seção. Não era policy — `term_acceptances_insert` sempre foi
+  `user_id = auth.uid()`, neutro de papel. O bloco subiu para **antes** dos ramos
+  (migration 0032): um lugar só, senão o papel que ficasse para trás seria descoberto por
+  auditoria, não por erro de tela. O portão de re-aceite entrou no layout do painel, pelo
+  mesmo motivo que está no do app: é o único lugar por onde toda tela passa.
+- **[2026-09-17]** **O aceite é por `user_id`, e é isso que faz o personal que treina a
+  si mesmo aceitar uma vez só.** `students.id = trainers.id = auth.users.id` na conta do
+  Otávio, então o aceite que ele deu pelo app do aluno **já vale** para o painel — ele não
+  vê dois portões. Não foi projetado, caiu de graça de a tabela apontar para `auth.users`
+  em vez de para `students`; fica registrado porque o dia em que alguém "arrumar" a chave
+  para apontar ao papel, isso quebra.
+- **[2026-09-17]** **Texto com efeito jurídico não se copia entre telas.** O checkbox de
+  aceite eram quarenta linhas dentro do onboarding do aluno; virou
+  `components/aceite-dos-termos.tsx` antes de o cadastro do personal precisar dele. Duas
+  cópias de uma frase que vincula juridicamente divergem na primeira revisão, e a
+  diferença aparece numa auditoria, não numa tela quebrada. Mesmo motivo de
+  `O_QUE_MUDOU` e `O_QUE_NAO_MUDA` serem **um objeto por papel** e não duas constantes
+  soltas: a mudança é a mesma, a leitura é de lados opostos — para o aluno é "guardam
+  algo sobre mim", para o personal é "o que eu escrevo fica registrado".
+- **[2026-09-17]** **Escrita de aceite em `lib/legal/aceite.ts`, autorização em cada
+  lado.** Precedente de `lib/feed/escrita.ts`: `registrarAceite(userId)` é uma só, e
+  `app/(aluno)/acoes-de-aceite.ts` e `app/(personal)/acoes-de-aceite.ts` fazem
+  `requireStudent()` / `requireTrainer()` antes de chamá-la. Dois arquivos `"use server"`
+  e não uma função a mais no do aluno: módulo `"use server"` é fronteira de rede, e a
+  autorização de cada lado mora no lado dele.
+
 - **[2026-09-17]** **Num conjunto de caminhos que chegam ao mesmo lugar, a força real é a
   do mais frouxo.** Existiam **três** regras de senha: o cadastro do aluno exigia 8
   caracteres, uma letra e um número; o do personal e a **troca de senha** exigiam só o

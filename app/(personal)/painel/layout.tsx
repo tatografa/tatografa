@@ -2,7 +2,16 @@ import Link from "next/link";
 
 import { Logo } from "@/components/logo";
 import { BotaoSair } from "@/components/botao-sair";
+import { PortaoDeAceite } from "@/components/portao-de-aceite";
 import { requireTrainer } from "@/lib/auth/session";
+import {
+  O_QUE_MUDOU,
+  O_QUE_NAO_MUDA,
+  VERSAO_DOS_DOCUMENTOS,
+} from "@/lib/legal/documentos";
+import { aceiteEstaEmDia } from "@/lib/queries/aceite";
+
+import { aceitarAtualizacaoDoPersonal } from "../acoes-de-aceite";
 
 /** As seções do painel, na ordem do doc 06. */
 const NAVEGACAO = [
@@ -36,6 +45,28 @@ export default async function PainelLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const { trainer } = await requireTrainer();
+
+  /*
+   * O portão de re-aceite, agora também deste lado (decisão do Otávio, 17/09).
+   * Mora no layout pelo mesmo motivo que `requireTrainer()` mora: é o único
+   * lugar por onde toda tela do painel passa, e num componente de página ele
+   * seria contornável por uma URL digitada.
+   *
+   * `/termos` e `/privacidade` ficam fora deste grupo de rotas de propósito —
+   * ler o que se está aceitando não pode depender de aceitar.
+   */
+  if (!(await aceiteEstaEmDia(trainer.id))) {
+    return (
+      <div className="min-h-dvh bg-canvas">
+        <PortaoDeAceite
+          versao={VERSAO_DOS_DOCUMENTOS}
+          oQueMudou={O_QUE_MUDOU.personal}
+          oQueNaoMuda={O_QUE_NAO_MUDA.personal}
+          aoAceitar={aceitarAtualizacaoDoPersonal}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-dvh bg-canvas">

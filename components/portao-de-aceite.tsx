@@ -7,15 +7,13 @@ import { useActionState } from "react";
 import { Logo } from "@/components/logo";
 import { Button, Card } from "@/components/ui";
 
-import {
-  aceitarAtualizacao,
-  type EstadoDoAceite,
-} from "@/app/(aluno)/acoes-de-aceite";
+import type { EstadoDoAceite } from "@/app/(aluno)/acoes-de-aceite";
 
 const INICIAL: EstadoDoAceite = {};
 
 /**
- * O que o aluno vê quando o texto dos documentos mudou desde o aceite dele.
+ * O que o aluno **e o personal** veem quando o texto dos documentos mudou
+ * desde o aceite deles.
  *
  * **É um portão, não um aviso.** Fica no lugar do app inteiro até o aceite
  * entrar, porque é isso que a própria política promete ("avisamos no app e
@@ -24,16 +22,32 @@ const INICIAL: EstadoDoAceite = {};
  *
  * O resumo do que mudou vem por prop e não está escrito aqui: quem decide o que
  * mudou é o texto, e duas cópias da mesma frase saem de sincronia na primeira
- * revisão.
+ * revisão. **A ação também vem por prop**, pelo mesmo motivo que a escrita é
+ * compartilhada e a autorização não: cada lado chama a sua, com
+ * `requireStudent()` ou `requireTrainer()` dentro.
+ *
+ * Saiu de `components/aluno/` quando o personal passou a aceitar também
+ * (decisão do Otávio, 17/09): a pasta dizia de quem era a tela, e ela é dos dois.
  */
 export function PortaoDeAceite({
   versao,
   oQueMudou,
+  oQueNaoMuda,
+  aoAceitar,
 }: {
   versao: string;
   oQueMudou: string;
+  /**
+   * A frase que tranquiliza, e ela é diferente para cada lado: o aluno perde o
+   * sono pelo histórico, o personal pelos treinos que montou. Uma frase só
+   * falaria com um e soaria estranha para o outro.
+   */
+  oQueNaoMuda: string;
+  aoAceitar: (
+    anterior: EstadoDoAceite,
+  ) => Promise<EstadoDoAceite>;
 }) {
-  const [estado, acao, enviando] = useActionState(aceitarAtualizacao, INICIAL);
+  const [estado, acao, enviando] = useActionState(aoAceitar, INICIAL);
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-[440px] flex-col justify-center px-5 py-8">
@@ -54,11 +68,7 @@ export function PortaoDeAceite({
             Atualizamos a política de privacidade
           </h1>
           <p className="text-[13.5px] leading-relaxed text-ink-2">{oQueMudou}</p>
-          <p className="text-[13px] leading-relaxed text-ink-3">
-            Seu treino, seu histórico e seus recordes continuam exatamente como
-            estavam. Para seguir usando o app, confirme que você leu o texto
-            novo.
-          </p>
+          <p className="text-[13px] leading-relaxed text-ink-3">{oQueNaoMuda}</p>
         </div>
 
         <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[13px] font-semibold">

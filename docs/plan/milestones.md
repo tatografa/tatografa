@@ -529,7 +529,7 @@ Dois cards não podem começar sem decisão dele:
 | ~~Provedor de e-mail~~ | ~~M4-02~~ | **resolvido**: SMTP da Hostinger, já pago |
 | ~~Domínio próprio~~ | ~~M4-02~~ | **resolvido**: `repsclub.com.br`, já tem |
 | Texto de termos e privacidade | M4-05 | Advogado, se quiser revisão |
-| Projeto Supabase separado para produção | nenhum card, mas trava o piloto | Free tier serve |
+| ~~Projeto Supabase separado para produção~~ | **decidido 17/09: fica o mesmo** | — |
 
 ### Ordem
 
@@ -542,7 +542,7 @@ programação:
 | Apontar `repsclub.com.br` para a Vercel | Otávio | zero (já tem) |
 | Criar a caixa `contato@repsclub.com.br` | Otávio | zero |
 | Revisar o rascunho de termos e privacidade | advogado | a decidir |
-| Decidir se o personal também aceita os termos | Otávio | ~20 linhas |
+| ~~Decidir se o personal também aceita os termos~~ | **decidido 17/09: sim** | feito (migration 0032) |
 
 Roteiro das três primeiras: `docs/plan/configurar-dominio-e-email.md`.
 

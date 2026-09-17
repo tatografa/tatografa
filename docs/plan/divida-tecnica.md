@@ -103,7 +103,7 @@ O advisor agora acusa esses três índices como "nunca usados". É esperado num
 banco com duas dezenas de linhas: o planejador prefere varrer a tabela inteira.
 Não confundir com índice inútil.
 
-### 3. Projeto Supabase de produção — **decisão do Otávio, aberta desde o M4**
+### 3. ~~Projeto Supabase de produção~~ — **decidido em 17/09: fica o mesmo**
 
 O piloto vai gravar peso, altura, data de nascimento e histórico de treino de
 uma pessoa real num projeto chamado **`reps-club-dev`**, que hoje tem dados de
@@ -122,8 +122,10 @@ vale decidir antes de crescer: um projeto separado para produção dá backup e
 limites próprios, e tira dado real de um ambiente onde a gente aplica migration
 de teste.
 
-**Mínimo para o piloto:** saber que os dados de teste estão lá e não confundir
-os números do painel com os do aluno de verdade.
+**Decidido em 17/09: o piloto usa o `reps-club-dev` mesmo.** O limite fica
+aceito e conhecido — dado real convive com dado de teste, e é neste projeto que
+migration e prova de burla rodam. **Mínimo para o piloto:** saber que os dados de
+teste estão lá e não confundir os números do painel com os do aluno de verdade.
 
 ## Decidido
 

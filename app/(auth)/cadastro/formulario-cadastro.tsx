@@ -1,17 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import { Button, Input } from "@/components/ui";
 
 import { cadastrar, type EstadoAuth } from "../actions";
 import { DICA_DA_SENHA, SENHA_MINIMA } from "@/lib/domain/senha";
+import { AceiteDosTermos } from "@/components/aceite-dos-termos";
 
 const INICIAL: EstadoAuth = {};
 
 export function FormularioCadastro() {
   const [estado, acao, enviando] = useActionState(cadastrar, INICIAL);
+  // Controlado para a marcação sobreviver a um erro do servidor: o React reseta
+  // o formulário depois da ação, e ter que remarcar o aceite por causa de um
+  // e-mail inválido é o tipo de atrito que faz a pessoa clicar sem ler.
+  const [aceitouTermos, setAceitouTermos] = useState(false);
 
   if (estado.sucesso === "confirme-email") {
     return (
@@ -79,6 +84,12 @@ export function FormularioCadastro() {
           error={estado.errosPorCampo?.senha}
           minLength={SENHA_MINIMA}
           required
+        />
+
+        <AceiteDosTermos
+          marcado={aceitouTermos}
+          aoMarcar={setAceitouTermos}
+          erro={estado.errosPorCampo?.termos}
         />
 
         {estado.erro && (

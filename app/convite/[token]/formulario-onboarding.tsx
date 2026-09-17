@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 
 import { criarAcesso, type EstadoOnboarding } from "./actions";
 import { erroDaSenha, REGRAS_DA_SENHA } from "@/lib/domain/senha";
+import { AceiteDosTermos } from "@/components/aceite-dos-termos";
 
 const INICIAL: EstadoOnboarding = {};
 
@@ -223,52 +224,14 @@ export function FormularioOnboarding({
             </ul>
           </div>
 
-          <label className="flex cursor-pointer items-start gap-2.5">
-            <input
-              type="checkbox"
-              name="termos"
-              checked={aceitouTermos}
-              onChange={(e) => {
-                setAceitouTermos(e.target.checked);
-                setErroLocal((atual) => ({ ...atual, termos: undefined }));
-              }}
-              className="mt-0.5 size-4 shrink-0 accent-brand"
-            />
-            {/*
-              Os links abrem em aba nova: clicar num deles no meio do
-              onboarding não pode custar a senha já digitada e a etapa já
-              vencida. `stopPropagation` porque o link está dentro da `<label>`
-              — sem isso, tocar nele marcaria o checkbox de tabela.
-            */}
-            <span className="text-[12.5px] leading-[1.5] text-ink-3">
-              Aceito os{" "}
-              <a
-                href="/termos"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="font-semibold text-brand underline underline-offset-2 transition hover:text-brand-hover"
-              >
-                termos de uso
-              </a>{" "}
-              e a{" "}
-              <a
-                href="/privacidade"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="font-semibold text-brand underline underline-offset-2 transition hover:text-brand-hover"
-              >
-                política de privacidade
-              </a>{" "}
-              do Reps Club.
-            </span>
-          </label>
-          {(erroLocal.termos ?? estado.errosPorCampo?.termos) && (
-            <p className="text-[12.5px] font-semibold text-danger">
-              {erroLocal.termos ?? estado.errosPorCampo?.termos}
-            </p>
-          )}
+          <AceiteDosTermos
+            marcado={aceitouTermos}
+            aoMarcar={(valor) => {
+              setAceitouTermos(valor);
+              setErroLocal((atual) => ({ ...atual, termos: undefined }));
+            }}
+            erro={erroLocal.termos ?? estado.errosPorCampo?.termos}
+          />
 
           <Button type="button" block size="lg" onClick={avancar}>
             Continuar

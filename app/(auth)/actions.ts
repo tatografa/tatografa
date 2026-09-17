@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { erroDaSenha } from "@/lib/domain/senha";
+import { VERSAO_DOS_DOCUMENTOS } from "@/lib/legal/documentos";
 
 import { getSiteOrigin } from "@/lib/auth/site-url";
 import { falhaDeEnvioVisivel, traduzErro } from "@/lib/auth/mensagens";
@@ -17,7 +18,7 @@ import { createClient } from "@/lib/supabase/server";
  */
 export type EstadoAuth = {
   erro?: string;
-  errosPorCampo?: Partial<Record<"nome" | "email" | "senha", string>>;
+  errosPorCampo?: Partial<Record<"nome" | "email" | "senha" | "termos", string>>;
   campos?: { nome?: string; email?: string };
   sucesso?: "confirme-email" | "link-enviado";
 };
@@ -45,6 +46,12 @@ const esquemaCadastro = z.object({
   nome: z.string().trim().min(2, "Informe seu nome."),
   email,
   senha,
+  // O personal também aceita os documentos (decisão do Otávio, 17/09). Os
+  // termos falam dele em cada seção — "o que é responsabilidade sua e do seu
+  // personal" — e até aqui nenhum personal tinha linha de aceite.
+  termos: z.literal("on", {
+    error: "É preciso aceitar os termos para criar a conta.",
+  }),
 });
 const esquemaEmail = z.object({ email });
 const esquemaNovaSenha = z.object({ senha });
@@ -53,7 +60,12 @@ const esquemaNovaSenha = z.object({ senha });
 function errosDe(erro: z.ZodError): EstadoAuth["errosPorCampo"] {
   const saida: EstadoAuth["errosPorCampo"] = {};
   for (const problema of erro.issues) {
-    const campo = problema.path[0] as "nome" | "email" | "senha" | undefined;
+    const campo = problema.path[0] as
+      | "nome"
+      | "email"
+      | "senha"
+      | "termos"
+      | undefined;
     if (campo && !saida[campo]) saida[campo] = problema.message;
   }
   return saida;
@@ -104,6 +116,7 @@ export async function cadastrar(
     nome: String(formData.get("nome") ?? ""),
     email: String(formData.get("email") ?? ""),
     senha: String(formData.get("senha") ?? ""),
+    termos: formData.get("termos") ?? "",
   };
   const campos = { nome: bruto.nome, email: bruto.email };
 
@@ -121,7 +134,18 @@ export async function cadastrar(
     options: {
       // `role: personal` é o que faz o gatilho do banco criar a linha em
       // `trainers` (migration 0003). Sem isso, a conta nasce sem perfil.
-      data: { role: "personal", name: analise.data.nome },
+      data: {
+        role: "personal",
+        name: analise.data.nome,
+        /*
+         * A versão do texto aceito, para o gatilho gravar em
+         * `term_acceptances` (migration 0032, que subiu esse bloco para antes
+         * dos ramos de papel — antes ele só existia no do aluno). Vem da
+         * constante do servidor, **não** do formulário: quem decide qual versão
+         * vale é quem serve o texto.
+         */
+        termos_versao: VERSAO_DOS_DOCUMENTOS,
+      },
       emailRedirectTo: `${origem}/auth/confirmar?proximo=/painel`,
     },
   });
