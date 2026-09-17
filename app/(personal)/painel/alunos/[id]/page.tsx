@@ -6,6 +6,7 @@ import { requireTrainer } from "@/lib/auth/session";
 import { lerAluno } from "@/lib/queries/alunos";
 import { listarHistorico } from "@/lib/queries/historico";
 import { programaAtivoDoAluno } from "@/lib/queries/macrotreinos";
+import { listarObservacoes } from "@/lib/queries/observacoes";
 import { progressoDoAluno } from "@/lib/queries/progresso";
 import { lerReavaliacoesDeUmAluno } from "@/lib/queries/reavaliacao";
 
@@ -35,12 +36,14 @@ export default async function AlunoDoPainel(
   // Sem `comFotos`: a ficha mostra os números, e a foto do corpo do aluno fica
   // na tela de reavaliações, onde o personal foi de propósito. Assinar três
   // URLs por ciclo aqui seria pagar por imagem que ninguém abriu.
-  const [programa, sessoes, exercicios, reavaliacoes] = await Promise.all([
-    programaAtivoDoAluno(aluno.id),
-    listarHistorico(aluno.id),
-    progressoDoAluno(aluno.id),
-    lerReavaliacoesDeUmAluno(trainer.id, aluno.id),
-  ]);
+  const [programa, sessoes, exercicios, reavaliacoes, observacoes] =
+    await Promise.all([
+      programaAtivoDoAluno(aluno.id),
+      listarHistorico(aluno.id),
+      progressoDoAluno(aluno.id),
+      lerReavaliacoesDeUmAluno(trainer.id, aluno.id),
+      listarObservacoes(aluno.id),
+    ]);
 
   return (
     <FichaDoAluno
@@ -49,6 +52,7 @@ export default async function AlunoDoPainel(
       sessoes={sessoes}
       exercicios={exercicios}
       reavaliacoes={reavaliacoes}
+      observacoes={observacoes}
     />
   );
 }

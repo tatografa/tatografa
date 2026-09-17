@@ -17,7 +17,7 @@
  * Corrigir uma vírgula não é mudar a versão. Mudar o que se coleta, com quem
  * se compartilha ou por quanto tempo se guarda, é.
  */
-export const VERSAO_DOS_DOCUMENTOS = "2026-09-15";
+export const VERSAO_DOS_DOCUMENTOS = "2026-09-17";
 
 /**
  * O que mudou nesta versão, em uma frase, para o portão de re-aceite.
@@ -27,7 +27,7 @@ export const VERSAO_DOS_DOCUMENTOS = "2026-09-15";
  * clicar sem ler, o que é o contrário de consentimento.
  */
 export const O_QUE_MUDOU =
-  "Agora existe a reavaliação: seu personal libera um formulário e você preenche peso, medidas do corpo e até três fotos suas — de frente, de lado e de costas. Só você e ele veem isso; reavaliação nunca vira post no feed, e você apaga as fotos quando quiser.";
+  "Seu personal agora tem um espaço de anotações sobre o seu acompanhamento — lesão, preferência, motivo de uma falta. As anotações são dele e não aparecem em nenhuma tela sua, como a ficha de papel de um personal sempre foi. Elas são dado sobre você: dá para pedir a ele o que está escrito, e elas somem junto com a sua conta.";
 
 /**
  * Quem responde pelo dado.

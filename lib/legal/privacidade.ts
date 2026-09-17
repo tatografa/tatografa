@@ -53,6 +53,7 @@ export const PRIVACIDADE: Documento = {
         "**Que nasce do seu treino:** os treinos que seu personal montou para você, e, a cada série que você registra, a carga, as repetições, se você pulou a série, quando a sessão começou e terminou e quanto tempo durou.",
         "**Que você publica, se quiser:** foto, legenda e comentários no feed, mais o registro de quais posts você curtiu. Publicar é opcional do começo ao fim — dá para usar o Reps Club inteiro sem nunca abrir o feed.",
         "**Que você preenche na reavaliação, se quiser:** peso, percentual de gordura, medidas de braço, peito, cintura, quadril e coxa, uma observação sua, e até três fotos suas — de frente, de lado e de costas. Seu personal libera o formulário; preencher é escolha sua, campo por campo, e a reavaliação pode ser enviada sem nenhuma foto.",
+        "**Que o seu personal escreve sobre o seu acompanhamento:** ele tem, na sua ficha, um espaço de anotações — lesão, preferência de exercício, motivo de uma falta, o que ele precisar lembrar para montar o seu próximo treino. **Essas anotações são dele e você não as vê pelo app**, do mesmo jeito que a ficha de papel de um personal sempre foi dele. Elas continuam sendo dado sobre você: se quiser saber o que está escrito ali, peça a ele ou escreva para " + OPERADOR.contato + ", e apagamos junto com a sua conta.",
         "**Nada além disso.** Não pedimos documento, endereço, telefone, cartão nem localização. Não usamos cookie de rastreamento, nem ferramenta de publicidade.",
       ],
     },
@@ -96,6 +97,7 @@ export const PRIVACIDADE: Documento = {
       titulo: "Quem vê seus dados",
       paragrafos: [
         "**Seu personal**, o mesmo que te convidou: vê seu perfil, seus treinos, todo o seu histórico de execução, as suas reavaliações — medidas e fotos — e tudo o que você publica no feed, inclusive os posts marcados como “só o seu personal”. É o ponto do produto — ele precisa disso para te treinar.",
+        "**As anotações que o seu personal faz sobre você ficam só com ele.** Nenhum outro aluno, nenhum outro personal e nenhum aluno de fora da turma as vê — e você também não, pela tela. Quem confere isso é o banco de dados, a cada consulta, como no resto.",
         "**Os outros alunos do seu personal**, e apenas eles, veem os posts que você marcou para a turma: a foto, a legenda, os comentários e a contagem de curtidas. Nada mais seu: nem perfil, nem peso, nem treino, nem histórico, nem reavaliação. Você também vê os posts que eles marcaram para a turma.",
         "**Nenhum outro personal**, e nenhum aluno de fora da sua turma, vê qualquer coisa sua — inclusive os posts da turma. Isso não é promessa: é regra no banco de dados, conferida a cada consulta.",
         "**Quem opera o Reps Club**, para manter o serviço no ar e responder aos seus pedidos.",
@@ -109,7 +111,7 @@ export const PRIVACIDADE: Documento = {
         "Enquanto sua conta existir. Seu histórico de treino só tem valor porque é longo: apagar o ano passado apagaria a sua evolução.",
         "Post e foto ficam até você apagar o post. Apagou, saiu — junto com as curtidas e os comentários dele.",
         "As fotos da reavaliação ficam até você apagá-las, na tela da reavaliação. As medidas ficam enquanto a conta existir: é a série histórica que dá sentido à comparação.",
-        "Quando você pedir exclusão da conta, apagamos tudo em até 30 dias — perfil, treinos, todas as séries registradas, seus posts, suas reavaliações e todas as suas fotos. Não guardamos cópia depois disso.",
+        "Quando você pedir exclusão da conta, apagamos tudo em até 30 dias — perfil, treinos, todas as séries registradas, seus posts, suas reavaliações, todas as suas fotos e as anotações que o seu personal fez sobre você. Não guardamos cópia depois disso.",
       ],
     },
     {
@@ -117,6 +119,7 @@ export const PRIVACIDADE: Documento = {
       paragrafos: [
         "A LGPD te dá o direito de saber o que temos sobre você, corrigir o que estiver errado, pedir uma cópia, e pedir exclusão. Também de retirar o consentimento e de saber com quem compartilhamos.",
         "Boa parte disso você já faz sozinho no app: seu perfil e seu histórico estão todos lá, o perfil é editável, cada post tem o botão de apagar, e as fotos de cada reavaliação também.",
+        "**A exceção são as anotações do seu personal sobre o seu acompanhamento**, que não aparecem em nenhuma tela sua. Elas existem, são dado sobre você, e o seu direito de saber o que está escrito ali continua valendo — só não é um botão, é um pedido: fale com ele, ou escreva para " + OPERADOR.contato + ".",
         `Para o resto — cópia de tudo ou exclusão da conta —, peça ao seu personal ou escreva para ${OPERADOR.contato}. Respondemos em até 15 dias.`,
         "Se não ficar satisfeito, você pode reclamar à ANPD, a autoridade nacional de proteção de dados.",
       ],

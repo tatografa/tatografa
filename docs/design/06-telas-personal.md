@@ -165,6 +165,10 @@ Para a fatia vertical do roadmap, só estas partes são necessárias:
 
 O resto vem depois. Não construa as 9 páginas antes de o loop funcionar.
 
+**Estado em 17/09/2026.** O §4 ganhou as observações privadas do personal — lista de
+anotações datadas, visíveis só para ele (`trainer_notes`, migration 0028). O aluno não
+tem policy de leitura, e a política de privacidade passou a declarar que elas existem.
+
 **Estado em 16/09/2026.** As nove páginas existem. O §2 e o §3 foram fechados nesta data:
 o dashboard ganhou o quarto indicador (reavaliações pendentes) e a atividade recente, e a
 lista de alunos saiu dele para `/painel/alunos`, com tabela, busca e filtro. O que este
@@ -174,7 +178,6 @@ documento ainda pede e **não** existe, por decisão registrada no `CLAUDE.md`:
 |---|---|---|
 | Layout base | Sidebar colapsável | A barra no topo navega as mesmas páginas |
 | §3 | Assistente de novo aluno | O aluno preenche o próprio perfil no onboarding |
-| §4 | Observações privadas do personal | Não construído ainda |
 | §5 | Reordenar por arraste, duplicar, rascunho | Não construídos ainda |
 
 A referência visual `prototipos/Painel do Personal - Dashboard.dc.html` desenha um

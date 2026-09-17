@@ -197,6 +197,43 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-17]** **A anotação do personal é tabela própria porque `students` é
+  legível pelo aluno.** `students_select` devolve a ele a própria linha inteira, então
+  uma coluna `observacoes` ali seria lida pelo app do aluno na primeira consulta — e a
+  anotação profissional de quem treina alguém deixa de ser escrita com honestidade no
+  segundo em que o avaliado lê. `trainer_notes` (migration 0028) não tem policy de select
+  para o aluno: com RLS ligado, **a ausência é a trava**, como em `term_acceptances`.
+  O nome diz de quem é a caneta — ao lado de `student_measurements` (medidas *do* aluno,
+  escritas *pelo* aluno), um `student_notes` leria como anotação do aluno. Provado com 13
+  casos: seis de burla (o aluno lendo, escrevendo e apagando; outro personal lendo,
+  escrevendo e editando) e sete de caminho legítimo.
+- **[2026-09-17]** **Apagar e editar são permitidos aqui, ao contrário de sessão e de
+  reavaliação.** Lá o registro fechado é histórico de que **outra pessoa** depende: o
+  aluno perde a evolução, o personal perde a comparação. Aqui ninguém mais lê e nenhum
+  número do produto sai da anotação, então travar só obrigaria a esvaziar o texto para
+  fingir que sumiu. A regra não é "registro não se apaga", é "não se apaga o que o outro
+  já leu".
+- **[2026-09-17]** **O cadeado na tela é parte da funcionalidade, não enfeite.** Um campo
+  de texto numa ficha não diz a quem pertence, e o personal só escreve "não confio na
+  execução dele no agachamento" se souber que o aluno não lê. Quem garante é o RLS; quem
+  faz ele **confiar** é a linha "só você vê" no cabeçalho e a dica embaixo do campo. Sem
+  elas o campo existe e vira lugar de elogio.
+- **[2026-09-17]** **Guardar dado sobre alguém obriga a dizer que ele existe — e a regra
+  de quando subir a versão já estava escrita.** `documentos.ts` diz: "mudar o que se
+  coleta, com quem se compartilha ou por quanto tempo se guarda" sobe a data. A anotação
+  muda o que se coleta, então `VERSAO_DOS_DOCUMENTOS` foi para `2026-09-17` e **todo aluno
+  passa pelo portão de re-aceite na próxima visita**. Subir agora, com o piloto começando,
+  custa quase nada; subir com trinta alunos custa trinta portões. A política declara a
+  anotação em quatro lugares — o que se coleta, quem vê, o que a exclusão leva e os
+  direitos —, e diz a verdade inteira: o aluno não vê pela tela, mas pode pedir o que está
+  escrito. É o par da decisão de 14/09 (texto legal é contrato com a tela), agora no
+  sentido inverso: **tela que coleta sem o texto declarar é o mesmo defeito de cabeça
+  para baixo.**
+- **[2026-09-17]** **Nem typecheck nem lint pegam `server-only` importado por componente
+  cliente; só o `build`.** `LIMITE_DAS_OBSERVACOES` nasceu em `lib/queries/observacoes.ts`
+  por ser o `limit()` daquela consulta, e a tela que mostra "as 50 mais recentes" é
+  cliente. Terceira vez que o mesmo formato aparece, depois de `PERIODOS` e de
+  `iniciaisDe`. **Dado de tela mora em `lib/domain/`, mesmo quando "pertence" à consulta.**
 - **[2026-09-16]** **O dashboard responde "o que mudou hoje"; a carteira tem endereço
   próprio.** A lista de alunos saiu de `/painel` para `/painel/alunos` (doc 06 §3), com
   tabela, busca e filtro por status. Não é organização: enquanto a lista morava no

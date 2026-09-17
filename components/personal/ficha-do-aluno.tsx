@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { EvolucaoDoAluno } from "@/components/personal/evolucao-do-aluno";
+import { ObservacoesDoAluno } from "@/components/personal/observacoes-do-aluno";
 import { Comparacao } from "@/components/reavaliacao/comparacao";
 import { Badge, Card } from "@/components/ui";
 import {
@@ -13,6 +14,7 @@ import type { AlunoDaFicha } from "@/lib/queries/alunos";
 import type { SessaoDoHistorico } from "@/lib/queries/historico";
 import { LIMITE_DO_HISTORICO } from "@/lib/queries/historico";
 import type { Macrotreino } from "@/lib/queries/macrotreinos";
+import type { Observacao } from "@/lib/queries/observacoes";
 import type { ExercicioComProgresso } from "@/lib/queries/progresso";
 import { formatarMedida } from "@/lib/domain/reavaliacao";
 import { comparar, type Reavaliacao } from "@/lib/queries/reavaliacao";
@@ -30,6 +32,12 @@ export type FichaDoAlunoProps = {
    * reavaliações mostra as fotos, onde ele foi de propósito.
    */
   reavaliacoes: Reavaliacao[];
+  /**
+   * As anotações do personal sobre este aluno, da mais recente para a mais
+   * antiga. Nunca chegam a nenhuma tela do aluno: `trainer_notes` não tem
+   * policy de select para ele (migration 0028).
+   */
+  observacoes: Observacao[];
 };
 
 /**
@@ -45,12 +53,13 @@ export function FichaDoAluno({
   sessoes,
   exercicios,
   reavaliacoes,
+  observacoes,
 }: FichaDoAlunoProps) {
   return (
     <div className="space-y-8">
       <header className="space-y-3">
         <Link
-          href="/painel"
+          href="/painel/alunos"
           className="eyebrow text-ink-4 transition hover:text-ink-2"
         >
           ← Alunos
@@ -88,6 +97,12 @@ export function FichaDoAluno({
       </header>
 
       <ProgramaAtivo programa={programa} nome={aluno.name} />
+
+      <ObservacoesDoAluno
+        alunoId={aluno.id}
+        observacoes={observacoes}
+        nome={primeiroNome(aluno.name)}
+      />
 
       <section className="space-y-3">
         <h2 className="eyebrow text-ink-4">Evolução por exercício</h2>

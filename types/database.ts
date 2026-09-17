@@ -553,6 +553,48 @@ export type Database = {
         }
         Relationships: []
       }
+      trainer_notes: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          student_id: string
+          trainer_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          student_id: string
+          trainer_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          student_id?: string
+          trainer_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_notes_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_notes_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trainers: {
         Row: {
           avatar_url: string | null
