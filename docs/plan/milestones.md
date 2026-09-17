@@ -545,3 +545,50 @@ programação:
 | Decidir se o personal também aceita os termos | Otávio | ~20 linhas |
 
 Roteiro das três primeiras: `docs/plan/configurar-dominio-e-email.md`.
+
+## O painel fechado · o que o teste de campo achou (17/09/2026)
+
+Rodada de **57 passos**, cobrindo as quatro levas posteriores ao reteste do M3:
+dashboard, tela de alunos, observações privadas e duplicação.
+
+**57 de 57 bateram.** Uma anotação, e ela virou conserto.
+
+### O achado: o card que dizia o contrário do que tinha acabado de acontecer
+
+Passo 44 — "a cópia aparece na seção daquele outro aluno, com a etiqueta
+*Arquivado*". Marcado ✅ com a nota **"não vi essa etiqueta"**. Os passos 45 e 46
+passaram, então a cópia estava lá e ele a encontrou; o que não foi visto foi a
+etiqueta.
+
+Reproduzido com props fixas, no estado exato: aluno que **não tinha programa
+nenhum** recebendo a primeira cópia. A seção dele lia, nesta ordem:
+
+1. "Carla Menezes"
+2. **"Carla está sem programa — e sem treino no app."**
+3. **Botão "Criar programa"**
+4. ARQUIVADO · Projeto verão (cópia)
+
+A etiqueta estava no DOM e acima da dobra (y=484). O problema não era ela: era o
+card acima, que **afirmava o oposto do que o personal tinha acabado de fazer** e
+oferecia refazer à mão o que estava pronto duas linhas abaixo. O olho foi para a
+frase mais alta e mais errada.
+
+Corrigido: com programa arquivado na lista, o card passa a dizer "não tem nenhum
+programa **ativo** — ative um dos que estão logo abaixo" e **perde o botão**
+"Criar programa". Sem arquivados, o texto e o botão antigos continuam.
+
+**A lição não é sobre esta tela.** O estado vazio foi escrito quando "sem
+programa ativo" e "sem programa nenhum" eram a mesma coisa. Duplicar criou um
+terceiro estado — tem programa, nenhum ativo — e o texto velho passou a mentir.
+Funcionalidade nova pode transformar em mentira um estado vazio que estava certo.
+
+### Um defeito meu, na ferramenta de teste
+
+Os três roteiros em HTML **escreviam no mesmo documento** (`roteiro/m3`) e liam
+de três chaves diferentes. Nasceu de criar cada roteiro por cópia: a leitura
+ganhava chave nova, a escrita ficava com a do original. O sintoma não é erro
+nenhum — é a página abrir vazia ao recarregar, e um roteiro sobrescrever as
+marcações do outro em silêncio. As marcações das duas rodadas do M3 se perderam
+assim; os **resultados** sobreviveram porque estão escritos aqui, que é o
+registro que vale. Corrigido: cada página declara `DOCUMENTO` uma vez, no topo,
+e os dois usos leem a constante.

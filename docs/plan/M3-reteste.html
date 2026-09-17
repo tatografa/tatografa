@@ -497,6 +497,17 @@ const PARTES = [
 
 const TOTAL = PARTES.reduce((s, p) => s + p.passos.length, 0);
 
+/* O documento onde as marcações deste roteiro vivem.
+ *
+ * **Uma constante, e não a string repetida nos dois lugares.** A escrita e o
+ * `onSnapshot` precisam apontar para o mesmo documento, e quando os roteiros
+ * foram criados por cópia a leitura ganhou chave nova e a escrita ficou com a
+ * do original: os três gravavam em "roteiro/m3" e liam de três lugares
+ * diferentes. O sintoma não é erro nenhum — é a página abrir vazia ao ser
+ * recarregada, e um roteiro sobrescrever as marcações do outro em silêncio.
+ */
+const DOCUMENTO = "roteiro/m3-reteste";
+
 /* Estado local. A chave de cada passo é o número que aparece na tela, para a
    nota que o Otávio escrever e o passo que ele cita conversarem sem tradução. */
 let estado = {};
@@ -571,7 +582,7 @@ function salvar() {
     const naEscrita = edicoes;
     try {
       await db
-        .doc("roteiro/m3")
+        .doc(DOCUMENTO)
         .set({ passos: estado, atualizadoEm: new Date().toISOString() });
 
       // Só solta o que foi enviado se nada mudou enquanto a escrita ia e
@@ -706,7 +717,7 @@ function avisar(texto) {
     return;
   }
 
-  db.doc("roteiro/m3-reteste").onSnapshot(
+  db.doc(DOCUMENTO).onSnapshot(
     (snapshot) => {
       // Enquanto a escrita própria não confirma, a tela local já está certa:
       // adotar a volta do servidor aqui faria o toque piscar para trás.

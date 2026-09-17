@@ -58,7 +58,11 @@ export function ListaDeProgramas({ porAluno }: { porAluno: ProgramasDoAluno[] })
                   alunos={alunos}
                 />
               ) : (
-                <SemPrograma alunoId={aluno.id} aluno={aluno.name} />
+                <SemPrograma
+                  alunoId={aluno.id}
+                  aluno={aluno.name}
+                  temArquivados={arquivados.length > 0}
+                />
               )}
 
               {arquivados.length > 0 && (
@@ -218,7 +222,36 @@ function ProgramaArquivado({
  * O texto diz a consequência, não só o fato: sem programa o aluno abre o app e
  * não tem o que fazer, e é o personal que resolve isso.
  */
-function SemPrograma({ alunoId, aluno }: { alunoId: string; aluno: string }) {
+function SemPrograma({
+  alunoId,
+  aluno,
+  temArquivados,
+}: {
+  alunoId: string;
+  aluno: string;
+  /**
+   * Muda a frase **e** o caminho oferecido. Achado no teste de campo: logo
+   * depois de duplicar um programa para um aluno que não tinha nenhum, a
+   * primeira coisa da seção dele era "está sem programa" com um botão "Criar
+   * programa" — dizendo o contrário do que o personal tinha acabado de fazer,
+   * e mandando refazer à mão o que estava pronto duas linhas abaixo. A cópia
+   * aparecia, com a etiqueta e tudo; ninguém olhava para ela.
+   */
+  temArquivados: boolean;
+}) {
+  if (temArquivados) {
+    return (
+      <Card className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-[13.5px] text-ink-3">
+          {primeiroNome(aluno)} <strong className="font-semibold text-ink-2">
+            não tem nenhum programa ativo
+          </strong>{" "}
+          — e sem isso não vê treino no app. Ative um dos que estão logo abaixo.
+        </p>
+      </Card>
+    );
+  }
+
   return (
     <Card className="flex flex-wrap items-center justify-between gap-3">
       <p className="text-[13.5px] text-ink-3">

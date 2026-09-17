@@ -197,6 +197,16 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-17, do teste de campo]** **Funcionalidade nova transforma em mentira um
+  estado vazio que estava certo.** O card "está sem programa — e sem treino no app" foi
+  escrito quando "sem programa ativo" e "sem programa nenhum" eram a mesma coisa.
+  Duplicar criou um terceiro estado — tem programa, nenhum ativo — e aí, logo depois de
+  copiar um programa para um aluno, a primeira coisa da seção dele **afirmava o oposto**
+  e oferecia "Criar programa", refazer à mão o que estava pronto duas linhas abaixo. A
+  etiqueta "Arquivado" estava lá, no DOM e acima da dobra; ninguém olhava para ela.
+  Agora, com arquivado na lista, o texto diz "não tem nenhum programa **ativo** — ative um
+  dos que estão logo abaixo" e o botão some. **Ao acrescentar um caminho que cria dado,
+  reler os estados vazios que aquele dado agora preenche.**
 - **[2026-09-17]** **Duplicar programa é uma transação só, e a cópia nasce arquivada.**
   Copiar um macrotreino é 1 `mesocycles` + N `workouts` + M `workout_exercises`
   (`duplicar_macrotreino`, migration 0029). Em passos soltos pela Server Action, uma
