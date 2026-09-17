@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reteste M3 · Reps Club</title>
+<title>Roteiro do painel · Reps Club</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
@@ -384,7 +384,7 @@
 <header class="topo">
   <div class="topo-interno">
     <div class="topo-linha">
-      <span class="marca"><b>Reps Club</b> · Reteste</span>
+      <span class="marca"><b>Reps Club</b> · Painel</span>
       <span class="contagens">
         <span class="c-ok" id="n-ok">0 ok</span>
         <span class="c-fail" id="n-fail">0 ✗</span>
@@ -400,9 +400,9 @@
 
 <main class="envelope">
   <div class="abertura">
-    <h1>Reteste: os consertos e as pontas soltas</h1>
-    <p class="sub">A sua rodada de 115 passos passou em <strong>106</strong>. Este roteiro cobre só o que sobrou: os <strong>dois defeitos já corrigidos</strong>, os <strong>dois que eu não consegui reproduzir</strong> e os <strong>quatro onde o roteiro errou a expectativa</strong>. Leva cerca de <strong>22 minutos</strong>.</p>
-    <p class="sub">Em cada passo, marque <strong>ok</strong> ou <strong>✗</strong>. Quando marcar ✗, escreva <strong>a frase que apareceu na tela</strong> — os quatro defeitos do M1 e do M2 estavam todos em borda de sessão, e nenhum deles apareceria num “não funcionou” sem o texto.</p>
+    <h1>O painel do personal, fechado</h1>
+    <p class="sub">Tudo o que entrou <strong>depois do reteste do M3</strong>, em quatro levas: o <strong>dashboard</strong> com os dois blocos que faltavam, a <strong>tela de alunos</strong> com tabela e busca, as <strong>observações privadas</strong> sobre o aluno e a <strong>duplicação</strong> de treino e de macrotreino. Leva cerca de <strong>40 minutos</strong>.</p>
+    <p class="sub">Em cada passo, marque <strong>ok</strong> ou <strong>✗</strong>. Quando marcar ✗, escreva <strong>a frase que apareceu na tela</strong> — os defeitos reais que você achou nas rodadas anteriores nunca apareceriam num “não funcionou” sem o texto.</p>
     <div class="aviso-salvo" id="aviso">
       <span class="ponto"></span>
       <span id="aviso-texto">Marque à vontade: cada toque é salvo e eu leio daqui quando você terminar.</span>
@@ -412,11 +412,13 @@
       <h2>Antes de começar</h2>
       <ul>
         <li><b>Onde:</b> <code>repsclub.com.br</code>, com painel no computador e app no celular ao mesmo tempo.</li>
-        <li><b>Recarregue o app</b> antes de começar: as correções das Partes 1 subiram agora.</li>
-        <li><b>As Partes 2 e 3 são as mais importantes</b>, e não pelo ✓ — é onde eu <b>não sei</b> o que aconteceu. As suas anotações ali valem mais que a marcação.</li>
-        <li><b>A senha do raul</b> é necessária na Parte 3.</li>
+        <li><b>A Parte 1 vem primeiro porque ela trava o resto.</b> A política de privacidade mudou de versão, então <b>todo aluno</b> — inclusive você, como aluno de si mesmo — passa por um portão de aceite ao abrir o app. Sem ele, nenhuma tela do celular abre.</li>
+        <li><b>A Parte 4 é a que mais importa.</b> É a única do roteiro em que um defeito vazaria dado de uma pessoa para outra.</li>
+        <li><b>Você precisa de dois alunos</b> na carteira para a Parte 6 (duplicar para outro aluno). Você mesmo conta como um.</li>
+        <li><b>O banco é o de desenvolvimento.</b> Pode criar, copiar, apagar e refazer à vontade.</li>
+        <li><b>Faça na ordem.</b> A Parte 6 usa o programa que você olhar na Parte 5.</li>
       </ul>
-      <p class="ressalva">O roteiro completo de 115 passos continua no outro link, com as suas 106 marcações — este aqui não o substitui, cobre só o que ficou pendente.</p>
+      <p class="ressalva">Não consigo conferir daqui se o último deploy subiu — a rede bloqueia o domínio. O sinal de que é o código de agora: o menu do painel tem <b>“Painel”</b> e <b>“Alunos”</b> como itens <b>separados</b>. Se “Alunos” for o primeiro item e levar ao dashboard, o deploy ainda não chegou.</p>
     </div>
   </div>
 
@@ -430,67 +432,103 @@
       <div class="ficha"><span class="n" id="f-resta">—</span><span class="r">a fazer</span></div>
     </div>
     <p>Me diga que terminou — eu leio as marcações e as notas direto daqui.</p>
-    <p>Se a Parte 1 passar, os dois defeitos estão mortos. Se as Partes 2 e 3 vierem com anotação, eu tenho o que faltava para fechar os outros dois — e aí o <strong>M3 fecha</strong>.</p>
+    <p>Se a <strong>Parte 4</strong> passar inteira, a anotação privada está trancada de verdade e o doc 06 fecha. O que sobra do painel é a <strong>sidebar colapsável</strong> e o <strong>dashboard maior</strong> dos seus prints — e esse depende de você decidir se o Reps Club vai cuidar de cobrança.</p>
   </div>
 </main>
 
 <script>
 const PARTES = [
   {
-    n: "Parte 1", titulo: "Os dois consertos de hoje", duracao: "5 min", critica: true,
-    nota: "<strong>No computador, logado como personal.</strong> Os dois defeitos que a sua rodada encontrou. O passo 2 é o que importa: era ali que o diálogo ficava aberto.",
+    n: "Parte 1", titulo: "O portão de re-aceite", duracao: "5 min", critica: true,
+    nota: "<strong>No celular, no app do aluno.</strong> A política de privacidade passou a declarar as anotações que o personal faz sobre o aluno — e a regra do projeto é que mudar <b>o que se coleta</b> exige aceite novo. Então <b>todo aluno</b> topa com este portão uma vez. Ele vem primeiro no roteiro porque <b>trava todas as outras telas do celular</b>.",
     passos: [
-      "Painel → <strong>Reavaliações</strong> → “Nova reavaliação”. Escolha um aluno e clique <strong>Liberar</strong>. O diálogo <strong>fecha sozinho</strong>.",
-      "Clique “Nova reavaliação” de novo, escolha <strong>outro aluno</strong> e libere. <strong>Fecha sozinho outra vez.</strong> <em>Era exatamente aqui que ele ficava aberto: o segundo sucesso seguido.</em>",
-      "Uma terceira vez, agora com o <strong>mesmo aluno da primeira</strong>. Aparece “Esse aluno já tem uma reavaliação esperando resposta” e o diálogo <strong>continua aberto</strong> — erro tem que ficar na tela para ser lido.",
-      "Painel → <strong>Alunos</strong> → clique num aluno que já informou os dados. Na linha abaixo do nome aparecem <strong>o peso e a altura</strong>, junto do objetivo, do nível e do e-mail.",
-      "Abra a ficha de um aluno que <strong>nunca informou peso</strong>. A linha simplesmente pula o dado — sem “null”, sem espaço vazio estranho.",
-      "No celular, no app do aluno, mude o <strong>peso</strong> em Perfil → “Editar meus dados”. Volte à ficha dele no painel: <strong>o peso novo está lá.</strong> <em>Era o passo 27, que falhou porque a ficha nunca mostrou peso.</em>",
+      "Abra o app do aluno no celular (logado como <strong>você mesmo</strong>, aluno de si mesmo). Aparece uma tela de <strong>aceite</strong>, e não a home.",
+      "Ela diz <strong>o que mudou</strong>, em uma frase: que o seu personal agora tem um espaço de anotações sobre o acompanhamento, que elas <strong>não aparecem em nenhuma tela sua</strong>, e que dá para pedir a ele o que está escrito. <em>Portão que diz só “atualizamos os documentos” faz clicar sem ler — quero conferir que este não é assim.</em>",
+      "<strong>Tente sair sem aceitar</strong>: use o botão de voltar do celular, ou digite <code>repsclub.com.br/app/treinos</code> na barra de endereço. <strong>Volta para o portão.</strong> Ele é bloqueante, não é uma faixa que se fecha.",
+      "Abra o link de <strong>política de privacidade</strong> a partir do portão. Ela abre e <strong>dá para ler sem ter aceitado</strong> — ler o que se está aceitando não pode depender de aceitar.",
+      "Na política, procure a seção <strong>“Que dados coletamos”</strong>. Tem um parágrafo sobre as anotações do personal. Confira que ele diz que você <strong>não as vê pelo app</strong> e que pode pedir o conteúdo.",
+      "Volte e <strong>aceite</strong>. O app abre na home normalmente.",
+      "<strong>Feche o app e abra de novo.</strong> O portão <strong>não volta</strong> — o aceite ficou gravado.",
+      "Se você tem <strong>outra conta de aluno</strong> (raul ou Vinicius), entre nela. O portão aparece <strong>para ela também</strong>, porque o aceite é por pessoa. Aceite e siga.",
     ],
   },
   {
-    n: "Parte 2", titulo: "O aviso de conflito", duracao: "5 min", critica: true,
-    nota: "<strong>No computador.</strong> Este eu <b>não consegui reproduzir</b> — no meu teste o aviso aparece. Os passos abaixo servem para descobrir por que não apareceu para você, então as anotações aqui valem mais que o ✓.",
+    n: "Parte 2", titulo: "O dashboard", duracao: "6 min",
+    nota: "<strong>No computador, logado como personal.</strong> O <code>/painel</code> deixou de ser uma lista de alunos e passou a responder “o que mudou hoje”. Dois blocos que o handoff pedia desde o começo e nunca existiram.",
     passos: [
-      "Painel → <strong>Agenda</strong>. Anote qual semana está no título (ex.: “14 a 20 de setembro”).",
-      "Clique <strong>“Nova sessão”</strong>. Repare no <strong>dia que já vem preenchido</strong> — é hoje. Escolha um aluno, deixe a hora em <strong>18:00</strong> e marque.",
-      "Clique “Nova sessão” de novo, escolha <strong>outro aluno</strong> e <strong>não mude nada</strong> — nem o dia, nem a hora. Antes de salvar deve aparecer uma <strong>faixa amarela</strong> dizendo com quem bate.",
-      "Se apareceu: ela fica <strong>entre o campo de duração e o de observação</strong>. Role o diálogo todo e diga se ela estava visível sem precisar rolar.",
-      "Se <strong>não</strong> apareceu: escreva no ✗ <strong>qual dia estava no campo</strong> nas duas vezes. É a informação que me falta.",
-      "Agora repita mudando o dia para <strong>outra semana</strong> (duas semanas à frente), no mesmo horário de uma sessão que já exista lá. <strong>Espero que o aviso NÃO apareça</strong> — ele só enxerga a semana que está na tela. Quero confirmar esse limite antes de decidir se conserto.",
+      "Abra <strong>Painel</strong>. No topo agora há <strong>quatro</strong> indicadores, não três: alunos ativos, treinos na semana, aderência média e <strong>reavaliações pendentes</strong>.",
+      "Se o número de reavaliações pendentes for <strong>maior que zero</strong>, ele está <strong>em vermelho</strong> e o cartão inteiro é <strong>clicável</strong> — leva para a tela de Reavaliações.",
+      "Se for <strong>zero</strong>, ele fica <strong>preto e não clica</strong>. <em>De propósito: levar a uma lista vazia é pior que não levar.</em> Se estiver em zero, libere uma reavaliação e volte para ver o cartão mudar.",
+      "Abaixo dos indicadores, o bloco <strong>“Precisam de atenção”</strong> continua como estava — ou não aparece nenhum, se ninguém estiver parado.",
+      "Mais abaixo, o bloco novo: <strong>“Atividade recente”</strong>. Cada linha tem o <strong>nome do aluno</strong>, o treino (letra e nome), e à direita o dia mais <strong>séries · kg · duração</strong>.",
+      "O dia é escrito como <strong>“Hoje”</strong>, <strong>“Ontem”</strong> ou “qua, 12 de set”. Se você treinou hoje, a sua linha diz <strong>Hoje</strong>. <em>Se disser “Ontem” num treino de hoje à noite, me avise: é fuso, e o projeto já tomou esse tiro.</em>",
+      "<strong>Clique numa linha da atividade.</strong> Abre a <strong>sessão</strong> daquele treino, série por série — não a ficha do aluno.",
+      "<strong>A lista de alunos não está mais no dashboard.</strong> No lugar dela, no fim da página, há um link <strong>“Ver todos os N alunos →”</strong>. Clique nele.",
     ],
   },
   {
-    n: "Parte 3", titulo: "A etiqueta PERSONAL", duracao: "4 min",
-    nota: "O outro que eu não consegui fechar. A lógica está certa no código, então quero saber <b>em que tela</b> você estava. Atenção a quem está logado em cada passo.",
+    n: "Parte 3", titulo: "A tela de alunos", duracao: "7 min",
+    nota: "A carteira ganhou endereço próprio, em <b>tabela</b> — densa de propósito, porque é onde você compara alunos na vertical. Enquanto ela morava no dashboard, empurrava tudo para fora da dobra a cada aluno novo.",
     passos: [
-      "<strong>No app do aluno</strong> (celular), logado como <strong>você mesmo</strong>: publique um post <strong>para a turma</strong>, com legenda reconhecível.",
-      "Confirme que você está no app do aluno e não no painel: a <strong>barra de baixo</strong> tem Treinar · Progresso · Feed · Perfil.",
-      "Saia e entre <strong>na conta do raul</strong>. Vá em <strong>Feed → aba “Da turma”</strong>.",
-      "No post que <strong>você</strong> publicou, ao lado do seu nome, tem a etiqueta vermelha <strong>PERSONAL</strong>.",
-      "Nos posts do próprio raul ou do Vinicius <strong>não</strong> há essa etiqueta — e está certo, ela marca só o post de quem treina a turma.",
-      "Se você viu etiquetas escritas <strong>“SÓ PARA VOCÊ”</strong> ou <strong>“TURMA”</strong>, escreva isso no ✗: essas são as do <strong>painel</strong>, não as do app — e aí eu sei que a tela era outra.",
+      "No menu do topo, <strong>“Painel”</strong> e <strong>“Alunos”</strong> são itens <strong>separados</strong>. “Alunos” leva a <code>/painel/alunos</code>.",
+      "A tabela tem <strong>seis colunas</strong>: Aluno (com as iniciais num círculo), Objetivo, Macrotreino, Última sessão, Aderência e Status.",
+      "Na <strong>sua própria linha</strong> aparece a etiqueta vermelha <strong>“Você”</strong>, ao lado do status.",
+      "Aluno <strong>sem macrotreino ativo</strong> mostra “Sem macrotreino” em cinza claro, e a aderência dele é <strong>“—”</strong>, não “0%”. <em>Zero por cento diria que ele faltou; o traço diz que não há o que medir.</em>",
+      "Aluno que <strong>nunca treinou</strong> mostra “Nunca treinou” na coluna de última sessão.",
+      "No campo de busca, digite <strong>parte de um nome</strong>. A tabela reduz na hora, sem recarregar a página.",
+      "Agora digite um nome <strong>sem acento</strong> de alguém que tem acento no nome (ex.: “jose” para achar “José”). <strong>Acha do mesmo jeito.</strong>",
+      "Digite <strong>parte de um e-mail</strong> (ex.: “gmail”). A busca também casa e-mail, não só nome.",
+      "Com o filtro ligado, embaixo da tabela aparece <strong>“X de Y alunos”</strong>. Sem filtro, só “Y alunos”.",
+      "Digite uma bobagem (“zzz”). Aparece o card <strong>“Nenhum aluno com esse filtro”</strong> — e o campo de busca <strong>continua na tela</strong>, para você apagar o que digitou.",
+      "Limpe a busca e mude o seletor de status para <strong>“Inativos”</strong>. Só os inativos ficam. Volte para “Todos”.",
+      "<strong>Clique no meio de uma linha</strong> — não no nome, mas na coluna “Macrotreino” ou “Objetivo”. Abre a ficha do aluno assim mesmo: a linha inteira é clicável.",
+      "Na ficha, o link de voltar no topo diz <strong>“← Alunos”</strong> e leva para <strong>esta tabela</strong>, não para o dashboard.",
     ],
   },
   {
-    n: "Parte 4", titulo: "A próxima sessão na home", duracao: "4 min",
-    nota: "Na rodada passada o <b>roteiro</b> atrapalhou: mandava marcar tudo como realizada ou faltou <b>antes</b> de conferir a linha. Sem sessão agendada no futuro não há o que mostrar. Agora na ordem certa.",
+    n: "Parte 4", titulo: "As observações privadas", duracao: "9 min", critica: true,
+    nota: "<strong>O teste que mais importa deste roteiro.</strong> É o único lugar onde um defeito vazaria o que você escreveu sobre uma pessoa <b>para essa pessoa</b>. Os passos 7 e 8 são o motivo desta parte existir — faça-os com atenção, e escreva no ✗ <b>em que tela</b> você estava se algo aparecer.",
     passos: [
-      "Painel → Agenda → <strong>“Nova sessão”</strong> para <strong>você mesmo</strong>, num dia <strong>futuro</strong>. <strong>Deixe como agendada</strong> — não clique em Veio nem em Faltou.",
-      "No celular, no app do aluno, abra a <strong>home</strong>. Tem a linha <strong>“Sessão com {seu nome} · {dia}, {hora} · 1h”</strong>, com ícone de calendário.",
-      "<strong>Não há botão nenhum</strong> nessa linha. É lembrete, e é de propósito: quem marca presença é o personal.",
-      "No painel, <strong>cancele</strong> essa sessão. Volte à home do aluno: <strong>a linha sumiu</strong>.",
-      "Marque outra sessão futura como <strong>realizada</strong>. A linha também não volta — só sessão <strong>agendada e no futuro</strong> aparece ali.",
+      "Painel → Alunos → abra a ficha de um aluno. Entre o programa e a evolução há a seção <strong>“🔒 Observações · só você vê”</strong>, com um cadeado.",
+      "Sem nenhuma anotação, o card diz que nada foi anotado sobre aquele aluno e repete, em negrito, que <strong>o aluno não vê o que você escreve aqui</strong>.",
+      "Clique <strong>“Anotar”</strong>. Abre um campo com a dica “Só você lê. O aluno não vê esta anotação em lugar nenhum do app.” Escreva algo reconhecível — <strong>“dor no ombro direito, trocar barra por halter”</strong> — e salve. O formulário <strong>fecha sozinho</strong> e a anotação aparece na lista, com a data.",
+      "Clique <strong>“Editar”</strong> nessa anotação, mude o texto e salve. Agora a linha de data diz <strong>“Hoje · editada”</strong>.",
+      "Escreva uma <strong>segunda</strong> anotação. Ela entra <strong>no topo</strong> da lista — a mais recente primeiro.",
+      "Tente salvar uma anotação <strong>em branco</strong> (só espaços). O botão <strong>“Salvar anotação” fica desabilitado</strong>; não dá para enviar.",
+      "<strong>Agora o que importa.</strong> No celular, no app do aluno, <strong>logado como o aluno sobre quem você escreveu</strong>, procure a frase “dor no ombro direito” em <strong>toda</strong> tela: home, Treinar, detalhe do treino, Progresso, Feed, Perfil, Reavaliação. <strong>Ela não está em lugar nenhum.</strong>",
+      "Ainda no celular, abra <strong>Perfil → “Editar meus dados”</strong>. Nenhum campo traz a anotação, nem escondido no fim do formulário.",
+      "Volte ao painel e clique <strong>“Apagar”</strong> numa anotação. Ela pergunta <strong>“Apagar?”</strong> com “Sim, apagar” e “Não” — não some no primeiro clique.",
+      "Clique <strong>“Não”</strong>: a anotação continua lá. Clique “Apagar” de novo e confirme com <strong>“Sim, apagar”</strong>: some.",
+      "Abra a ficha de <strong>outro</strong> aluno. As anotações do primeiro <strong>não estão lá</strong> — cada ficha mostra só as dela.",
     ],
   },
   {
-    n: "Parte 5", titulo: "As pontas soltas", duracao: "4 min",
-    nota: "Três coisas onde a expectativa do roteiro estava errada, e uma que ficou sem marcar.",
+    n: "Parte 5", titulo: "Duplicar macrotreino", duracao: "8 min",
+    nota: "O item que o handoff justifica com cinco palavras: “o personal reaproveita muito”. Montar um programa do zero é meia hora; entregá-lo ao segundo aluno era a mesma meia hora, digitada de novo. <b>Repare no que a cópia NÃO leva</b> — é onde estão as decisões.",
     passos: [
-      "Do painel, o caminho para o app do aluno é <strong>menu “Treinar” → “Abrir o app do aluno”</strong>. Confirme que funciona. <em>Era o passo 16: funcionou para você, mas o roteiro não dizia o caminho.</em>",
-      "No Perfil do aluno → <strong>“Editar meus dados”</strong>: se você virou aluno de si mesmo pelo painel, nascimento, objetivo, nível, peso e altura vêm <strong>em branco</strong> — você nunca passou pelo convite, que é onde isso é preenchido. <strong>Isso está certo.</strong> Preencha e salve.",
-      "Depois de salvar, abra a sua ficha no painel: <strong>os dados aparecem</strong> na linha do cabeçalho.",
-      "Execute um treino e, na tela de conclusão, use <strong>“Tirar foto do treino”</strong>. Publique. No feed, o card mostra o <strong>resumo do treino acima da legenda</strong> (letra, nome, séries, kg). <em>Esse ficou sem marcar na rodada passada.</em>",
+      "Painel → <strong>Macrotreinos</strong>. No card do programa <strong>ativo</strong> de um aluno, ao lado de “Editar” e “Arquivar”, há agora <strong>“Duplicar”</strong>.",
+      "Clique. O diálogo diz, <strong>antes de você confirmar</strong>, que os treinos e a prescrição vêm junto, que o histórico de execução <strong>não</strong> vem, e que <strong>a cópia nasce arquivada</strong>. <em>Sem essa última frase você sairia daqui achando que o aluno já tem treino.</em>",
+      "O seletor <strong>“Para quem”</strong> já vem com o dono atual do programa, e a lista tem <strong>todos os seus alunos</strong>. O campo de nome já vem com <strong>“{nome do programa} (cópia)”</strong>.",
+      "Escolha <strong>outro aluno</strong>, ajuste o nome se quiser, e clique <strong>Duplicar</strong>. O diálogo fecha e a cópia aparece na seção <strong>daquele outro aluno</strong>, com a etiqueta <strong>“Arquivado”</strong>.",
+      "Na linha da cópia, confira: <strong>o mesmo número de treinos</strong> do original, e a data de início é <strong>hoje</strong> — não a data do programa de origem. <em>A semana da rotação sai dessa data: herdar a antiga faria a cópia nascer na semana 5 de 8.</em>",
+      "Clique <strong>“Ativar”</strong> na cópia. Ela vira Ativo e diz <strong>“Semana 1 de N”</strong>.",
+      "Vá em <strong>Treinos</strong>. Os treinos aparecem agora sob o nome <strong>do aluno novo</strong>, com as mesmas letras, os mesmos nomes e a mesma contagem de séries do original.",
+      "Abra um desses treinos copiados. Os exercícios, as séries, as repetições e o descanso são <strong>os mesmos</strong> do treino de origem.",
+      "Na ficha do <strong>aluno novo</strong>, o <strong>histórico de sessões continua o dele</strong> — os treinos que o <strong>outro</strong> aluno executou <strong>não</strong> vieram junto. <em>Se aparecerem, é grave: me diga na hora.</em>",
+      "Volte a Macrotreinos. Num programa <strong>arquivado</strong>, o botão <strong>“Duplicar” também existe</strong>, ao lado de “Ativar”. <em>Programa arquivado é justamente o modelo que você guardou para reusar.</em>",
+      "Duplique <strong>a partir do arquivado</strong>, agora para <strong>o mesmo aluno</strong>. Funciona igual, e a cópia também nasce arquivada.",
+    ],
+  },
+  {
+    n: "Parte 6", titulo: "Duplicar treino e a letra sugerida", duracao: "5 min",
+    nota: "Dentro de um programa, copiar um treino é o caminho de “o B é parecido com o A”. Junto vai um conserto pequeno no campo mais usado do editor.",
+    passos: [
+      "Painel → Treinos → abra um treino. No cabeçalho, ao lado da linha “aluno · séries · min”, há o botão <strong>“Duplicar treino”</strong>.",
+      "Clique. O diálogo diz que a cópia entra <strong>no mesmo programa</strong>, com a <strong>próxima letra livre</strong> e os mesmos exercícios. Confirme.",
+      "A página volta ao programa. O treino novo está lá com a <strong>primeira letra que faltava</strong> — se o programa tinha A e B, a cópia é <strong>C</strong> — e o nome termina em <strong>“(cópia)”</strong>.",
+      "Abra a cópia: os exercícios, séries, repetições e descanso são <strong>iguais</strong> aos do original. Mude um exercício e salve — <strong>o treino original não muda</strong>.",
+      "Agora o conserto: no programa, clique <strong>“Montar treino”</strong>. O campo <strong>“Letra”</strong> já vem preenchido com a <strong>próxima letra livre</strong>, não com “A”. <em>Antes ele vinha sempre “A”, então montar o B começava com a letra do A na tela.</em>",
+      "Cancele, apague um treino do meio (por exemplo o B) e clique “Montar treino” de novo: a letra sugerida é <strong>B</strong>, o buraco que ficou — não a próxima do fim.",
     ],
   },
 ];
@@ -706,7 +744,7 @@ function avisar(texto) {
     return;
   }
 
-  db.doc("roteiro/m3-reteste").onSnapshot(
+  db.doc("roteiro/painel").onSnapshot(
     (snapshot) => {
       // Enquanto a escrita própria não confirma, a tela local já está certa:
       // adotar a volta do servidor aqui faria o toque piscar para trás.

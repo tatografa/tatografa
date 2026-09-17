@@ -6,7 +6,9 @@ repositório. Mantidos à mão, os dois divergiram em 14/09 — 6/16/16/11/8 con
 5/16/18/8/8, dois documentos dizendo ser o mesmo roteiro. Agora só existe uma
 lista, e ela mora no HTML.
 
-    python3 docs/plan/gerar-roteiro.py
+    python3 docs/plan/gerar-roteiro.py                 # M3-roteiro
+    python3 docs/plan/gerar-roteiro.py M3-reteste
+    python3 docs/plan/gerar-roteiro.py painel-roteiro
 """
 
 import html
@@ -79,9 +81,46 @@ Nas Partes 2 e 3 a **anotação vale mais que a marcação**: são os dois casos
 que eu não sei o que aconteceu, e a frase que aparece na tela é o que falta.
 """
 
-CABECALHO = CABECALHO_RETESTE if NOME == "M3-reteste" else CABECALHO_COMPLETO
+CABECALHO_PAINEL = """# Roteiro · o painel do personal, fechado
 
-RODAPE = """
+> **Este arquivo é gerado** por `docs/plan/gerar-roteiro.py painel-roteiro`, a
+> partir de `painel-roteiro.html` — a página que o Otávio abre para marcar.
+> Editar os passos aqui não muda a página; edite o HTML e rode o script.
+>
+> Tudo o que entrou **depois do reteste do M3**, em quatro levas: o dashboard
+> com os dois blocos que faltavam, a tela de alunos com tabela e busca, as
+> observações privadas sobre o aluno e a duplicação de treino e de macrotreino.
+> Cerca de 40 minutos.
+
+## Antes de começar
+
+- **Onde:** `repsclub.com.br`, painel no computador e app no celular ao mesmo tempo.
+- **A Parte 1 vem primeiro porque trava o resto.** A política de privacidade mudou
+  de versão, então todo aluno passa por um portão de aceite ao abrir o app.
+- **A Parte 4 é a que mais importa:** é a única em que um defeito vazaria dado de
+  uma pessoa para outra.
+- **Dois alunos na carteira** são necessários na Parte 5. Você mesmo conta como um.
+- **Faça na ordem.** A Parte 6 usa o programa da Parte 5.
+
+O sinal de que o deploy chegou: o menu do painel tem **“Painel”** e **“Alunos”**
+como itens **separados**.
+
+## O que anotar
+
+Em cada passo: **aconteceu o que está escrito?**
+
+- ✅ sim
+- ❌ não → **escreva a frase que apareceu na tela**
+"""
+
+CABECALHOS = {
+    "M3-reteste": CABECALHO_RETESTE,
+    "painel-roteiro": CABECALHO_PAINEL,
+}
+
+CABECALHO = CABECALHOS.get(NOME, CABECALHO_COMPLETO)
+
+RODAPE_M3 = """
 ---
 
 ## Quando terminar
@@ -92,6 +131,21 @@ precisa copiar nada.
 Se passar tudo, o M3 fecha. O que sobra da Fase 3 é a reavaliação física, que é
 cortável — aí decidimos se vale ou se o próximo pedaço é outro.
 """
+
+RODAPE_PAINEL = """
+---
+
+## Quando terminar
+
+Me diga que terminou — eu leio as marcações e as notas direto da página, não
+precisa copiar nada.
+
+Se a **Parte 4** passar inteira, a anotação privada está trancada de verdade e o
+doc 06 fecha. O que sobra do painel é a sidebar colapsável e o dashboard maior
+dos protótipos — e esse depende de decidir se o Reps Club vai cuidar de cobrança.
+"""
+
+RODAPE = RODAPE_PAINEL if NOME == "painel-roteiro" else RODAPE_M3
 
 
 def para_markdown(trecho: str) -> str:
