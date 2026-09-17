@@ -11,6 +11,8 @@ export type SessaoAberta = {
   treino: { label: string; name: string } | null;
   /** Quantas séries já foram registradas nela. Zero = pode ser descartada. */
   series_registradas: number;
+  /** A observação que o aluno já escreveu sobre esta execução. */
+  notes: string | null;
 };
 
 export type SessaoConcluida = {
@@ -38,7 +40,7 @@ export async function sessaoAbertaDoAluno(
 
   const { data, error } = await supabase
     .from("workout_sessions")
-    .select("id, workout_id, started_at, workouts(label, name)")
+    .select("id, workout_id, started_at, workouts(label, name), notes")
     .eq("student_id", alunoId)
     .is("finished_at", null)
     .maybeSingle();
@@ -52,6 +54,7 @@ export async function sessaoAbertaDoAluno(
     started_at: data.started_at,
     treino: data.workouts ?? null,
     series_registradas: await contarSeries(data.id),
+    notes: data.notes,
   };
 }
 

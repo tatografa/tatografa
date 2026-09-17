@@ -5,7 +5,10 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireStudent } from "@/lib/auth/session";
-import { LIMITES_DA_EXECUCAO } from "@/lib/domain/execucao";
+import {
+  LIMITES_DA_EXECUCAO,
+  LIMITE_DA_OBSERVACAO_DO_TREINO,
+} from "@/lib/domain/execucao";
 import { contarSeries } from "@/lib/queries/execucao";
 import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -361,4 +364,58 @@ async function prescricaoDoTreino(
 
   if (error) throw error;
   return new Set((data ?? []).map((linha) => linha.id));
+}
+
+const esquemaObservacao = z.object({
+  sessionId: z.string().uuid(),
+  // Vazio é intenção legítima: é como o aluno **apaga** a observação que
+  // escreveu. Vira nulo, não string vazia — o `check` da 0031 recusa em branco,
+  // e a tela decide "tem observação?" por nulo em todo lugar.
+  texto: z
+    .string()
+    .trim()
+    .max(LIMITE_DA_OBSERVACAO_DO_TREINO, "Observação muito longa."),
+});
+
+/**
+ * Grava a observação do aluno sobre a execução — o "adicionar observação" do
+ * menu ⋮ (doc 05 §5).
+ *
+ * **Preenche `workout_sessions.notes`, que existia desde a 0001 e nunca tinha
+ * recebido uma linha.** O aluno explica o que o número não explica: "ombro
+ * direito doeu, fui leve no supino". Sem isso, o personal abre o histórico, vê
+ * a carga cair de 60 para 40 e não tem como saber se foi lesão, sono ruim ou
+ * preguiça — e o produto inteiro existe para ele saber o que o aluno de fato fez.
+ *
+ * Aceita sessão **concluída** de propósito: a observação costuma vir depois,
+ * quando o aluno para de ofegar. O gatilho da 0030 congela os fatos da sessão e
+ * deixa só esta coluna livre, exatamente para isto.
+ */
+export async function salvarObservacaoDoTreino(entrada: {
+  sessionId: string;
+  texto: string;
+}): Promise<ResultadoDaGravacao> {
+  const { student } = await requireStudent();
+
+  const validado = esquemaObservacao.safeParse(entrada);
+  if (!validado.success) {
+    return {
+      ok: false,
+      erro: validado.error.issues[0]?.message ?? "Observação inválida.",
+      permanente: true,
+    };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("workout_sessions")
+    .update({ notes: validado.data.texto || null })
+    .eq("id", validado.data.sessionId)
+    .eq("student_id", student.id);
+
+  if (error) return { ok: false, erro: ERRO_GENERICO, permanente: false };
+
+  // O histórico do aluno e a ficha que o personal lê mostram a observação.
+  revalidatePath("/app/historico");
+  return { ok: true };
 }

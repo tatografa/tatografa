@@ -228,3 +228,13 @@ export function ajustar(
   // 47.50000000000001 na tela e no banco.
   return Math.round(preso * 100) / 100;
 }
+
+/**
+ * Limite da observação que o aluno escreve sobre a própria execução.
+ *
+ * Módulo neutro porque o número aparece nos dois lados: o `maxLength` do campo
+ * e o contador vivem no componente cliente, e a validação que decide se grava
+ * vive no `"use server"`. É o mesmo valor do `check` da migration 0031 — três
+ * lugares, e este é o único que os dois do TypeScript leem.
+ */
+export const LIMITE_DA_OBSERVACAO_DO_TREINO = 500;

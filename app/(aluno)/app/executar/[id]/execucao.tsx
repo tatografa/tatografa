@@ -21,6 +21,8 @@ import {
   type SerieDaExecucao,
 } from "@/lib/domain/execucao";
 import { textoDaUltimaVez, type UltimaVez } from "@/lib/domain/recordes";
+
+import { MenuDaExecucao } from "./menu-da-execucao";
 import { comoRelogio } from "@/lib/domain/treino";
 import type { ExercicioPrescrito, TreinoCompleto } from "@/lib/queries/treinos";
 import { agendarAlarmeDeDescanso } from "@/lib/alarme-de-descanso";
@@ -49,7 +51,12 @@ type TelaGravada = {
   descansoAte: number | null;
 };
 
-export type SessaoEmExecucao = { id: string; started_at: string };
+export type SessaoEmExecucao = {
+  id: string;
+  started_at: string;
+  /** A observação já escrita, para o menu abrir com o texto em vez de em branco. */
+  notes: string | null;
+};
 
 export interface ExecucaoProps {
   treino: TreinoCompleto;
@@ -230,6 +237,19 @@ function ExecucaoMontada({
     // bottom nav, que só atrapalharia quem está de pé com o celular na mão.
     <div className="fixed inset-0 z-40 flex flex-col bg-dark-bg text-dark-text">
       <Cabecalho
+        menu={
+          <MenuDaExecucao
+            sessionId={sessao.id}
+            exercicio={{ nome: exercicio.exercicio.name }}
+            ultima={referencia[exercicio.id]}
+            observacaoInicial={sessao.notes}
+            aoEncerrar={() => void finalizar()}
+            encerrando={concluindo}
+            // Sessão sem série registrada é descartada, não encerrada: o botão
+            // prometeria salvar um treino que não existe.
+            podeEncerrar={series.size > 0}
+          />
+        }
         treino={treino}
         indice={indice}
         fracao={progresso.fracao}
@@ -444,12 +464,15 @@ function Cabecalho({
   fracao,
   inicioEm,
   pendentes,
+  menu,
 }: {
   treino: TreinoCompleto;
   indice: number;
   fracao: number;
   inicioEm: string;
   pendentes: number;
+  /** O ⋮ do doc 05 §5. Recebido pronto: o cabeçalho não sabe o que ele faz. */
+  menu: React.ReactNode;
 }) {
   return (
     <header className="border-b border-dark-border bg-dark-bg px-5 pt-[calc(12px+env(safe-area-inset-top))] pb-3">
@@ -472,7 +495,16 @@ function Cabecalho({
             </p>
           </div>
 
-          <SeriesPendentes quantidade={pendentes} />
+          {/*
+            O contador e o ⋮ dividem o canto direito. O doc 05 desenha só o ⋮
+            ali, mas o contador de pendentes nasceu depois e é o que torna
+            aceitável a fila viver no aparelho — escondê-lo atrás do menu
+            desfaria essa promessa.
+          */}
+          <div className="flex shrink-0 items-center gap-1">
+            <SeriesPendentes quantidade={pendentes} />
+            {menu}
+          </div>
         </div>
 
         <div

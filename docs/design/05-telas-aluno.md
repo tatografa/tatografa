@@ -167,6 +167,12 @@ bloqueia a tela e o timer precisa continuar correto.
 Overlay `rgba(10,10,10,.6)`, painel `dark-surface-2`, raio 22px no topo, padding 22px.
 Ações: trocar exercício, ver histórico do exercício, adicionar observação, encerrar treino.
 
+**Construído em 17/09/2026, com três das quatro ações.** "Trocar exercício" ficou de fora:
+a leitura óbvia (substituir o prescrito por outro do catálogo) esbarra em
+`private.serie_no_treino_da_sessao` (migration 0009) e é decisão de produto sobre quem
+manda na prescrição, não ajuste de tela. O ⋮ divide o canto direito com o contador de
+séries pendentes, que nasceu depois do handoff e não pode ficar atrás de um menu.
+
 ---
 
 ## 6 · Conclusão do treino (`/app/executar/[id]/fim`)

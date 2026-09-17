@@ -33,6 +33,11 @@ export type SessaoDoHistorico = {
   /** Nunca nulo: a sessão em andamento não entra no histórico. */
   finished_at: string;
   duration_seconds: number | null;
+  /**
+   * O que o aluno escreveu sobre a própria execução, pelo menu da tela de
+   * treino. É o que o número não conta: dor, sono ruim, máquina ocupada.
+   */
+  notes: string | null;
   /** Nulo se o personal apagou o treino depois — a sessão continua valendo. */
   treino: TreinoDaSessao | null;
   series_feitas: number;
@@ -87,7 +92,7 @@ export async function listarHistorico(
 
   const { data: sessoes, error } = await supabase
     .from("workout_sessions")
-    .select("id, workout_id, started_at, finished_at, duration_seconds")
+    .select("id, workout_id, started_at, finished_at, duration_seconds, notes")
     .eq("student_id", alunoId)
     .not("finished_at", "is", null)
     .order("finished_at", { ascending: false })
@@ -127,6 +132,7 @@ export async function listarHistorico(
         started_at: sessao.started_at,
         finished_at: sessao.finished_at,
         duration_seconds: sessao.duration_seconds,
+        notes: sessao.notes,
         treino: treinoPorId.get(sessao.workout_id) ?? null,
         series_feitas: contarFeitas(daSessao),
         series_prescritas: prescritasPorTreino.get(sessao.workout_id) ?? 0,
@@ -155,7 +161,7 @@ export async function lerSessaoDoHistorico(
 
   const { data: sessao, error } = await supabase
     .from("workout_sessions")
-    .select("id, workout_id, started_at, finished_at, duration_seconds")
+    .select("id, workout_id, started_at, finished_at, duration_seconds, notes")
     .eq("id", sessaoId)
     .eq("student_id", alunoId)
     .not("finished_at", "is", null)
@@ -207,6 +213,7 @@ export async function lerSessaoDoHistorico(
     started_at: sessao.started_at,
     finished_at: sessao.finished_at,
     duration_seconds: sessao.duration_seconds,
+    notes: sessao.notes,
     treino: treino ? { id: treino.id, label: treino.label, name: treino.name } : null,
     series_feitas: contarFeitas(series),
     // O mesmo denominador da lista, não `treino.total_series`: aquele pula a

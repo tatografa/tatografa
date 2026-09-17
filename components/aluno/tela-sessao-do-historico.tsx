@@ -71,6 +71,25 @@ export function TelaSessaoDoHistorico({
         </p>
       ) : null}
 
+      {/*
+        A observação entra **entre os números e as séries**, porque é o que
+        explica os números: a carga que caiu de 60 para 40 com "ombro direito
+        doeu" ao lado é outra leitura. Sem ela, o personal vê a queda e não
+        sabe se foi lesão, sono ruim ou preguiça.
+
+        Rótulo neutro de propósito: esta tela é a mesma dos dois lados — o
+        aluno vendo o próprio treino e o personal lendo o do aluno. "Sua
+        observação" soaria errado para um; "observação do aluno", para o outro.
+      */}
+      {sessao.notes ? (
+        <section className="rounded-card border border-border-soft bg-canvas-sunken px-4 py-3.5">
+          <h2 className="eyebrow text-[9px] text-ink-4">Observação do treino</h2>
+          <p className="mt-1.5 text-[14px] leading-[1.6] whitespace-pre-wrap text-ink-2">
+            {sessao.notes}
+          </p>
+        </section>
+      ) : null}
+
       {sessao.exercicios.length ? (
         <ol className="space-y-2.5">
           {sessao.exercicios.map((exercicio) => (

@@ -197,6 +197,46 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-17]** **Sexta vez do mesmo formato — e a primeira em que nenhuma policy
+  está errada sozinha** (migration 0030). `workout_sessions_delete` exige
+  `finished_at is null`, e é essa a trava de "sessão concluída não se apaga" (02/09).
+  Só que `workout_sessions_update` **não guarda `finished_at`**: o aluno zera a coluna,
+  a sessão volta a "em andamento" e o delete passa. Provado no banco: recusa no primeiro
+  delete, `update ... set finished_at = null` afetando 1 linha, segundo delete afetando 1
+  linha, e uma sessão com 12 séries desaparecida. Não vaza dado — o aluno apaga o
+  **próprio** histórico —, mas **mente para quem depende dele**: o personal abre a ficha
+  e o treino ruim não está lá, sem rastro. **A lição nova:** as duas policies estão
+  certas isoladamente, e o furo mora na conversa entre elas. Ao ler uma trava que depende
+  de uma coluna, procurar **quem mais escreve naquela coluna**.
+- **[2026-09-17]** **Congelar exige gatilho, não policy — de novo.** É a mesma razão de
+  `assessments_imutavel`: o `using` do RLS enxerga a linha antiga e o `with check` a
+  nova, mas nenhum consegue dizer "o valor novo não pode ser nulo **se** o antigo não
+  era". Quem compara as duas é o gatilho. `workout_sessions_imutavel` congela o que é
+  fato da execução e o personal lê como verdade — começo, fim, duração, treino, aluno —
+  e **deixa `notes` livre**, pela mesma divisão da 0026: a observação é a voz do aluno
+  sobre o próprio treino e não reescreve nenhum número que o personal usou para decidir.
+- **[2026-09-17]** **`workout_sessions.notes` existia desde a 0001 e nunca recebeu uma
+  linha** — terceira coluna com a intenção escrita no schema e nenhuma tela preenchendo,
+  depois de `posts.session_id` e `trainers.phone`. O menu ⋮ da execução (doc 05 §5), que
+  o handoff pedia e nunca existiu, passa a preenchê-la. O valor é de produto: o personal
+  vê a carga cair de 60 para 40 e **não tem como saber** se foi lesão, sono ruim ou
+  preguiça — e o produto inteiro existe para ele saber o que o aluno de fato fez. A
+  observação é lida na **mesma tela** que os dois lados compartilham
+  (`TelaSessaoDoHistorico`), com rótulo neutro: "sua observação" soaria errado para o
+  personal, "observação do aluno" para o aluno.
+- **[2026-09-17]** **"Trocar exercício" do doc 05 §5 NÃO foi construído, e não é
+  esquecimento.** A leitura óbvia — substituir o exercício prescrito por outro do
+  catálogo quando a máquina está ocupada — esbarra em
+  `private.serie_no_treino_da_sessao` (migration 0009), que recusa série apontando para
+  fora do treino da sessão. Não é ajuste de tela: é decidir quem manda na prescrição
+  quando o aluno está na academia, e isso é do Otávio. As outras três ações do doc
+  entraram.
+- **[2026-09-17]** **`BottomSheet` é componente à parte do `Dialog`, e a diferença não é
+  de estilo.** O diálogo do painel é uma caixa centrada num desktop; a folha da execução
+  encosta na borda de baixo, respeita a área segura do aparelho e se apoia no polegar —
+  e roda no tema escuro, então reaproveitar o `Dialog` exigiria condicionar cada cor dele
+  por uma prop. Os dois são `<dialog>` nativo pelo mesmo motivo: foco preso, Esc e o
+  resto da página inerte saem de graça.
 - **[2026-09-17, do teste de campo]** **Funcionalidade nova transforma em mentira um
   estado vazio que estava certo.** O card "está sem programa — e sem treino no app" foi
   escrito quando "sem programa ativo" e "sem programa nenhum" eram a mesma coisa.

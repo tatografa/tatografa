@@ -65,7 +65,11 @@ export default async function ExecutarTreino(
   return (
     <Execucao
       treino={treino}
-      sessao={{ id: aberta.id, started_at: aberta.started_at }}
+      sessao={{
+        id: aberta.id,
+        started_at: aberta.started_at,
+        notes: aberta.notes,
+      }}
       seriesIniciais={series}
       referencia={referencia}
     />
