@@ -763,6 +763,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      alunos_por_mes: {
+        Args: { p_meses?: number }
+        Returns: {
+          mes: string
+          total: number
+        }[]
+      }
       ativar_macrotreino: {
         Args: { p_mesocycle_id: string }
         Returns: undefined
@@ -816,11 +823,33 @@ export type Database = {
           total: number
         }[]
       }
+      progressoes_da_carteira: {
+        Args: { p_desde: string; p_limite?: number }
+        Returns: {
+          aluno: string
+          carga_final: number
+          carga_inicial: number
+          exercicio: string
+          exercise_id: string
+          exercise_source: Database["public"]["Enums"]["exercise_source"]
+          primeira_em: string
+          sessoes: number
+          student_id: string
+          ultima_em: string
+        }[]
+      }
       series_por_exercicio: {
         Args: { p_workout_id: string }
         Returns: {
           total: number
           workout_exercise_id: string
+        }[]
+      }
+      sessoes_por_dia: {
+        Args: { p_ate: string; p_de: string }
+        Returns: {
+          dia: string
+          total: number
         }[]
       }
       ultima_sessao_por_aluno: {

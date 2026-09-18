@@ -207,3 +207,25 @@ A referência visual `prototipos/Painel do Personal - Dashboard.dc.html` desenha
 dashboard **maior** que o §2 — receita mensal, ticket médio, churn, renovações,
 distribuição por plano. Esses cinco dependem de plano, preço e pagamento, que não existem
 no modelo de dados: são escopo de produto a decidir, não tela a construir.
+
+**Estado em 18/09/2026 (gráficos).** Os **três gráficos do protótipo que saem de dado que
+já existe** foram construídos (`components/personal/graficos-do-painel.tsx`, RPCs da
+migration 0033):
+
+| Gráfico | O que mostra | De onde sai |
+|---|---|---|
+| Evolução mensal de alunos | Tamanho acumulado da carteira ao fim de cada um dos 12 meses | `students.created_at` |
+| Atividade diária | Sessões concluídas por dia nos últimos 30 dias | `workout_sessions` |
+| Top 10 progressões | Maiores ganhos de carga por par (aluno, exercício) em 90 dias | `session_sets` |
+
+Eles ficam **abaixo** dos alertas e da atividade recente, não no topo como no protótipo:
+o dashboard responde "o que mudou hoje", e a tendência é a camada seguinte.
+
+O que o protótipo desenha aqui e **continua** fora, todo pelo mesmo motivo — depende de
+decisão de produto, não de tela:
+
+| O quê | O que falta decidir |
+|---|---|
+| Ticket médio, Receita mensal, Churn, Renovações, Distribuição por plano | Se o Reps Club cobra do personal: não há plano, preço nem pagamento no modelo |
+| "24 de 40 alunos · Plano Pro" | O mesmo — e o "40" seria inventado |
+| Presencial × Online | Um campo no cadastro do aluno que hoje não existe |

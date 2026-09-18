@@ -201,6 +201,60 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-18]** **Os três gráficos do dashboard agregam no banco, não em memória**
+  (migration 0033: `alunos_por_mes`, `sessoes_por_dia`, `progressoes_da_carteira`). O
+  motivo não é desempenho: é que o **corte de página do PostgREST é silencioso**, e as
+  progressões varrem `session_sets` da carteira inteira. Uma página perdida faria a barra
+  desenhar menos treino do que aconteceu — número errado com cara de certo, sem erro
+  nenhum aparecer. As três são `security invoker` e **nenhuma recebe id de personal**,
+  como `sessoes_na_semana`: quem define "a carteira" é o RLS, e um id vindo do cliente
+  seria uma segunda fonte de verdade sobre de quem é o dado. Onze provas no banco — cinco
+  de burla (outro personal e o aluno em cada função) e seis de caminho legítimo, três
+  delas com dado sintético dentro de transação desfeita.
+- **[2026-09-18]** **Progressão é comparação de par `(aluno, exercício)`, ordenada por
+  percentual.** Em quilos, o agachamento ganharia de toda rosca direta todo mês e o "top
+  10" viraria um ranking de exercício pesado em vez de um de evolução. A carga de cada
+  sessão é a **série mais pesada** — o mesmo critério do recorde pessoal (decisão do
+  Otávio, 02/09) —, porque duas contas para "quanto ele evoluiu" fariam o painel discordar
+  da tela que o aluno vê. Quatro exclusões, cada uma com motivo: série pulada e carga nula
+  (peso corporal não tem carga para comparar), par com uma sessão só (não há de onde para
+  onde), carga inicial zero (seria aumento infinito) e **quem caiu** — uma lista chamada
+  "as maiores progressões" que mostra quedas quando faltam dez mente pelo título, e o
+  vazio diz a verdade melhor. **Agrupa por `(exercise_source, exercise_id)`**, nunca por
+  `workout_exercise_id`: provado com uma segunda prescrição do mesmo exercício em outro
+  programa, que virou **uma** linha de três sessões e não duas de uma.
+- **[2026-09-18]** **O crescimento da carteira é o acumulado ao fim de cada mês, e o eixo
+  começa no zero.** Duas decisões opostas à do gráfico do aluno, e as duas pela mesma
+  razão: a pergunta é outra. "Novos alunos por mês" desenharia uma queda em abril só
+  porque ninguém entrou, quando ninguém saiu; e cortar o eixo entre o mínimo e o máximo —
+  que no gráfico de carga é justamente o que torna a evolução visível — aqui
+  transformaria 12 alunos virando 13 numa escalada. **Contagem se desenha a partir do
+  zero.** O mês vazio entra por `generate_series` e repete o total anterior, senão o eixo
+  pula de janeiro para março e a inclinação da linha mente.
+- **[2026-09-18]** **Os gráficos ficam abaixo do que é decisão de hoje, ao contrário do
+  protótipo, que os põe no topo.** É a aplicação direta da lição de 16/09: o dashboard
+  responde "o que mudou hoje" — quem parou, o que aconteceu, quem está devendo reavaliação
+  —, e foi por empurrar isso para fora da dobra que a lista de alunos saiu daqui. Tendência
+  é a camada seguinte: útil, e nunca urgente.
+- **[2026-09-18]** **Gráfico de leitura não vira componente cliente por causa de uma
+  dica de mouse.** Os três são servidor, sem uma linha de JavaScript no navegador; o que o
+  ponteiro revela é `group-hover` do CSS. O painel abre em toda navegação, e hidratar três
+  gráficos em toda visita seria peso por um recurso que o teclado não usa. Por isso **o
+  que o mouse revela nunca é a única via para o número**: cada bloco imprime em texto o
+  que desenha, e o SVG leva a frase inteira no `aria-label` ("6 treinos concluídos em 3
+  dos últimos 30 dias; o dia mais cheio foi qua, 09/09, com 3"). axe-core sem violação
+  nem incompleto.
+- **[2026-09-18]** **Rótulo de eixo se posiciona na fração do item que nomeia, não por
+  `justify-between`.** Com trinta barras e sete rótulos, espaçar por igual põe "09/09"
+  debaixo de outra barra — e um eixo que aponta para o dia errado é pior que não ter
+  eixo. A conta muda com a forma: a barra ocupa uma faixa e o rótulo vai no meio dela
+  (`(i + 0,5) / n`); o ponto da linha é uma coordenada e o rótulo vai em cima dele
+  (`i / (n - 1)`). Achado olhando o screenshot, não lendo o código.
+- **[2026-09-18]** **O toco do dia sem treino não é dado, é a marca de que existe um dia
+  ali.** Ele fica em `border-strong`, que não alcança os 3:1 da WCAG para objeto gráfico —
+  e não precisa: quem carrega informação é a barra, em `brand` sobre `surface` (5,38). O
+  que diz "ninguém treinou" é o buraco entre as barras e a frase acima delas, não o tom do
+  toco.
 - **[2026-09-18]** **A navegação do painel é lateral e colapsável, e a barra do topo
   saiu.** Não é preferência de gosto: as duas navegam as mesmas dez páginas, e a barra
   horizontal dava ao painel a silhueta de um *site* onde o protótipo desenha uma

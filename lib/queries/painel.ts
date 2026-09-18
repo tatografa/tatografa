@@ -8,6 +8,15 @@ import {
   semanaDoCalendario,
   type Alerta,
 } from "@/lib/domain/atencao";
+import {
+  desdeQuandoProgredir,
+  janelaDaAtividade,
+  LIMITE_DAS_PROGRESSOES,
+  MESES_DO_CRESCIMENTO,
+  type DiaDaAtividade,
+  type PontoDoMes,
+  type Progressao,
+} from "@/lib/domain/dashboard";
 import { contarFeitas, rotuloDoDia } from "@/lib/domain/historico";
 import { volumeDaSessao } from "@/lib/domain/treino";
 import { createClient } from "@/lib/supabase/server";
@@ -293,4 +302,62 @@ async function sessoesNaSemanaPorAluno(
 
   if (error) throw error;
   return new Map((data ?? []).map((linha) => [linha.student_id, linha.total]));
+}
+
+/** O que os três gráficos do dashboard consomem (doc 06 §2). */
+export type GraficosDoPainel = {
+  crescimento: PontoDoMes[];
+  atividade: DiaDaAtividade[];
+  progressoes: Progressao[];
+};
+
+/**
+ * Os três gráficos, em três agregações feitas **no banco** (migration 0033).
+ *
+ * Nenhuma delas volta linha a linha: a atividade de 30 dias e, principalmente,
+ * as progressões — que varrem `session_sets` da carteira inteira — trariam
+ * milhares de registros para o servidor descartar depois de somar. Pior que o
+ * peso é o corte de página silencioso do PostgREST, que faria a barra desenhar
+ * menos treino do que aconteceu sem nenhum erro aparecer.
+ *
+ * As três funções não recebem id de personal. Quem define "a carteira" é o RLS
+ * — elas são `security invoker` —, pelo mesmo motivo de `sessoes_na_semana`:
+ * um id vindo do cliente seria uma segunda fonte de verdade sobre de quem é o
+ * dado, e as duas discordariam algum dia.
+ */
+export async function lerGraficosDoPainel(): Promise<GraficosDoPainel> {
+  const supabase = await createClient();
+  const janela = janelaDaAtividade();
+
+  const [crescimento, atividade, progressoes] = await Promise.all([
+    supabase.rpc("alunos_por_mes", { p_meses: MESES_DO_CRESCIMENTO }),
+    supabase.rpc("sessoes_por_dia", { p_de: janela.de, p_ate: janela.ate }),
+    supabase.rpc("progressoes_da_carteira", {
+      p_desde: desdeQuandoProgredir(),
+      p_limite: LIMITE_DAS_PROGRESSOES,
+    }),
+  ]);
+
+  if (crescimento.error) throw crescimento.error;
+  if (atividade.error) throw atividade.error;
+  if (progressoes.error) throw progressoes.error;
+
+  return {
+    crescimento: (crescimento.data ?? []).map((linha) => ({
+      mes: linha.mes,
+      total: Number(linha.total),
+    })),
+    atividade: (atividade.data ?? []).map((linha) => ({
+      dia: linha.dia,
+      total: Number(linha.total),
+    })),
+    progressoes: (progressoes.data ?? []).map((linha) => ({
+      studentId: linha.student_id,
+      aluno: linha.aluno,
+      exercicio: linha.exercicio,
+      cargaInicial: Number(linha.carga_inicial),
+      cargaFinal: Number(linha.carga_final),
+      sessoes: Number(linha.sessoes),
+    })),
+  };
 }

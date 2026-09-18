@@ -6,10 +6,11 @@ import {
   AtividadeRecente,
   Indicadores,
 } from "@/components/personal/blocos-do-painel";
+import { GraficosDoPainel } from "@/components/personal/graficos-do-painel";
 import { Button, Card } from "@/components/ui";
 import { requireTrainer } from "@/lib/auth/session";
 import { listarConvitesPendentes } from "@/lib/queries/alunos";
-import { lerResumoDaCarteira } from "@/lib/queries/painel";
+import { lerGraficosDoPainel, lerResumoDaCarteira } from "@/lib/queries/painel";
 
 import { cancelarConvite } from "./actions";
 import { ConvidarAluno } from "./convidar-aluno";
@@ -21,10 +22,11 @@ export default async function PainelPage() {
 
   // O limiar sai da linha do personal, não de uma constante: é ajuste dele,
   // editável em /painel/configuracoes.
-  const [{ alunos, alertas, indicadores, atividade }, convites] =
+  const [{ alunos, alertas, indicadores, atividade }, convites, graficos] =
     await Promise.all([
       lerResumoDaCarteira(trainer.id, trainer.dias_para_alerta),
       listarConvitesPendentes(),
+      lerGraficosDoPainel(),
     ]);
 
   const primeiroNome = trainer.name.split(" ")[0];
@@ -100,6 +102,20 @@ export default async function PainelPage() {
             devendo reavaliação —, e a carteira fica a um clique.
           */}
           <AtividadeRecente sessoes={atividade} />
+
+          {/*
+            Os gráficos ficam **abaixo** do que é decisão de hoje, e não no
+            topo como no protótipo. O dashboard responde "o que mudou hoje" —
+            quem parou, o que aconteceu, quem está devendo reavaliação —, e foi
+            por empurrar isso para fora da dobra que a lista de alunos saiu
+            daqui em 16/09. A tendência é a camada seguinte: útil, e nunca
+            urgente.
+          */}
+          <GraficosDoPainel
+            crescimento={graficos.crescimento}
+            atividade={graficos.atividade}
+            progressoes={graficos.progressoes}
+          />
 
           <Link
             href="/painel/alunos"
