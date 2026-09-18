@@ -201,6 +201,30 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-18, decisão do Otávio]** **A fonte da interface é Inter.** O doc 04 pedia
+  Archivo e deixava a escolha em aberto ("decida com o Otávio"); a Inter já estava no ar
+  desde o M0, sem decisão registrada. Agora está: **Inter**, e Archivo sai do escopo.
+  **O custo, medido e aceito:** a Inter é uma família de UI deliberadamente neutra e a
+  Archivo é uma grotesca com personalidade — a 800/26px com `-0.02em`, que é o título de
+  toda tela, a diferença entre as duas é o maior fator isolado de "as telas não parecem o
+  protótipo". Não é defeito: é a escolha.
+- **[2026-09-18]** **Os protótipos `.dc.html` não renderizam neste ambiente, e nunca
+  renderizaram.** São apps React que buscam `react`, `react-dom` e `@babel/standalone` do
+  unpkg — bloqueado pela política de rede, tanto para o navegador quanto para o `curl`.
+  É por isso que toda conferência de fidelidade daqui saiu dos **markdown** (docs 04, 05,
+  06) e não da imagem: a estrutura bate porque os docs descrevem estrutura, e o acabamento
+  derrapa porque só a imagem mostra acabamento. **Comparar com o protótipo exige
+  screenshot tirado na máquina do Otávio.** Registrar isto é mais útil que tentar de novo.
+- **[2026-09-18]** **A paleta divergiu do protótipo em exatamente cinco cores, e as cinco
+  do protótipo reprovam em AA.** Medido: cinza secundário `#9a9a95` sobre branco = 2,83;
+  terciário `#84847f` = 3,76; branco sobre o vermelho `#ff2a2a` = 3,74; verde `#1f9d57`
+  sobre canvas = 3,17; âmbar `#d4a331` = 2,10. Os meus equivalentes dão 5,77 / 5,36 /
+  5,38 / 4,55 / 4,74. **O protótipo nunca passou por auditoria de contraste**; o M4-04
+  passou, e foi de 17 violações a zero escurecendo justamente estas cinco. O resto da
+  paleta é idêntico byte a byte (`#0a0a0a`, `#54544f`, `#fafafa`, `#e8e8e3`, `#232323`,
+  `#3a3a3a`, `#f4f4f2`, `#e7e7e2`), e raios (14/12/16) e escala tipográfica também batem.
+  **A diferença não é desleixo, é uma troca** — e reverter é decisão de produto que custa
+  a conformidade.
 - **[2026-09-17]** **Sexta vez do mesmo formato — e a primeira em que nenhuma policy
   está errada sozinha** (migration 0030). `workout_sessions_delete` exige
   `finished_at is null`, e é essa a trava de "sessão concluída não se apaga" (02/09).

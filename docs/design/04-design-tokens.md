@@ -76,6 +76,12 @@ O painel do personal e a landing usam **Inter**. Ao unificar, mantenha Archivo c
 e Inter apenas se já houver motivo — mas escolher uma só é preferível. Isso muda o que o usuário
 vê: **decida com o Otávio.**
 
+> **DECIDIDO em 18/09/2026: a família é a Inter, nas duas interfaces.** Archivo sai do
+> escopo. O custo está medido e aceito: a Inter é neutra de propósito e a Archivo tem
+> personalidade — a 800/26px, que é o título de toda tela, essa diferença é o maior fator
+> isolado de "as telas não parecem o protótipo". Onde este quadro e a tabela acima
+> discordarem, vale este quadro.
+
 Mínimos: 11px para labels em mobile, 14px para corpo. Alvo de toque nunca abaixo de 44×44px.
 
 ## Espaçamento
