@@ -17,7 +17,7 @@
  * Corrigir uma vírgula não é mudar a versão. Mudar o que se coleta, com quem
  * se compartilha ou por quanto tempo se guarda, é.
  */
-export const VERSAO_DOS_DOCUMENTOS = "2026-09-17";
+export const VERSAO_DOS_DOCUMENTOS = "2026-09-18";
 
 /**
  * O que mudou nesta versão, em uma frase, para o portão de re-aceite.
@@ -28,7 +28,7 @@ export const VERSAO_DOS_DOCUMENTOS = "2026-09-17";
  */
 export const O_QUE_MUDOU = {
   aluno:
-    "Seu personal agora tem um espaço de anotações sobre o seu acompanhamento — lesão, preferência, motivo de uma falta. As anotações são dele e não aparecem em nenhuma tela sua, como a ficha de papel de um personal sempre foi. Elas são dado sobre você: dá para pedir a ele o que está escrito, e elas somem junto com a sua conta.",
+    "Seu perfil ganhou quatro campos opcionais: telefone, cidade, uma meta de peso e se você usa alguma terapia hormonal. Os quatro começam em branco e continuam em branco se você não quiser preencher — nada no app deixa de funcionar. A informação sobre terapia hormonal é dado de saúde: ela é só sua e do seu personal, quem escreve é você, e dá para voltar para “não informado” quando quiser. A política de privacidade explica cada um.",
   /*
    * A mesma mudança, lida do outro lado. Para o aluno é "guardam algo sobre
    * mim"; para o personal é "o que eu escrevo fica registrado, e ele pode
@@ -36,7 +36,7 @@ export const O_QUE_MUDOU = {
    * personal na terceira pessoa para o próprio personal.
    */
   personal:
-    "Você agora tem um espaço de anotações privadas sobre cada aluno, na ficha dele. O aluno não vê o que você escreve por nenhuma tela do app — mas a anotação é dado sobre ele, então ele pode pedir a você o que está escrito, e ela é apagada junto com a conta dele. O aluno foi avisado disso no app.",
+    "A ficha do aluno passa a mostrar telefone, cidade, meta de peso e perfil biológico (natural, reposição ou hormonizado), quando ele preencher. Quem preenche é o aluno, não você: o banco recusa a sua escrita nos dois últimos, de propósito: perfil biológico é dado de saúde, e registrar sozinho uma suposição sobre o corpo de alguém é o tipo de coisa que não se desfaz. O aluno foi avisado no app de que você vê esses campos.",
 } as const;
 
 /**

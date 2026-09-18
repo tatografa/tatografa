@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { FichaDoAluno } from "@/components/personal/ficha-do-aluno";
 import { requireTrainer } from "@/lib/auth/session";
-import { lerAluno } from "@/lib/queries/alunos";
+import { lerAluno, resumoDoAluno } from "@/lib/queries/alunos";
 import { listarHistorico } from "@/lib/queries/historico";
 import { programaAtivoDoAluno } from "@/lib/queries/macrotreinos";
 import { listarObservacoes } from "@/lib/queries/observacoes";
@@ -36,13 +36,17 @@ export default async function AlunoDoPainel(
   // Sem `comFotos`: a ficha mostra os números, e a foto do corpo do aluno fica
   // na tela de reavaliações, onde o personal foi de propósito. Assinar três
   // URLs por ciclo aqui seria pagar por imagem que ninguém abriu.
-  const [programa, sessoes, exercicios, reavaliacoes, observacoes] =
+  const [programa, sessoes, exercicios, reavaliacoes, observacoes, resumo] =
     await Promise.all([
       programaAtivoDoAluno(aluno.id),
       listarHistorico(aluno.id),
       progressoDoAluno(aluno.id),
       lerReavaliacoesDeUmAluno(trainer.id, aluno.id),
       listarObservacoes(aluno.id),
+      // Sessões totais e dias seguidos vêm agregados do banco, e não de
+      // `sessoes`: aquela lista tem teto de 50, e o total pararia em "50" para
+      // sempre justamente no aluno que mais treina.
+      resumoDoAluno(aluno.id),
     ]);
 
   return (
@@ -53,6 +57,7 @@ export default async function AlunoDoPainel(
       exercicios={exercicios}
       reavaliacoes={reavaliacoes}
       observacoes={observacoes}
+      resumo={resumo}
     />
   );
 }

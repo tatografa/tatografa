@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 
 import { ConvidarAluno } from "@/app/(personal)/painel/convidar-aluno";
+import { IndicadoresDaCarteiraNoTopo } from "@/components/personal/indicadores-da-carteira";
 import { TabelaDeAlunos } from "@/components/personal/tabela-de-alunos";
 import { requireTrainer } from "@/lib/auth/session";
+import { indicadoresDaCarteira } from "@/lib/domain/carteira";
 import { lerAlunosDaCarteira } from "@/lib/queries/painel";
 
 export const metadata: Metadata = { title: "Alunos" };
@@ -26,6 +28,18 @@ export default async function AlunosPage() {
   const { trainer } = await requireTrainer();
   const alunos = await lerAlunosDaCarteira();
 
+  /*
+   * Contado no servidor, como `dias_sem_treinar`: "novos em 30 dias" é dia de
+   * calendário no fuso do produto, e a tabela é componente cliente. Contar lá
+   * usaria o relógio do aparelho e daria um número diferente do da tela ao
+   * lado, sem nada na interface explicando a diferença.
+   */
+  const indicadores = indicadoresDaCarteira(
+    alunos,
+    trainer.dias_para_alerta,
+    new Date(),
+  );
+
   return (
     <div className="space-y-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
@@ -40,6 +54,13 @@ export default async function AlunosPage() {
         </div>
         <ConvidarAluno />
       </header>
+
+      {alunos.length > 0 && (
+        <IndicadoresDaCarteiraNoTopo
+          indicadores={indicadores}
+          diasParaAlerta={trainer.dias_para_alerta}
+        />
+      )}
 
       <TabelaDeAlunos alunos={alunos} idDoPersonal={trainer.id} />
     </div>

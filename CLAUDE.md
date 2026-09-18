@@ -201,6 +201,64 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-18, decisão do Otávio]** **`students` ganhou telefone, cidade/UF, meta de
+  peso e perfil biológico** (migration 0034), os quatro informados **pelo aluno**. O
+  perfil biológico (natural / reposição / hormonizado) é **dado de saúde sensível pela
+  LGPD**: guardar isso obriga a declarar, então a política de privacidade e os termos
+  passam a descrever os quatro campos, `VERSAO_DOS_DOCUMENTOS` foi para `2026-09-18` e
+  todo mundo passa pelo portão de re-aceite. **Não existe valor `nao_informado` no enum**
+  — "não informado" é a ausência do dado, e é isso que `null` quer dizer; um quarto valor
+  faria o banco guardar uma afirmação onde só há silêncio, e as duas coisas se contariam
+  separado no dia em que alguém somar.
+- **[2026-09-18]** **`students_update` sempre deixou o personal escrever na linha do
+  aluno, e isso passou a importar.** O ramo `trainer_id = auth.uid()` existe desde a 0001
+  e é o que permite arquivar e reativar; já valia para peso e altura e ninguém tinha
+  reparado. Com o perfil biológico a consequência muda de tamanho: um personal registrando
+  sozinho que alguém faz reposição hormonal é **uma suposição sobre o corpo de outra
+  pessoa gravada como fato**. O gatilho `students_dado_do_corpo` recusa a mudança de
+  `biological_profile` e de `weight_goal_kg` quando quem escreve não é o dono da linha —
+  e o personal continua editando o resto. É a mesma regra de
+  `student_measurements_insert` ("o número tem que vir de quem mediu") e o **terceiro
+  gatilho pelo mesmo motivo de sempre**: o `using` do RLS vê a linha antiga e o
+  `with check` a nova, e nenhum dos dois diz "esta coluna não pode **mudar** a não ser
+  que…". Provado com nove casos, dois deles de burla direta — o personal tentando escrever
+  cada uma das duas colunas, recusado com 42501.
+- **[2026-09-18]** **A barra da meta de peso mede do peso inicial até a meta, não do
+  zero.** "75 de 70 kg" não é 107% de nada: o que importa é quanto do caminho combinado já
+  foi andado, e o caminho começa onde a pessoa estava. O inicial sai da **reavaliação mais
+  antiga** que trouxe peso — e sem consulta nova, porque a lista já está na tela —, com o
+  peso de cadastro como reserva. Quem anda para o lado errado fica em 0 e quem passou da
+  meta fica em 1: barra negativa não existe, e barra cheia é a resposta certa para
+  "chegou". **E não é pintada de verde nem de vermelho**, pela mesma razão da variação da
+  medida (15/09): perder dois quilos é vitória para um objetivo e prejuízo para outro.
+- **[2026-09-18]** **Os quatro indicadores da carteira não são de cobrança, e o quarto
+  mudou de pergunta.** O protótipo mostra "Renovações · vencendo nos próximos 7 dias" e
+  "24 de 40 vagas do plano"; não há plano, preço nem pagamento no modelo, e o "40" seria
+  inventado — número falso no lugar mais visível da tela é o oposto do que um indicador
+  serve. No lugar entra **quem precisa de atenção**, com o limiar que o personal
+  configurou, e é o único dos quatro que vira link, porque é o único que é fila de
+  trabalho. `novosNoMes` é contado **no servidor**: é dia de calendário no fuso do produto,
+  e a tabela é componente cliente — a mesma razão de `dias_sem_treinar`.
+- **[2026-09-18]** **Ordenação de tabela: o que não tem valor vai para o fim nas duas
+  direções, e o primeiro clique entra pela ordem mais útil da coluna.** "Nunca treinou" e
+  "sem aderência" não são zero nem infinito, são a ausência do número; jogá-los no topo do
+  crescente abriria a tabela com quem não dá para avaliar. E em "última sessão" e
+  "aderência" o primeiro clique desce, não sobe: quem interessa é o extremo ruim — quem
+  está sumido há mais tempo e quem está treinando menos. `localeCompare` com `pt-BR` no
+  nome, senão "Ângela" cai depois de "Zeca".
+- **[2026-09-18]** **Botão que manda para outra tela precisa que a outra tela saiba
+  disso.** "Agendar sessão" na ficha do aluno leva a `/painel/agenda?aluno=<id>` — e a
+  agenda não lia esse parâmetro. Seria a quarta vez do mesmo defeito ("promessa de tela
+  sem tela"), só que em silêncio: o link funcionaria, abriria a agenda, e o personal
+  escolheria o aluno de novo num seletor de trinta nomes. Agora a página confere o id
+  **contra a carteira que o RLS devolveu** e abre o diálogo já preenchido; id torto ou de
+  estranho não pré-seleciona ninguém e não vira erro — uma URL errada não deve explodir na
+  cara de quem só clicou num botão.
+- **[2026-09-18]** **`telefoneDoPersonal` virou `telefoneOpcional` no dia em que o aluno
+  ganhou telefone.** O nome antigo empurraria a segunda tela a escrever a própria cópia da
+  regra — que é exatamente como as iniciais do nome viraram quatro. O esquema é um só, e
+  a coluna nova nasceu com `check` no banco (`^[0-9]{10,15}$`), que `trainers.phone` nunca
+  teve: lá a regra vive só no zod desde 2026-08-23.
 - **[2026-09-18]** **Os três gráficos do dashboard agregam no banco, não em memória**
   (migration 0033: `alunos_por_mes`, `sessoes_por_dia`, `progressoes_da_carteira`). O
   motivo não é desempenho: é que o **corte de página do PostgREST é silencioso**, e as

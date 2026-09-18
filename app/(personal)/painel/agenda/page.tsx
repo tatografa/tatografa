@@ -23,7 +23,7 @@ export const metadata: Metadata = { title: "Agenda" };
  * errado para quem está fora do Brasil — além de ficar vazio até a hidratação.
  */
 export default async function Agenda({ searchParams }: PageProps<"/painel/agenda">) {
-  const { semana: pedida } = await searchParams;
+  const { semana: pedida, aluno: alunoPedido } = await searchParams;
   const { trainer } = await requireTrainer();
 
   const ehDia = typeof pedida === "string" && /^\d{4}-\d{2}-\d{2}$/.test(pedida);
@@ -35,12 +35,26 @@ export default async function Agenda({ searchParams }: PageProps<"/painel/agenda
     listarAlunos(),
   ]);
 
+  /*
+   * A ficha do aluno manda `?aluno=<id>` no botão "Agendar sessão", e o diálogo
+   * abre já com ele escolhido. O id é conferido contra a carteira **que o RLS
+   * devolveu** — id de estranho, ou torto, simplesmente não pré-seleciona
+   * ninguém. Ignorar em silêncio é o certo aqui: uma URL torta não deve virar
+   * erro na cara de quem só clicou num botão.
+   */
+  const alunoInicial =
+    typeof alunoPedido === "string" &&
+    alunos.some((a) => a.id === alunoPedido)
+      ? alunoPedido
+      : null;
+
   return (
     <TelaAgenda
       semana={semana}
       sessoes={sessoes}
       semMarcacao={semMarcacao}
       alunos={alunos}
+      alunoInicial={alunoInicial}
       hoje={diaLocal(new Date().toISOString())}
     />
   );

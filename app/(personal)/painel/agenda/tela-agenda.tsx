@@ -41,6 +41,7 @@ export function TelaAgenda({
   sessoes,
   semMarcacao,
   alunos,
+  alunoInicial,
   hoje,
 }: {
   semana: Semana;
@@ -48,6 +49,8 @@ export function TelaAgenda({
   /** Sessões passadas que continuam “agendada”, de qualquer semana. */
   semMarcacao: SessaoAgendada[];
   alunos: AlunoDaLista[];
+  /** Vindo da ficha dele: abre o diálogo já com este aluno escolhido. */
+  alunoInicial?: string | null;
   /** O dia de hoje no fuso do produto, calculado no servidor. */
   hoje: string;
 }) {
@@ -68,7 +71,13 @@ export function TelaAgenda({
             {rotuloDaSemana(semana)}
           </h1>
         </div>
-        <NovaSessao alunos={alunos} semana={semana} sessoes={sessoes} hoje={hoje} />
+        <NovaSessao
+          alunos={alunos}
+          semana={semana}
+          sessoes={sessoes}
+          hoje={hoje}
+          alunoInicial={alunoInicial}
+        />
       </header>
 
       {/*

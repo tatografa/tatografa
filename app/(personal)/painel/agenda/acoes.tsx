@@ -41,13 +41,19 @@ export function NovaSessao({
   semana,
   sessoes,
   hoje,
+  alunoInicial,
 }: {
   alunos: AlunoDaLista[];
   semana: Semana;
   sessoes: SessaoAgendada[];
   hoje: string;
+  /** Veio da ficha do aluno: o diálogo já abre com ele escolhido. */
+  alunoInicial?: string | null;
 }) {
-  const [aberto, setAberto] = useState(false);
+  // O inicializador roda uma vez só, então fechar não reabre. Chegar de
+  // `/painel/alunos/[id]` com o diálogo fechado obrigaria a clicar de novo no
+  // botão que a pessoa acabou de clicar.
+  const [aberto, setAberto] = useState(Boolean(alunoInicial));
   const [estado, acao, enviando] = useActionState(agendarSessao, AGENDAMENTO);
 
   // O dia e a hora ficam no estado porque o aviso de conflito depende deles
@@ -84,7 +90,7 @@ export function NovaSessao({
           <Select
             name="alunoId"
             label="Aluno"
-            defaultValue={estado.campos?.alunoId ?? ""}
+            defaultValue={estado.campos?.alunoId ?? alunoInicial ?? ""}
             error={estado.errosPorCampo?.alunoId}
           >
             <option value="" disabled>

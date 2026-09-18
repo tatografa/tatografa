@@ -1,11 +1,16 @@
 import { z } from "zod";
 
 /**
- * O telefone do personal, e o link de WhatsApp que sai dele.
+ * Telefone e o link de WhatsApp que sai dele — dos dois lados do produto.
  *
  * Módulo neutro: a Server Action das configurações valida com o mesmo esquema
  * que a tela do aluno usa para montar o link. Duas leituras diferentes do que é
  * "um número válido" produziriam um link que abre no vazio.
+ *
+ * O esquema chamava-se `telefoneDoPersonal` enquanto só o personal tinha
+ * número. Com o telefone do aluno (18/09) a regra passou a servir aos dois, e o
+ * nome antigo empurraria a segunda tela a escrever a sua própria cópia — que é
+ * exatamente como as iniciais do nome viraram quatro.
  */
 
 /** Só os dígitos. É o que o WhatsApp aceita na URL. */
@@ -55,11 +60,12 @@ export function formatarTelefone(bruto: string | null): string {
 /**
  * O campo, para quem digita.
  *
- * Aceita vazio — telefone é opcional, e o personal que não quiser dar o dele
- * simplesmente não aparece com o botão no app do aluno. O que não se aceita é
- * um número que não dá em lugar nenhum.
+ * Aceita vazio — telefone é opcional dos dois lados. O personal que não quiser
+ * dar o dele não aparece com o botão no app do aluno; o aluno que não quiser
+ * dar o dele vira uma ficha sem botão de WhatsApp. O que não se aceita é um
+ * número que não dá em lugar nenhum.
  */
-export const telefoneDoPersonal = z
+export const telefoneOpcional = z
   .string()
   .trim()
   .transform((v) => (v === "" ? null : v))

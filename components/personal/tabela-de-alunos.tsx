@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
@@ -8,7 +9,10 @@ import { comoPorcentagem } from "@/lib/domain/atencao";
 import {
   FILTROS_DE_STATUS,
   filtrarAlunos,
+  ordenarAlunos,
+  type CampoDeOrdem,
   type FiltroDeStatus,
+  type Ordem,
 } from "@/lib/domain/carteira";
 import { iniciaisDe } from "@/lib/domain/nome";
 import type { AlunoNaTabela } from "@/lib/queries/painel";
@@ -43,11 +47,25 @@ export function TabelaDeAlunos({
 }) {
   const [busca, setBusca] = useState("");
   const [status, setStatus] = useState<FiltroDeStatus>("todos");
+  // Nome crescente é a ordem que o personal espera ao abrir uma lista de
+  // pessoas. As outras duas colunas ele pede clicando.
+  const [ordem, setOrdem] = useState<Ordem>({ campo: "nome", crescente: true });
 
   const lista = useMemo(
-    () => filtrarAlunos(alunos, { busca, status }),
-    [alunos, busca, status],
+    () => ordenarAlunos(filtrarAlunos(alunos, { busca, status }), ordem),
+    [alunos, busca, status, ordem],
   );
+
+  // Primeiro clique numa coluna nova entra na ordem mais útil dela, não sempre
+  // na crescente: em "última sessão" e "aderência", quem interessa é o extremo
+  // ruim — quem está sumido há mais tempo e quem está treinando menos.
+  function ordenarPor(campo: CampoDeOrdem) {
+    setOrdem((atual) =>
+      atual.campo === campo
+        ? { campo, crescente: !atual.crescente }
+        : { campo, crescente: campo === "nome" },
+    );
+  }
 
   const filtrando = Boolean(busca.trim()) || status !== "todos";
 
@@ -89,11 +107,17 @@ export function TabelaDeAlunos({
             <table className="w-full min-w-[820px] border-collapse text-left">
               <thead>
                 <tr className="border-b border-border">
-                  <Coluna>Aluno</Coluna>
+                  <Coluna ordem={ordem} campo="nome" aoOrdenar={ordenarPor}>
+                    Aluno
+                  </Coluna>
                   <Coluna>Objetivo</Coluna>
                   <Coluna>Macrotreino</Coluna>
-                  <Coluna>Última sessão</Coluna>
-                  <Coluna alinhada>Aderência</Coluna>
+                  <Coluna ordem={ordem} campo="ultima" aoOrdenar={ordenarPor}>
+                    Última sessão
+                  </Coluna>
+                  <Coluna alinhada ordem={ordem} campo="aderencia" aoOrdenar={ordenarPor}>
+                    Aderência
+                  </Coluna>
                   <Coluna>Status</Coluna>
                 </tr>
               </thead>
@@ -194,19 +218,52 @@ function Linha({ aluno, ehVoce }: { aluno: AlunoNaTabela; ehVoce: boolean }) {
   );
 }
 
+/**
+ * O cabeçalho de coluna, ordenável quando recebe `campo`.
+ *
+ * `aria-sort` no `<th>` e não só a setinha: é ele que faz o leitor de tela
+ * anunciar "ordenado crescente" ao entrar na tabela. Sem isso a ordem existe
+ * para quem vê o ícone e para mais ninguém — e o motivo de esta ser uma
+ * `<table>` de verdade, e não uma grade de `<div>`, é exatamente esse.
+ */
 function Coluna({
   children,
   alinhada = false,
+  campo,
+  ordem,
+  aoOrdenar,
 }: {
   children: React.ReactNode;
   alinhada?: boolean;
+  campo?: CampoDeOrdem;
+  ordem?: Ordem;
+  aoOrdenar?: (campo: CampoDeOrdem) => void;
 }) {
+  const ativa = Boolean(campo && ordem?.campo === campo);
+  const Seta = ativa ? (ordem?.crescente ? ArrowUp : ArrowDown) : ArrowUpDown;
+
   return (
     <th
       scope="col"
+      aria-sort={
+        !campo ? undefined : ativa ? (ordem?.crescente ? "ascending" : "descending") : "none"
+      }
       className={`eyebrow px-4 py-3 text-[9px] text-ink-4 ${alinhada ? "text-right" : ""}`}
     >
-      {children}
+      {campo && aoOrdenar ? (
+        <button
+          type="button"
+          onClick={() => aoOrdenar(campo)}
+          className={`inline-flex items-center gap-1 rounded-[5px] transition hover:text-ink ${
+            alinhada ? "flex-row-reverse" : ""
+          } ${ativa ? "text-ink" : ""}`}
+        >
+          {children}
+          <Seta size={11} aria-hidden className={ativa ? "" : "opacity-45"} />
+        </button>
+      ) : (
+        children
+      )}
     </th>
   );
 }

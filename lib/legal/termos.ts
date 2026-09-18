@@ -51,6 +51,7 @@ export const TERMOS: Documento = {
       titulo: "Seus dados e seu conteúdo",
       paragrafos: [
         "O treino que o personal monta é dele. O histórico do que você executou é seu. Nenhum dos dois é nosso: guardamos para vocês, e a política de privacidade explica com quem isso é compartilhado.",
+        "Dois campos do perfil são escritos **só pelo aluno**, e nem o personal consegue alterá-los: a meta de peso e o perfil biológico (natural, reposição ou hormonizado). Não é regra de tela — é o banco que recusa. Perfil biológico é dado de saúde, e registrar uma suposição sobre o corpo de outra pessoa como se fosse fato é exatamente o que essa trava impede.",
         "Não usamos seu conteúdo para outra finalidade, não vendemos e não publicamos.",
       ],
     },

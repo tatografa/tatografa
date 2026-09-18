@@ -208,6 +208,35 @@ dashboard **maior** que o §2 — receita mensal, ticket médio, churn, renovaç
 distribuição por plano. Esses cinco dependem de plano, preço e pagamento, que não existem
 no modelo de dados: são escopo de produto a decidir, não tela a construir.
 
+**Estado em 18/09/2026 (alunos e ficha).** O §3 e o §4 fecharam contra os protótipos do
+Otávio, menos o que depende de cobrança.
+
+**§3 · Alunos** ganhou os quatro indicadores do topo e as colunas ordenáveis. Os
+indicadores **não são os do protótipo**: "Renovações" e "de 40 vagas do plano" viraram
+**Inativos** e **Precisam de atenção** — não há plano nem pagamento no modelo, e o "40"
+seria inventado. Também **não** entraram: as caixas de seleção por linha (não existe
+nenhuma ação em lote para elas dispararem) e a paginação (a carteira do piloto cabe numa
+página, e o corte do servidor é o que vira filtro do servidor quando não couber).
+
+**§4 · Perfil do aluno** virou duas colunas: identidade à esquerda (avatar, status,
+sessões totais, dias seguidos, ficha de dados, WhatsApp e meta de peso) e o trabalho à
+direita. A ação primária do cabeçalho passou a ser **Agendar sessão**, que leva à agenda
+com o aluno já escolhido.
+
+Quatro campos novos em `students` (migration 0034), todos informados **pelo aluno** no
+perfil dele: telefone, cidade/UF, meta de peso e perfil biológico. Os dois últimos o
+banco recusa se a escrita não vier da conta do próprio aluno.
+
+O que dos dois protótipos continua fora, e por quê:
+
+| Onde | O quê | Por quê não |
+|---|---|---|
+| §3 e §4 | Plano, Vencimento, Renovações, "24 de 40 vagas" | Cobrança não existe no modelo de dados |
+| §3 | Caixas de seleção por linha | Nenhuma ação em lote para elas dispararem |
+| §3 | Paginação | A carteira cabe numa página; busca e filtro já rodam na tela |
+| §4 | Feed do aluno dentro da ficha | Existe em `/painel/social`, com a fila de "sem resposta" — duplicar aqui seria a mesma leitura em dois lugares |
+| §4 | Foto do corpo na ficha | Fica em `/painel/reavaliacoes`: ver a foto de alguém exige intenção |
+
 **Estado em 18/09/2026 (gráficos).** Os **três gráficos do protótipo que saem de dado que
 já existe** foram construídos (`components/personal/graficos-do-painel.tsx`, RPCs da
 migration 0033):

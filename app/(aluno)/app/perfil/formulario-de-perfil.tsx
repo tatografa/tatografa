@@ -4,7 +4,9 @@ import { Pencil } from "lucide-react";
 import { useActionState, useState } from "react";
 
 import { Button, Input, Select } from "@/components/ui";
-import { NIVEL, OBJETIVO } from "@/lib/rotulos";
+import { UFS } from "@/lib/domain/perfil";
+import { formatarTelefone } from "@/lib/domain/telefone";
+import { NIVEL, OBJETIVO, PERFIL_BIOLOGICO } from "@/lib/rotulos";
 import type { Tables } from "@/types/database";
 
 import { salvarPerfil, type EstadoDoPerfil } from "./actions";
@@ -13,7 +15,9 @@ const INICIAL: EstadoDoPerfil = {};
 
 type Aluno = Pick<
   Tables<"students">,
-  "name" | "email" | "birth_date" | "goal" | "experience_level" | "weight_kg" | "height_cm"
+  | "name" | "email" | "birth_date" | "goal" | "experience_level"
+  | "weight_kg" | "height_cm"
+  | "phone" | "city" | "state" | "biological_profile" | "weight_goal_kg"
 >;
 
 /**
@@ -56,6 +60,28 @@ export function FormularioDePerfil({ aluno }: { aluno: Aluno }) {
       {
         rotulo: "Altura",
         valor: aluno.height_cm ? `${aluno.height_cm} cm` : "Não informado",
+      },
+      {
+        rotulo: "Meta de peso",
+        valor: aluno.weight_goal_kg
+          ? `${Number(aluno.weight_goal_kg)} kg`
+          : "Não informado",
+      },
+      {
+        rotulo: "Telefone",
+        valor: aluno.phone ? formatarTelefone(aluno.phone) : "Não informado",
+      },
+      {
+        rotulo: "Cidade",
+        valor: aluno.city
+          ? [aluno.city, aluno.state].filter(Boolean).join(" · ")
+          : "Não informado",
+      },
+      {
+        rotulo: "Perfil biológico",
+        valor: aluno.biological_profile
+          ? PERFIL_BIOLOGICO[aluno.biological_profile]
+          : "Não informado",
       },
     ];
 
@@ -144,6 +170,78 @@ export function FormularioDePerfil({ aluno }: { aluno: Aluno }) {
           defaultValue={aluno.height_cm ? String(aluno.height_cm) : ""}
           error={estado.errosPorCampo?.altura}
         />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Input
+          label="Meta de peso (kg)"
+          name="metaDePeso"
+          type="number"
+          inputMode="decimal"
+          step="0.1"
+          defaultValue={
+            aluno.weight_goal_kg ? String(Number(aluno.weight_goal_kg)) : ""
+          }
+          error={estado.errosPorCampo?.metaDePeso}
+        />
+        <Input
+          label="Telefone"
+          name="telefone"
+          type="tel"
+          inputMode="tel"
+          placeholder="(11) 99999-9999"
+          defaultValue={aluno.phone ? formatarTelefone(aluno.phone) : ""}
+          error={estado.errosPorCampo?.telefone}
+        />
+      </div>
+
+      <div className="grid grid-cols-[1fr_88px] gap-3">
+        <Input
+          label="Cidade"
+          name="cidade"
+          defaultValue={aluno.city ?? ""}
+          error={estado.errosPorCampo?.cidade}
+        />
+        <Select
+          label="UF"
+          name="uf"
+          defaultValue={aluno.state ?? ""}
+          error={estado.errosPorCampo?.uf}
+        >
+          <option value="">—</option>
+          {UFS.map((uf) => (
+            <option key={uf} value={uf}>
+              {uf}
+            </option>
+          ))}
+        </Select>
+      </div>
+
+      {/*
+        O perfil biológico é dado de saúde sensível, e a tela precisa dizer isso
+        do lado do campo — não só na política. Sem a frase, o aluno escolhe
+        "Reposição" sem saber quem lê; com ela, escolher em branco é uma decisão
+        informada, e em branco é um estado final legítimo.
+      */}
+      <div className="space-y-2">
+        <Select
+          label="Perfil biológico (opcional)"
+          name="perfilBiologico"
+          defaultValue={aluno.biological_profile ?? ""}
+          error={estado.errosPorCampo?.perfilBiologico}
+        >
+          <option value="">Prefiro não informar</option>
+          {Object.entries(PERFIL_BIOLOGICO).map(([valor, rotulo]) => (
+            <option key={valor} value={valor}>
+              {rotulo}
+            </option>
+          ))}
+        </Select>
+        <p className="text-[12px] leading-relaxed text-ink-4">
+          Isso é informação de saúde. Só você e o seu personal veem, e a resposta
+          do corpo ao treino muda com ela — por isso perguntamos. Deixar em
+          branco é uma resposta, e nada no app deixa de funcionar.
+        </p>
       </div>
 
       {/*

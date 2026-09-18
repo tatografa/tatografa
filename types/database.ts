@@ -470,7 +470,11 @@ export type Database = {
       students: {
         Row: {
           avatar_url: string | null
+          biological_profile:
+            | Database["public"]["Enums"]["biological_profile"]
+            | null
           birth_date: string | null
+          city: string | null
           created_at: string
           email: string
           experience_level:
@@ -481,13 +485,20 @@ export type Database = {
           id: string
           name: string
           onboarded_at: string | null
+          phone: string | null
+          state: string | null
           status: Database["public"]["Enums"]["student_status"]
           trainer_id: string
+          weight_goal_kg: number | null
           weight_kg: number | null
         }
         Insert: {
           avatar_url?: string | null
+          biological_profile?:
+            | Database["public"]["Enums"]["biological_profile"]
+            | null
           birth_date?: string | null
+          city?: string | null
           created_at?: string
           email: string
           experience_level?:
@@ -498,13 +509,20 @@ export type Database = {
           id: string
           name: string
           onboarded_at?: string | null
+          phone?: string | null
+          state?: string | null
           status?: Database["public"]["Enums"]["student_status"]
           trainer_id: string
+          weight_goal_kg?: number | null
           weight_kg?: number | null
         }
         Update: {
           avatar_url?: string | null
+          biological_profile?:
+            | Database["public"]["Enums"]["biological_profile"]
+            | null
           birth_date?: string | null
+          city?: string | null
           created_at?: string
           email?: string
           experience_level?:
@@ -515,8 +533,11 @@ export type Database = {
           id?: string
           name?: string
           onboarded_at?: string | null
+          phone?: string | null
+          state?: string | null
           status?: Database["public"]["Enums"]["student_status"]
           trainer_id?: string
+          weight_goal_kg?: number | null
           weight_kg?: number | null
         }
         Relationships: [
@@ -869,6 +890,7 @@ export type Database = {
     }
     Enums: {
       appointment_status: "agendada" | "realizada" | "faltou" | "cancelada"
+      biological_profile: "natural" | "reposicao" | "hormonizado"
       body_region: "braco" | "peito" | "cintura" | "quadril" | "coxa"
       equipment:
         | "barra"
@@ -926,6 +948,7 @@ export const Constants = {
   public: {
     Enums: {
       appointment_status: ["agendada", "realizada", "faltou", "cancelada"],
+      biological_profile: ["natural", "reposicao", "hormonizado"],
       body_region: ["braco", "peito", "cintura", "quadril", "coxa"],
       equipment: [
         "barra",

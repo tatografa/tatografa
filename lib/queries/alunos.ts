@@ -1,6 +1,7 @@
 import "server-only";
 
 import { pareceUuid } from "@/lib/domain/id";
+import { sequenciaDeDias } from "@/lib/domain/sequencia";
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
 
@@ -94,7 +95,52 @@ export type AlunoDaFicha = Pick<
   // aparecia aqui, e a tela nunca mostrou peso.
   | "weight_kg"
   | "height_cm"
+  // Os cinco de 18/09. `birth_date` já existia no schema e nenhuma tela do
+  // painel lia: a idade importa para montar treino e a ficha não dizia.
+  | "birth_date"
+  | "phone"
+  | "city"
+  | "state"
+  | "biological_profile"
+  | "weight_goal_kg"
 >;
+
+/** Os dois números do topo da ficha (doc 06 §4). */
+export type ResumoDoAluno = { sessoesTotais: number; diasSeguidos: number };
+
+/**
+ * Quantas sessões o aluno já concluiu e há quantos dias seguidos ele treina.
+ *
+ * As duas contas são **agregadas no banco**: `head: true` para a contagem e
+ * `dias_de_treino` (migration 0013) para os dias distintos. `listarHistorico`
+ * não serve para nenhuma das duas — ela tem teto de 50 sessões, e o total
+ * pararia em "50" para sempre no aluno que mais treina, que é justamente aquele
+ * de quem o personal quer saber o número.
+ *
+ * A sequência sai de `sequenciaDeDias`, a **mesma** função que desenha o
+ * "🔥 5 dias seguidos" na home do aluno. Duas contas para a mesma corrente
+ * fariam o personal e o aluno verem números diferentes da mesma coisa.
+ */
+export async function resumoDoAluno(alunoId: string): Promise<ResumoDoAluno> {
+  const supabase = await createClient();
+
+  const [sessoes, dias] = await Promise.all([
+    supabase
+      .from("workout_sessions")
+      .select("id", { count: "exact", head: true })
+      .eq("student_id", alunoId)
+      .not("finished_at", "is", null),
+    supabase.rpc("dias_de_treino", { p_student_id: alunoId }),
+  ]);
+
+  if (sessoes.error) throw sessoes.error;
+  if (dias.error) throw dias.error;
+
+  return {
+    sessoesTotais: sessoes.count ?? 0,
+    diasSeguidos: sequenciaDeDias((dias.data ?? []).map((linha) => linha.dia)),
+  };
+}
 
 /**
  * Um aluno da carteira do personal.
@@ -112,7 +158,7 @@ export async function lerAluno(id: string): Promise<AlunoDaFicha | null> {
   const { data, error } = await supabase
     .from("students")
     .select(
-      "id, name, email, goal, experience_level, status, created_at, onboarded_at, weight_kg, height_cm",
+      "id, name, email, goal, experience_level, status, created_at, onboarded_at, weight_kg, height_cm, birth_date, phone, city, state, biological_profile, weight_goal_kg",
     )
     .eq("id", id)
     .maybeSingle();

@@ -50,17 +50,19 @@ export const PRIVACIDADE: Documento = {
       paragrafos: [
         "**Para criar sua conta:** nome, e-mail e senha. A senha é guardada cifrada, e nem nós conseguimos lê-la.",
         "**Que você informa no primeiro acesso:** data de nascimento, peso, altura, objetivo (ganhar massa, perder gordura, condicionamento ou saúde) e nível de experiência.",
+        "**Que você pode informar no seu perfil, se quiser:** telefone com DDD, cidade e estado, uma meta de peso e se você usa alguma terapia hormonal (natural, reposição ou hormonizado). **Os quatro são opcionais e ficam em branco até você preencher** — nenhuma tela do app deixa de funcionar sem eles. O telefone serve para o seu personal falar com você no WhatsApp, que é onde essa conversa já acontece; a meta de peso desenha a barra de progresso que só você e ele veem. **Quem escreve esses dois últimos é você, e só você:** o banco recusa a escrita se ela não vier da sua conta, nem quando é o seu personal quem tenta.",
         "**Que nasce do seu treino:** os treinos que seu personal montou para você, e, a cada série que você registra, a carga, as repetições, se você pulou a série, quando a sessão começou e terminou e quanto tempo durou.",
         "**Que você publica, se quiser:** foto, legenda e comentários no feed, mais o registro de quais posts você curtiu. Publicar é opcional do começo ao fim — dá para usar o Reps Club inteiro sem nunca abrir o feed.",
         "**Que você preenche na reavaliação, se quiser:** peso, percentual de gordura, medidas de braço, peito, cintura, quadril e coxa, uma observação sua, e até três fotos suas — de frente, de lado e de costas. Seu personal libera o formulário; preencher é escolha sua, campo por campo, e a reavaliação pode ser enviada sem nenhuma foto.",
         "**Que o seu personal escreve sobre o seu acompanhamento:** ele tem, na sua ficha, um espaço de anotações — lesão, preferência de exercício, motivo de uma falta, o que ele precisar lembrar para montar o seu próximo treino. **Essas anotações são dele e você não as vê pelo app**, do mesmo jeito que a ficha de papel de um personal sempre foi dele. Elas continuam sendo dado sobre você: se quiser saber o que está escrito ali, peça a ele ou escreva para " + OPERADOR.contato + ", e apagamos junto com a sua conta.",
-        "**Nada além disso.** Não pedimos documento, endereço, telefone, cartão nem localização. Não usamos cookie de rastreamento, nem ferramenta de publicidade.",
+        "**Nada além disso.** Não pedimos documento, endereço completo, cartão nem localização do aparelho — o app nunca acessa o GPS. Telefone e cidade só existem se você digitar. Não usamos cookie de rastreamento, nem ferramenta de publicidade.",
       ],
     },
     {
       titulo: "Isso é dado de saúde",
       paragrafos: [
         "Peso, altura e data de nascimento, junto com o que você levanta, dizem coisas sobre seu corpo. Foto de treino, mais ainda. **As medidas e as fotos da reavaliação são o caso mais forte de todos**: são um retrato do seu corpo, feito para ser comparado com o de três meses atrás. A lei brasileira (LGPD) chama isso de **dado pessoal sensível** e exige cuidado maior — inclusive o seu consentimento explícito, que é o que você dá ao aceitar esta política no primeiro acesso.",
+        "**A informação sobre terapia hormonal é o caso mais direto disso.** Ela não é inferida de nada: é uma pergunta sobre a sua saúde, e por isso é opcional, fica em branco por padrão e pode voltar para “não informado” a qualquer momento pelo seu perfil. Ela é vista por você e pelo seu personal, mais ninguém, e existe por um motivo só — a resposta do corpo ao treino é diferente, e quem monta o seu treino decide melhor sabendo. Se preferir não dizer, não diga: nenhuma tela cobra, e nada no produto para de funcionar.",
         "Consentimento dado é consentimento que pode ser retirado. Se você retirar, a conta é encerrada, porque sem esses dados o produto não tem o que fazer.",
       ],
     },

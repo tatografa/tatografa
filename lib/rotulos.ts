@@ -37,6 +37,19 @@ export const NIVEL: Record<Enums<"experience_level">, string> = {
   avancado: "Avançado",
 };
 
+/**
+ * Terapia hormonal, como a interface escreve.
+ *
+ * Não existe "Não informado" aqui porque não existe no enum: a ausência é
+ * `null`, e a frase para ela é escolha de cada tela — na ficha do personal é
+ * "Não informado", no formulário do aluno é a opção em branco do select.
+ */
+export const PERFIL_BIOLOGICO: Record<Enums<"biological_profile">, string> = {
+  natural: "Natural",
+  reposicao: "Reposição",
+  hormonizado: "Hormonizado",
+};
+
 /** O enum é identificador; a interface é em português e não mostra "ativo" cru. */
 export const STATUS_DO_ALUNO: Record<Enums<"student_status">, string> = {
   convidado: "Convidado",

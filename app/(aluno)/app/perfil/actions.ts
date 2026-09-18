@@ -15,6 +15,11 @@ export type EstadoDoPerfil = {
 /**
  * O aluno corrige o próprio perfil.
  *
+ * Desde 18/09 ele também informa **telefone, cidade/UF, meta de peso e perfil
+ * biológico**. Os quatro são opcionais e aceitam voltar para vazio: a política
+ * de privacidade promete que informar é escolha, e uma escolha que não se
+ * desfaz não é escolha.
+ *
  * **Por que isto existe:** a política de privacidade promete, em "Seus
  * direitos", que "o perfil é editável" — e até aqui ele era só de leitura.
  * Corrigir dado errado sobre si é direito da LGPD, e uma tela que só mostra não
@@ -42,6 +47,11 @@ export async function salvarPerfil(
     nascimento: String(formData.get("nascimento") ?? ""),
     peso: String(formData.get("peso") ?? ""),
     altura: String(formData.get("altura") ?? ""),
+    telefone: String(formData.get("telefone") ?? ""),
+    cidade: String(formData.get("cidade") ?? ""),
+    uf: String(formData.get("uf") ?? ""),
+    perfilBiologico: String(formData.get("perfilBiologico") ?? ""),
+    metaDePeso: String(formData.get("metaDePeso") ?? ""),
   };
 
   const analise = esquemaDoPerfil.safeParse(bruto);
@@ -54,7 +64,10 @@ export async function salvarPerfil(
     return { errosPorCampo };
   }
 
-  const { nome, objetivo, nivel, nascimento, peso, altura } = analise.data;
+  const {
+    nome, objetivo, nivel, nascimento, peso, altura,
+    telefone, cidade, uf, perfilBiologico, metaDePeso,
+  } = analise.data;
   const { student } = await requireStudent();
   const supabase = await createClient();
 
@@ -67,6 +80,15 @@ export async function salvarPerfil(
       birth_date: nascimento,
       weight_kg: peso,
       height_cm: Math.round(altura),
+      phone: telefone,
+      city: cidade,
+      state: uf,
+      // Os dois últimos passam pelo gatilho `students_dado_do_corpo`, que só
+      // aceita a escrita vinda da conta do próprio aluno (migration 0034).
+      // Aqui isso é sempre verdade — `requireStudent()` já resolveu quem é —,
+      // e a trava existe para o POST direto que não passa por esta tela.
+      biological_profile: perfilBiologico,
+      weight_goal_kg: metaDePeso,
     })
     .eq("id", student.id);
 

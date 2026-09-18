@@ -1,5 +1,7 @@
+import { CalendarPlus } from "lucide-react";
 import Link from "next/link";
 
+import { IdentidadeDoAluno } from "@/components/personal/identidade-do-aluno";
 import { EvolucaoDoAluno } from "@/components/personal/evolucao-do-aluno";
 import { ObservacoesDoAluno } from "@/components/personal/observacoes-do-aluno";
 import { Comparacao } from "@/components/reavaliacao/comparacao";
@@ -10,15 +12,13 @@ import {
   rotuloDoDia,
 } from "@/lib/domain/historico";
 import { semanaAtual } from "@/lib/domain/treino";
-import type { AlunoDaFicha } from "@/lib/queries/alunos";
+import type { AlunoDaFicha, ResumoDoAluno } from "@/lib/queries/alunos";
 import type { SessaoDoHistorico } from "@/lib/queries/historico";
 import { LIMITE_DO_HISTORICO } from "@/lib/queries/historico";
 import type { Macrotreino } from "@/lib/queries/macrotreinos";
 import type { Observacao } from "@/lib/queries/observacoes";
 import type { ExercicioComProgresso } from "@/lib/queries/progresso";
-import { formatarMedida } from "@/lib/domain/reavaliacao";
 import { comparar, type Reavaliacao } from "@/lib/queries/reavaliacao";
-import { NIVEL, OBJETIVO, STATUS_DO_ALUNO } from "@/lib/rotulos";
 
 export type FichaDoAlunoProps = {
   aluno: AlunoDaFicha;
@@ -38,6 +38,8 @@ export type FichaDoAlunoProps = {
    * policy de select para ele (migration 0028).
    */
   observacoes: Observacao[];
+  /** Sessões totais e dias seguidos — os dois números do topo da ficha. */
+  resumo: ResumoDoAluno;
 };
 
 /**
@@ -54,66 +56,79 @@ export function FichaDoAluno({
   exercicios,
   reavaliacoes,
   observacoes,
+  resumo,
 }: FichaDoAlunoProps) {
+  /*
+   * O peso de onde a barra da meta parte: a reavaliação mais **antiga** que
+   * trouxe peso. `reavaliacoes` vem da mais recente para a mais antiga, então
+   * é o último da lista que serve — e é de propósito que não há consulta nova
+   * para isto: o dado já está na tela.
+   */
+  const pesoInicial =
+    [...reavaliacoes].reverse().find((r) => r.peso !== null)?.peso ??
+    null;
+
   return (
-    <div className="space-y-8">
-      <header className="space-y-3">
+    <div className="space-y-6">
+      <header className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href="/painel/alunos"
           className="eyebrow text-ink-4 transition hover:text-ink-2"
         >
           ← Alunos
         </Link>
-
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="space-y-1.5">
-            <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
-              {aluno.name}
-            </h1>
-            {/*
-              Peso e altura entram na mesma linha do objetivo: é a partir deles
-              que o personal monta o treino, e a ficha era o único lugar onde
-              ele iria procurar — sem mostrar nenhum dos dois. Achado no teste
-              de campo.
-            */}
-            <p className="text-[13.5px] text-ink-3">
-              {[
-                aluno.goal ? OBJETIVO[aluno.goal] : null,
-                aluno.experience_level ? NIVEL[aluno.experience_level] : null,
-                aluno.weight_kg !== null
-                  ? `${formatarMedida(aluno.weight_kg)} kg`
-                  : null,
-                aluno.height_cm !== null ? `${aluno.height_cm} cm` : null,
-                aluno.email,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
-          </div>
-          <Badge tone={aluno.status === "ativo" ? "sucesso" : "neutro"}>
-            {STATUS_DO_ALUNO[aluno.status]}
-          </Badge>
-        </div>
+        {/*
+          A ação primária do cabeçalho desta tela é agendar sessão (doc 06, a
+          tabela de ação por página). A agenda já existe desde 15/09 e a ficha
+          não levava a ela — o personal saía pelo menu e procurava o aluno de
+          novo.
+        */}
+        <Link
+          href={`/painel/agenda?aluno=${aluno.id}`}
+          className="inline-flex min-h-10 items-center gap-2 rounded-input bg-brand px-4 text-[13px] font-bold text-white shadow-botao transition hover:bg-brand-hover"
+        >
+          <CalendarPlus size={15} aria-hidden />
+          Agendar sessão
+        </Link>
       </header>
 
-      <ProgramaAtivo programa={programa} nome={aluno.name} />
+      {/*
+        Duas colunas a partir de `xl`: a identidade fica à esquerda e acompanha
+        a rolagem, o trabalho fica à direita. Abaixo disso empilha — não porque
+        o painel seja mobile, mas porque uma coluna de 320px espremida num
+        notebook de 1280 com a sidebar aberta deixaria a tabela do histórico
+        sem largura para respirar.
+      */}
+      <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
+        <div className="xl:sticky xl:top-6 xl:self-start">
+          <IdentidadeDoAluno
+            aluno={aluno}
+            resumo={resumo}
+            pesoInicial={pesoInicial}
+          />
+        </div>
 
-      <ObservacoesDoAluno
-        alunoId={aluno.id}
-        observacoes={observacoes}
-        nome={primeiroNome(aluno.name)}
-      />
+        <div className="min-w-0 space-y-8">
+          <ProgramaAtivo programa={programa} nome={aluno.name} />
 
-      <section className="space-y-3">
-        <h2 className="eyebrow text-ink-4">Evolução por exercício</h2>
-        <Card size="lg">
-          <EvolucaoDoAluno exercicios={exercicios} />
-        </Card>
-      </section>
+          <ObservacoesDoAluno
+            alunoId={aluno.id}
+            observacoes={observacoes}
+            nome={primeiroNome(aluno.name)}
+          />
 
-      <Reavaliacoes reavaliacoes={reavaliacoes} alunoId={aluno.id} />
+          <section className="space-y-3">
+            <h2 className="eyebrow text-ink-4">Evolução por exercício</h2>
+            <Card size="lg">
+              <EvolucaoDoAluno exercicios={exercicios} />
+            </Card>
+          </section>
 
-      <Historico sessoes={sessoes} alunoId={aluno.id} nome={aluno.name} />
+          <Reavaliacoes reavaliacoes={reavaliacoes} alunoId={aluno.id} />
+
+          <Historico sessoes={sessoes} alunoId={aluno.id} nome={aluno.name} />
+        </div>
+      </div>
     </div>
   );
 }

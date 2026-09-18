@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { requireTrainer } from "@/lib/auth/session";
 import { LIMITES_DO_ALERTA } from "@/lib/domain/atencao";
-import { telefoneDoPersonal } from "@/lib/domain/telefone";
+import { telefoneOpcional } from "@/lib/domain/telefone";
 import { createClient } from "@/lib/supabase/server";
 
 export type EstadoDasConfiguracoes = {
@@ -102,7 +102,7 @@ export async function salvarContato(
   const { trainer } = await requireTrainer();
 
   const bruto = { telefone: String(dados.get("telefone") ?? "") };
-  const analise = telefoneDoPersonal.safeParse(bruto.telefone);
+  const analise = telefoneOpcional.safeParse(bruto.telefone);
 
   if (!analise.success) {
     return {
