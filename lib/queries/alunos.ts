@@ -120,3 +120,24 @@ export async function lerAluno(id: string): Promise<AlunoDaFicha | null> {
   if (error) throw error;
   return data;
 }
+
+/**
+ * Quantos alunos o personal tem — o marcador ao lado de "Alunos" na sidebar.
+ *
+ * Contagem agregada no banco (`head: true`), não `listarAlunos().length`:
+ * aquela função faz duas consultas e traz a carteira inteira com a data da
+ * última sessão de cada um. Isto roda no **layout**, ou seja, em toda
+ * navegação do painel — seria pagar a leitura mais cara do produto pela
+ * informação mais barata dele. Mesmo raciocínio de
+ * `contarReavaliacoesPendentes`.
+ */
+export async function contarAlunos(): Promise<number> {
+  const supabase = await createClient();
+
+  const { count, error } = await supabase
+    .from("students")
+    .select("id", { count: "exact", head: true });
+
+  if (error) throw error;
+  return count ?? 0;
+}

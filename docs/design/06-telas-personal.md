@@ -174,7 +174,7 @@ parágrafo. O que resta do §5, com o motivo:
 |---|---|
 | Reordenar por arraste | Entregue por setas ↑↓ — mesmo resultado, melhor no teclado |
 | Salvar como rascunho | Já existe como status: o programa nasce arquivado e é ativado |
-| Sidebar colapsável | Não construída; a barra do topo navega as mesmas páginas |
+| Sidebar colapsável | **Entregue em 18/09** (`components/personal/navegacao-lateral.tsx`) |
 
 **Estado em 17/09/2026.** O §4 ganhou as observações privadas do personal — lista de
 anotações datadas, visíveis só para ele (`trainer_notes`, migration 0028). O aluno não
@@ -187,8 +187,21 @@ documento ainda pede e **não** existe, por decisão registrada no `CLAUDE.md`:
 
 | Onde | O quê | Por quê não |
 |---|---|---|
-| Layout base | Sidebar colapsável | A barra no topo navega as mesmas páginas |
 | §3 | Assistente de novo aluno | O aluno preenche o próprio perfil no onboarding |
+
+**Estado em 18/09/2026.** O **layout base** fechou: a barra do topo saiu e entrou a
+**navegação lateral colapsável** (236px aberta, 68px em faixa de ícones), com a preferência
+guardada no aparelho. Item ativo com marcador de 3px em `brand`, rota mais específica
+vencendo — `/painel` só acende em `/painel`. "Treinar" e "Configurações" ficam separados no
+pé: o primeiro leva ao app do aluno, o segundo é da conta, não da carteira. O que a sidebar
+do protótipo tem e **não** foi construído:
+
+| O quê | Por quê não |
+|---|---|
+| Campo de busca global | Não existe busca que atravesse alunos, treinos e exercícios; campo que não acha nada é pior que campo nenhum |
+| Card "Plano Pro · 24/40 alunos" | Pressupõe que o Reps Club cobra do personal — não há plano, preço nem pagamento no modelo |
+| Alternador de tema claro/escuro | Os tokens `dark-*` existem para a execução do treino; modo escuro do painel é revisar cada componente |
+| Avatar com foto no pé | Não há upload de foto de personal; o pé mostra nome e iniciais |
 
 A referência visual `prototipos/Painel do Personal - Dashboard.dc.html` desenha um
 dashboard **maior** que o §2 — receita mensal, ticket médio, churn, renovações,

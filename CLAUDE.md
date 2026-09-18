@@ -201,6 +201,40 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-18]** **A navegação do painel é lateral e colapsável, e a barra do topo
+  saiu.** Não é preferência de gosto: as duas navegam as mesmas dez páginas, e a barra
+  horizontal dava ao painel a silhueta de um *site* onde o protótipo desenha uma
+  *ferramenta* — é a diferença de acabamento que mais salta ao comparar, e a única grande
+  que **não depende de dado novo nenhum**. A preferência de recolher mora no aparelho
+  (`reps:painel:sidebar-colapsada`), lida no inicializador do `useState` com o padrão
+  `useMontado()` + troca de `key`: ler no render de hidratação daria HTML diferente do
+  servidor, e ler em efeito é `setState` em efeito, que o lint recusa.
+  **Quatro detalhes que só aparecem depois de medir no navegador:**
+  (1) o marcador de 3px do item ativo é **fora do fluxo** (`absolute`) — em fila, ele
+  empurrava o ícone 3px para fora do centro da faixa de 68px, e o desalinhamento é
+  visível justamente no estado em que só o ícone identifica a página;
+  (2) `LayoutGrid` e `LayoutDashboard` desenham **a mesma grade de quatro quadrados**, e
+  na faixa recolhida não há rótulo para desempatar — "Exercícios" virou `Library`;
+  (3) o item ativo é a **rota mais específica** que casa, senão "Painel" ficaria aceso em
+  toda tela, porque toda rota do painel começa por `/painel`;
+  (4) o marcador é retângulo em `brand`, não a cor do texto: cor sozinha não é sinal para
+  quem não distingue vermelho. Conferido no navegador: 236/68px, preferência sobrevivendo
+  ao recarregar, foco percorrendo os dez itens, **axe-core sem violação nem incompleto**.
+- **[2026-09-18]** **Terceiro par de iniciais, e o comentário que previa isso estava
+  escrito no arquivo certo.** O pé da sidebar recolhida mostra as iniciais do personal, e
+  eu escrevi uma quarta cópia da mesma regra dentro do componente — `lib/domain/nome.ts`
+  já dizia, em comentário, "o dia em que um componente cliente precisar das mesmas
+  iniciais ele importa daqui". A lição não é "reusar função": é que **comentário que
+  descreve um uso futuro só serve se alguém for ler o arquivo** — e quem escreve a tela
+  nova não vai. O que faz a regra ser uma só é ela estar no lugar óbvio com o nome óbvio.
+- **[2026-09-18]** **Três coisas da sidebar do protótipo não foram construídas, e nenhuma
+  por falta de tempo.** *Busca global:* não existe busca que atravesse alunos, treinos e
+  exercícios, e um campo que abre e não acha nada é pior que campo nenhum. *Card "Plano
+  Pro · 24/40 alunos":* pressupõe que o Reps Club cobra do personal — não há plano, preço
+  nem pagamento em lugar nenhum do modelo de dados, e o número "40" seria inventado.
+  *Alternador de tema:* os tokens `dark-*` existem para a tela de execução do treino, no
+  celular, na academia; modo escuro do painel é revisar cada um dos componentes, não uma
+  classe no `<html>`. Registrado aqui para não voltar como "faltou".
 - **[2026-09-18, decisão do Otávio]** **A fonte da interface é Inter.** O doc 04 pedia
   Archivo e deixava a escolha em aberto ("decida com o Otávio"); a Inter já estava no ar
   desde o M0, sem decisão registrada. Agora está: **Inter**, e Archivo sai do escopo.

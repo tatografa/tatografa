@@ -1,7 +1,6 @@
-import Link from "next/link";
 
-import { Logo } from "@/components/logo";
 import { BotaoSair } from "@/components/botao-sair";
+import { NavegacaoLateral } from "@/components/personal/navegacao-lateral";
 import { PortaoDeAceite } from "@/components/portao-de-aceite";
 import { requireTrainer } from "@/lib/auth/session";
 import {
@@ -10,22 +9,9 @@ import {
   VERSAO_DOS_DOCUMENTOS,
 } from "@/lib/legal/documentos";
 import { aceiteEstaEmDia } from "@/lib/queries/aceite";
+import { contarAlunos } from "@/lib/queries/alunos";
 
 import { aceitarAtualizacaoDoPersonal } from "../acoes-de-aceite";
-
-/** As seções do painel, na ordem do doc 06. */
-const NAVEGACAO = [
-  { href: "/painel", rotulo: "Painel" },
-  { href: "/painel/alunos", rotulo: "Alunos" },
-  { href: "/painel/macrotreinos", rotulo: "Macrotreinos" },
-  { href: "/painel/treinos", rotulo: "Treinos" },
-  { href: "/painel/exercicios", rotulo: "Exercícios" },
-  { href: "/painel/agenda", rotulo: "Agenda" },
-  { href: "/painel/reavaliacoes", rotulo: "Reavaliações" },
-  { href: "/painel/social", rotulo: "Social" },
-  { href: "/painel/treinar", rotulo: "Treinar" },
-  { href: "/painel/configuracoes", rotulo: "Configurações" },
-] as const;
 
 /**
  * Moldura do painel do personal (desktop).
@@ -33,13 +19,11 @@ const NAVEGACAO = [
  * Aqui mora a autorização de verdade: `requireTrainer()` confirma que existe
  * linha em `trainers` para o usuário logado. O proxy só evita render à toa.
  *
- * A sidebar colapsável do doc 04 continua não existindo: a barra no topo
- * navega as mesmas páginas, e trocar de moldura não muda nada do que o
- * personal consegue fazer. Fica como dívida conhecida, não como pendência.
- *
- * `NAVEGACAO` é uma lista e não dez `<Link>` escritos à mão porque nove deles
- * eram a mesma linha de classes copiada — e foi assim que "Alunos" ficou
- * apontando para `/painel` depois que a tela de alunos ganhou endereço próprio.
+ * **A moldura é a sidebar colapsável do doc 04**, e não mais a barra no topo.
+ * As duas navegam as mesmas páginas — o que muda é a silhueta: com a barra, o
+ * painel tinha a forma de um site; com a lateral, a de uma ferramenta. É a
+ * diferença que mais salta ao comparar com o protótipo, e a única grande que
+ * não dependia de dado novo nenhum.
  */
 export default async function PainelLayout({
   children,
@@ -68,36 +52,23 @@ export default async function PainelLayout({
     );
   }
 
+  // A contagem vai no marcador de "Alunos", como no protótipo. Leitura barata
+  // (`head + count`), não a carteira inteira: o layout roda em toda navegação
+  // do painel, e trazer as linhas para contá-las seria pagar a leitura mais
+  // cara do produto pela informação mais barata dele.
+  const alunos = await contarAlunos();
+
   return (
-    <div className="min-h-dvh bg-canvas">
-      <header className="border-b border-border bg-surface">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-6">
-          <Link href="/painel" className="text-ink">
-            <Logo size={26} />
-          </Link>
+    <div className="flex min-h-dvh bg-canvas">
+      <NavegacaoLateral
+        nome={trainer.name}
+        alunos={alunos}
+        sair={<BotaoSair />}
+      />
 
-          <nav className="flex items-center gap-1" aria-label="Seções do painel">
-            {NAVEGACAO.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="rounded-[9px] px-3 py-1.5 text-[13px] font-semibold text-ink-3 transition hover:bg-canvas-sunken hover:text-ink"
-              >
-                {item.rotulo}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <span className="hidden text-[13px] font-medium text-ink-2 sm:block">
-              {trainer.name}
-            </span>
-            <BotaoSair />
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+      <main className="min-w-0 flex-1 px-8 py-8">
+        <div className="mx-auto max-w-6xl">{children}</div>
+      </main>
     </div>
   );
 }
