@@ -52,9 +52,22 @@ export async function requireTrainer(): Promise<{
  * dentro dele precisam do mesmo aluno e do mesmo personal para o cabeçalho.
  * Sem isso seriam três idas ao Supabase por tela, todas com a mesma resposta.
  */
+/**
+ * O personal, na medida em que o app do aluno precisa dele.
+ *
+ * Exportado como tipo porque a tela de acesso pausado o recebe inteiro: tipar
+ * lá com um `Pick` à mão seria uma segunda cópia da mesma lista de colunas, e
+ * a que ficasse para trás seria descoberta por erro de tipo num refactor, não
+ * aqui.
+ */
+export type Personal = Pick<
+  Tables<"trainers">,
+  "id" | "name" | "phone" | "avatar_url"
+>;
+
 export const requireStudent = cache(async function requireStudent(): Promise<{
   student: Tables<"students">;
-  personal: Pick<Tables<"trainers">, "id" | "name" | "phone" | "avatar_url">;
+  personal: Personal;
 }> {
   const supabase = await createClient();
 

@@ -10,6 +10,15 @@ type Aba = {
   rotulo: string;
   href?: string;
   Icone: typeof Dumbbell;
+  /**
+   * Some quando o acesso está pausado.
+   *
+   * **"Treinar" não some, embora leve à tela de aviso**, e Perfil também não:
+   * desativar as quatro deixaria o aluno pausado sem como voltar ao aviso
+   * depois de abrir o perfil — barra inteira apagada é beco sem saída, não
+   * informação.
+   */
+  sePausa?: boolean;
 };
 
 /**
@@ -28,8 +37,8 @@ type Aba = {
  */
 const ABAS: Aba[] = [
   { rotulo: "Treinar", href: "/app", Icone: Dumbbell },
-  { rotulo: "Progresso", href: "/app/progresso", Icone: TrendingUp },
-  { rotulo: "Feed", href: "/app/feed", Icone: Users },
+  { rotulo: "Progresso", href: "/app/progresso", Icone: TrendingUp, sePausa: true },
+  { rotulo: "Feed", href: "/app/feed", Icone: Users, sePausa: true },
   { rotulo: "Perfil", href: "/app/perfil", Icone: User },
 ];
 
@@ -54,7 +63,7 @@ function abaAtiva(caminho: string): string | null {
   return escolhida?.rotulo ?? null;
 }
 
-export function BottomNav() {
+export function BottomNav({ naTurma = true }: { naTurma?: boolean }) {
   const caminho = usePathname();
   const ativaAgora = abaAtiva(caminho);
 
@@ -69,8 +78,10 @@ export function BottomNav() {
       )}
     >
       <ul className="mx-auto flex max-w-[440px] items-stretch">
-        {ABAS.map(({ rotulo, href, Icone }) => {
+        {ABAS.map(({ rotulo, href, Icone, sePausa }) => {
           const ativa = rotulo === ativaAgora;
+          const pausada = !naTurma && sePausa === true;
+          const destino = pausada ? undefined : href;
           const conteudo = (
             <>
               <Icone size={16} aria-hidden />
@@ -82,9 +93,9 @@ export function BottomNav() {
 
           return (
             <li key={rotulo} className="flex-1">
-              {href ? (
+              {destino ? (
                 <Link
-                  href={href}
+                  href={destino}
                   aria-current={ativa ? "page" : undefined}
                   // 64px de altura: alvo de toque bem acima dos 44px mínimos.
                   className={cn(
@@ -97,7 +108,10 @@ export function BottomNav() {
               ) : (
                 <span
                   aria-disabled="true"
-                  title="Disponível em breve"
+                  // Dois motivos diferentes para o mesmo cinza: "em breve" é
+                  // promessa, "pausado" é estado. Um título só faria a aba
+                  // desativada mentir num dos dois casos.
+                  title={pausada ? "Seu acesso está pausado" : "Disponível em breve"}
                   className="flex h-16 flex-col items-center justify-center gap-1 text-ink-5 opacity-45"
                 >
                   {conteudo}

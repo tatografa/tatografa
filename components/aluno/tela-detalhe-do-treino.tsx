@@ -1,5 +1,5 @@
 
-import { iniciarTreino } from "@/app/(aluno)/app/executar/actions";
+import { iniciarTreino } from "@/app/(aluno)/app/(ativo)/executar/actions";
 import { classesDeBotao } from "@/components/ui";
 import type { ExercicioPrescrito, TreinoCompleto } from "@/lib/queries/treinos";
 import { LinkDeVoltar } from "@/components/aluno/link-de-voltar";

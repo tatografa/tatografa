@@ -10,6 +10,7 @@ import {
   O_QUE_NAO_MUDA,
   VERSAO_DOS_DOCUMENTOS,
 } from "@/lib/legal/documentos";
+import { estaNaTurma } from "@/lib/domain/turma";
 import { aceiteEstaEmDia } from "@/lib/queries/aceite";
 
 /**
@@ -67,7 +68,7 @@ export default async function AlunoLayout({
         {children}
       </div>
 
-      <BottomNav />
+      <BottomNav naTurma={estaNaTurma(student.status)} />
     </div>
   );
 }

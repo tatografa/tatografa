@@ -201,6 +201,58 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-26, decisão do Otávio]** **Aluno inativo perde o acesso ao app.** O dado
+  histórico fica — não se apaga nada —, mas o login é limitado até ele voltar a pagar.
+  Duas camadas: o **banco** tranca a escrita (migration 0036) e a **tela** explica
+  (`(ativo)/layout.tsx` + `AcessoPausado`). A trava de verdade é a primeira; um POST
+  direto não passa por layout nenhum.
+- **[2026-09-26]** **Perfil e histórico ficam abertos, e não por esquecimento.** A
+  política de privacidade publicada promete, em "Seus direitos", que "seu perfil e seu
+  histórico estão todos lá, o perfil é editável" — corrigir dado errado sobre si e ver o
+  que se levantou são direitos da LGPD, não itens de assinatura. Trancá-los faria do
+  texto publicado uma mentira, que é o mesmo defeito de 14/09 de cabeça para baixo: lá o
+  texto prometia o que a tela não fazia, aqui a tela tiraria o que o texto promete.
+- **[2026-09-26]** **Route group `(ativo)`, e não um `if` em cada página.** A autorização
+  mora no layout — mas não podia morar no layout **de cima**, porque `/app/perfil` e
+  `/app/historico` são irmãos das rotas fechadas e continuam abertos. `(ativo)` não muda
+  nenhuma URL: é uma cerca em volta do que é produto. O `requireStudent()` do layout de
+  dentro não custa consulta a mais: ele é `cache()` por requisição desde o M0.
+- **[2026-09-26]** **A trava do treino é só no `insert`, e isso é deliberado.** Quem for
+  arquivado com um treino aberto no celular precisa conseguir fechá-lo e mandar as séries
+  que ficaram na fila do aparelho — bloquear o `update` transformaria a trava em perda de
+  dado **dele**, e o que se quer é que ele pare de treinar, não que perca o que levantou.
+  Sem poder abrir sessão nova, isso acontece no máximo uma vez. É a única exceção à regra
+  de "insert e update juntos", e ela existe porque as duas escritas fazem coisas
+  diferentes aqui: uma começa, a outra encerra.
+- **[2026-09-26]** **`private.aluno_ativo()` é escrita sobre `minha_turma()`**, e não com
+  um `status = 'ativo'` de novo. Duas cópias da mesma condição divergem no dia em que
+  "ativo" deixar de ser o único valor que vale — e aí uma policy liberaria o que a outra
+  recusa, em silêncio. Mesma razão de `pode_ver_post` e `nomes_no_feed` dividirem a regra
+  desde a 0020.
+- **[2026-09-26]** **O personal continua comentando e curtindo o post do aluno
+  arquivado.** `post_comments_insert` e `post_likes_insert` ganharam
+  `aluno_ativo() or trainer_of(dono do post)`: a trava é sobre quem **é** aluno, e o
+  personal não é aluno de ninguém. Sem o segundo ramo, arquivar um aluno calaria o
+  personal embaixo das fotos que ele já tinha comentado.
+- **[2026-09-26]** **A tela não diz "arquivado", não diz por quê, e não é beco sem
+  saída.** "Arquivado" e "inativo" são palavras do painel — do lado do aluno soam como
+  punição e não explicam nada; "pausado" diz o que é: interrompido e reversível. E o
+  produto **não sabe** o motivo (não há cobrança no modelo de dados), então chutar "sua
+  mensalidade venceu" seria inventar um fato sobre a vida de alguém. Quem sabe é o
+  personal, e é para ele que o botão aponta. As duas portas que continuam abertas
+  aparecem como link, porque tela que tranca sem mostrar a porta faz o usuário achar que
+  perdeu tudo.
+- **[2026-09-26, do screenshot de novo]** **Personal sem WhatsApp cadastrado transformava
+  a tela de pausa em beco sem saída.** O `CardDoPersonal` perde o botão quando não há
+  número — regra certa desde 15/09 —, mas nesta tela, cujo assunto inteiro é "fale com
+  ele", perder o botão é perder a saída. A frase de apoio passa a dizer que o caminho
+  existe fora do app. Segunda vez na mesma semana que o defeito aparece **no par de
+  estados**, não no estado que eu fui escrever: ver os dois lado a lado é o que mostra.
+- **[2026-09-26]** **O portão dos termos vem antes do portão da pausa**, porque ele está
+  no layout de cima. É a ordem certa: o aluno pausado continua lendo o próprio histórico e
+  o próprio perfil, e ler dado sob termos que ele não aceitou seria pior que a estranheza
+  de aceitar termos de um app que está pausado. Registrado porque parece errado à primeira
+  vista.
 - **[2026-09-26]** **`students.status` existia em três valores e o feed nunca olhou para
   ele.** O personal arquivava um aluno — a carteira mostrava "Inativo", o dashboard parava
   de contá-lo, o alerta de inatividade o pulava — e no app dele **nada mudava**: continuava
