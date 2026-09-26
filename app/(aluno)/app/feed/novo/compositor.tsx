@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 
 import { Badge, Button, EscolhaCards, Textarea } from "@/components/ui";
+import { FORA_DA_TURMA } from "@/lib/domain/turma";
 import { LIMITE_DA_LEGENDA } from "@/lib/domain/feed";
 import { formatarNumero } from "@/lib/domain/historico";
 import { prepararFoto } from "@/lib/imagem";
@@ -37,11 +38,18 @@ export function Compositor({
   nomeDoPersonal,
   sessaoId,
   treino,
+  naTurma,
 }: {
   nomeDoPersonal: string;
   /** Presente quando o post nasce da tela de conclusão do treino. */
   sessaoId?: string;
   treino?: TreinoDoPost | null;
+  /**
+   * Arquivado pelo personal (migration 0035): o post vai só para ele, e a
+   * opção da turma nem aparece. Mostrá-la seria oferecer um caminho que o
+   * banco recusa — o mesmo motivo de o perfil não enviar `trainer_id`.
+   */
+  naTurma: boolean;
 }) {
   const [estado, acao, enviando] = useActionState(publicarPost, INICIAL);
 
@@ -211,11 +219,21 @@ export function Compositor({
         valor={alcance}
         aoMudar={setAlcance}
         error={estado.errosPorCampo?.alcance}
-        opcoes={[
-          { valor: "personal", rotulo: `Só ${nomeDoPersonal}`, icone: "🔒" },
-          { valor: "publico", rotulo: `${nomeDoPersonal} e a turma`, icone: "👥" },
-        ]}
+        opcoes={
+          naTurma
+            ? [
+                { valor: "personal", rotulo: `Só ${nomeDoPersonal}`, icone: "🔒" },
+                { valor: "publico", rotulo: `${nomeDoPersonal} e a turma`, icone: "👥" },
+              ]
+            : [{ valor: "personal", rotulo: `Só ${nomeDoPersonal}`, icone: "🔒" }]
+        }
       />
+
+      {!naTurma && (
+        <p className="rounded-card bg-canvas-sunken px-3.5 py-3 text-[12.5px] leading-relaxed text-ink-3">
+          {FORA_DA_TURMA.compositor(nomeDoPersonal)}
+        </p>
+      )}
 
       {estado.erro ? (
         <p role="alert" className="text-[13px] font-semibold text-danger">

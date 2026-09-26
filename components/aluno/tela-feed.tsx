@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Carregando, Esqueleto } from "@/components/esqueleto";
 import { Badge } from "@/components/ui";
 import { formatarNumero } from "@/lib/domain/historico";
+import { FORA_DA_TURMA } from "@/lib/domain/turma";
 import type { AbaDoFeed, PostDoFeed } from "@/lib/queries/feed";
 import { cn } from "@/lib/utils";
 
@@ -29,12 +30,15 @@ export function TelaFeed({
   aoTrocarAba,
   nomeDoPersonal,
   idDoPersonal,
+  naTurma,
   carregando = false,
 }: {
   posts: PostDoFeed[];
   aba: AbaDoFeed;
   aoTrocarAba: (aba: AbaDoFeed) => void;
   nomeDoPersonal: string;
+  /** Arquivado pelo personal: a aba pública nunca mais terá post (0035). */
+  naTurma: boolean;
   /**
    * Para o selo "PERSONAL" do doc 05. O personal que treina é aluno de si
    * mesmo (migration 0019), então ele posta com `student_id` como todo mundo —
@@ -106,7 +110,7 @@ export function TelaFeed({
           ))}
         </ul>
       ) : (
-        <Vazio aba={aba} nomeDoPersonal={nomeDoPersonal} />
+        <Vazio aba={aba} nomeDoPersonal={nomeDoPersonal} naTurma={naTurma} />
       )}
     </div>
   );
@@ -260,13 +264,27 @@ function CardDePost({
  * O vazio muda por aba porque a próxima ação muda: na turma não há o que fazer
  * além de esperar alguém postar; no canal com o personal, quem age é o aluno.
  */
+/**
+ * Três vazios, não dois.
+ *
+ * "Ninguém postou ainda" era verdade enquanto todo aluno estava na turma.
+ * Desde a 0035 existe um terceiro estado — fora da turma —, e ali a frase
+ * vira mentira: **nunca** vai aparecer post, e o aluno ficaria esperando. É o
+ * mesmo defeito de 17/09, quando duplicar programa criou um estado novo e o
+ * card antigo passou a afirmar o oposto do que tinha acabado de acontecer.
+ * Ao acrescentar um caminho que muda o que uma tela pode mostrar, reler os
+ * vazios que aquele caminho agora alcança.
+ */
 function Vazio({
   aba,
   nomeDoPersonal,
+  naTurma,
 }: {
   aba: AbaDoFeed;
   nomeDoPersonal: string;
+  naTurma: boolean;
 }) {
+  const foraDaTurma = !naTurma && aba === "publico";
   return (
     <section className="rounded-card-lg border border-border-soft bg-surface p-5 text-center">
       <span
@@ -276,14 +294,20 @@ function Vazio({
         <Users size={19} />
       </span>
       <p className="mt-3.5 text-[15px] font-bold text-ink">
-        {aba === "publico"
-          ? "Ninguém postou ainda"
-          : "Nada por aqui ainda"}
+        {foraDaTurma
+          ? "A turma não aparece mais"
+          : aba === "publico"
+            ? "Ninguém postou ainda"
+            : "Nada por aqui ainda"}
       </p>
       <p className="mt-1.5 text-[13px] leading-relaxed text-ink-3">
-        {aba === "publico"
-          ? `Quando alguém que treina com ${nomeDoPersonal} compartilhar um treino, aparece aqui.`
-          : `Ao terminar um treino você pode registrar uma foto. Ela fica visível só para ${nomeDoPersonal}, a não ser que você escolha mostrar para a turma.`}
+        {foraDaTurma
+          ? FORA_DA_TURMA.feed(nomeDoPersonal)
+          : aba === "publico"
+            ? `Quando alguém que treina com ${nomeDoPersonal} compartilhar um treino, aparece aqui.`
+            : naTurma
+              ? `Ao terminar um treino você pode registrar uma foto. Ela fica visível só para ${nomeDoPersonal}, a não ser que você escolha mostrar para a turma.`
+              : FORA_DA_TURMA.abaDoPersonal(nomeDoPersonal)}
       </p>
     </section>
   );

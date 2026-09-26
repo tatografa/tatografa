@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { requireStudent } from "@/lib/auth/session";
+import { estaNaTurma } from "@/lib/domain/turma";
 import { resumoDaSessaoConcluida } from "@/lib/queries/feed";
 
 import { Compositor } from "./compositor";
@@ -46,6 +47,7 @@ export default async function NovoPost({
         nomeDoPersonal={personal.name.split(" ")[0]}
         sessaoId={treino ? String(sessao) : undefined}
         treino={treino}
+        naTurma={estaNaTurma(student.status)}
       />
     </div>
   );

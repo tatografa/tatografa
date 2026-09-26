@@ -201,6 +201,48 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-26]** **`students.status` existia em três valores e o feed nunca olhou para
+  ele.** O personal arquivava um aluno — a carteira mostrava "Inativo", o dashboard parava
+  de contá-lo, o alerta de inatividade o pulava — e no app dele **nada mudava**: continuava
+  vendo foto, legenda e comentários de toda a turma, e continuava publicando para ela. Não
+  era decisão antiga que ficou para trás; era uma pergunta que nenhuma tela e nenhuma
+  policy chegaram a fazer. A política de privacidade, publicada e aceita por três pessoas,
+  já dizia o contrário: "**os outros alunos do seu personal**, e apenas eles". Migration
+  0035.
+- **[2026-09-26]** **Filtra quem OLHA, não quem escreveu** — e a assimetria é o ponto. O
+  arquivado deixa de ver a turma; os posts que ele **já publicou** continuam visíveis para
+  quem já os via. Filtrar pelo autor apagaria da tela dos colegas um post que eles viram
+  ontem, comentaram e curtiram: a promessa da política foi feita a eles também, e
+  histórico não some porque um terceiro mudou de status. Provado nos dois sentidos —
+  arquivado vê 0 posts e 0 nomes da turma, e o colega ativo continua vendo o post antigo
+  dele **com o nome**.
+- **[2026-09-26]** **A trava nova é função nova, e é por isso que ela não quebrou nada.**
+  A tentação era pôr `status = 'ativo'` dentro de `private.my_trainer_id()`. Aquela função
+  sustenta `students_update` (**no `with check`**), `trainers_select` e `exercises_select`:
+  com ela devolvendo nulo, o arquivado perderia a edição do próprio perfil e deixaria de
+  enxergar a linha do próprio personal — trava certa no lugar errado, estragando telas que
+  funcionavam. `private.minha_turma()` é estreita e só responde "qual é a minha turma
+  agora", usada por `pode_ver_post` e `nomes_no_feed`, que precisam concordar (0020).
+  Consertar `pode_ver_post` consertou de graça **cinco** outros lugares que passam por ela,
+  inclusive a policy de leitura do bucket `treinos` — ou seja, a foto também.
+- **[2026-09-26]** **Sétima vez do mesmo formato, e a primeira em que eu criaria o furo.**
+  Trancar só `posts_insert` deixaria o arquivado gravar como `personal` e virar `publico`
+  por `update` na linha seguinte. Depois de 0007, 0009, 0010, 0019, 0022 e 0030, a regra
+  agora é reflexo: **toda coluna que a trava lê precisa estar no `with check` dos dois.**
+  Provado: publicar para a turma recusado, falar só com o personal permitido, virar público
+  por update recusado, comentar e curtir post da turma recusados.
+- **[2026-09-26]** **Isto NÃO subiu a versão dos documentos, e a razão importa.** A regra
+  escrita em `documentos.ts` manda subir quando muda "com quem se compartilha" — e aqui
+  mudou: o compartilhamento **encolheu**. Consentimento dado cobre o alcance maior; exigir
+  re-aceite por uma restrição de privacidade seria um portão cobrando concordância para
+  algo que protege quem concorda. Sobe a versão o que amplia; o que aperta não.
+- **[2026-09-26, do screenshot]** **A frase errada não era a que eu fui corrigir.** Ao
+  acrescentar o terceiro estado vazio do feed ("A turma não aparece mais"), a frase da aba
+  **privada** continuou dizendo "a não ser que você escolha mostrar para a turma" — escolha
+  que o compositor tinha acabado de parar de oferecer. Eu só vi porque tirei os quatro
+  vazios num screenshot só, lado a lado. É a mesma lição de 17/09 com outra cara: caminho
+  novo não transforma em mentira **um** estado vazio, transforma todos os que ele alcança —
+  e ler o código não mostra isso, ver as telas juntas mostra.
 - **[2026-09-18, decisão do Otávio]** **`students` ganhou telefone, cidade/UF, meta de
   peso e perfil biológico** (migration 0034), os quatro informados **pelo aluno**. O
   perfil biológico (natural / reposição / hormonizado) é **dado de saúde sensível pela

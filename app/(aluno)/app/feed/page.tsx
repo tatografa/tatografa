@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { requireStudent } from "@/lib/auth/session";
+import { estaNaTurma } from "@/lib/domain/turma";
 import { lerFeed, type AbaDoFeed } from "@/lib/queries/feed";
 
 import { FeedNavegavel } from "./feed-navegavel";
@@ -27,6 +28,7 @@ export default async function FeedPage({ searchParams }: PageProps<"/app/feed">)
       aba={escolhida}
       nomeDoPersonal={personal.name}
       idDoPersonal={personal.id}
+      naTurma={estaNaTurma(student.status)}
     />
   );
 }
