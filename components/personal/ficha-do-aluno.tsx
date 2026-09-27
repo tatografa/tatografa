@@ -20,6 +20,7 @@ import type { Observacao } from "@/lib/queries/observacoes";
 import type { ExercicioComProgresso } from "@/lib/queries/progresso";
 import { comparar, type Reavaliacao } from "@/lib/queries/reavaliacao";
 import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
+import { primeiroNome } from "@/lib/domain/nome";
 
 export type FichaDoAlunoProps = {
   aluno: AlunoDaFicha;
@@ -108,7 +109,7 @@ export function FichaDoAluno({
         </div>
 
         <div className="min-w-0 space-y-8">
-          <ProgramaAtivo programa={programa} nome={aluno.name} />
+          <ProgramaAtivo programa={programa} nome={aluno.name} alunoId={aluno.id} />
 
           <ObservacoesDoAluno
             alunoId={aluno.id}
@@ -140,9 +141,11 @@ export function FichaDoAluno({
 function ProgramaAtivo({
   programa,
   nome,
+  alunoId,
 }: {
   programa: Macrotreino | null;
   nome: string;
+  alunoId: string;
 }) {
   if (!programa) {
     return (
@@ -157,7 +160,7 @@ function ProgramaAtivo({
             guardado.
           </p>
           <Link
-            href="/painel/macrotreinos"
+            href={`/painel/treinos?aluno=${alunoId}&novo=1`}
             className="inline-block text-[13px] font-semibold text-brand transition hover:text-brand-hover"
           >
             Montar um programa →
@@ -199,11 +202,19 @@ function ProgramaAtivo({
           />
         </div>
 
-        <p className="text-[13px] text-ink-4">
-          {programa.total_treinos === 1
-            ? "1 treino no programa"
-            : `${programa.total_treinos} treinos no programa`}
-        </p>
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <p className="text-[13px] text-ink-4">
+            {programa.total_treinos === 1
+              ? "1 treino no programa"
+              : `${programa.total_treinos} treinos no programa`}
+          </p>
+          <Link
+            href={`/painel/treinos?aluno=${alunoId}&programa=${programa.id}`}
+            className="text-[13px] font-semibold text-brand transition hover:text-brand-hover"
+          >
+            Abrir a divisão de treino →
+          </Link>
+        </div>
       </Card>
     </section>
   );
@@ -372,6 +383,3 @@ function Historico({
   );
 }
 
-function primeiroNome(nome: string): string {
-  return nome.trim().split(/\s+/)[0] ?? nome;
-}

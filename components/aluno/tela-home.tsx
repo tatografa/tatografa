@@ -13,6 +13,7 @@ import type {
 
 import { contagem } from "./card-de-treino";
 import { CardMacrotreino } from "./card-macrotreino";
+import { primeiroNome } from "@/lib/domain/nome";
 
 export type TelaHomeProps = {
   nomeDoAluno: string;
@@ -338,6 +339,3 @@ function Avatar({ nome }: { nome: string }) {
   );
 }
 
-function primeiroNome(nome: string): string {
-  return nome.trim().split(/\s+/)[0] ?? nome;
-}

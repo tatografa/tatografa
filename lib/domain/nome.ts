@@ -22,3 +22,12 @@ export function iniciaisDe(nome: string): string {
   const ultima = partes.length > 1 ? partes[partes.length - 1][0] : "";
   return (primeira + ultima).toUpperCase();
 }
+
+/**
+ * O primeiro nome, para frases ("Carla já vê a prescrição"). Eram cinco cópias
+ * idênticas em cinco telas até 27/09 — a mesma história das iniciais, que o
+ * comentário acima já contava.
+ */
+export function primeiroNome(nome: string): string {
+  return nome.trim().split(/\s+/)[0] ?? nome;
+}

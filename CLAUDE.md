@@ -232,6 +232,78 @@ Provar que funciona sem o Otávio ler código:
   coluna, não a da janela. A primeira versão usava `flex-wrap` e `auto-fit`: o trilho
   descia preso aos 340px e ficava órfão num canto, e os quatro números caíam em três mais
   um sobrando. Os dois só apareceram no screenshot a 1100px, nenhum no de 1440.
+- **[2026-09-27, decisão do Otávio]** **"Treinos" virou a divisão de treino do protótipo,
+  e "Macrotreinos" saiu do menu.** Uma tela por aluno: à esquerda o aluno, o painel de
+  macrociclos, o objetivo, a frequência, os nomes dos dias e o volume da semana; à direita
+  um cartão por treino, lado a lado, num quadro pontilhado com zoom. `/painel/macrotreinos`,
+  `/painel/treinos/novo` e `/painel/treinos/<id>` continuam de pé como **redirect** para o
+  programa certo — há link salvo e mensagem de WhatsApp apontando para eles. Aluno e
+  programa vão na **URL** (`?aluno=&programa=`), não em estado: o link recarrega e se cola
+  numa conversa sem perder onde se estava, e id torto cai no padrão sem virar erro.
+- **[2026-09-27, decisão do Otávio]** **RIR é por exercício, não por série.** O protótipo
+  prescreve série a série (Aquecimento, Preparatória, Work, Drop, Falha, cada uma com reps
+  e RIR); isso mudaria a execução e o histórico inteiros e ficou fora. Entrou
+  `workout_exercises.rir_target` (migration 0037): texto, "2" ou "0-2", de 0 a 10, com
+  `check` no banco — mesma razão de `reps_target` ser texto. Nulo = não prescrito, que é
+  todo treino anterior a hoje. **Para o aluno o RIR vai em palavras** ("Pare com 0 a 2
+  repetições sobrando", `rirEmPalavras`), com a sigla entre parênteses: RIR é a língua de
+  quem prescreve, e quem lê está entre uma série e outra. No lugar das "séries detalhadas"
+  o cartão abre os campos que o editor antigo tinha: séries, reps, RIR, descanso, técnica e
+  observação.
+- **[2026-09-27, decisão do Otávio]** **A rotação continua; o cartão diz "Treino A", não
+  "Segunda".** O protótipo prende cada treino a um dia da semana. Aqui o aluno faz o
+  próximo da rotação (decisão de 04/09): quem falta na segunda faz o A na terça. Por isso a
+  **frequência semanal é o número de treinos da divisão** — 4x são 4 cartões, e o volume
+  "semanal" é a soma deles — e os botões 1x…7x acrescentam ou tiram cartões, como no
+  protótipo. Tirar cartão com treino salvo passa por confirmação que diz o que some.
+- **[2026-09-27, decisão do Otávio]** **O objetivo mora no programa, não no aluno**
+  (`mesocycles.goal`, enum `training_goal`). O mesmo aluno faz um bloco de força e depois
+  um de hipertrofia; guardar no aluno reescreveria o passado a cada troca. É outro campo
+  que `students.goal` ("o que eu quero da vida"), e os rótulos vivem separados
+  (`OBJETIVO_DO_PROGRAMA`). Nulo é "não informado", sem sexto valor — mesma regra do
+  perfil biológico. Salva na escolha, sem botão.
+- **[2026-09-27]** **Salvar é um botão só, e salva cartão por cartão, não numa
+  transação.** "Enviar para o aluno" (programa ativo) ou "Salvar rascunho" (arquivado), no
+  cabeçalho. Cada treino é independente, e um cartão com erro não deve impedir os outros
+  seis de chegar ao aluno; o que falhou fica marcado **no próprio cartão**. Sem redirect —
+  o editor antigo redirecionava, e aqui isso levaria embora a edição dos cartões ao lado.
+  Trocar de aluno, de programa ou ativar/arquivar pergunta antes se há cartão por salvar,
+  e fechar a aba dispara o aviso do navegador.
+- **[2026-09-27]** **A ação devolve os ids das linhas na ordem da tela, e sem isso o
+  segundo "Salvar" apagaria histórico.** O editor antigo redirecionava e relia tudo do
+  banco. Sem redirect, o cartão continuaria com as linhas novas sem id; o salvar seguinte
+  as mandaria como novas outra vez — `gravarPrescricao` criaria cópias e **apagaria as
+  originais**, levando por cascata qualquer série que o aluno registrasse no meio. Achado
+  lendo o fluxo antes de escrever a tela, não em campo.
+- **[2026-09-27]** **Programa arquivado aceita treino novo — a regra de 04/09 foi
+  revogada.** "Treino novo só em programa ativo" nasceu quando arquivado era só passado.
+  Desde a duplicação (17/09) o arquivado é também o rascunho: a cópia nasce arquivada e
+  "quase sempre leva um ajuste antes de ativar". Recusar treino novo ali obrigava a ativar
+  primeiro e montar com o aluno já vendo o programa pela metade. O quadro marca
+  "Arquivado · o aluno não vê", e o botão diz "Salvar rascunho".
+- **[2026-09-27]** **As abas do painel de macrociclos são Atual, Histórico e Novo**, não
+  as Ativos, Inativos e Rascunhos do protótipo. O modelo não tem rascunho separado (o
+  arquivado é o rascunho), e "o programa na tela" nem sempre é o ativo — o personal pode
+  estar ajustando um arquivado antes de ativar. Uma aba só (aluno sem programa) não
+  desenha abas: vai direto ao formulário.
+- **[2026-09-27]** **Coluna nova em tabela que uma função copia coluna por coluna precisa
+  entrar na função.** `duplicar_macrotreino` e `duplicar_treino` listam as colunas de
+  `workout_exercises` uma a uma; sem reescrevê-las na 0037, duplicar um programa **apagaria
+  em silêncio** o RIR e o objetivo da cópia. Provado: a cópia leva `goal = forca` e as
+  linhas com `0-2`. Quinze provas no banco — sete de burla (outro personal e o aluno
+  tentando mudar RIR e objetivo, contar séries de programa alheio, anon executando) e oito
+  de caminho legítimo, incluindo o `check` recusando "11" e "até falha".
+- **[2026-09-27]** **O "Volume insights" divide por grupo muscular, não por tipo de
+  série.** Sem tipo por série não há o que o protótipo divide; a pergunta que sobra, e que
+  o personal faz a um treino, é "estou pondo peito demais?". Reps somam faixa **pelo
+  meio** (8-12 vale 10, `repeticoesDaSoma`): o piso subestimaria toda faixa e o teto
+  contaria como feito o que é limite. A tela diz isso no `title` do número.
+- **[2026-09-27]** **Zoom por `zoom`, não por `transform: scale`.** O scale encolhe o
+  desenho e deixa a caixa do tamanho original — a rolagem do quadro continuaria do
+  tamanho de 100%, metade vazia.
+- **[2026-09-27]** **Quinto `primeiroNome`, e dessa vez virou um só** (`lib/domain/nome.ts`).
+  Cinco cópias idênticas em cinco telas, a mesma história das iniciais de 18/09. A tela
+  nova precisava de uma sexta.
 - **[2026-09-26, decisão do Otávio]** **Aluno inativo perde o acesso ao app.** O dado
   histórico fica — não se apaga nada —, mas o login é limitado até ele voltar a pagar.
   Duas camadas: o **banco** tranca a escrita (migration 0036) e a **tela** explica

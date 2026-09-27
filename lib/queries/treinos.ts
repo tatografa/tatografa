@@ -1,6 +1,5 @@
 import "server-only";
 
-import { pareceUuid } from "@/lib/domain/id";
 import { duracaoEstimadaMin, totalDeSeries } from "@/lib/domain/treino";
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
@@ -25,6 +24,8 @@ export type ExercicioPrescrito = {
   position: number;
   sets: number;
   reps_target: string;
+  /** RIR alvo ("0-2"). Nulo = o personal não prescreveu. */
+  rir_target: string | null;
   rest_seconds: number;
   technique: string | null;
   notes: string | null;
@@ -46,138 +47,8 @@ export type TreinoCompleto = {
   duracao_min: number;
 };
 
-export type TreinoResumido = {
-  id: string;
-  label: string;
-  name: string;
-  total_exercicios: number;
-  total_series: number;
-  duracao_min: number;
-};
-
-export type TreinosDoAluno = {
-  aluno: AlunoDoTreino;
-  macrotreino: Omit<MacrotreinoAtivo, "student_id"> | null;
-  treinos: TreinoResumido[];
-};
-
 const COLUNAS_PRESCRICAO =
-  "id, workout_id, exercise_id, exercise_source, position, sets, reps_target, rest_seconds, technique, notes";
-
-/**
- * Os treinos do **programa ativo** de cada aluno do personal.
- *
- * Quatro consultas fixas, não uma por aluno nem uma por treino: alunos,
- * macrotreinos, treinos e prescrições vêm em lote e o agrupamento acontece em
- * memória. O RLS já restringe tudo à carteira do personal logado.
- *
- * Só o programa ativo entra. No M1 a função trazia os treinos de TODOS os
- * mesociclos do aluno enquanto o cabeçalho mostrava só o ativo — latente
- * enquanto havia um programa por aluno, e lista errada assim que passou a
- * haver gestão de macrotreino: os treinos do programa velho apareceriam sob o
- * nome do programa novo, sem nada distinguindo os dois. Programa arquivado se
- * consulta em `/painel/macrotreinos`.
- */
-export async function listarTreinosPorAluno(): Promise<TreinosDoAluno[]> {
-  const supabase = await createClient();
-
-  const { data: alunos, error: erroAlunos } = await supabase
-    .from("students")
-    .select("id, name")
-    .order("name");
-
-  if (erroAlunos) throw erroAlunos;
-  if (!alunos?.length) return [];
-
-  const { data: macros, error: erroMacros } = await supabase
-    .from("mesocycles")
-    .select("id, name, total_weeks, started_at, student_id, created_at")
-    .eq("status", "ativo")
-    .in(
-      "student_id",
-      alunos.map((a) => a.id),
-    )
-    .order("created_at", { ascending: false });
-
-  if (erroMacros) throw erroMacros;
-
-  const macroPorAluno = new Map<string, Omit<MacrotreinoAtivo, "student_id">>();
-  for (const macro of macros ?? []) {
-    // Um ativo por aluno é garantido pelo índice parcial da migration 0011.
-    // O `if` fica como rede: se o índice cair, o mais recente prevalece.
-    if (!macroPorAluno.has(macro.student_id)) {
-      macroPorAluno.set(macro.student_id, {
-        id: macro.id,
-        name: macro.name,
-        total_weeks: macro.total_weeks,
-        started_at: macro.started_at,
-      });
-    }
-  }
-
-  const idsDeMacro = [...macroPorAluno.values()].map((m) => m.id);
-  const alunoPorMacro = new Map(
-    [...macroPorAluno.entries()].map(([alunoId, macro]) => [macro.id, alunoId]),
-  );
-
-  // Erro aqui não pode virar lista vazia: "nenhum treino ainda" para um
-  // personal que tem treinos o faria remontar tudo por cima.
-  let treinos: Pick<Tables<"workouts">, "id" | "mesocycle_id" | "label" | "name" | "position">[] = [];
-  if (idsDeMacro.length) {
-    const { data, error } = await supabase
-      .from("workouts")
-      .select("id, mesocycle_id, label, name, position")
-      .in("mesocycle_id", idsDeMacro)
-      .order("position");
-    if (error) throw error;
-    treinos = data ?? [];
-  }
-
-  const idsDeTreino = treinos.map((t) => t.id);
-
-  let prescricoes: Pick<
-    Tables<"workout_exercises">,
-    "workout_id" | "sets" | "rest_seconds"
-  >[] = [];
-  if (idsDeTreino.length) {
-    const { data, error } = await supabase
-      .from("workout_exercises")
-      .select("workout_id, sets, rest_seconds")
-      .in("workout_id", idsDeTreino);
-    if (error) throw error;
-    prescricoes = data ?? [];
-  }
-
-  const porTreino = new Map<string, { sets: number; rest_seconds: number }[]>();
-  for (const linha of prescricoes) {
-    const lista = porTreino.get(linha.workout_id) ?? [];
-    lista.push({ sets: linha.sets, rest_seconds: linha.rest_seconds });
-    porTreino.set(linha.workout_id, lista);
-  }
-
-  const treinosPorAluno = new Map<string, TreinoResumido[]>();
-  for (const treino of treinos) {
-    const alunoId = alunoPorMacro.get(treino.mesocycle_id);
-    if (!alunoId) continue;
-    const exercicios = porTreino.get(treino.id) ?? [];
-    const lista = treinosPorAluno.get(alunoId) ?? [];
-    lista.push({
-      id: treino.id,
-      label: treino.label,
-      name: treino.name,
-      total_exercicios: exercicios.length,
-      total_series: totalDeSeries(exercicios),
-      duracao_min: duracaoEstimadaMin(exercicios),
-    });
-    treinosPorAluno.set(alunoId, lista);
-  }
-
-  return alunos.map((aluno) => ({
-    aluno,
-    macrotreino: macroPorAluno.get(aluno.id) ?? null,
-    treinos: treinosPorAluno.get(aluno.id) ?? [],
-  }));
-}
+  "id, workout_id, exercise_id, exercise_source, position, sets, reps_target, rir_target, rest_seconds, technique, notes";
 
 /**
  * Um treino com a prescrição inteira, pronto para o editor e para as telas do
@@ -230,6 +101,7 @@ export async function lerTreino(treinoId: string): Promise<TreinoCompleto | null
       position: exercicios.length,
       sets: linha.sets,
       reps_target: linha.reps_target,
+      rir_target: linha.rir_target,
       rest_seconds: linha.rest_seconds,
       technique: linha.technique,
       notes: linha.notes,
@@ -286,28 +158,4 @@ async function seriesRegistradas(treinoId: string): Promise<Map<string, number>>
     contagem.set(linha.workout_exercise_id, Number(linha.total));
   }
   return contagem;
-}
-
-/**
- * As letras já usadas num programa — o que o editor precisa para sugerir a
- * próxima ao montar um treino novo.
- *
- * Consulta própria e mínima, e não `lerTreinosDoPrograma()`: a tela de "novo
- * treino" não mostra os treinos que já existem, só precisa saber quais letras
- * estão ocupadas. Trazer nome, prescrição e contagem de séries de cada um para
- * escolher uma letra seria pagar a leitura mais cara do painel pela informação
- * mais barata dele — o mesmo raciocínio de `contarReavaliacoesPendentes`.
- */
-export async function letrasDoPrograma(programaId: string): Promise<string[]> {
-  if (!pareceUuid(programaId)) return [];
-
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("workouts")
-    .select("label")
-    .eq("mesocycle_id", programaId);
-
-  if (error) throw error;
-  return (data ?? []).map((linha) => linha.label);
 }

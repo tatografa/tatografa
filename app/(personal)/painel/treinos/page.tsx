@@ -1,113 +1,53 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Plus } from "lucide-react";
 
-import { Badge, Button, Card, classesDeBotao } from "@/components/ui";
-import { listarTreinosPorAluno } from "@/lib/queries/treinos";
 import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
+import { Card, classesDeBotao } from "@/components/ui";
+import { diaLocal } from "@/lib/domain/fuso";
+import { lerDivisaoDeTreino } from "@/lib/queries/divisao";
+
+import { DivisaoDeTreino } from "./divisao-de-treino";
 
 export const metadata: Metadata = { title: "Treinos" };
 
-export default async function TreinosPage() {
-  const porAluno = await listarTreinosPorAluno();
-  const total = porAluno.reduce((soma, linha) => soma + linha.treinos.length, 0);
+/**
+ * "Divisão de treino" — a tela do protótipo que juntou macrotreinos e treinos
+ * (27/09). À esquerda, o aluno, o programa e os dias; à direita, um cartão por
+ * treino, lado a lado.
+ *
+ * Aluno e programa vão na URL, e não em estado da tela: o link do programa de
+ * alguém pode ser aberto de outra aba, colado numa conversa e recarregado sem
+ * perder onde se estava.
+ */
+export default async function TreinosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ aluno?: string; programa?: string; novo?: string }>;
+}) {
+  const { aluno, programa, novo } = await searchParams;
+  const divisao = await lerDivisaoDeTreino({ alunoId: aluno, programaId: programa });
+
+  if (!divisao.aluno) {
+    return (
+      <>
+        <CabecalhoDaPagina
+          titulo="Divisão de treino"
+          subtitulo="Monte o macrociclo de treinos dos seus alunos"
+        />
+        <SemAluno />
+      </>
+    );
+  }
 
   return (
-    <div className="space-y-8">
-      <CabecalhoDaPagina
-        titulo="Treinos"
-        subtitulo={
-          total === 0
-            ? "Nenhum treino ainda — eles nascem dentro de um programa"
-            : `${total} treino${total > 1 ? "s" : ""}, agrupados por aluno e programa`
-        }
-        acoes={
-          /* Treino novo nasce dentro de um programa, então o botão leva à tela
-             que sabe de qual: um "Novo treino" solto voltaria a perguntar
-             aluno e programa aqui, que é o que este card tirou do editor. */
-          porAluno.length > 0 ? (
-            <Link href="/painel/macrotreinos" className={classesDeBotao()}>
-              <Plus size={16} aria-hidden /> Novo treino
-            </Link>
-          ) : undefined
-        }
-      />
-
-      {porAluno.length === 0 ? (
-        <SemAluno />
-      ) : (
-        <div className="space-y-8">
-          {porAluno.map(({ aluno, macrotreino, treinos }) => (
-            <section key={aluno.id} className="space-y-3">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h2 className="text-[16px] font-extrabold tracking-[-0.01em] text-ink">
-                  {aluno.name}
-                </h2>
-                <p className="text-[12.5px] text-ink-4">
-                  {macrotreino
-                    ? `${macrotreino.name} · ${macrotreino.total_weeks} semanas`
-                    : "Sem programa ativo"}
-                </p>
-              </div>
-
-              {/* Só os treinos do programa ATIVO aparecem aqui (dívida do M1):
-                  os do programa arquivado continuam salvos e se consultam pela
-                  tela de macrotreinos. */}
-              {!macrotreino ? (
-                <Card className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-[13.5px] text-ink-3">
-                    {aluno.name.split(" ")[0]} está sem programa ativo — e sem treino
-                    no app.
-                  </p>
-                  <Link
-                    href={`/painel/macrotreinos/novo?aluno=${aluno.id}`}
-                    className={classesDeBotao({ size: "sm", variant: "secondary" })}
-                  >
-                    Criar programa
-                  </Link>
-                </Card>
-              ) : treinos.length === 0 ? (
-                <Card className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-[13.5px] text-ink-3">
-                    {aluno.name.split(" ")[0]} ainda não tem treino montado.
-                  </p>
-                  <Link
-                    href={`/painel/treinos/novo?programa=${macrotreino.id}`}
-                    className={classesDeBotao({ size: "sm", variant: "secondary" })}
-                  >
-                    Montar treino
-                  </Link>
-                </Card>
-              ) : (
-                <ul className="space-y-2">
-                  {treinos.map((treino) => (
-                    <li key={treino.id}>
-                      <Link
-                        href={`/painel/treinos/${treino.id}`}
-                        className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-border bg-surface px-4 py-3.5 transition hover:border-border-strong"
-                      >
-                        <div className="flex min-w-0 items-center gap-3">
-                          <Badge tone="brand">{treino.label}</Badge>
-                          <div className="min-w-0">
-                            <p className="truncate text-[14.5px] font-semibold text-ink">
-                              {treino.name}
-                            </p>
-                            <p className="truncate text-[12.5px] text-ink-4">
-                              {treino.total_exercicios} exercícios ·{" "}
-                              {treino.total_series} séries · ~{treino.duracao_min} min
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          ))}
-        </div>
-      )}
-    </div>
+    <DivisaoDeTreino
+      // Trocar de aluno ou de programa monta a tela de novo: o estado dos
+      // cartões é do programa, e herdá-lo de outro misturaria dois treinos.
+      key={`${divisao.aluno.id}:${divisao.programa?.id ?? "sem"}`}
+      divisao={divisao}
+      hoje={diaLocal(new Date())}
+      abrirNovo={novo === "1" || !divisao.programa}
+    />
   );
 }
 
@@ -123,8 +63,8 @@ function SemAluno() {
           quando ele tiver entrado.
         </p>
       </div>
-      <Link href="/painel">
-        <Button>Convidar aluno</Button>
+      <Link href="/painel" className={classesDeBotao()}>
+        Convidar aluno
       </Link>
     </Card>
   );

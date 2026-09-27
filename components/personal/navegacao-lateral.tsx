@@ -7,7 +7,6 @@ import {
   Gauge,
   LayoutDashboard,
   Library,
-  ListChecks,
   MessageCircle,
   PlayCircle,
   Settings,
@@ -24,6 +23,10 @@ import { useMontado } from "@/lib/usar-montado";
 /**
  * As seções do painel, na ordem do protótipo do doc 06.
  *
+ * "Macrotreinos" saiu em 27/09: o programa passou a ser montado dentro de
+ * "Treinos" (a divisão de treino do protótipo), e dois itens para a mesma
+ * tarefa fariam o personal procurar o programa em um e o treino no outro.
+ *
  * `fim: true` marca os itens que ficam separados no pé da lista: "Treinar" leva
  * o personal para o **app do aluno** e "Configurações" é da conta, não da
  * carteira. Misturados no meio, os dois parecem mais uma tela de trabalho.
@@ -32,7 +35,6 @@ const NAVEGACAO = [
   { href: "/painel", rotulo: "Painel", Icone: LayoutDashboard },
   { href: "/painel/alunos", rotulo: "Alunos", Icone: Users, contagem: true },
   { href: "/painel/social", rotulo: "Feed", Icone: MessageCircle },
-  { href: "/painel/macrotreinos", rotulo: "Macrotreinos", Icone: ListChecks },
   { href: "/painel/treinos", rotulo: "Treinos", Icone: Dumbbell },
   { href: "/painel/exercicios", rotulo: "Exercícios", Icone: Library },
   { href: "/painel/agenda", rotulo: "Agenda", Icone: CalendarDays },

@@ -13,6 +13,8 @@ export const LIMITES = {
   descansoMax: 600,
   repeticoesMin: 1,
   repeticoesMax: 100,
+  rirMin: 0,
+  rirMax: 10,
 } as const;
 
 /**
@@ -55,6 +57,65 @@ export function normalizarRepeticoes(bruto: string): string | null {
   }
 
   return null;
+}
+
+/**
+ * RIR alvo ("repetições em reserva"): um número ("2") ou uma faixa ("0-2"),
+ * de 0 a 10. Devolve a forma canônica ou `null` se não é um RIR válido.
+ *
+ * Mesmo formato das repetições, e pelo mesmo motivo: "0-2" é prescrição. A
+ * diferença é o zero — ele é o RIR mais comum que existe (a série até a
+ * falha), enquanto zero repetição não é prescrição de nada. O banco confere o
+ * formato de novo (`workout_exercises_rir_target_formato`, migration 0037).
+ */
+export function normalizarRir(bruto: string): string | null {
+  const texto = bruto.trim().replace(/\s*[-–—]\s*/g, "-");
+  if (texto === "") return null;
+
+  const noLimite = (valor: number) =>
+    Number.isInteger(valor) && valor >= LIMITES.rirMin && valor <= LIMITES.rirMax;
+
+  const unico = /^(\d{1,2})$/.exec(texto);
+  if (unico) {
+    const valor = Number(unico[1]);
+    return noLimite(valor) ? String(valor) : null;
+  }
+
+  const faixa = /^(\d{1,2})-(\d{1,2})$/.exec(texto);
+  if (faixa) {
+    const de = Number(faixa[1]);
+    const ate = Number(faixa[2]);
+    if (!noLimite(de) || !noLimite(ate) || de > ate) return null;
+    return de === ate ? String(de) : `${de}-${ate}`;
+  }
+
+  return null;
+}
+
+/**
+ * O RIR em palavras de academia, para quem executa. A sigla sozinha é jargão
+ * de quem prescreve: o aluno entende "pare com 2 sobrando" sem nunca ter lido
+ * o que RIR quer dizer. Zero é a falha, e ganha o nome dela.
+ */
+export function rirEmPalavras(rir: string): string {
+  if (rir === "0") return "Vá até a falha";
+  if (rir === "1") return "Pare com 1 repetição sobrando";
+  if (rir.startsWith("0-")) return `Vá até a falha ou pare com até ${rir.slice(2)} sobrando`;
+  return `Pare com ${rir.replace("-", " a ")} repetições sobrando`;
+}
+
+/**
+ * Quantas repetições uma prescrição vale numa soma: o próprio número, ou o
+ * meio da faixa ("8-12" vale 10). É o que o "total de reps" da divisão de
+ * treino soma — o piso subestimaria toda faixa, e o teto contaria como feito
+ * o que é limite. Texto inválido vale zero: a soma não deve quebrar por um
+ * campo que o personal ainda está digitando.
+ */
+export function repeticoesDaSoma(reps: string): number {
+  const canonico = normalizarRepeticoes(reps);
+  if (!canonico) return 0;
+  const [de, ate = de] = canonico.split("-").map(Number);
+  return (de + ate) / 2;
 }
 
 function dentroDaFaixa(valor: number): boolean {

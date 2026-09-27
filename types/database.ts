@@ -245,6 +245,7 @@ export type Database = {
       mesocycles: {
         Row: {
           created_at: string
+          goal: Database["public"]["Enums"]["training_goal"] | null
           id: string
           name: string
           started_at: string
@@ -255,6 +256,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          goal?: Database["public"]["Enums"]["training_goal"] | null
           id?: string
           name: string
           started_at?: string
@@ -265,6 +267,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          goal?: Database["public"]["Enums"]["training_goal"] | null
           id?: string
           name?: string
           started_at?: string
@@ -658,6 +661,7 @@ export type Database = {
           position: number
           reps_target: string
           rest_seconds: number
+          rir_target: string | null
           sets: number
           technique: string | null
           workout_id: string
@@ -670,6 +674,7 @@ export type Database = {
           position?: number
           reps_target: string
           rest_seconds?: number
+          rir_target?: string | null
           sets: number
           technique?: string | null
           workout_id: string
@@ -682,6 +687,7 @@ export type Database = {
           position?: number
           reps_target?: string
           rest_seconds?: number
+          rir_target?: string | null
           sets?: number
           technique?: string | null
           workout_id?: string
@@ -859,6 +865,13 @@ export type Database = {
           ultima_em: string
         }[]
       }
+      series_por_programa: {
+        Args: { p_mesocycle_id: string }
+        Returns: {
+          total: number
+          workout_exercise_id: string
+        }[]
+      }
       series_por_exercicio: {
         Args: { p_workout_id: string }
         Returns: {
@@ -922,6 +935,12 @@ export type Database = {
         | "lombar"
         | "cardio"
       student_goal: "massa" | "gordura" | "condicionamento" | "saude"
+      training_goal:
+        | "hipertrofia"
+        | "forca"
+        | "resistencia"
+        | "emagrecimento"
+        | "condicionamento"
       student_status: "convidado" | "ativo" | "inativo"
     }
     CompositeTypes: {
@@ -982,6 +1001,13 @@ export const Constants = {
         "cardio",
       ],
       student_goal: ["massa", "gordura", "condicionamento", "saude"],
+      training_goal: [
+        "hipertrofia",
+        "forca",
+        "resistencia",
+        "emagrecimento",
+        "condicionamento",
+      ],
       student_status: ["convidado", "ativo", "inativo"],
     },
   },

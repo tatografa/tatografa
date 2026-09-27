@@ -85,8 +85,9 @@ function LinhaDoExercicio({ exercicio }: { exercicio: ExercicioPrescrito }) {
           {exercicio.exercicio.name}
         </p>
         <p className="mt-0.5 text-[11px] text-ink-4">
-          {exercicio.sets} × {exercicio.reps_target} · {exercicio.rest_seconds}s
-          descanso
+          {exercicio.sets} × {exercicio.reps_target}
+          {exercicio.rir_target ? ` · RIR ${exercicio.rir_target}` : ""} ·{" "}
+          {exercicio.rest_seconds}s descanso
         </p>
       </div>
 

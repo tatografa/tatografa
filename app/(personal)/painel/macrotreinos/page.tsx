@@ -1,13 +1,11 @@
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-import { listarProgramasPorAluno } from "@/lib/queries/macrotreinos";
-
-import { ListaDeProgramas } from "./lista-de-programas";
-
-export const metadata: Metadata = { title: "Macrotreinos" };
-
-export default async function MacrotreinosPage() {
-  const porAluno = await listarProgramasPorAluno();
-
-  return <ListaDeProgramas porAluno={porAluno} />;
+/**
+ * Macrotreinos morava aqui até 27/09, quando o programa passou a ser montado
+ * dentro da divisão de treino (decisão do Otávio). O endereço continua de pé
+ * porque há link salvo, histórico do navegador e mensagem de WhatsApp
+ * apontando para ele.
+ */
+export default function MacrotreinosPage() {
+  redirect("/painel/treinos");
 }

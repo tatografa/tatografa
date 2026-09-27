@@ -7,9 +7,10 @@ import { z } from "zod";
 import { requireTrainer } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 
-export type CampoDoPrograma = "aluno" | "nome" | "semanas" | "inicio";
+export type CampoDoPrograma = "aluno" | "nome" | "semanas" | "inicio" | "objetivo";
 
 export type EstadoDoPrograma = {
+  salvo?: boolean;
   erro?: string;
   errosPorCampo?: Partial<Record<CampoDoPrograma, string>>;
 };
@@ -35,8 +36,23 @@ const esquema = z.object({
     .refine((valor) => !Number.isNaN(Date.parse(valor)), "Data de início inválida."),
 });
 
+const OBJETIVOS = [
+  "hipertrofia",
+  "forca",
+  "resistencia",
+  "emagrecimento",
+  "condicionamento",
+] as const;
+
+// Vazio é "não informado" e vira nulo (0037): não existe um sexto valor
+// "outro" para o banco guardar uma afirmação onde só há silêncio.
+const esquemaDoObjetivo = z
+  .union([z.enum(OBJETIVOS, { error: "Objetivo inválido." }), z.literal("")])
+  .transform((valor) => (valor === "" ? null : valor));
+
 const esquemaDeCriacao = esquema.extend({
   alunoId: z.string().uuid("Escolha um aluno."),
+  objetivo: esquemaDoObjetivo,
 });
 
 const esquemaDeEdicao = esquema.extend({
@@ -65,6 +81,7 @@ export async function criarPrograma(
     nome: texto(formData, "nome"),
     semanas: numero(formData, "semanas"),
     inicio: texto(formData, "inicio"),
+    objetivo: texto(formData, "objetivo"),
   });
   if (!analise.success) return comErros(analise.error);
 
@@ -89,6 +106,7 @@ export async function criarPrograma(
       name: dados.nome,
       total_weeks: dados.semanas,
       started_at: dados.inicio,
+      goal: dados.objetivo,
       status: "arquivado",
     })
     .select("id")
@@ -104,16 +122,21 @@ export async function criarPrograma(
 
   if (erroAtivacao) {
     return {
-      erro: "O programa foi criado, mas não deu para ativar. Ative ele na lista.",
+      erro: "O programa foi criado, mas não deu para ativar. Ative ele no painel de macrociclos.",
     };
   }
 
-  revalidatePath("/painel/macrotreinos");
   revalidatePath("/painel/treinos");
-  redirect(`/painel/macrotreinos/${criado.id}?salvo=1`);
+  redirect(enderecoDoPrograma(dados.alunoId, criado.id));
 }
 
-/** Renomeia, muda a duração ou a data de início. Não mexe no status. */
+/**
+ * Renomeia, muda a duração ou a data de início. Não mexe no status.
+ *
+ * Não redireciona: o formulário mora no painel lateral da divisão de treino,
+ * ao lado dos cartões, e um redirect levaria embora o que o personal estiver
+ * editando neles.
+ */
 export async function salvarPrograma(
   _anterior: EstadoDoPrograma,
   formData: FormData,
@@ -144,10 +167,37 @@ export async function salvarPrograma(
   // Sem esta checagem, a tela diria "salvo" sobre uma escrita que não houve.
   if (count === 0) return { erro: "Programa não encontrado. Recarregue a página." };
 
-  revalidatePath("/painel/macrotreinos");
-  revalidatePath(`/painel/macrotreinos/${dados.programaId}`);
   revalidatePath("/painel/treinos");
-  redirect(`/painel/macrotreinos/${dados.programaId}?salvo=1`);
+  return { salvo: true };
+}
+
+/**
+ * Muda o objetivo do programa. Chamado direto do seletor, sem botão de salvar:
+ * é um valor só, e um "Salvar" para uma escolha de lista é um clique a mais que
+ * ninguém lembra de dar.
+ */
+export async function salvarObjetivo(
+  programaId: string,
+  objetivo: string,
+): Promise<{ ok: boolean }> {
+  const analise = z
+    .object({ programaId: z.string().uuid(), objetivo: esquemaDoObjetivo })
+    .safeParse({ programaId, objetivo });
+  if (!analise.success) return { ok: false };
+
+  await requireTrainer();
+  const supabase = await createClient();
+
+  const { error, count } = await supabase
+    .from("mesocycles")
+    .update({ goal: analise.data.objetivo }, { count: "exact" })
+    .eq("id", analise.data.programaId);
+
+  // Zero linhas é o RLS recusando: o programa é de outro personal.
+  if (error || count === 0) return { ok: false };
+
+  revalidatePath("/painel/treinos");
+  return { ok: true };
 }
 
 /**
@@ -166,11 +216,17 @@ export async function arquivarPrograma(formData: FormData): Promise<void> {
   const supabase = await createClient();
 
   // O RLS de `mesocycles` já exige ser o personal do aluno daquele programa.
-  await supabase.from("mesocycles").update({ status: "arquivado" }).eq("id", id);
+  const { data } = await supabase
+    .from("mesocycles")
+    .update({ status: "arquivado" })
+    .eq("id", id)
+    .select("student_id")
+    .maybeSingle();
 
-  revalidatePath("/painel/macrotreinos");
   revalidatePath("/painel/treinos");
-  redirect("/painel/macrotreinos");
+  // Fica no mesmo programa, agora arquivado: o personal acabou de mexer nele,
+  // e voltar ao ativo de outro jeito esconderia o resultado do clique.
+  redirect(data ? enderecoDoPrograma(data.student_id, id) : "/painel/treinos");
 }
 
 /** Volta um programa arquivado a ativo, arquivando o que estiver no lugar. */
@@ -186,9 +242,19 @@ export async function ativarPrograma(formData: FormData): Promise<void> {
   // escrita falhasse.
   await supabase.rpc("ativar_macrotreino", { p_mesocycle_id: id });
 
-  revalidatePath("/painel/macrotreinos");
+  const { data } = await supabase
+    .from("mesocycles")
+    .select("student_id")
+    .eq("id", id)
+    .maybeSingle();
+
   revalidatePath("/painel/treinos");
-  redirect("/painel/macrotreinos");
+  redirect(data ? enderecoDoPrograma(data.student_id, id) : "/painel/treinos");
+}
+
+/** O endereço de um programa na divisão de treino. */
+function enderecoDoPrograma(alunoId: string, programaId: string): string {
+  return `/painel/treinos?aluno=${alunoId}&programa=${programaId}`;
 }
 
 // --------------------------------------------------------------- ajuda -----
@@ -267,7 +333,7 @@ export async function duplicarPrograma(
   await requireTrainer();
   const supabase = await createClient();
 
-  const { error } = await supabase.rpc("duplicar_macrotreino", {
+  const { data: copia, error } = await supabase.rpc("duplicar_macrotreino", {
     p_mesocycle_id: analise.data.programaId,
     p_student_id: analise.data.alunoId,
     p_name: analise.data.nome,
@@ -285,36 +351,10 @@ export async function duplicarPrograma(
     return { erro: "Não conseguimos copiar agora. Tente de novo." };
   }
 
-  revalidatePath("/painel/macrotreinos");
-  return {};
-}
-
-/**
- * Copia um treino dentro do mesmo programa.
- *
- * A cópia recebe a primeira letra livre e o sufixo "(cópia)" no nome, pela RPC
- * `duplicar_treino`. É o caminho de "treino B parecido com o A": copiar e
- * trocar dois exercícios, em vez de montar os outros dez de novo.
- */
-export async function duplicarTreino(formData: FormData): Promise<void> {
-  const treinoId = String(formData.get("treinoId") ?? "");
-  const programaId = String(formData.get("programaId") ?? "");
-  if (!z.string().uuid().safeParse(treinoId).success) return;
-
-  await requireTrainer();
-  const supabase = await createClient();
-
-  const { error } = await supabase.rpc("duplicar_treino", {
-    p_workout_id: treinoId,
-  });
-
-  // Ação de formulário sem estado: o erro aqui é o programa ter sumido entre o
-  // render e o clique. `revalidatePath` redesenha a página com a verdade, que é
-  // o que o personal precisa ver — uma mensagem sobre um treino que não existe
-  // mais não o ajudaria a fazer nada diferente.
-  if (error) console.error("duplicarTreino", error);
-
-  revalidatePath(`/painel/macrotreinos/${programaId}`);
+  revalidatePath("/painel/treinos");
+  // Abre a cópia: ela nasce arquivada e "quase sempre leva um ajuste antes de
+  // ativar" (17/09) — o próximo passo do personal é justamente nela.
+  redirect(enderecoDoPrograma(analise.data.alunoId, copia));
 }
 
 function comErros(erro: z.ZodError): EstadoDoPrograma {
@@ -334,4 +374,5 @@ const mapaDeCampos: Record<string, CampoDoPrograma | undefined> = {
   nome: "nome",
   semanas: "semanas",
   inicio: "inicio",
+  objetivo: "objetivo",
 };

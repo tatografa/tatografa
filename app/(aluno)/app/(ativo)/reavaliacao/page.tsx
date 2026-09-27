@@ -10,6 +10,7 @@ import { comparar, lerReavaliacoesDoAluno } from "@/lib/queries/reavaliacao";
 
 import { BotaoApagarFotos } from "./botao-apagar-fotos";
 import { Formulario } from "./formulario";
+import { primeiroNome } from "@/lib/domain/nome";
 
 export const metadata: Metadata = { title: "Reavaliação" };
 
@@ -122,6 +123,3 @@ export default async function ReavaliacaoDoAluno({
   );
 }
 
-function primeiroNome(nome: string): string {
-  return nome.trim().split(/\s+/)[0] ?? nome;
-}

@@ -21,6 +21,7 @@ import {
   type SerieDaExecucao,
 } from "@/lib/domain/execucao";
 import { textoDaUltimaVez, type UltimaVez } from "@/lib/domain/recordes";
+import { rirEmPalavras } from "@/lib/domain/prescricao";
 
 import { MenuDaExecucao } from "./menu-da-execucao";
 import { comoRelogio } from "@/lib/domain/treino";
@@ -268,6 +269,15 @@ function ExecucaoMontada({
           </p>
 
           <UltimaVezDoExercicio ultima={referencia[exercicio.id]} />
+
+          {/* O RIR vai em palavras e não na sigla: "RIR 0-2" é a língua de
+              quem prescreve, e o aluno lê isto entre uma série e outra. */}
+          {exercicio.rir_target ? (
+            <p className="mt-2.5 inline-block rounded-[8px] border border-dark-border px-2.5 py-1.5 text-[11px] font-medium text-dark-muted">
+              {rirEmPalavras(exercicio.rir_target)}{" "}
+              <span className="font-mono">(RIR {exercicio.rir_target})</span>
+            </p>
+          ) : null}
 
           {exercicio.technique ? (
             <p className="mt-2.5 inline-block rounded-[8px] border border-dark-border px-2.5 py-1.5 text-[11px] font-medium text-dark-muted">

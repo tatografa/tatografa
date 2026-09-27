@@ -19,7 +19,7 @@ import {
   CrescimentoDaCarteira,
   TopDeProgressoes,
 } from "@/components/personal/graficos-do-painel";
-import { Button, Card } from "@/components/ui";
+import { Card, classesDeBotao } from "@/components/ui";
 import { requireTrainer } from "@/lib/auth/session";
 import { listarConvitesPendentes } from "@/lib/queries/alunos";
 import { lerGraficosDoPainel, lerResumoDaCarteira } from "@/lib/queries/painel";
@@ -161,8 +161,8 @@ function VazioSemAluno() {
           Depois é só montar o treino e atribuir a ele.
         </p>
       </div>
-      <Link href="/painel/treinos">
-        <Button variant="secondary">Ver meus treinos</Button>
+      <Link href="/painel/treinos" className={classesDeBotao({ variant: "secondary" })}>
+        Ver meus treinos
       </Link>
     </Card>
   );

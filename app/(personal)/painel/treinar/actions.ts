@@ -54,7 +54,7 @@ export async function virarAlunoDeMimMesmo(
 
   // `"layout"` e não a página solta: a linha nova muda **toda** a subárvore do
   // painel — a lista e os indicadores em `/painel`, e principalmente o seletor
-  // de aluno de `/painel/macrotreinos/novo`, que é onde o personal vai montar o
+  // de aluno de `/painel/treinos`, que é onde o personal vai montar o
   // próprio programa. Invalidar só `/painel` deixava o seletor servindo a lista
   // de antes, e o personal não se encontrava nela.
   revalidatePath("/painel", "layout");

@@ -31,6 +31,20 @@ export const OBJETIVO: Record<Enums<"student_goal">, string> = {
   saude: "Saúde",
 };
 
+/**
+ * O objetivo do **programa** (`mesocycles.goal`), que não é o do aluno
+ * (`OBJETIVO`, acima): o aluno diz o que quer na vida; o programa diz o que
+ * este bloco de semanas persegue. O mesmo aluno faz um de força e depois um de
+ * hipertrofia.
+ */
+export const OBJETIVO_DO_PROGRAMA: Record<Enums<"training_goal">, string> = {
+  hipertrofia: "Hipertrofia",
+  forca: "Força",
+  resistencia: "Resistência",
+  emagrecimento: "Emagrecimento",
+  condicionamento: "Condicionamento",
+};
+
 export const NIVEL: Record<Enums<"experience_level">, string> = {
   iniciante: "Iniciante",
   intermediario: "Intermediário",

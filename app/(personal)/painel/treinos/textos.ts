@@ -8,6 +8,8 @@
  * palavra não deve existir em duas cópias para contornar isso.
  */
 
+import { primeiroNome } from "@/lib/domain/nome";
+
 /**
  * A confirmação de arquivamento.
  *
@@ -36,9 +38,7 @@ export function textoDeAtivacao(aluno: string, nome: string, ativoAtual: string)
   );
 }
 
-export function primeiroNome(nome: string): string {
-  return nome.trim().split(/\s+/)[0] ?? nome;
-}
+export { primeiroNome };
 
 /**
  * O texto do diálogo de duplicação.

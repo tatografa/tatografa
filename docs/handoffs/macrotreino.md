@@ -13,10 +13,16 @@
 | Semana para exibir ("Semana 3 de 8") | `lib/domain/treino.ts` → `semanaAtual` |
 | Programas do personal | `lib/queries/macrotreinos.ts` |
 | Agenda do aluno, já com o sugerido | `lib/queries/aluno.ts` → `lerAgendaDoAluno` |
-| Treinos do programa ativo, por aluno | `lib/queries/treinos.ts` → `listarTreinosPorAluno` |
-| Criar, editar, arquivar, ativar | `app/(personal)/painel/macrotreinos/actions.ts` |
-| Textos das confirmações | `app/(personal)/painel/macrotreinos/textos.ts` |
-| Migrations | `supabase/migrations/0011_*`, `0012_*` |
+| Divisão de treino (programa inteiro de um aluno) | `lib/queries/divisao.ts` → `lerDivisaoDeTreino` |
+| Criar, editar, arquivar, ativar, duplicar, objetivo | `app/(personal)/painel/treinos/acoes-de-programa.ts` |
+| Textos das confirmações | `app/(personal)/painel/treinos/textos.ts` |
+| Migrations | `supabase/migrations/0011_*`, `0012_*`, `0037_*` (objetivo) |
+
+> **27/09:** `/painel/macrotreinos` deixou de ser tela e virou redirect para
+> `/painel/treinos`, onde o programa é criado e editado no "Painel de
+> macrociclos" (decisão do Otávio). `mesocycles.goal` guarda o objetivo do
+> programa — nulo é "não informado". `listarTreinosPorAluno` saiu: ninguém
+> mais lia os treinos de todos os alunos de uma vez.
 
 ## O que `lerAgendaDoAluno(alunoId)` devolve
 
@@ -106,8 +112,10 @@ de semanas — fechar sem ninguém decidir deixaria o aluno sem treino.
    (`/painel/treinos/novo?programa=<id>`) e não pergunta mais aluno, nome do
    programa nem semanas. A Server Action confere o dono do programa de novo:
    URL é palpite fácil.
-4. **Treino novo só entra em programa ativo.** Editar treino de programa
-   arquivado continua valendo.
+4. ~~**Treino novo só entra em programa ativo.**~~ **Revogado em 27/09:** o
+   programa arquivado também é o rascunho (a cópia nasce arquivada), e a
+   divisão de treino aceita treino novo nele — o aluno só vê quando o
+   programa for ativado.
 
 ## Segurança verificada (SQL, com dois personais)
 

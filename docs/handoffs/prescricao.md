@@ -36,6 +36,7 @@ type ExercicioPrescrito = {
   position: number;      // 0, 1, 2… sem buracos, renumerado na leitura
   sets: number;
   reps_target: string;   // "12" ou "8-10" — TEXTO, nunca número
+  rir_target: string | null; // "2" ou "0-2", de 0 a 10. Nulo = não prescrito (0037)
   rest_seconds: number;
   technique: string | null;
   notes: string | null;
@@ -70,6 +71,10 @@ resposta contaria a um estranho que aquele id existe.
    buracos: a gravação renumera, e a leitura renumera de novo sobre as linhas que
    sobraram. Pode indexar por ela ("exercício 3 de 5"). Não reordene por outro
    critério.
+6. **`rir_target` vai em palavras para o aluno** (`rirEmPalavras`, em
+   `lib/domain/prescricao.ts`): "Pare com 0 a 2 repetições sobrando", com a
+   sigla entre parênteses. Nulo não mostra nada — todo treino anterior a 27/09
+   é nulo, e não existe RIR "padrão" que coubesse inventar.
 5. **Uma linha órfã é pulada, não quebra a tela.** `exercise_id` não tem fk; se um
    exercício próprio for apagado, `lerTreino` omite a linha em vez de estourar — e
    é por isso que a posição é renumerada na leitura, senão a linha pulada deixaria
@@ -87,6 +92,12 @@ resposta contaria a um estranho que aquele id existe.
 > existir. O contrato novo está em `docs/handoffs/macrotreino.md`.
 
 ### Salvamento por Server Action única
+
+> **Desde 27/09 o editor é o quadro da divisão de treino** (`/painel/treinos`),
+> e a ação é `salvarTreinoDaDivisao`, uma chamada por cartão alterado, sem
+> redirect. A regra de preservar as linhas que continuam é a mesma; o que
+> mudou é que a ação devolve os ids das linhas **na ordem da tela**, para o
+> cartão não mandá-las como novas no salvar seguinte.
 
 O editor não salva sozinho. O rascunho vive no navegador e vai inteiro para
 `salvarTreino` no clique de Salvar. O personal monta o treino sentado no
