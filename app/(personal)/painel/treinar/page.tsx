@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { requireTrainer } from "@/lib/auth/session";
 import { tenhoPerfilDeAluno } from "@/lib/queries/modo-aluno";
 
 import { CartaoDeModoAluno } from "./cartao-de-modo-aluno";
+import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 
 export const metadata: Metadata = { title: "Treinar" };
 
@@ -33,22 +33,16 @@ export default async function Treinar() {
 
   return (
     <div className="space-y-8">
-      <header className="space-y-2">
-        <Link
-          href="/painel"
-          className="eyebrow text-ink-4 transition hover:text-ink-2"
-        >
-          ← Painel
-        </Link>
-        <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
-          Treinar como aluno
-        </h1>
-        <p className="max-w-xl text-[13.5px] leading-relaxed text-ink-3">
-          Você também treina. Aqui você vira aluno de si mesmo: monta o próprio
-          macrotreino no mesmo editor, executa pelo app do aluno no celular e
-          aparece no feed junto com a sua turma.
-        </p>
-      </header>
+      <CabecalhoDaPagina
+        titulo="Treinar como aluno"
+        subtitulo="Você também treina: monte o seu macrotreino e execute pelo app do aluno"
+      />
+      {/* A frase inteira, que o cabeçalho de uma linha só não comporta. */}
+      <p className="max-w-xl text-[13.5px] leading-relaxed text-ink-3">
+        Aqui você vira aluno de si mesmo: monta o próprio macrotreino no mesmo
+        editor, executa pelo app do aluno no celular e aparece no feed junto
+        com a sua turma.
+      </p>
 
       <CartaoDeModoAluno jaSouAluno={jaSouAluno} />
     </div>

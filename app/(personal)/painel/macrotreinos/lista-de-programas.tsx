@@ -8,6 +8,7 @@ import type { Macrotreino, ProgramasDoAluno } from "@/lib/queries/macrotreinos";
 
 import { BotaoArquivar, BotaoAtivar, BotaoDuplicar } from "./acoes-do-programa";
 import { primeiroNome } from "./textos";
+import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 
 /**
  * A tela de macrotreinos, sem nenhum acesso a banco.
@@ -24,21 +25,21 @@ export function ListaDeProgramas({ porAluno }: { porAluno: ProgramasDoAluno[] })
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="space-y-2">
-          <p className="eyebrow text-ink-4">Macrotreinos</p>
-          <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
-            {porAluno.length === 0
-              ? "Nenhum aluno ainda"
-              : `${porAluno.length} aluno${porAluno.length > 1 ? "s" : ""}`}
-          </h1>
-        </div>
-        {porAluno.length > 0 && (
-          <Link href="/painel/macrotreinos/novo" className={classesDeBotao()}>
-            <Plus size={16} aria-hidden /> Novo programa
-          </Link>
-        )}
-      </header>
+      <CabecalhoDaPagina
+        titulo="Macrotreinos"
+        subtitulo={
+          porAluno.length === 0
+            ? "Nenhum aluno ainda — o programa nasce depois do convite"
+            : `Os programas de ${porAluno.length} aluno${porAluno.length > 1 ? "s" : ""}, e qual está ativo`
+        }
+        acoes={
+          porAluno.length > 0 ? (
+            <Link href="/painel/macrotreinos/novo" className={classesDeBotao()}>
+              <Plus size={16} aria-hidden /> Novo programa
+            </Link>
+          ) : undefined
+        }
+      />
 
       {porAluno.length === 0 ? (
         <SemAluno />

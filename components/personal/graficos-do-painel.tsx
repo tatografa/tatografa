@@ -1,3 +1,10 @@
+import { Trophy } from "lucide-react";
+
+import {
+  CartaoDoPainel,
+  LINHA_DO_CARTAO,
+  LINHAS_DO_CARTAO,
+} from "@/components/personal/cartao-do-painel";
 import {
   crescimentoEmPalavras,
   DIAS_DA_ATIVIDADE,
@@ -17,7 +24,6 @@ import {
   type PontoDoMes,
   type Progressao,
 } from "@/lib/domain/dashboard";
-import { iniciaisDe } from "@/lib/domain/nome";
 
 /*
  * Os três gráficos do doc 06 §2.
@@ -44,29 +50,9 @@ import { iniciaisDe } from "@/lib/domain/nome";
 const LARGURA = 360;
 const ALTURA = 120;
 
-export function GraficosDoPainel({
-  crescimento,
-  atividade,
-  progressoes,
-}: {
-  crescimento: PontoDoMes[];
-  atividade: DiaDaAtividade[];
-  progressoes: Progressao[];
-}) {
-  return (
-    <div className="space-y-4">
-      <div className="grid gap-4 lg:grid-cols-2">
-        <CrescimentoDaCarteira pontos={crescimento} />
-        <AtividadeDiaria dias={atividade} />
-      </div>
-      <TopDeProgressoes progressoes={progressoes} />
-    </div>
-  );
-}
-
 /* ------------------------------------------- evolução mensal de alunos --- */
 
-function CrescimentoDaCarteira({ pontos }: { pontos: PontoDoMes[] }) {
+export function CrescimentoDaCarteira({ pontos }: { pontos: PontoDoMes[] }) {
   const linha = linhaDoCrescimento(pontos, LARGURA, ALTURA);
   const atual = pontos.length ? pontos[pontos.length - 1].total : 0;
   const doPrimeiro = pontos.length ? pontos[0].total : 0;
@@ -75,14 +61,14 @@ function CrescimentoDaCarteira({ pontos }: { pontos: PontoDoMes[] }) {
   return (
     <Bloco
       titulo="Evolução mensal de alunos"
+      apoio={`Total ao fim de cada mês · últimos ${pontos.length} meses`}
       // O acumulado, e não as entradas do mês: com um aluno novo em março e
       // nenhum em abril, "novos por mês" desenharia uma queda onde ninguém saiu.
-      resumo={`${atual} ${atual === 1 ? "aluno" : "alunos"} hoje`}
-      apoio={
+      resumo={`${atual} ${atual === 1 ? "aluno" : "alunos"} · ${
         variacao === 0
-          ? `sem mudança em ${pontos.length} meses`
-          : `${variacao > 0 ? "+" : "−"}${Math.abs(variacao)} em ${pontos.length} meses`
-      }
+          ? "sem mudança"
+          : `${variacao > 0 ? "+" : "−"}${Math.abs(variacao)} no período`
+      }`}
     >
       {!linha || linha.maximo === 0 ? (
         <Vazio>Nenhum aluno cadastrado ainda.</Vazio>
@@ -148,15 +134,17 @@ function CrescimentoDaCarteira({ pontos }: { pontos: PontoDoMes[] }) {
 
 /* --------------------------------------------------- atividade diária --- */
 
-function AtividadeDiaria({ dias }: { dias: DiaDaAtividade[] }) {
+export function AtividadeDiaria({ dias }: { dias: DiaDaAtividade[] }) {
   const { total, diasComTreino, melhorDia } = resumoDaAtividade(dias);
   const maximo = Math.max(1, ...dias.map((d) => d.total));
 
   return (
     <Bloco
       titulo="Atividade diária"
-      resumo={`${total} ${total === 1 ? "treino" : "treinos"}`}
-      apoio={`em ${diasComTreino} dos últimos ${DIAS_DA_ATIVIDADE} dias`}
+      apoio={`Treinos concluídos por dia · últimos ${DIAS_DA_ATIVIDADE} dias`}
+      resumo={`${total} ${total === 1 ? "treino" : "treinos"} em ${diasComTreino} ${
+        diasComTreino === 1 ? "dia" : "dias"
+      }`}
     >
       {total === 0 ? (
         <Vazio>
@@ -176,10 +164,14 @@ function AtividadeDiaria({ dias }: { dias: DiaDaAtividade[] }) {
             className="flex items-end gap-[2px] border-b border-border-strong"
           >
             {dias.map((dia) => (
-              <div key={dia.dia} className="group relative flex h-full flex-1 items-end">
+              <div
+                key={dia.dia}
+                className="group relative flex h-full flex-1 items-end"
+              >
                 <div
                   style={{
-                    height: dia.total === 0 ? 2 : `${(dia.total / maximo) * 100}%`,
+                    height:
+                      dia.total === 0 ? 2 : `${(dia.total / maximo) * 100}%`,
                   }}
                   className={`w-full rounded-t-[3px] transition ${
                     dia.total === 0
@@ -215,85 +207,72 @@ function AtividadeDiaria({ dias }: { dias: DiaDaAtividade[] }) {
 
 /* ------------------------------------------------ top 10 progressões ---- */
 
-function TopDeProgressoes({ progressoes }: { progressoes: Progressao[] }) {
-  const ganhos = progressoes.map((p) =>
-    ganhoPercentual(p.cargaInicial, p.cargaFinal),
-  );
-  const maior = Math.max(1, ...ganhos);
-
+export function TopDeProgressoes({
+  progressoes,
+}: {
+  progressoes: Progressao[];
+}) {
   return (
-    <Bloco
+    <CartaoDoPainel
       titulo={`Top ${LIMITE_DAS_PROGRESSOES} progressões`}
-      resumo={
-        progressoes.length
-          ? `${progressoes.length} ${progressoes.length === 1 ? "evolução" : "evoluções"}`
-          : // "—" desenharia um traço grande e solto onde deveria haver uma
-            // palavra: o vazio aqui tem explicação logo abaixo, e o número
-            // grande precisa combinar com ela.
-            "Nenhuma"
-      }
-      apoio={`nos últimos ${DIAS_DAS_PROGRESSOES} dias`}
+      apoio={`Maiores ganhos de carga · ${DIAS_DAS_PROGRESSOES} dias`}
+      Icone={Trophy}
     >
       {progressoes.length === 0 ? (
-        <Vazio>
+        <p
+          className={`text-[13px] leading-relaxed text-ink-3 ${LINHA_DO_CARTAO}`}
+        >
           Ainda não há como comparar. Uma progressão aparece aqui quando o mesmo
           exercício, com carga, é executado em dois treinos diferentes dentro
           dos últimos {DIAS_DAS_PROGRESSOES} dias.
-        </Vazio>
+        </p>
       ) : (
         // Lista ordenada de verdade: a posição no ranking é conteúdo, e num
         // `<div>` ela existiria só para quem enxerga a ordem na tela.
-        <ol className="space-y-2.5">
-          {progressoes.map((p, i) => {
-            const ganho = ganhos[i];
-            return (
-              <li
-                key={`${p.studentId}-${p.exercicio}`}
-                className="flex items-center gap-3"
+        <ol className={LINHAS_DO_CARTAO}>
+          {progressoes.map((p, i) => (
+            <li
+              key={`${p.studentId}-${p.exercicio}`}
+              className={`flex items-center gap-3 ${LINHA_DO_CARTAO}`}
+            >
+              {/* O número da posição é o da `<ol>`, que o leitor de tela já
+                  anuncia; este é o desenho dele. Os três primeiros em
+                  `brand`, como no protótipo. */}
+              <span
+                aria-hidden
+                className={`w-[22px] shrink-0 text-center text-[13px] font-semibold tabular-nums ${
+                  i < 3 ? "text-brand" : "text-ink-5"
+                }`}
               >
-                <span
-                  aria-hidden
-                  className="flex size-7 shrink-0 items-center justify-center rounded-full bg-canvas-sunken text-[10px] font-bold text-ink-3"
-                >
-                  {iniciaisDe(p.aluno)}
-                </span>
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-baseline justify-between gap-3">
-                    <p className="min-w-0 truncate text-[13px] font-semibold text-ink">
-                      {p.exercicio}{" "}
-                      <span className="font-normal text-ink-4">· {p.aluno}</span>
-                    </p>
-                    <p className="shrink-0 font-mono text-[12px] font-bold text-brand tabular-nums">
-                      {formatarGanho(ganho)}
-                    </p>
-                  </div>
-
-                  <div className="mt-1 flex items-center gap-2.5">
-                    {/* A barra é comparação entre as linhas, não o valor em si:
-                        o número exato está escrito ao lado, e por isso ela pode
-                        ser relativa à maior da lista sem enganar ninguém. */}
-                    <div
-                      aria-hidden
-                      className="h-1.5 flex-1 overflow-hidden rounded-full bg-canvas-sunken"
-                    >
-                      <div
-                        style={{ width: `${(ganho / maior) * 100}%` }}
-                        className="h-full rounded-full bg-brand"
-                      />
-                    </div>
-                    <p className="shrink-0 font-mono text-[11px] text-ink-4 tabular-nums">
-                      {faixaDeCarga(p.cargaInicial, p.cargaFinal)} ·{" "}
-                      {p.sessoes} treinos
-                    </p>
-                  </div>
-                </div>
-              </li>
-            );
-          })}
+                {i + 1}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13px] font-medium text-ink">
+                  {p.aluno}
+                </p>
+                <p className="truncate text-[12px] text-ink-4">{p.exercicio}</p>
+              </div>
+              {/*
+                Em percentual, não em quilos como no protótipo ("+20kg"): em
+                quilos o agachamento ganha de toda rosca direta todo mês, e o
+                ranking vira de exercício pesado em vez de evolução (18/09). A
+                carga de onde para onde vai embaixo, para o número ter chão.
+                Verde é certo aqui, ao contrário da medida do corpo: carga que
+                sobe é progressão para qualquer objetivo.
+              */}
+              <div className="shrink-0 text-right">
+                <p className="text-[12.5px] font-semibold text-success tabular-nums">
+                  {formatarGanho(ganhoPercentual(p.cargaInicial, p.cargaFinal))}
+                </p>
+                <p className="text-[11px] text-ink-5 tabular-nums">
+                  {faixaDeCarga(p.cargaInicial, p.cargaFinal)}
+                </p>
+              </div>
+            </li>
+          ))}
         </ol>
       )}
-    </Bloco>
+    </CartaoDoPainel>
   );
 }
 
@@ -301,29 +280,31 @@ function TopDeProgressoes({ progressoes }: { progressoes: Progressao[] }) {
 
 function Bloco({
   titulo,
-  resumo,
   apoio,
+  resumo,
   children,
 }: {
   titulo: string;
-  /** O número grande. É ele que responde a pergunta do bloco sem o gráfico. */
-  resumo: string;
   apoio: string;
+  /**
+   * A resposta do bloco em palavras, na pílula ao lado do título — onde o
+   * protótipo põe o "+71% no ano". É ela que responde a pergunta sem o gráfico.
+   */
+  resumo: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="space-y-4 rounded-card border border-border bg-surface p-5">
-      <header className="space-y-1.5">
-        <h3 className="eyebrow text-ink-4">{titulo}</h3>
-        <p className="flex items-baseline gap-2">
-          <span className="text-[22px] font-extrabold leading-none tracking-[-0.02em] text-ink tabular-nums">
-            {resumo}
-          </span>
-          <span className="text-[12.5px] text-ink-4">{apoio}</span>
+    <CartaoDoPainel
+      titulo={titulo}
+      apoio={apoio}
+      lateral={
+        <p className="rounded-full bg-canvas px-2.5 py-1 text-[12px] font-medium text-ink-2 tabular-nums">
+          {resumo}
         </p>
-      </header>
-      {children}
-    </section>
+      }
+    >
+      <div className="space-y-2 p-[18px] pt-8">{children}</div>
+    </CartaoDoPainel>
   );
 }
 

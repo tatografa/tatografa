@@ -9,6 +9,7 @@ import { lerMacrotreino } from "@/lib/queries/macrotreinos";
 
 import { BotaoArquivar } from "../acoes-do-programa";
 import { FormularioDePrograma } from "../formulario-de-programa";
+import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 
 export const metadata: Metadata = { title: "Editar programa" };
 
@@ -30,28 +31,21 @@ export default async function EditarProgramaPage({
 
   return (
     <div className="space-y-8">
-      <header className="space-y-2">
-        <Link
-          href="/painel/macrotreinos"
-          className="eyebrow text-ink-4 transition hover:text-ink-2"
-        >
-          ← Macrotreinos
-        </Link>
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
-            {programa.name}
-          </h1>
+      <CabecalhoDaPagina
+        titulo={programa.name}
+        selo={
           <Badge tone={ativo ? "brand" : "neutro"}>
             {ativo ? "Ativo" : "Arquivado"}
           </Badge>
-        </div>
-        <p className="text-[13.5px] text-ink-3">
-          {programa.aluno.name}
-          {ativo
+        }
+        subtitulo={
+          programa.aluno.name +
+          (ativo
             ? ` · semana ${semanaAtual(programa.started_at, programa.total_weeks)} de ${programa.total_weeks}`
-            : " · fora da tela do aluno"}
-        </p>
-      </header>
+            : " · fora da tela do aluno")
+        }
+        voltar={{ href: "/painel/macrotreinos", rotulo: "Voltar para macrotreinos" }}
+      />
 
       {salvo === "1" && (
         <p

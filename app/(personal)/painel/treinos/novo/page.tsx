@@ -8,6 +8,7 @@ import { lerMacrotreino } from "@/lib/queries/macrotreinos";
 import { letrasDoPrograma } from "@/lib/queries/treinos";
 
 import { EditorDeTreino } from "../editor-de-treino";
+import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 
 export const metadata: Metadata = { title: "Novo treino" };
 
@@ -41,20 +42,11 @@ export default async function NovoTreinoPage({
 
   return (
     <div className="space-y-8">
-      <header className="space-y-2">
-        <Link
-          href="/painel/macrotreinos"
-          className="eyebrow text-ink-4 transition hover:text-ink-2"
-        >
-          ← Macrotreinos
-        </Link>
-        <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
-          Novo treino
-        </h1>
-        <p className="text-[13.5px] text-ink-3">
-          {programa.aluno.name} · {programa.name}
-        </p>
-      </header>
+      <CabecalhoDaPagina
+        titulo="Novo treino"
+        subtitulo={`${programa.aluno.name} · ${programa.name}`}
+        voltar={{ href: "/painel/macrotreinos", rotulo: "Voltar para macrotreinos" }}
+      />
 
       <EditorDeTreino
         programa={{

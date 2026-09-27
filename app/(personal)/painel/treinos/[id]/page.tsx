@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { lerTreino } from "@/lib/queries/treinos";
@@ -7,6 +6,7 @@ import { lerTreino } from "@/lib/queries/treinos";
 import { EditorDeTreino, type ItemDoEditor } from "../editor-de-treino";
 
 import { BotaoDuplicarTreino } from "./botao-duplicar";
+import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 
 export const metadata: Metadata = { title: "Editar treino" };
 
@@ -50,35 +50,28 @@ export default async function EditarTreinoPage({
         navegações de distância de onde o fluxo larga o personal. O programa já
         estava em mãos aqui; faltava usá-lo.
       */}
-      <header className="space-y-2">
-        <Link
-          href={`/painel/macrotreinos/${treino.macrotreino.id}`}
-          className="eyebrow text-ink-4 transition hover:text-ink-2"
-        >
-          ← {treino.macrotreino.name}
-        </Link>
-        <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
-          {treino.label} · {treino.name}
-        </h1>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-[13.5px] text-ink-3">
-            {treino.aluno.name} · {treino.total_series} séries · ~
-            {treino.duracao_min} min
-          </p>
-          {/*
+      <CabecalhoDaPagina
+        titulo={`${treino.label} · ${treino.name}`}
+        subtitulo={`${treino.aluno.name} · ${treino.total_series} séries · ~${treino.duracao_min} min`}
+        voltar={{
+          href: `/painel/macrotreinos/${treino.macrotreino.id}`,
+          rotulo: `Voltar para ${treino.macrotreino.name}`,
+        }}
+        acoes={
+          /*
             Duplicar mora aqui e não na lista de treinos: lá cada linha é um
             `<Link>` inteiro, e um botão dentro de um link é aninhamento
-            inválido — o clique ficaria disputado entre os dois. Aqui o personal
-            já está olhando o treino que quer copiar.
-          */}
+            inválido — o clique ficaria disputado entre os dois. Aqui o
+            personal já está olhando o treino que quer copiar.
+          */
           <BotaoDuplicarTreino
             treinoId={treino.id}
             programaId={treino.macrotreino.id}
             label={treino.label}
             nome={treino.name}
           />
-        </div>
-      </header>
+        }
+      />
 
       {/*
         O programa vem do próprio treino, não de uma consulta ao programa ativo

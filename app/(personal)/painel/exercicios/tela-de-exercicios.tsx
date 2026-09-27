@@ -14,6 +14,7 @@ import type { Enums } from "@/types/database";
 
 import { DialogoDeExercicio } from "./dialogo-de-exercicio";
 import { DialogoDeExclusao } from "./dialogo-de-exclusao";
+import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 
 type Linha = ExercicioDisponivel & { em_uso?: number };
 
@@ -49,22 +50,16 @@ export function TelaDeExercicios({
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="space-y-2">
-          <p className="eyebrow text-ink-4">Exercícios</p>
-          <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
-            {catalogo.length + proprios.length} exercícios
-          </h1>
-          <p className="text-[13.5px] text-ink-3">
-            O catálogo do Reps Club mais os seus. Os seus aparecem no editor de
-            treino junto com o resto.
-          </p>
-        </div>
-        <Button onClick={() => setCriando(true)}>
-          <Plus size={16} aria-hidden />
-          Novo exercício
-        </Button>
-      </header>
+      <CabecalhoDaPagina
+        titulo="Exercícios"
+        subtitulo={`${catalogo.length + proprios.length} exercícios — o catálogo do Reps Club mais os seus`}
+        acoes={
+          <Button onClick={() => setCriando(true)}>
+            <Plus size={16} aria-hidden />
+            Novo exercício
+          </Button>
+        }
+      />
 
       <div className="flex flex-wrap gap-3">
         <input

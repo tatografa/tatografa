@@ -5,6 +5,7 @@ import { TelaSessaoDoHistorico } from "@/components/aluno/tela-sessao-do-histori
 import { requireTrainer } from "@/lib/auth/session";
 import { lerAluno } from "@/lib/queries/alunos";
 import { lerSessaoDoHistorico } from "@/lib/queries/historico";
+import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 
 export const metadata: Metadata = { title: "Sessão do aluno" };
 
@@ -31,9 +32,17 @@ export default async function SessaoDoAluno(
   if (!sessao) notFound();
 
   return (
-    <TelaSessaoDoHistorico
-      sessao={sessao}
-      voltarPara={{ href: `/painel/alunos/${aluno.id}`, rotulo: aluno.name }}
-    />
+    <>
+      <CabecalhoDaPagina
+        titulo="Treino registrado"
+        subtitulo={aluno.name}
+      />
+      {/* A tela é a mesma que o aluno vê, com o próprio caminho de volta —
+          ela é compartilhada com o app, e lá não existe esta moldura. */}
+      <TelaSessaoDoHistorico
+        sessao={sessao}
+        voltarPara={{ href: `/painel/alunos/${aluno.id}`, rotulo: aluno.name }}
+      />
+    </>
   );
 }

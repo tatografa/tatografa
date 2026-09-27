@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { Card } from "@/components/ui";
 import { requireTrainer } from "@/lib/auth/session";
 
 import { AjusteDeAlerta } from "./ajuste-de-alerta";
 import { ContatoDoPersonal } from "./contato-do-personal";
+import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 
 export const metadata: Metadata = { title: "Configurações" };
 
@@ -23,17 +23,10 @@ export default async function Configuracoes() {
 
   return (
     <div className="space-y-8">
-      <header className="space-y-2">
-        <Link
-          href="/painel"
-          className="eyebrow text-ink-4 transition hover:text-ink-2"
-        >
-          ← Painel
-        </Link>
-        <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
-          Configurações
-        </h1>
-      </header>
+      <CabecalhoDaPagina
+        titulo="Configurações"
+        subtitulo="Ajuste seu perfil, seu contato e o alerta de inatividade"
+      />
 
       <section className="space-y-3">
         <h2 className="eyebrow text-ink-4">Seu WhatsApp</h2>

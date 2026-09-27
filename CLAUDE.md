@@ -201,6 +201,37 @@ Provar que funciona sem o Otávio ler código:
   entrega. O piloto decide se importa: com um aluno por vez, dez minutos de espera não é
   problema; com dez, vira.
 
+- **[2026-09-27, pedido do Otávio]** **O painel do personal segue o layout do protótipo**
+  (`Painel do Personal - Dashboard.dc.html`), medido no código dele: fundo cinza com dois
+  cartões brancos de canto 20px (navegação e página), **um cabeçalho só para as dezessete
+  páginas** (`CabecalhoDaPagina`: título 22px, subtítulo, ações à direita, fio embaixo) e
+  o avatar do personal fixo no canto, levando às configurações. O dashboard virou **duas
+  colunas** — números, alerta, convites e gráficos à esquerda; Top 10 e treinos recentes
+  num trilho de até 340px à direita —, todos no mesmo `CartaoDoPainel` (selo de ícone,
+  título, apoio, linhas com fio). Um componente para os seis blocos porque o que faz a
+  tela parecer ferramenta é **repetição**, e seis cópias do cabeçalho divergiriam.
+- **[2026-09-27]** **O que ficou diferente do protótipo, cada um com motivo.**
+  *Rolagem:* no protótipo rola o cartão de dentro; aqui rola a janela e a navegação fica
+  `sticky` — rolagem interna faria o voltar do navegador e o Ctrl+F errarem de contêiner.
+  *Busca global, sino, "Plano Pro", "Modo escuro":* já descartados em 18/09, pelo mesmo
+  motivo. *Pílula de variação nos números ("+12%"):* compara com o mês anterior, e o
+  painel não guarda nenhum dos quatro números do mês anterior — seria número inventado no
+  lugar mais visível. *Receita, ticket, churn, renovações e "Distribuição por plano":* não
+  há cobrança nem plano no modelo de dados (decisão de 18/09 continua). *Progressão em
+  percentual e não em quilos:* em quilos o agachamento ganha de toda rosca todo mês (18/09).
+  *"Painel" e não "Dashboard" no título:* é o nome do item no menu, e a interface é inteira
+  em português. *Paleta:* a cinza-azulada do protótipo não entrou; os tokens continuam os
+  que passaram em AA.
+- **[2026-09-27]** **O traço vermelho do item ativo saiu da navegação.** Estava lá desde
+  18/09 porque "cor sozinha não é sinal"; o protótipo marca o ativo com fundo preenchido e
+  peso de fonte, e isso **também não é só cor** — é forma mais peso. A regra de
+  acessibilidade continua atendida; mudou o jeito.
+- **[2026-09-27]** **Colunas por container query, não por ponto de quebra da janela.** Com
+  a navegação aberta ou recolhida a largura útil muda 184px, então quem decide se o trilho
+  da direita cabe (e se os quatro números vão numa linha ou em duas) é a largura da
+  coluna, não a da janela. A primeira versão usava `flex-wrap` e `auto-fit`: o trilho
+  descia preso aos 340px e ficava órfão num canto, e os quatro números caíam em três mais
+  um sobrando. Os dois só apareceram no screenshot a 1100px, nenhum no de 1440.
 - **[2026-09-26, decisão do Otávio]** **Aluno inativo perde o acesso ao app.** O dado
   histórico fica — não se apaga nada —, mas o login é limitado até ele voltar a pagar.
   Duas camadas: o **banco** tranca a escrita (migration 0036) e a **tela** explica
@@ -383,8 +414,12 @@ Provar que funciona sem o Otávio ler código:
   transformaria 12 alunos virando 13 numa escalada. **Contagem se desenha a partir do
   zero.** O mês vazio entra por `generate_series` e repete o total anterior, senão o eixo
   pula de janeiro para março e a inclinação da linha mente.
-- **[2026-09-18]** **Os gráficos ficam abaixo do que é decisão de hoje, ao contrário do
-  protótipo, que os põe no topo.** É a aplicação direta da lição de 16/09: o dashboard
+- **[2026-09-18, revisto em 2026-09-27]** **Os gráficos ficam abaixo do que é decisão de
+  hoje, ao contrário do protótipo, que os põe no topo.** _Com o layout de duas colunas
+  (27/09) isto encolheu para o mínimo: os gráficos voltaram para a coluna da esquerda,
+  como no protótipo, e só o alerta "Precisam de atenção" fica entre eles e os números —
+  sem ninguém parado ele não desenha nada e os gráficos sobem. O resto do raciocínio
+  abaixo continua valendo._ É a aplicação direta da lição de 16/09: o dashboard
   responde "o que mudou hoje" — quem parou, o que aconteceu, quem está devendo reavaliação
   —, e foi por empurrar isso para fora da dobra que a lista de alunos saiu daqui. Tendência
   é a camada seguinte: útil, e nunca urgente.
@@ -448,13 +483,16 @@ Provar que funciona sem o Otávio ler código:
   Archivo é uma grotesca com personalidade — a 800/26px com `-0.02em`, que é o título de
   toda tela, a diferença entre as duas é o maior fator isolado de "as telas não parecem o
   protótipo". Não é defeito: é a escolha.
-- **[2026-09-18]** **Os protótipos `.dc.html` não renderizam neste ambiente, e nunca
-  renderizaram.** São apps React que buscam `react`, `react-dom` e `@babel/standalone` do
-  unpkg — bloqueado pela política de rede, tanto para o navegador quanto para o `curl`.
-  É por isso que toda conferência de fidelidade daqui saiu dos **markdown** (docs 04, 05,
-  06) e não da imagem: a estrutura bate porque os docs descrevem estrutura, e o acabamento
-  derrapa porque só a imagem mostra acabamento. **Comparar com o protótipo exige
-  screenshot tirado na máquina do Otávio.** Registrar isto é mais útil que tentar de novo.
+- **[2026-09-18, corrigido em 2026-09-27]** **Os protótipos `.dc.html` renderizam, sim —
+  só não do jeito óbvio.** São apps React que buscam `react@18.3.1`, `react-dom@18.3.1` e
+  `@babel/standalone@7.29.0` do unpkg, que a política de rede bloqueia. O registro do npm
+  **não** é bloqueado: `npm pack` dos três pacotes numa pasta de rascunho e um
+  `page.route("**/unpkg.com/**")` do Playwright servindo os arquivos locais fazem o
+  protótipo abrir inteiro no Chromium, com fonte e tudo. O que estava registrado aqui ("não
+  renderizam, e nunca renderizaram") valeu por um mês de conferências feitas só pelos
+  markdown — **e foi por isso que o acabamento derrapou**: a estrutura batia porque os docs
+  descrevem estrutura, e o acabamento só a imagem mostra. Desde 27/09, comparar é
+  screenshot lado a lado, medido no código do protótipo.
 - **[2026-09-18]** **A paleta divergiu do protótipo em exatamente cinco cores, e as cinco
   do protótipo reprovam em AA.** Medido: cinza secundário `#9a9a95` sobre branco = 2,83;
   terciário `#84847f` = 3,76; branco sobre o vermelho `#ff2a2a` = 3,74; verde `#1f9d57`

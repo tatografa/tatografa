@@ -1,4 +1,6 @@
 
+import Link from "next/link";
+
 import { BotaoSair } from "@/components/botao-sair";
 import { NavegacaoLateral } from "@/components/personal/navegacao-lateral";
 import { PortaoDeAceite } from "@/components/portao-de-aceite";
@@ -9,6 +11,7 @@ import {
   VERSAO_DOS_DOCUMENTOS,
 } from "@/lib/legal/documentos";
 import { aceiteEstaEmDia } from "@/lib/queries/aceite";
+import { iniciaisDe } from "@/lib/domain/nome";
 import { contarAlunos } from "@/lib/queries/alunos";
 
 import { aceitarAtualizacaoDoPersonal } from "../acoes-de-aceite";
@@ -19,11 +22,18 @@ import { aceitarAtualizacaoDoPersonal } from "../acoes-de-aceite";
  * Aqui mora a autorização de verdade: `requireTrainer()` confirma que existe
  * linha em `trainers` para o usuário logado. O proxy só evita render à toa.
  *
- * **A moldura é a sidebar colapsável do doc 04**, e não mais a barra no topo.
- * As duas navegam as mesmas páginas — o que muda é a silhueta: com a barra, o
- * painel tinha a forma de um site; com a lateral, a de uma ferramenta. É a
- * diferença que mais salta ao comparar com o protótipo, e a única grande que
- * não dependia de dado novo nenhum.
+ * **A moldura é a do protótipo** (`Painel do Personal - Dashboard.dc.html`,
+ * medido no código dele em 27/09): fundo cinza, e sobre ele dois cartões
+ * brancos de cantos de 20px, afastados 13px da janela e 11px um do outro — a
+ * navegação à esquerda e a página à direita.
+ *
+ * **Uma diferença deliberada:** no protótipo a janela não rola, rola o cartão
+ * de dentro. Aqui quem rola é a janela, e a sidebar fica pregada com
+ * `sticky`. Com rolagem interna, trocar de página pelo menu manteria a posição
+ * da página anterior, o botão voltar do navegador não devolveria ao ponto onde
+ * se estava, e a busca da página (Ctrl+F) rolaria o contêiner errado. Parado,
+ * o desenho é o mesmo; a diferença só aparece rolando — o fim do cartão tem os
+ * cantos arredondados embaixo do conteúdo, e não embaixo da janela.
  */
 export default async function PainelLayout({
   children,
@@ -59,15 +69,37 @@ export default async function PainelLayout({
   const alunos = await contarAlunos();
 
   return (
-    <div className="flex min-h-dvh bg-canvas">
+    <div className="flex min-h-dvh items-start gap-[11px] bg-canvas-sunken p-[13px]">
       <NavegacaoLateral
         nome={trainer.name}
         alunos={alunos}
         sair={<BotaoSair />}
       />
 
-      <main className="min-w-0 flex-1 px-8 py-8">
-        <div className="mx-auto max-w-6xl">{children}</div>
+      {/*
+        O cartão da página. `relative` por causa do avatar, e `px-7 pb-8` é o
+        respiro do corpo — o cabeçalho de cada página (`CabecalhoDaPagina`)
+        sangra por cima dele para levar a linha de borda a borda.
+      */}
+      <main className="relative min-h-[calc(100dvh-26px)] min-w-0 flex-1 rounded-[20px] bg-surface px-7 pb-8 shadow-xs">
+        {/*
+          O avatar mora aqui e não no cabeçalho de cada página: é o único
+          lugar que já conhece o nome do personal, e as telas que são
+          componente cliente não conseguiriam buscá-lo. Ele se alinha ao
+          cabeçalho pela altura — 90px de cabeçalho, 40px de avatar, 25px do
+          topo —, e é por isso que o cabeçalho tem altura fixa e não quebra
+          linha. Leva às configurações, que é onde a conta mora.
+        */}
+        <Link
+          href="/painel/configuracoes"
+          aria-label={`Sua conta: ${trainer.name}`}
+          title={trainer.name}
+          className="absolute top-[25px] right-7 z-10 flex size-10 items-center justify-center rounded-full bg-ink text-[13px] font-semibold text-white transition hover:opacity-85"
+        >
+          {iniciaisDe(trainer.name)}
+        </Link>
+
+        {children}
       </main>
     </div>
   );

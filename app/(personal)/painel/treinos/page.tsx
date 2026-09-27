@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 
 import { Badge, Button, Card, classesDeBotao } from "@/components/ui";
 import { listarTreinosPorAluno } from "@/lib/queries/treinos";
+import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 
 export const metadata: Metadata = { title: "Treinos" };
 
@@ -13,22 +14,24 @@ export default async function TreinosPage() {
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="space-y-2">
-          <p className="eyebrow text-ink-4">Treinos</p>
-          <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
-            {total === 0 ? "Nenhum treino ainda" : `${total} treino${total > 1 ? "s" : ""}`}
-          </h1>
-        </div>
-        {/* Treino novo nasce dentro de um programa, então o botão leva à tela
-            que sabe de qual: um "Novo treino" solto voltaria a perguntar aluno
-            e programa aqui, que é exatamente o que este card tirou do editor. */}
-        {porAluno.length > 0 && (
-          <Link href="/painel/macrotreinos" className={classesDeBotao()}>
-            <Plus size={16} aria-hidden /> Novo treino
-          </Link>
-        )}
-      </header>
+      <CabecalhoDaPagina
+        titulo="Treinos"
+        subtitulo={
+          total === 0
+            ? "Nenhum treino ainda — eles nascem dentro de um programa"
+            : `${total} treino${total > 1 ? "s" : ""}, agrupados por aluno e programa`
+        }
+        acoes={
+          /* Treino novo nasce dentro de um programa, então o botão leva à tela
+             que sabe de qual: um "Novo treino" solto voltaria a perguntar
+             aluno e programa aqui, que é o que este card tirou do editor. */
+          porAluno.length > 0 ? (
+            <Link href="/painel/macrotreinos" className={classesDeBotao()}>
+              <Plus size={16} aria-hidden /> Novo treino
+            </Link>
+          ) : undefined
+        }
+      />
 
       {porAluno.length === 0 ? (
         <SemAluno />

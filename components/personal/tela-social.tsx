@@ -5,6 +5,7 @@ import { Badge, Card } from "@/components/ui";
 import { PERIODOS, type PeriodoDoSocial } from "@/lib/domain/feed";
 import type { PostDaCarteira } from "@/lib/queries/social";
 import { cn } from "@/lib/utils";
+import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 
 /**
  * O feed do personal (doc 06, tela 8), sem acesso a banco.
@@ -29,17 +30,20 @@ export function TelaSocial({
 
   return (
     <div className="space-y-6">
-      <header className="space-y-3">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="space-y-2">
-            <p className="eyebrow text-ink-4">Painel do personal</p>
-            <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
-              Social
-            </h1>
-          </div>
-
-          {/* Período por link, não por botão: a escolha fica na URL, então
-              recarregar ou voltar mostra o mesmo recorte. */}
+      <CabecalhoDaPagina
+        titulo="Feed"
+        subtitulo={
+          posts.length === 0
+            ? "Todas as publicações dos seus alunos, das mais recentes às mais antigas"
+            : `${posts.length === 1 ? "1 post" : `${posts.length} posts`}${
+                semResposta > 0
+                  ? ` · ${semResposta === 1 ? "1 ainda sem sua resposta" : `${semResposta} ainda sem sua resposta`}`
+                  : ""
+              }`
+        }
+        acoes={
+          /* Período por link, não por botão: a escolha fica na URL, então
+             recarregar ou voltar mostra o mesmo recorte. */
           <nav aria-label="Período" className="flex gap-1 rounded-input bg-canvas-sunken p-1">
             {PERIODOS.map((opcao) => (
               <Link
@@ -57,24 +61,8 @@ export function TelaSocial({
               </Link>
             ))}
           </nav>
-        </div>
-
-        {posts.length ? (
-          <p className="text-[13.5px] text-ink-3">
-            {posts.length === 1 ? "1 post" : `${posts.length} posts`}
-            {semResposta > 0 ? (
-              <>
-                {" · "}
-                <strong className="font-semibold text-ink">
-                  {semResposta === 1
-                    ? "1 ainda sem sua resposta"
-                    : `${semResposta} ainda sem sua resposta`}
-                </strong>
-              </>
-            ) : null}
-          </p>
-        ) : null}
-      </header>
+        }
+      />
 
       {posts.length ? (
         <ul className="grid gap-4 sm:grid-cols-2">

@@ -7,6 +7,7 @@ import type { AlunoDaLista } from "@/lib/queries/alunos";
 import type { ReavaliacaoNaCarteira } from "@/lib/queries/reavaliacao";
 
 import { BotaoCancelar, NovaReavaliacao } from "./acoes";
+import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 
 /**
  * A tela de reavaliações do personal (doc 06 §9).
@@ -30,17 +31,15 @@ export function TelaReavaliacoes({
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="space-y-2">
-          <p className="eyebrow text-ink-4">Reavaliações</p>
-          <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
-            {pendentes.length === 0
-              ? "Nenhuma esperando resposta"
-              : `${pendentes.length} esperando resposta`}
-          </h1>
-        </div>
-        <NovaReavaliacao alunos={alunos} />
-      </header>
+      <CabecalhoDaPagina
+        titulo="Reavaliações"
+        subtitulo={
+          pendentes.length === 0
+            ? "Nenhuma esperando resposta dos alunos"
+            : `${pendentes.length} esperando resposta dos alunos`
+        }
+        acoes={<NovaReavaliacao alunos={alunos} />}
+      />
 
       {reavaliacoes.length === 0 ? (
         <Vazio temAluno={alunos.length > 0} />

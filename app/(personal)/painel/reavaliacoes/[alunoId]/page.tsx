@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
 
 import { Comparacao } from "@/components/reavaliacao/comparacao";
 import { Card } from "@/components/ui";
@@ -9,6 +7,7 @@ import { requireTrainer } from "@/lib/auth/session";
 import { pareceUuid } from "@/lib/domain/id";
 import { lerAluno } from "@/lib/queries/alunos";
 import { comparar, lerReavaliacoesDeUmAluno } from "@/lib/queries/reavaliacao";
+import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 
 export const metadata: Metadata = { title: "Reavaliações do aluno" };
 
@@ -41,17 +40,11 @@ export default async function ReavaliacoesDoAluno({
 
   return (
     <div className="space-y-8">
-      <header className="space-y-2">
-        <Link
-          href="/painel/reavaliacoes"
-          className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-ink-4 transition hover:text-ink"
-        >
-          <ChevronLeft size={14} aria-hidden /> Reavaliações
-        </Link>
-        <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
-          {aluno.name}
-        </h1>
-      </header>
+      <CabecalhoDaPagina
+        titulo={aluno.name}
+        subtitulo="Reavaliações respondidas e a comparação entre elas"
+        voltar={{ href: "/painel/reavaliacoes", rotulo: "Voltar para reavaliações" }}
+      />
 
       {enviadas.length === 0 ? (
         <Card size="lg" className="text-center">

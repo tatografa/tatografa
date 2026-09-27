@@ -115,13 +115,17 @@ function Lateral({
   return (
     <aside
       data-colapsada={colapsada ? "" : undefined}
-      className={`sticky top-0 flex h-dvh shrink-0 flex-col border-r border-border bg-surface transition-[width] duration-200 ${
-        colapsada ? "w-[68px]" : "w-[236px]"
+      // Um cartão flutuando no fundo cinza, como no protótipo: 13px da borda
+      // da janela, cantos de 20px. Pregado com `sticky` e não `fixed` — a
+      // janela continua sendo quem rola, e o conteúdo ao lado não precisa
+      // reservar espaço para ele.
+      className={`sticky top-[13px] flex h-[calc(100dvh-26px)] shrink-0 flex-col rounded-[20px] bg-surface py-[18px] shadow-xs transition-[width] duration-200 ${
+        colapsada ? "w-[68px]" : "w-[252px]"
       }`}
     >
-      <div className={`flex h-16 items-center ${colapsada ? "justify-center px-2" : "justify-between pr-2 pl-5"}`}>
+      <div className={`mb-[18px] flex items-center ${colapsada ? "justify-center px-2" : "justify-between pr-2.5 pl-[18px]"}`}>
         <Link href="/painel" className="text-ink" aria-label="Painel do Reps Club">
-          {colapsada ? <Logo size={26} apenasSimbolo /> : <Logo size={26} />}
+          {colapsada ? <Logo size={32} apenasSimbolo /> : <Logo size={32} />}
         </Link>
         {!colapsada && <BotaoDeColapso colapsada={colapsada} aoAlternar={alternar} />}
       </div>
@@ -132,9 +136,11 @@ function Lateral({
         </div>
       )}
 
-      <nav aria-label="Seções do painel" className="flex-1 overflow-y-auto px-3 py-2">
+      <nav aria-label="Seções do painel" className="flex-1 overflow-y-auto px-3.5">
         {!colapsada && (
-          <p className="eyebrow mb-1.5 px-2 text-[9px] text-ink-5">Navegação</p>
+          <p className="mb-2 px-2 text-[12px] font-medium tracking-[0.02em] text-ink-5">
+            Navegação
+          </p>
         )}
         <ul className="space-y-0.5">
           {NAVEGACAO.map((item, i) => (
@@ -155,7 +161,7 @@ function Lateral({
         </ul>
       </nav>
 
-      <div className={`border-t border-border-soft p-3 ${colapsada ? "flex justify-center" : ""}`}>
+      <div className={`mx-3.5 border-t border-border-soft pt-3 ${colapsada ? "flex justify-center" : ""}`}>
         {colapsada ? (
           <span
             title={nome}
@@ -224,24 +230,21 @@ function ItemDaNavegacao({
       aria-current={ativo ? "page" : undefined}
       // `title` só na faixa de ícones: com o rótulo visível, a dica repete.
       title={colapsada ? rotulo : undefined}
-      className={`relative flex min-h-10 items-center gap-2.5 rounded-[10px] text-[13.5px] font-semibold transition ${
-        colapsada ? "justify-center px-0" : "px-2.5"
+      /*
+       * O item ativo como no protótipo: fundo preenchido e texto mais forte,
+       * sem o traço vermelho à esquerda que o doc 04 pedia. O protótipo é o
+       * desenho que o Otávio escolheu depois (27/09), e o sinal continua não
+       * sendo só cor — é uma forma (o fundo) mais um peso de fonte.
+       */
+      className={`relative flex min-h-10 items-center gap-[11px] rounded-[8px] py-2.5 text-[13.5px] transition ${
+        colapsada ? "justify-center px-0" : "px-[11px]"
       } ${
         ativo
-          ? "bg-canvas-sunken text-ink"
-          : "text-ink-3 hover:bg-canvas-sunken hover:text-ink"
+          ? "bg-canvas font-semibold text-ink"
+          : "font-medium text-ink-3 hover:bg-canvas hover:text-ink"
       }`}
     >
-      {/* O marcador do item ativo, como o doc 04 pede ("item ativo com
-          marcador em brand"). Um retângulo à esquerda e não a cor do texto:
-          cor sozinha não é sinal para quem não distingue vermelho. */}
-      <span
-        aria-hidden
-        className={`absolute top-1/2 left-0 h-5 w-[3px] -translate-y-1/2 rounded-r ${
-          ativo ? "bg-brand" : "bg-transparent"
-        }`}
-      />
-      <Icone aria-hidden size={17} />
+      <Icone aria-hidden size={18} />
       {!colapsada && (
         <>
           <span className="flex-1 truncate">{rotulo}</span>

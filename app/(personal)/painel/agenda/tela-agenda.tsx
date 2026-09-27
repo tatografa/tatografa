@@ -17,6 +17,7 @@ import type { AlunoDaLista } from "@/lib/queries/alunos";
 import type { SessaoAgendada } from "@/lib/queries/agenda";
 
 import { MarcarSessao, NovaSessao } from "./acoes";
+import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 
 const TOM: Record<Situacao, "neutro" | "brand" | "sucesso" | "atencao"> = {
   agendada: "brand",
@@ -64,21 +65,19 @@ export function TelaAgenda({
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="space-y-2">
-          <p className="eyebrow text-ink-4">Agenda</p>
-          <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
-            {rotuloDaSemana(semana)}
-          </h1>
-        </div>
-        <NovaSessao
-          alunos={alunos}
-          semana={semana}
-          sessoes={sessoes}
-          hoje={hoje}
-          alunoInicial={alunoInicial}
-        />
-      </header>
+      <CabecalhoDaPagina
+        titulo="Agenda"
+        subtitulo={rotuloDaSemana(semana)}
+        acoes={
+          <NovaSessao
+            alunos={alunos}
+            semana={semana}
+            sessoes={sessoes}
+            hoje={hoje}
+            alunoInicial={alunoInicial}
+          />
+        }
+      />
 
       {/*
         A fila do que ficou para trás vem **antes** da semana. Sessão passada

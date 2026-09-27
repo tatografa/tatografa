@@ -1,8 +1,14 @@
 import Link from "next/link";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, History } from "lucide-react";
+
+import {
+  CartaoDoPainel,
+  LINHA_DO_CARTAO,
+  LINHAS_DO_CARTAO,
+} from "@/components/personal/cartao-do-painel";
 
 import { comoPorcentagem, haQuantosDias } from "@/lib/domain/atencao";
-import { duracaoCurta, formatarNumero } from "@/lib/domain/historico";
+import { iniciaisDe } from "@/lib/domain/nome";
 import type {
   AlunoEmAlerta,
   IndicadoresDoPainel,
@@ -34,79 +40,99 @@ export function Indicadores({
   } = indicadores;
 
   return (
-    <section
-      aria-label="Resumo da carteira"
-      className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
-    >
-      <Indicador
-        valor={String(alunosAtivos)}
-        rotulo={alunosAtivos === 1 ? "aluno ativo" : "alunos ativos"}
-      />
-      <Indicador
-        valor={String(treinosNaSemana)}
-        rotulo={
-          treinosNaSemana === 1
-            ? "treino executado esta semana"
-            : "treinos executados esta semana"
-        }
-      />
-      <Indicador
-        valor={comoPorcentagem(aderenciaMedia)}
-        rotulo="aderência média"
-      />
-      <Indicador
-        valor={String(reavaliacoesPendentes)}
-        rotulo={
-          reavaliacoesPendentes === 1
-            ? "reavaliação pendente"
-            : "reavaliações pendentes"
-        }
-        destaque={reavaliacoesPendentes > 0}
-        href={reavaliacoesPendentes > 0 ? "/painel/reavaliacoes" : undefined}
-      />
-    </section>
+    // Dois por linha ou os quatro numa linha só, nunca três e um sobrando —
+    // que é o que `auto-fit` fazia com quatro ladrilhos numa coluna de 740px.
+    // A régua é a largura da coluna (container query), não a da janela.
+    <div className="@container">
+      <section
+        aria-label="Resumo da carteira"
+        className="grid grid-cols-2 gap-3.5 @min-[640px]:grid-cols-4"
+      >
+        <Indicador
+          titulo="Alunos ativos"
+          valor={String(alunosAtivos)}
+          apoio="com acesso ao app"
+        />
+        <Indicador
+          titulo="Treinos na semana"
+          valor={String(treinosNaSemana)}
+          apoio="desde segunda-feira"
+        />
+        <Indicador
+          titulo="Aderência média"
+          valor={comoPorcentagem(aderenciaMedia)}
+          apoio="feitos sobre prescritos"
+        />
+        <Indicador
+          titulo="Reavaliações"
+          valor={String(reavaliacoesPendentes)}
+          apoio="esperando resposta"
+          destaque={reavaliacoesPendentes > 0}
+          href={reavaliacoesPendentes > 0 ? "/painel/reavaliacoes" : undefined}
+        />
+      </section>
+    </div>
   );
 }
 
+/**
+ * Um ladrilho do topo, no desenho do protótipo: fundo preenchido e sem borda,
+ * o nome em cima, o número grande no meio e uma frase curta embaixo.
+ *
+ * **Sem a pílula de variação ("+12%") que o protótipo põe no canto.** Ela
+ * compara com o mês anterior, e o painel não guarda o valor do mês anterior de
+ * nenhum destes quatro — calcular aderência de trinta dias atrás é refazer a
+ * conta com outra janela, e mostrar a pílula sem essa conta seria número
+ * inventado no lugar mais visível da tela.
+ */
 function Indicador({
+  titulo,
   valor,
-  rotulo,
+  apoio,
   destaque = false,
   href,
 }: {
+  titulo: string;
   valor: string;
-  rotulo: string;
+  apoio: string;
   /** Pinta o número de `brand` quando há o que fazer com ele. */
   destaque?: boolean;
   href?: string;
 }) {
   const classes = [
-    "block rounded-card border bg-surface px-4 py-3.5 transition",
-    href ? "border-border hover:border-border-strong" : "border-border",
+    "block min-w-0 rounded-[12px] bg-canvas p-4 transition",
+    href ? "hover:bg-canvas-sunken" : "",
   ].join(" ");
 
   const conteudo = (
     <>
+      <p className="text-[13px] text-ink-4">{titulo}</p>
       <p
-        className={`text-[26px] leading-none font-extrabold tracking-[-0.02em] tabular-nums ${
+        className={`mt-0.5 text-[26px] leading-tight font-bold tracking-[-0.02em] tabular-nums ${
           destaque ? "text-brand" : "text-ink"
         }`}
       >
         {valor}
       </p>
-      <p className="eyebrow mt-2 text-[9px] leading-[1.4] text-ink-4">
-        {rotulo}
-      </p>
+      <p className="mt-1 text-[12.5px] text-ink-4">{apoio}</p>
     </>
   );
 
-  if (href) return <Link href={href} className={classes}>{conteudo}</Link>;
+  if (href)
+    return (
+      <Link href={href} className={classes}>
+        {conteudo}
+      </Link>
+    );
   return <div className={classes}>{conteudo}</div>;
 }
 
 /**
  * "Alunos que precisam de atenção" — o doc 06 chama de a lista mais útil da
- * página, e por isso ela fica **acima** da lista geral, não embaixo dela.
+ * página. No layout de duas colunas ela é o primeiro cartão depois dos
+ * números: o protótipo põe os gráficos logo abaixo dos indicadores, e eles
+ * continuam lá — só que **depois** de quem parou de treinar, que é a decisão de
+ * hoje. Tendência é a camada seguinte.
  *
  * Lista vazia não desenha nada: um bloco de alerta vazio treina o olho a
  * ignorar o bloco de alerta.
@@ -121,32 +147,31 @@ export function AlunosQuePrecisamDeAtencao({
   if (!alertas.length) return null;
 
   return (
-    <section className="space-y-3">
-      <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <h2 className="eyebrow flex items-center gap-1.5 text-warning">
-          <AlertTriangle aria-hidden size={13} />
-          Precisam de atenção · {alertas.length}
-        </h2>
+    <CartaoDoPainel
+      titulo={`Precisam de atenção · ${alertas.length}`}
+      Icone={AlertTriangle}
+      tom="warning"
+      apoio={
         <Link
           href="/painel/configuracoes"
-          className="inline-flex min-h-6 items-center text-[12px] font-medium text-ink-5 transition hover:text-ink-3"
+          className="transition hover:text-ink-3"
         >
-          Avisar depois de {diasParaAlerta}{" "}
-          {diasParaAlerta === 1 ? "dia" : "dias"} · ajustar
+          Aviso depois de {diasParaAlerta}{" "}
+          {diasParaAlerta === 1 ? "dia" : "dias"} sem treinar · ajustar
         </Link>
-      </div>
-
-      <ul className="space-y-2">
+      }
+    >
+      <ul className={LINHAS_DO_CARTAO}>
         {alertas.map((alerta) => (
           <li key={alerta.id}>
             <Link
               href={`/painel/alunos/${alerta.id}`}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-warning/35 bg-warning-bg px-4 py-3.5 transition hover:border-warning/60"
+              className={`flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 transition hover:bg-canvas ${LINHA_DO_CARTAO}`}
             >
-              <p className="truncate text-[14.5px] font-semibold text-ink">
+              <p className="min-w-0 truncate text-[13px] font-medium text-ink">
                 {alerta.nome}
               </p>
-              <p className="shrink-0 text-[12.5px] font-medium text-ink-2">
+              <p className="shrink-0 text-[12px] font-medium text-warning">
                 {alerta.motivo === "nunca-treinou"
                   ? `entrou ${haQuantosDias(alerta.dias)} e ainda não treinou`
                   : `treinou ${haQuantosDias(alerta.dias)}`}
@@ -155,12 +180,13 @@ export function AlunosQuePrecisamDeAtencao({
           </li>
         ))}
       </ul>
-    </section>
+    </CartaoDoPainel>
   );
 }
 
 /**
- * "Atividade recente" (doc 06 §2): as últimas sessões concluídas da carteira.
+ * "Treinos recentes" (doc 06 §2, "Atividade recente"): as últimas sessões
+ * concluídas da carteira, no cartão da coluna da direita do protótipo.
  *
  * É a única tela do painel onde o personal vê a carteira inteira em ordem de
  * acontecimento, e não por aluno. Vale pela leitura de baixo: "ninguém treinou
@@ -173,50 +199,58 @@ export function AlunosQuePrecisamDeAtencao({
  */
 export function AtividadeRecente({ sessoes }: { sessoes: SessaoRecente[] }) {
   return (
-    <section className="space-y-3">
-      <h2 className="eyebrow text-ink-4">Atividade recente</h2>
-
+    <CartaoDoPainel
+      titulo="Treinos recentes"
+      apoio="Últimos treinos concluídos"
+      Icone={History}
+    >
       {!sessoes.length ? (
-        <p className="rounded-card border border-border bg-surface px-4 py-3.5 text-[14px] text-ink-3">
+        <p
+          className={`text-[13px] leading-relaxed text-ink-3 ${LINHA_DO_CARTAO}`}
+        >
           Nenhum treino concluído ainda. Assim que alguém terminar uma sessão,
           ela aparece aqui.
         </p>
       ) : (
-        <ul className="space-y-2">
+        <ul className={LINHAS_DO_CARTAO}>
           {sessoes.map((sessao) => (
             <li key={sessao.id}>
               <Link
                 href={`/painel/alunos/${sessao.aluno.id}/sessoes/${sessao.id}`}
-                className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-card border border-border bg-surface px-4 py-3.5 transition hover:border-border-strong"
+                className={`flex items-center gap-3 transition hover:bg-canvas ${LINHA_DO_CARTAO}`}
               >
-                <div className="min-w-0">
-                  <p className="truncate text-[14.5px] font-semibold text-ink">
-                    {sessao.aluno.nome}
-                  </p>
-                  <p className="truncate text-[12.5px] text-ink-4">
+                <span
+                  aria-hidden
+                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-canvas-sunken text-[11px] font-semibold text-ink-3"
+                >
+                  {iniciaisDe(sessao.aluno.nome)}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="min-w-0 truncate text-[13px] font-medium text-ink">
+                      {sessao.aluno.nome}
+                    </p>
+                    <p className="shrink-0 text-[12px] text-ink-5 tabular-nums">
+                      {sessao.rotuloDoDia}
+                    </p>
+                  </div>
+                  {/* Volume e duração ficam a um clique, na sessão: numa
+                      coluna de 340px eles empurrariam o nome do treino para
+                      as reticências, e é o nome que diz o que foi feito. */}
+                  <p className="truncate text-[12px] text-ink-4 tabular-nums">
                     {sessao.treino
                       ? `${sessao.treino.label} · ${sessao.treino.name}`
                       : "Treino removido"}
-                  </p>
-                </div>
-                <p className="shrink-0 text-right text-[12.5px] font-medium text-ink-2 tabular-nums">
-                  {sessao.rotuloDoDia}
-                  <span className="block text-[12px] font-normal text-ink-4">
+                    {" · "}
                     {sessao.series_feitas}{" "}
                     {sessao.series_feitas === 1 ? "série" : "séries"}
-                    {sessao.volume_kg > 0
-                      ? ` · ${formatarNumero(sessao.volume_kg)} kg`
-                      : ""}
-                    {sessao.duration_seconds !== null
-                      ? ` · ${duracaoCurta(sessao.duration_seconds)}`
-                      : ""}
-                  </span>
-                </p>
+                  </p>
+                </div>
               </Link>
             </li>
           ))}
         </ul>
       )}
-    </section>
+    </CartaoDoPainel>
   );
 }

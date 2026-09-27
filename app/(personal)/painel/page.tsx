@@ -1,12 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { Send } from "lucide-react";
+
 import {
   AlunosQuePrecisamDeAtencao,
   AtividadeRecente,
   Indicadores,
 } from "@/components/personal/blocos-do-painel";
-import { GraficosDoPainel } from "@/components/personal/graficos-do-painel";
+import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
+import {
+  CartaoDoPainel,
+  LINHA_DO_CARTAO,
+  LINHAS_DO_CARTAO,
+} from "@/components/personal/cartao-do-painel";
+import {
+  AtividadeDiaria,
+  CrescimentoDaCarteira,
+  TopDeProgressoes,
+} from "@/components/personal/graficos-do-painel";
 import { Button, Card } from "@/components/ui";
 import { requireTrainer } from "@/lib/auth/session";
 import { listarConvitesPendentes } from "@/lib/queries/alunos";
@@ -29,104 +41,111 @@ export default async function PainelPage() {
       lerGraficosDoPainel(),
     ]);
 
-  const primeiroNome = trainer.name.split(" ")[0];
-
   return (
-    <div className="space-y-8">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="space-y-2">
-          <p className="eyebrow text-ink-4">Painel do personal</p>
-          <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
-            Olá, {primeiroNome}.
-          </h1>
-        </div>
-        <ConvidarAluno />
-      </header>
+    <>
+      <CabecalhoDaPagina
+        // "Painel" e não "Dashboard" como no protótipo: é o nome do item no
+        // menu ao lado, e a interface é inteira em português.
+        titulo="Painel"
+        subtitulo="Aqui está o resumo da sua consultoria hoje"
+        acoes={<ConvidarAluno />}
+      />
 
       {alunos.length === 0 && convites.length === 0 ? (
         <VazioSemAluno />
       ) : (
-        <div className="space-y-8">
-          <Indicadores indicadores={indicadores} />
+        /*
+          Duas colunas como no protótipo, decididas por **container query** e
+          não pela largura da janela: com a navegação lateral aberta ou
+          recolhida a largura útil muda 184px, e quem decide se a coluna da
+          direita cabe é o espaço que sobra no cartão. Abaixo disso as duas
+          empilham e a da direita ocupa a largura toda — com `flex-wrap` ela
+          descia presa aos 340px e ficava órfã no canto.
+        */
+        <div className="@container">
+          <div className="grid items-start gap-4 @min-[720px]:grid-cols-[minmax(0,1fr)_clamp(260px,32%,340px)]">
+            <div className="min-w-0 space-y-4">
+              <Indicadores indicadores={indicadores} />
 
-          {/*
-            Acima da lista geral de propósito: o doc 06 chama este bloco de "a
-            lista mais útil da página — não a esconda embaixo". Sem ninguém
-            parado ele não desenha nada, porque bloco de alerta vazio treina o
-            olho a ignorar bloco de alerta.
-          */}
-          <AlunosQuePrecisamDeAtencao
-            alertas={alertas}
-            diasParaAlerta={trainer.dias_para_alerta}
-          />
+              {/*
+              Primeiro cartão depois dos números, e antes dos gráficos que o
+              protótipo põe aqui: o doc 06 chama este bloco de "a lista mais
+              útil da página — não a esconda embaixo". Sem ninguém parado ele
+              não desenha nada, e os gráficos sobem.
+            */}
+              <AlunosQuePrecisamDeAtencao
+                alertas={alertas}
+                diasParaAlerta={trainer.dias_para_alerta}
+              />
 
-          {convites.length > 0 && (
-            <section className="space-y-3">
-              <h2 className="eyebrow text-ink-4">
-                Convites pendentes · {convites.length}
-              </h2>
-              <ul className="space-y-2">
-                {convites.map((convite) => (
-                  <li
-                    key={convite.id}
-                    className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-border bg-surface px-4 py-3"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-[14px] font-semibold text-ink">
-                        {convite.name}
-                      </p>
-                      <p className="truncate text-[12.5px] text-ink-4">
-                        {convite.email} · expira em{" "}
-                        {diasAte(convite.expires_at)}
-                      </p>
-                    </div>
-                    <form action={cancelarConvite}>
-                      <input type="hidden" name="id" value={convite.id} />
-                      <button
-                        type="submit"
-                        className="text-[12.5px] font-semibold text-ink-4 transition hover:text-danger"
-                      >
-                        Cancelar
-                      </button>
-                    </form>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
+              {convites.length > 0 && <ConvitesPendentes convites={convites} />}
 
-          {/*
-            A lista inteira não mora mais aqui: ela é `/painel/alunos` (doc 06
-            §3), com tabela, busca e filtro. O dashboard guarda o que é
-            decisão de hoje — quem parou, o que aconteceu, quem está
-            devendo reavaliação —, e a carteira fica a um clique.
-          */}
-          <AtividadeRecente sessoes={atividade} />
+              <CrescimentoDaCarteira pontos={graficos.crescimento} />
+              <AtividadeDiaria dias={graficos.atividade} />
+            </div>
 
-          {/*
-            Os gráficos ficam **abaixo** do que é decisão de hoje, e não no
-            topo como no protótipo. O dashboard responde "o que mudou hoje" —
-            quem parou, o que aconteceu, quem está devendo reavaliação —, e foi
-            por empurrar isso para fora da dobra que a lista de alunos saiu
-            daqui em 16/09. A tendência é a camada seguinte: útil, e nunca
-            urgente.
-          */}
-          <GraficosDoPainel
-            crescimento={graficos.crescimento}
-            atividade={graficos.atividade}
-            progressoes={graficos.progressoes}
-          />
-
-          <Link
-            href="/painel/alunos"
-            className="inline-flex min-h-8 items-center text-[13px] font-semibold text-ink-3 transition hover:text-ink"
-          >
-            Ver todos os {alunos.length}{" "}
-            {alunos.length === 1 ? "aluno" : "alunos"} →
-          </Link>
+            <div className="min-w-0 space-y-4">
+              <TopDeProgressoes progressoes={graficos.progressoes} />
+              {/*
+              A lista inteira não mora aqui: ela é `/painel/alunos` (doc 06
+              §3), com tabela, busca e filtro. O dashboard guarda o que é
+              decisão de hoje, e a carteira fica a um clique — no rodapé deste
+              cartão, onde o olho termina a coluna.
+            */}
+              <AtividadeRecente sessoes={atividade} />
+              <Link
+                href="/painel/alunos"
+                className="inline-flex min-h-8 items-center px-1 text-[13px] font-medium text-ink-3 transition hover:text-ink"
+              >
+                Ver todos os {alunos.length}{" "}
+                {alunos.length === 1 ? "aluno" : "alunos"} →
+              </Link>
+            </div>
+          </div>
         </div>
       )}
-    </div>
+    </>
+  );
+}
+
+function ConvitesPendentes({
+  convites,
+}: {
+  convites: Awaited<ReturnType<typeof listarConvitesPendentes>>;
+}) {
+  return (
+    <CartaoDoPainel
+      titulo={`Convites pendentes · ${convites.length}`}
+      apoio="Links enviados que ainda não viraram conta"
+      Icone={Send}
+    >
+      <ul className={LINHAS_DO_CARTAO}>
+        {convites.map((convite) => (
+          <li
+            key={convite.id}
+            className={`flex flex-wrap items-center justify-between gap-3 ${LINHA_DO_CARTAO}`}
+          >
+            <div className="min-w-0">
+              <p className="truncate text-[13px] font-medium text-ink">
+                {convite.name}
+              </p>
+              <p className="truncate text-[12px] text-ink-4">
+                {convite.email} · expira em {diasAte(convite.expires_at)}
+              </p>
+            </div>
+            <form action={cancelarConvite}>
+              <input type="hidden" name="id" value={convite.id} />
+              <button
+                type="submit"
+                className="inline-flex min-h-8 items-center text-[12.5px] font-medium text-ink-4 transition hover:text-danger"
+              >
+                Cancelar
+              </button>
+            </form>
+          </li>
+        ))}
+      </ul>
+    </CartaoDoPainel>
   );
 }
 

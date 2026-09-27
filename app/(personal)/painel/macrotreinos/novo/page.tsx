@@ -6,6 +6,7 @@ import { diaLocal } from "@/lib/domain/fuso";
 import { listarProgramasPorAluno } from "@/lib/queries/macrotreinos";
 
 import { FormularioDePrograma, type AlunoDaEscolha } from "../formulario-de-programa";
+import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 
 export const metadata: Metadata = { title: "Novo programa" };
 
@@ -27,21 +28,11 @@ export default async function NovoProgramaPage({
 
   return (
     <div className="space-y-8">
-      <header className="space-y-2">
-        <Link
-          href="/painel/macrotreinos"
-          className="eyebrow text-ink-4 transition hover:text-ink-2"
-        >
-          ← Macrotreinos
-        </Link>
-        <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
-          Novo programa
-        </h1>
-        <p className="text-[13.5px] text-ink-3">
-          O programa é o guarda-chuva dos treinos A, B, C. A semana atual sai da data
-          de início.
-        </p>
-      </header>
+      <CabecalhoDaPagina
+        titulo="Novo programa"
+        subtitulo="O guarda-chuva dos treinos A, B, C — a semana atual sai da data de início"
+        voltar={{ href: "/painel/macrotreinos", rotulo: "Voltar para macrotreinos" }}
+      />
 
       {/*
         `hoje` é calculado no servidor, no fuso do produto: o valor padrão do

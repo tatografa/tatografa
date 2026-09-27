@@ -19,6 +19,7 @@ import type { Macrotreino } from "@/lib/queries/macrotreinos";
 import type { Observacao } from "@/lib/queries/observacoes";
 import type { ExercicioComProgresso } from "@/lib/queries/progresso";
 import { comparar, type Reavaliacao } from "@/lib/queries/reavaliacao";
+import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 
 export type FichaDoAlunoProps = {
   aluno: AlunoDaFicha;
@@ -70,27 +71,25 @@ export function FichaDoAluno({
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <Link
-          href="/painel/alunos"
-          className="eyebrow text-ink-4 transition hover:text-ink-2"
-        >
-          ← Alunos
-        </Link>
-        {/*
-          A ação primária do cabeçalho desta tela é agendar sessão (doc 06, a
-          tabela de ação por página). A agenda já existe desde 15/09 e a ficha
-          não levava a ela — o personal saía pelo menu e procurava o aluno de
-          novo.
-        */}
-        <Link
-          href={`/painel/agenda?aluno=${aluno.id}`}
-          className="inline-flex min-h-10 items-center gap-2 rounded-input bg-brand px-4 text-[13px] font-bold text-white shadow-botao transition hover:bg-brand-hover"
-        >
-          <CalendarPlus size={15} aria-hidden />
-          Agendar sessão
-        </Link>
-      </header>
+      <CabecalhoDaPagina
+        titulo="Perfil do aluno"
+        subtitulo={aluno.name}
+        voltar={{ href: "/painel/alunos", rotulo: "Voltar para alunos" }}
+        acoes={
+          /*
+            A ação primária desta tela é agendar sessão (doc 06, a tabela de
+            ação por página, e o protótipo). A agenda abre com o aluno já
+            escolhido: ela lê `?aluno=` desde 18/09.
+          */
+          <Link
+            href={`/painel/agenda?aluno=${aluno.id}`}
+            className="inline-flex min-h-10 items-center gap-2 rounded-input bg-brand px-4 text-[13.5px] font-semibold text-white shadow-botao transition hover:bg-brand-hover"
+          >
+            <CalendarPlus size={15} aria-hidden />
+            Agendar sessão
+          </Link>
+        }
+      />
 
       {/*
         Duas colunas a partir de `xl`: a identidade fica à esquerda e acompanha

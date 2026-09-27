@@ -6,6 +6,7 @@ import { TabelaDeAlunos } from "@/components/personal/tabela-de-alunos";
 import { requireTrainer } from "@/lib/auth/session";
 import { indicadoresDaCarteira } from "@/lib/domain/carteira";
 import { lerAlunosDaCarteira } from "@/lib/queries/painel";
+import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 
 export const metadata: Metadata = { title: "Alunos" };
 
@@ -42,18 +43,11 @@ export default async function AlunosPage() {
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="space-y-2">
-          <p className="eyebrow text-ink-4">Alunos</p>
-          <h1 className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
-            {alunos.length === 1 ? "1 aluno" : `${alunos.length} alunos`}
-          </h1>
-          <p className="text-[13.5px] text-ink-3">
-            Sua carteira inteira. Clique numa linha para abrir a ficha.
-          </p>
-        </div>
-        <ConvidarAluno />
-      </header>
+      <CabecalhoDaPagina
+        titulo="Alunos"
+        subtitulo="Visualize e gerencie todos os alunos da sua consultoria"
+        acoes={<ConvidarAluno />}
+      />
 
       {alunos.length > 0 && (
         <IndicadoresDaCarteiraNoTopo
