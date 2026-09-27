@@ -23,6 +23,7 @@ import {
 import { textoDaUltimaVez, type UltimaVez } from "@/lib/domain/recordes";
 import { rirEmPalavras } from "@/lib/domain/prescricao";
 
+import { ComoFazer } from "./como-fazer";
 import { MenuDaExecucao } from "./menu-da-execucao";
 import { comoRelogio } from "@/lib/domain/treino";
 import type { ExercicioPrescrito, TreinoCompleto } from "@/lib/queries/treinos";
@@ -269,6 +270,8 @@ function ExecucaoMontada({
           </p>
 
           <UltimaVezDoExercicio ultima={referencia[exercicio.id]} />
+
+          <ComoFazer key={exercicio.id} exercicio={exercicio.exercicio} />
 
           {/* O RIR vai em palavras e não na sigla: "RIR 0-2" é a língua de
               quem prescreve, e o aluno lê isto entre uma série e outra. */}

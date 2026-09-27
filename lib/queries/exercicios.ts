@@ -18,6 +18,10 @@ export type ExercicioDisponivel = {
   is_bodyweight: boolean;
   is_unilateral: boolean;
   default_rest_seconds: number;
+  /** Link do YouTube ou Vimeo; a tela converte (`lib/domain/video.ts`). */
+  video_url: string | null;
+  description: string | null;
+  safety_notes: string | null;
 };
 
 export type FiltroDeExercicio = {
@@ -43,7 +47,7 @@ export async function buscarExercicios(
 ): Promise<ExercicioDisponivel[]> {
   const supabase = await createClient();
   const colunas =
-    "id, name, muscle_group, equipment, is_bodyweight, is_unilateral, default_rest_seconds";
+    "id, name, muscle_group, equipment, is_bodyweight, is_unilateral, default_rest_seconds, video_url, description, safety_notes";
 
   let doCatalogo = supabase.from("exercises_catalog").select(colunas);
   let proprios = supabase.from("exercises").select(colunas);
@@ -107,7 +111,7 @@ export async function exerciciosPorReferencia(
 
   const supabase = await createClient();
   const colunas =
-    "id, name, muscle_group, equipment, is_bodyweight, is_unilateral, default_rest_seconds";
+    "id, name, muscle_group, equipment, is_bodyweight, is_unilateral, default_rest_seconds, video_url, description, safety_notes";
 
   const idsCatalogo = [
     ...new Set(refs.filter((r) => r.exercise_source === "catalog").map((r) => r.exercise_id)),
@@ -166,7 +170,7 @@ export async function listarExerciciosProprios(): Promise<ExercicioProprio[]> {
   const { data: proprios, error } = await supabase
     .from("exercises")
     .select(
-      "id, name, muscle_group, equipment, is_bodyweight, is_unilateral, default_rest_seconds",
+      "id, name, muscle_group, equipment, is_bodyweight, is_unilateral, default_rest_seconds, video_url, description, safety_notes",
     )
     .order("name");
 
@@ -207,7 +211,7 @@ export async function listarCatalogo(): Promise<ExercicioDisponivel[]> {
   const { data, error } = await supabase
     .from("exercises_catalog")
     .select(
-      "id, name, muscle_group, equipment, is_bodyweight, is_unilateral, default_rest_seconds",
+      "id, name, muscle_group, equipment, is_bodyweight, is_unilateral, default_rest_seconds, video_url, description, safety_notes",
     )
     .order("name");
 

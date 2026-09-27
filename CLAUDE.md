@@ -323,6 +323,27 @@ Provar que funciona sem o Otávio ler código:
   terminado, com fotos de antes e depois): não existe no modelo — seria um tipo de post
   novo, não um desenho novo. *Moldura 4:3 de "sem foto":* ficou com 96px; 450px de caixa
   vazia empurravam para fora da tela o treino, que é o conteúdo daquele post.
+- **[2026-09-27, decisão do Otávio]** **Exercício ganhou vídeo, descrição e instruções de
+  segurança, e o aluno vê** (migration 0038, nas duas tabelas). A tela de exercícios
+  virou a biblioteca do protótipo: lista por grupo muscular com busca e filtros à esquerda,
+  o exercício à direita — vídeo 16:9, descrição, grupo, execução e segurança —, e o
+  formulário **no próprio painel**, não num diálogo: com três campos longos o cadastro não
+  cabia numa caixa. Na execução, o aluno ganha **"Como fazer"**, uma folha de baixo com o
+  vídeo e os textos — folha e não tela nova, para não tirar o aluno do meio da série e do
+  cronômetro. Sem conteúdo, o botão não aparece.
+- **[2026-09-27]** **Vídeo só de YouTube ou Vimeo, e quem decide é `enderecoDeEmbed`.** O
+  link vira `<iframe>` na tela do aluno, e um endereço qualquer ali seria uma página
+  arbitrária aberta dentro do app. Duas camadas: o `check` do banco confere https e o
+  domínio (recusa `youtube.com.evil.com` e `http://`), e `lib/domain/video.ts` extrai o
+  id do vídeo — o que ela não reconhece nunca vira iframe. O YouTube toca por
+  `youtube-nocookie.com`: abrir "Como fazer" não deve plantar cookie de rastreio no
+  aparelho do aluno. O link é guardado como o personal colou; a conversão é na leitura.
+- **[2026-09-27, decisão do Otávio]** **O catálogo ganhou as mesmas colunas, vazias, e o
+  conteúdo dele vem do Otávio por migration.** Continua só-leitura pela API (não há policy
+  de escrita, e a ausência é a trava — provado: personal tentando gravar vídeo no catálogo
+  afeta 0 linhas). **Um grupo muscular por exercício continua**, também decisão dele:
+  recorde, progresso e volume por grupo contam por um grupo só. Quatorze provas no banco,
+  nove de burla.
 - **[2026-09-26, decisão do Otávio]** **Aluno inativo perde o acesso ao app.** O dado
   histórico fica — não se apaga nada —, mas o login é limitado até ele voltar a pagar.
   Duas camadas: o **banco** tranca a escrita (migration 0036) e a **tela** explica

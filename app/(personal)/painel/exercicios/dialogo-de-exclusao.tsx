@@ -20,9 +20,12 @@ const INICIAL: EstadoExclusao = {};
 export function DialogoDeExclusao({
   exercicio,
   aoFechar,
+  aoExcluir,
 }: {
   exercicio: ExercicioProprio | null;
   aoFechar: () => void;
+  /** Depois de apagar: a tela tira o exercício do painel de detalhes. */
+  aoExcluir?: () => void;
 }) {
   const [estado, acao, enviando] = useActionState(excluirExercicio, INICIAL);
 
@@ -30,7 +33,7 @@ export function DialogoDeExclusao({
   if (estado !== ultimoEstado) {
     setUltimoEstado(estado);
     // Sem erro depois de enviar = apagou.
-    if (!estado.erro) aoFechar();
+    if (!estado.erro) (aoExcluir ?? aoFechar)();
   }
 
   if (!exercicio) return null;

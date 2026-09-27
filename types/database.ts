@@ -131,35 +131,44 @@ export type Database = {
         Row: {
           created_at: string
           default_rest_seconds: number
+          description: string | null
           equipment: Database["public"]["Enums"]["equipment"]
           id: string
           is_bodyweight: boolean
           is_unilateral: boolean
           muscle_group: Database["public"]["Enums"]["muscle_group"]
           name: string
+          safety_notes: string | null
           trainer_id: string
+          video_url: string | null
         }
         Insert: {
           created_at?: string
           default_rest_seconds?: number
+          description?: string | null
           equipment: Database["public"]["Enums"]["equipment"]
           id?: string
           is_bodyweight?: boolean
           is_unilateral?: boolean
           muscle_group: Database["public"]["Enums"]["muscle_group"]
           name: string
+          safety_notes?: string | null
           trainer_id: string
+          video_url?: string | null
         }
         Update: {
           created_at?: string
           default_rest_seconds?: number
+          description?: string | null
           equipment?: Database["public"]["Enums"]["equipment"]
           id?: string
           is_bodyweight?: boolean
           is_unilateral?: boolean
           muscle_group?: Database["public"]["Enums"]["muscle_group"]
           name?: string
+          safety_notes?: string | null
           trainer_id?: string
+          video_url?: string | null
         }
         Relationships: [
           {
@@ -174,30 +183,39 @@ export type Database = {
       exercises_catalog: {
         Row: {
           default_rest_seconds: number
+          description: string | null
           equipment: Database["public"]["Enums"]["equipment"]
           id: string
           is_bodyweight: boolean
           is_unilateral: boolean
           muscle_group: Database["public"]["Enums"]["muscle_group"]
           name: string
+          safety_notes: string | null
+          video_url: string | null
         }
         Insert: {
           default_rest_seconds?: number
+          description?: string | null
           equipment: Database["public"]["Enums"]["equipment"]
           id?: string
           is_bodyweight?: boolean
           is_unilateral?: boolean
           muscle_group: Database["public"]["Enums"]["muscle_group"]
           name: string
+          safety_notes?: string | null
+          video_url?: string | null
         }
         Update: {
           default_rest_seconds?: number
+          description?: string | null
           equipment?: Database["public"]["Enums"]["equipment"]
           id?: string
           is_bodyweight?: boolean
           is_unilateral?: boolean
           muscle_group?: Database["public"]["Enums"]["muscle_group"]
           name?: string
+          safety_notes?: string | null
+          video_url?: string | null
         }
         Relationships: []
       }

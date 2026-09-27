@@ -4,16 +4,31 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { requireTrainer } from "@/lib/auth/session";
+import {
+  enderecoDeEmbed,
+  LIMITE_DA_DESCRICAO,
+  LIMITE_DA_SEGURANCA,
+} from "@/lib/domain/video";
 import { createClient } from "@/lib/supabase/server";
 
 export type EstadoExercicio = {
   erro?: string;
   errosPorCampo?: Partial<
-    Record<"nome" | "grupo" | "equipamento" | "descanso", string>
+    Record<"nome" | "grupo" | "equipamento" | "descanso" | "video" | "descricao" | "seguranca", string>
   >;
   campos?: Record<string, string>;
   sucesso?: boolean;
+  /** O exercício salvo, para a tela abrir ele no painel de detalhes. */
+  id?: string;
 };
+
+/** Campo de texto opcional: vazio vira nulo, não string vazia no banco. */
+const textoOpcional = (limite: number, mensagem: string) =>
+  z
+    .string()
+    .trim()
+    .max(limite, mensagem)
+    .transform((v) => (v === "" ? null : v));
 
 const GRUPOS = [
   "peito", "costas", "ombros", "trapezio", "biceps", "triceps", "antebraco",
@@ -40,6 +55,17 @@ const esquema = z.object({
     .max(600, "Descanso acima de 10 minutos não é prescrição, é intervalo."),
   peso_corporal: z.coerce.boolean().default(false),
   unilateral: z.coerce.boolean().default(false),
+  // O link é guardado como o personal colou (é o que ele reconhece se for
+  // editar); a conversão para embed acontece na leitura. Validar aqui é saber
+  // que a conversão vai dar certo.
+  video: z
+    .string()
+    .trim()
+    .max(500, "Link longo demais.")
+    .refine((v) => v === "" || enderecoDeEmbed(v) !== null, "Use um link do YouTube ou do Vimeo.")
+    .transform((v) => (v === "" ? null : v)),
+  descricao: textoOpcional(LIMITE_DA_DESCRICAO, `No máximo ${LIMITE_DA_DESCRICAO} caracteres.`),
+  seguranca: textoOpcional(LIMITE_DA_SEGURANCA, `No máximo ${LIMITE_DA_SEGURANCA} caracteres.`),
 });
 
 function lerFormulario(formData: FormData) {
@@ -50,6 +76,9 @@ function lerFormulario(formData: FormData) {
     descanso: String(formData.get("descanso") ?? ""),
     peso_corporal: formData.get("peso_corporal") === "on",
     unilateral: formData.get("unilateral") === "on",
+    video: String(formData.get("video") ?? ""),
+    descricao: String(formData.get("descricao") ?? ""),
+    seguranca: String(formData.get("seguranca") ?? ""),
   };
 }
 
@@ -90,17 +119,21 @@ export async function salvarExercicio(
     default_rest_seconds: analise.data.descanso,
     is_bodyweight: analise.data.peso_corporal,
     is_unilateral: analise.data.unilateral,
+    video_url: analise.data.video,
+    description: analise.data.descricao,
+    safety_notes: analise.data.seguranca,
   };
 
   // `eq("trainer_id")` no update é redundante com o RLS, e fica de propósito:
   // um id forjado na requisição não deve nem chegar à policy para ser negado.
-  const { error, count } = id
+  const { data: salvo, error, count } = id
     ? await supabase
         .from("exercises")
         .update(linha, { count: "exact" })
         .eq("id", id)
         .eq("trainer_id", trainer.id)
-    : await supabase.from("exercises").insert(linha, { count: "exact" });
+        .select("id")
+    : await supabase.from("exercises").insert(linha, { count: "exact" }).select("id");
 
   if (error) {
     // Há unique em (trainer_id, name): o mesmo personal não repete nome.
@@ -117,12 +150,12 @@ export async function salvarExercicio(
   // ou apagado em outra aba entre abrir o diálogo e enviar). Sem esta checagem
   // o diálogo fecha dizendo "salvo" sobre uma escrita que não aconteceu — o
   // mesmo defeito que `salvarPrograma` já tratava, achado pela revisão do M2.
-  if (count === 0) {
+  if (count === 0 || !salvo?.length) {
     return { erro: "Exercício não encontrado. Recarregue a página.", campos };
   }
 
   revalidatePath("/painel/exercicios");
-  return { sucesso: true };
+  return { sucesso: true, id: salvo[0].id };
 }
 
 export type EstadoExclusao = { erro?: string };
