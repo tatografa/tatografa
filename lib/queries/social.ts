@@ -1,8 +1,9 @@
 import "server-only";
 
-import type { PeriodoDoSocial } from "@/lib/domain/feed";
+import { resumoDoExercicioNoPost, type PeriodoDoSocial, type SerieDoPost } from "@/lib/domain/feed";
 import { rotuloDoDia } from "@/lib/domain/historico";
 import { iniciaisDe } from "@/lib/domain/nome";
+import { chaveDoExercicio, exerciciosPorReferencia } from "@/lib/queries/exercicios";
 import { type ComentarioDoPost } from "@/lib/queries/feed";
 import { createClient } from "@/lib/supabase/server";
 import type { Enums } from "@/types/database";
@@ -26,6 +27,15 @@ export type PostDaCarteira = {
   comentarios: ComentarioDoPost[];
   /** Verdadeiro quando o personal ainda não respondeu nada neste post. */
   semResposta: boolean;
+  /** O treino que gerou o post, exercício por exercício. Nulo = post avulso. */
+  treino: TreinoDoPostNoPainel | null;
+};
+
+export type TreinoDoPostNoPainel = {
+  rotulo: string;
+  nome: string;
+  /** Na ordem da prescrição: "Supino reto · 4x8 · 62 kg". */
+  exercicios: { nome: string; resumo: string }[];
 };
 
 /**
@@ -48,14 +58,18 @@ export type PostDaCarteira = {
 export async function lerPostsDaCarteira(
   trainerId: string,
   periodo: PeriodoDoSocial,
+  /** Já conferido contra a carteira pela página; nulo = todos. */
+  alunoId: string | null = null,
 ): Promise<PostDaCarteira[]> {
   const supabase = await createClient();
 
   let consulta = supabase
     .from("posts")
-    .select("id, student_id, caption, photo_path, visibility, created_at")
+    .select("id, student_id, caption, photo_path, visibility, created_at, session_id")
     .order("created_at", { ascending: false })
     .limit(LIMITE_DO_SOCIAL);
+
+  if (alunoId) consulta = consulta.eq("student_id", alunoId);
 
   if (periodo !== "tudo") {
     const desde = new Date(Date.now() - Number(periodo) * 24 * 60 * 60 * 1000);
@@ -70,7 +84,9 @@ export async function lerPostsDaCarteira(
   const autores = [...new Set(posts.map((p) => p.student_id))];
   const caminhos = posts.map((p) => p.photo_path).filter((c) => c !== null);
 
-  const [alunos, curtidas, minhasCurtidas, comentarios, urls] = await Promise.all([
+  const sessoes = [...new Set(posts.map((p) => p.session_id).filter((id) => id !== null))];
+
+  const [alunos, curtidas, minhasCurtidas, comentarios, urls, treinos] = await Promise.all([
     // Sem RPC aqui, ao contrário do feed do aluno: `students_select` já devolve
     // ao personal a carteira inteira (`trainer_id = auth.uid()`).
     supabase.from("students").select("id, name").in("id", autores),
@@ -88,6 +104,7 @@ export async function lerPostsDaCarteira(
     caminhos.length
       ? supabase.storage.from("treinos").createSignedUrls(caminhos, MINUTOS_DA_URL * 60)
       : Promise.resolve({ data: [] as { path: string | null; signedUrl: string }[] }),
+    treinosDasSessoes(sessoes),
   ]);
 
   if (alunos.error) throw alunos.error;
@@ -137,6 +154,88 @@ export async function lerPostsDaCarteira(
       curtiPor: curti.has(p.id),
       comentarios: doPost,
       semResposta: !doPost.some((c) => c.doPersonal),
+      treino: p.session_id ? (treinos.get(p.session_id) ?? null) : null,
     };
   });
+}
+
+/**
+ * O treino de cada post, exercício por exercício — o bloco escuro do
+ * protótipo ("Supino reto · 4x8 · 62 kg").
+ *
+ * O feed do aluno mostra só o total (séries e volume), e de propósito: lá o
+ * leitor pode ser um colega, e quanto o outro levantou não é assunto da turma.
+ * Aqui o leitor é o personal, que já vê cada série na ficha — o post só traz a
+ * mesma informação para junto da foto que ele está comentando.
+ *
+ * Três idas fixas para o lote inteiro (sessões e séries em paralelo, depois as
+ * linhas de prescrição) mais os nomes dos exercícios; nunca uma por post.
+ */
+async function treinosDasSessoes(ids: string[]): Promise<Map<string, TreinoDoPostNoPainel>> {
+  const resultado = new Map<string, TreinoDoPostNoPainel>();
+  if (!ids.length) return resultado;
+
+  const supabase = await createClient();
+  const [{ data: sessoes }, { data: series }] = await Promise.all([
+    supabase.from("workout_sessions").select("id, workouts(label, name)").in("id", ids),
+    supabase
+      .from("session_sets")
+      .select("session_id, workout_exercise_id, load_kg, reps, skipped")
+      .in("session_id", ids),
+  ]);
+
+  const linhas = [...new Set((series ?? []).map((s) => s.workout_exercise_id))];
+  const { data: prescricao } = linhas.length
+    ? await supabase
+        .from("workout_exercises")
+        .select("id, position, exercise_id, exercise_source")
+        .in("id", linhas)
+    : { data: [] };
+  const nomes = await exerciciosPorReferencia(prescricao ?? []);
+  const linhaPor = new Map((prescricao ?? []).map((l) => [l.id, l]));
+
+  // sessão → linha de prescrição → séries
+  const agrupado = new Map<string, Map<string, SerieDoPost[]>>();
+  for (const s of series ?? []) {
+    const daSessao = agrupado.get(s.session_id) ?? new Map<string, SerieDoPost[]>();
+    const lista = daSessao.get(s.workout_exercise_id) ?? [];
+    // `load_kg` é `numeric` e chega como texto.
+    lista.push({ load_kg: s.load_kg === null ? null : Number(s.load_kg), reps: s.reps, skipped: s.skipped });
+    daSessao.set(s.workout_exercise_id, lista);
+    agrupado.set(s.session_id, daSessao);
+  }
+
+  for (const sessao of sessoes ?? []) {
+    if (!sessao.workouts) continue;
+    const daSessao = agrupado.get(sessao.id) ?? new Map<string, SerieDoPost[]>();
+    const exercicios = [...daSessao.entries()]
+      .map(([linhaId, lista]) => {
+        const linha = linhaPor.get(linhaId);
+        const exercicio = linha ? nomes.get(chaveDoExercicio(linha)) : undefined;
+        return {
+          posicao: linha?.position ?? Number.MAX_SAFE_INTEGER,
+          nome: exercicio?.name ?? "Exercício removido",
+          resumo: resumoDoExercicioNoPost(lista),
+        };
+      })
+      .sort((a, b) => a.posicao - b.posicao)
+      .map(({ nome, resumo }) => ({ nome, resumo }));
+
+    resultado.set(sessao.id, {
+      rotulo: sessao.workouts.label,
+      nome: sessao.workouts.name,
+      exercicios,
+    });
+  }
+  return resultado;
+}
+
+/** Os alunos do filtro "Todos os alunos", em ordem de nome. */
+export async function alunosDoFiltro(): Promise<{ id: string; nome: string }[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("students").select("id, name");
+  if (error) throw error;
+  return (data ?? [])
+    .map((a) => ({ id: a.id, nome: a.name }))
+    .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
 }

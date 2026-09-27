@@ -304,6 +304,25 @@ Provar que funciona sem o Otávio ler código:
 - **[2026-09-27]** **Quinto `primeiroNome`, e dessa vez virou um só** (`lib/domain/nome.ts`).
   Cinco cópias idênticas em cinco telas, a mesma história das iniciais de 18/09. A tela
   nova precisava de uma sexta.
+- **[2026-09-27, pedido do Otávio]** **O Feed do painel segue o protótipo:** uma coluna
+  de 680px, a faixa escura "Reps Club · N publicações", os filtros "Todos os alunos" e
+  "Todo o período" (agora com 90 dias, e "todo o período" como padrão — o recorte de 30
+  escondia justamente o post antigo que ficou sem resposta), e cada post com foto, **o
+  treino que a gerou exercício por exercício** ("Supino reto · 4x8 · 62 kg"), curtidas,
+  a conversa com o selo PERSONAL e o campo "Adicionar comentário…". A faixa soma "N sem
+  sua resposta": é o motivo de o personal abrir a tela, e o protótipo não diz.
+- **[2026-09-27]** **No painel o post mostra cada exercício; no feed do aluno, só o
+  total — e a diferença é deliberada.** Lá o leitor pode ser um colega, e quanto o outro
+  levantou não é assunto da turma (14/09). Aqui o leitor é o personal, que já vê cada série
+  na ficha. As reps de "4x8 · 62 kg" são **as da série mais pesada**, não média: o par
+  "8 com 62" precisa ter acontecido, e é o mesmo critério do recorde. Exercício todo
+  pulado aparece como "pulado", não some. Três idas para o lote inteiro, sem N+1.
+- **[2026-09-27]** **Do feed do protótipo, três coisas não entraram.** *"+ Publicar
+  aviso":* o personal não publica no feed (`posts_insert` é do aluno; quem quer postar
+  vira aluno de si mesmo, 13/09). *Post "Conquista do aluno"* (macrociclo iniciado ou
+  terminado, com fotos de antes e depois): não existe no modelo — seria um tipo de post
+  novo, não um desenho novo. *Moldura 4:3 de "sem foto":* ficou com 96px; 450px de caixa
+  vazia empurravam para fora da tela o treino, que é o conteúdo daquele post.
 - **[2026-09-26, decisão do Otávio]** **Aluno inativo perde o acesso ao app.** O dado
   histórico fica — não se apaga nada —, mas o login é limitado até ele voltar a pagar.
   Duas camadas: o **banco** tranca a escrita (migration 0036) e a **tela** explica
