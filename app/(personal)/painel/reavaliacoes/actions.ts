@@ -52,6 +52,8 @@ export async function liberarReavaliacao(
   }
 
   revalidatePath("/painel/reavaliacoes", "layout");
+  // A fila de reavaliações mora na agenda desde 27/09.
+  revalidatePath("/painel/agenda", "layout");
   return { ok: true };
 }
 
@@ -92,5 +94,7 @@ export async function cancelarReavaliacao(
   }
 
   revalidatePath("/painel/reavaliacoes", "layout");
+  // A fila de reavaliações mora na agenda desde 27/09.
+  revalidatePath("/painel/agenda", "layout");
   return {};
 }

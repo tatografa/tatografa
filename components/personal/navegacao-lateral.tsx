@@ -4,7 +4,6 @@ import {
   CalendarDays,
   ChevronLeft,
   Dumbbell,
-  Gauge,
   LayoutDashboard,
   Library,
   MessageCircle,
@@ -37,8 +36,9 @@ const NAVEGACAO = [
   { href: "/painel/social", rotulo: "Feed", Icone: MessageCircle },
   { href: "/painel/treinos", rotulo: "Treinos", Icone: Dumbbell },
   { href: "/painel/exercicios", rotulo: "Exercícios", Icone: Library },
-  { href: "/painel/agenda", rotulo: "Agenda", Icone: CalendarDays },
-  { href: "/painel/reavaliacoes", rotulo: "Reavaliações", Icone: Gauge },
+  // Agenda e reavaliações são uma tela só desde 27/09; a comparação de um
+  // aluno continua em /painel/reavaliacoes/<id> e acende este item.
+  { href: "/painel/agenda", rotulo: "Agenda", Icone: CalendarDays, tambem: "/painel/reavaliacoes" },
   { href: "/painel/treinar", rotulo: "Treinar", Icone: PlayCircle, fim: true },
   { href: "/painel/configuracoes", rotulo: "Configurações", Icone: Settings, fim: true },
 ] as const;
@@ -156,7 +156,10 @@ function Lateral({
                 {...item}
                 alunos={alunos}
                 colapsada={colapsada}
-                ativo={rotaAtiva(pathname, item.href)}
+                ativo={
+                  rotaAtiva(pathname, item.href) ||
+                  ("tambem" in item && rotaAtiva(pathname, item.tambem))
+                }
               />
             </li>
           ))}

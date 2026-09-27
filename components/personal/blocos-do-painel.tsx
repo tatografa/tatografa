@@ -68,7 +68,7 @@ export function Indicadores({
           valor={String(reavaliacoesPendentes)}
           apoio="esperando resposta"
           destaque={reavaliacoesPendentes > 0}
-          href={reavaliacoesPendentes > 0 ? "/painel/reavaliacoes" : undefined}
+          href={reavaliacoesPendentes > 0 ? "/painel/agenda" : undefined}
         />
       </section>
     </div>

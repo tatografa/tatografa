@@ -344,6 +344,38 @@ Provar que funciona sem o Otávio ler código:
   afeta 0 linhas). **Um grupo muscular por exercício continua**, também decisão dele:
   recorde, progresso e volume por grupo contam por um grupo só. Quatorze provas no banco,
   nove de burla.
+- **[2026-09-27, pedido do Otávio]** **Agenda e reavaliações viraram uma tela só**
+  (`/painel/agenda`), no layout da tela "Reavaliações" do protótipo: quatro números,
+  calendário de semana ou de mês, e à direita a próxima sessão e as filas (sessões
+  esperando marcação, reavaliações esperando o aluno, respondidas recentemente). As duas
+  respondem à mesma pergunta — "o que eu tenho com cada aluno e o que está esperando" — e
+  em duas telas o personal olhava metade dela de cada vez. O menu tem um item, "Agenda",
+  aceso também em `/painel/reavaliacoes/<aluno>` (a comparação continua com endereço
+  próprio). `/painel/reavaliacoes` virou **redirect**, pelo mesmo motivo de
+  `/painel/macrotreinos`: há link salvo apontando para lá.
+- **[2026-09-27]** **Reavaliação não tem hora, então vai numa faixa no alto do dia**, não
+  na grade: um chip no dia em que foi liberada e outro no dia em que foi respondida.
+  Pôr num horário inventado faria dela um encontro marcado, que ela não é — o aluno
+  responde quando mede.
+- **[2026-09-27]** **A grade de horas voltou, revendo a decisão de 15/09** ("sete linhas,
+  não uma grade de horas", que morava no comentário da tela antiga). O motivo de lá
+  continua certo — carteira de piloto tem duas ou três sessões por dia —, mas o protótipo
+  pede a grade, e ela mostra o que a lista escondia: sessão sobreposta e buraco no dia. O
+  vazio foi contido de dois jeitos: a faixa é 6h–22h (esticada só se houver sessão fora
+  dela) e a grade **rola dentro do cartão** até 560px, com foco de teclado, para a página
+  não virar uma parede de linhas.
+- **[2026-09-27]** **Do protótipo, três coisas não entraram.** *Semana começando no
+  domingo:* a agenda continua na segunda (15/09). *Tipo "Bioimpedância" e situações
+  "Confirmado/Pendente":* o modelo tem sessão e reavaliação, e `agendada / realizada /
+  faltou / cancelada` — confirmação seria o fluxo de aceite descartado em 15/09, e tipo
+  novo é coluna nova. **Os quatro números** são: sessões nos próximos 7 dias,
+  reavaliações esperando o aluno, sessões esperando a marcação do personal e
+  comparecimento no mês (`realizadas / (realizadas + faltou)`; cancelada não conta —
+  desmarcar com antecedência não é falta —, e sem nenhuma das duas o número é "—", não 0%).
+- **[2026-09-27]** **O evento abre num `<details>`, e a grade não tem JavaScript.** Veio,
+  Faltou e Cancelar moram no próprio popover, então marcar presença não exige sair do
+  calendário; e a tela inteira continua componente servidor — os únicos pedaços cliente
+  são os botões que já existiam.
 - **[2026-09-26, decisão do Otávio]** **Aluno inativo perde o acesso ao app.** O dado
   histórico fica — não se apaga nada —, mas o login é limitado até ele voltar a pagar.
   Duas camadas: o **banco** tranca a escrita (migration 0036) e a **tela** explica

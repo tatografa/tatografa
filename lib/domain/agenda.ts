@@ -247,3 +247,69 @@ export function esperandoMarcacao(
   const fim = new Date(sessao.starts_at).getTime() + sessao.duration_minutes * 60_000;
   return fim < agora.getTime();
 }
+
+/* ------------------------------------------------------------- o mês ----- */
+
+/**
+ * A visão de mês da agenda (27/09, layout do protótipo): a grade de semanas
+ * inteiras que cobre o mês, começando na segunda — a mesma regra de
+ * `semanaDe`, para as duas visões não discordarem de onde começa a semana.
+ */
+export type Mes = {
+  /** "2026-09". */
+  chave: string;
+  /** Segunda-feira da primeira semana da grade (pode ser do mês anterior). */
+  de: string;
+  /** Domingo da última semana da grade (pode ser do mês seguinte). */
+  ate: string;
+};
+
+export function mesDe(dia: string): Mes {
+  const chave = dia.slice(0, 7);
+  const primeiro = `${chave}-01`;
+  const ultimo = diaSomandoDias(`${proximaChave(chave)}-01`, -1);
+  return { chave, de: semanaDe(primeiro).de, ate: semanaDe(ultimo).ate };
+}
+
+export function mesVizinho(mes: Mes, passos: 1 | -1): Mes {
+  const chave = passos === 1 ? proximaChave(mes.chave) : chaveAnterior(mes.chave);
+  return mesDe(`${chave}-01`);
+}
+
+/** Todos os dias da grade, em ordem — múltiplo de 7. */
+export function diasDaGradeDoMes(mes: Mes): string[] {
+  const dias: string[] = [];
+  for (let dia = mes.de; dia <= mes.ate; dia = diaSomandoDias(dia, 1)) dias.push(dia);
+  return dias;
+}
+
+/** "setembro de 2026". */
+export function rotuloDoMes(mes: Mes): string {
+  return new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC", month: "long", year: "numeric" }).format(
+    new Date(diaLocalEmMs(`${mes.chave}-01`)),
+  );
+}
+
+function proximaChave(chave: string): string {
+  const [ano, mes] = chave.split("-").map(Number);
+  return mes === 12 ? `${ano + 1}-01` : `${ano}-${String(mes + 1).padStart(2, "0")}`;
+}
+
+function chaveAnterior(chave: string): string {
+  const [ano, mes] = chave.split("-").map(Number);
+  return mes === 1 ? `${ano - 1}-12` : `${ano}-${String(mes - 1).padStart(2, "0")}`;
+}
+
+/* ---------------------------------------------------------- os números --- */
+
+/**
+ * Quantas das sessões que já aconteceram o aluno de fato veio: realizadas
+ * sobre realizadas mais faltas. Cancelada não entra — desmarcar com antecedência
+ * não é faltar — e agendada sem marcação também não: não se sabe ainda. Nulo
+ * quando não há nenhuma marcada, porque 0% diria que todos faltaram.
+ */
+export function taxaDeComparecimento(situacoes: Situacao[]): number | null {
+  const realizadas = situacoes.filter((s) => s === "realizada").length;
+  const faltas = situacoes.filter((s) => s === "faltou").length;
+  return realizadas + faltas === 0 ? null : realizadas / (realizadas + faltas);
+}

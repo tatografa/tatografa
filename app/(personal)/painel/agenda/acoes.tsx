@@ -76,8 +76,8 @@ export function NovaSessao({
 
   return (
     <>
-      <Button onClick={() => setAberto(true)}>
-        <CalendarPlus size={16} aria-hidden /> Nova sessão
+      <Button size="sm" onClick={() => setAberto(true)}>
+        <CalendarPlus size={16} aria-hidden /> Agendar sessão
       </Button>
 
       <Dialog

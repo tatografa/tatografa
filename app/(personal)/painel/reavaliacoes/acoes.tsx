@@ -23,7 +23,14 @@ const CANCELAMENTO: EstadoDoCancelamento = {};
  * reavaliação contém é o aluno que responde. Pedir "data limite" ou "o que
  * medir" aqui seria inventar campo que o banco não tem.
  */
-export function NovaReavaliacao({ alunos }: { alunos: AlunoDaLista[] }) {
+export function NovaReavaliacao({
+  alunos,
+  variante = "primary",
+}: {
+  alunos: AlunoDaLista[];
+  /** Na agenda o botão divide o cabeçalho com "Nova sessão", que é o primário. */
+  variante?: "primary" | "secondary";
+}) {
   const [aberto, setAberto] = useState(false);
   const [estado, acao, enviando] = useActionState(liberarReavaliacao, LIBERACAO);
 
@@ -49,8 +56,8 @@ export function NovaReavaliacao({ alunos }: { alunos: AlunoDaLista[] }) {
 
   return (
     <>
-      <Button onClick={() => setAberto(true)}>
-        <Plus size={16} aria-hidden /> Nova reavaliação
+      <Button size="sm" variant={variante} onClick={() => setAberto(true)}>
+        <Plus size={16} aria-hidden /> Liberar reavaliação
       </Button>
 
       <Dialog

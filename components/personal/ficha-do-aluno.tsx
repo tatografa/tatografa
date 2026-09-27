@@ -295,12 +295,12 @@ function Reavaliacoes({
         !aberta && (
           <Card>
             <p className="text-[13px] text-ink-4">
-              Nenhuma reavaliação ainda. Libere uma em{" "}
+              Nenhuma reavaliação ainda. Libere uma na{" "}
               <Link
-                href="/painel/reavaliacoes"
+                href="/painel/agenda"
                 className="font-semibold text-brand hover:underline"
               >
-                Reavaliações
+                Agenda
               </Link>
               .
             </p>

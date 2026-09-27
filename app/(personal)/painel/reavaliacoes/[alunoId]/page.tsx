@@ -43,7 +43,7 @@ export default async function ReavaliacoesDoAluno({
       <CabecalhoDaPagina
         titulo={aluno.name}
         subtitulo="Reavaliações respondidas e a comparação entre elas"
-        voltar={{ href: "/painel/reavaliacoes", rotulo: "Voltar para reavaliações" }}
+        voltar={{ href: "/painel/agenda", rotulo: "Voltar para a agenda" }}
       />
 
       {enviadas.length === 0 ? (
