@@ -46,7 +46,7 @@ export function AjusteDeAlerta({ dias }: { dias: number }) {
             &ldquo;precisam de atenção&rdquo; no painel.
           </p>
         </div>
-        <Button variant="secondary" onClick={() => setEditando(true)}>
+        <Button variant="secondary" size="sm" onClick={() => setEditando(true)}>
           <Pencil size={15} aria-hidden />
           Editar
         </Button>
@@ -82,11 +82,12 @@ export function AjusteDeAlerta({ dias }: { dias: number }) {
         <Button
           type="button"
           variant="secondary"
+          size="sm"
           onClick={() => setEditando(false)}
         >
           Cancelar
         </Button>
-        <Button type="submit" disabled={enviando}>
+        <Button type="submit" size="sm" disabled={enviando}>
           {enviando ? "Salvando…" : "Salvar"}
         </Button>
       </div>

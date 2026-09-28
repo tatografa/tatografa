@@ -430,6 +430,26 @@ Provar que funciona sem o Otávio ler código:
   da direita, abaixo do programa — o protótipo não as desenha, e são o trabalho do
   personal sobre o aluno. Nenhuma consulta nova: os posts saem de `lerPostsDaCarteira`
   filtrado pelo aluno, e curtir/responder agora revalidam também o perfil.
+- **[2026-09-28, pedido do Otávio]** **Configurações segue o protótipo:** o cartão
+  "Perfil" em cima (iniciais, nome, e-mail e WhatsApp), com "Editar perfil" no
+  cabeçalho da página, e embaixo dois cartões — **Alerta de inatividade** no lugar de
+  "Plano e assinatura" (não há cobrança no modelo, 18/09) e **Segurança** com trocar
+  senha e sair da conta. **O personal passa a editar o próprio nome**, que nenhuma tela
+  editava: é o nome que o aluno vê no app. O **e-mail não se edita**: é o login em
+  `auth.users`, e a tela mostra esse, não a cópia de `trainers.email`.
+- **[2026-09-28]** **Trocar senha pede a senha atual**, conferida por
+  `signInWithPassword` com o e-mail de `auth.users`. O Supabase aceitaria só a sessão,
+  e o painel roda em computador de academia e notebook aberto: quem achar a sessão
+  esquecida não deve conseguir trancar o dono fora da conta. A regra de força é a de
+  `lib/domain/senha.ts`, e as senhas nunca voltam no estado da ação.
+- **[2026-09-28]** **Do protótipo de Configurações, quatro coisas não entraram, e uma
+  delas porque é falsa.** *"Nome da consultoria":* coluna nova que nenhuma tela leria.
+  *2FA:* o Supabase tem, mas é um fluxo inteiro (cadastro do fator, desafio no login,
+  recuperação); um interruptor que não protege nada é pior que nenhum. *"Última
+  alteração há 3 meses":* o Supabase não guarda quando a senha mudou. *"Sua conta está
+  protegida por criptografia de ponta a ponta":* **não é verdade** — o banco lê os
+  dados, é assim que o personal vê o treino do aluno —, e tela de segurança é o último
+  lugar para uma frase falsa.
 - **[2026-09-26, decisão do Otávio]** **Aluno inativo perde o acesso ao app.** O dado
   histórico fica — não se apaga nada —, mas o login é limitado até ele voltar a pagar.
   Duas camadas: o **banco** tranca a escrita (migration 0036) e a **tela** explica

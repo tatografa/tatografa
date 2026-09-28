@@ -5,7 +5,9 @@ import { z } from "zod";
 
 import { requireTrainer } from "@/lib/auth/session";
 import { LIMITES_DO_ALERTA } from "@/lib/domain/atencao";
+import { erroDaSenha } from "@/lib/domain/senha";
 import { telefoneOpcional } from "@/lib/domain/telefone";
+import { traduzErro } from "@/lib/auth/mensagens";
 import { createClient } from "@/lib/supabase/server";
 
 export type EstadoDasConfiguracoes = {
@@ -75,56 +77,146 @@ export async function salvarConfiguracoes(
   return { sucesso: true };
 }
 
-export type EstadoDoContato = {
+export type EstadoDoPerfil = {
   erro?: string;
-  errosPorCampo?: Partial<Record<"telefone", string>>;
-  campos?: { telefone?: string };
+  errosPorCampo?: Partial<Record<"nome" | "telefone", string>>;
+  campos?: { nome?: string; telefone?: string };
   sucesso?: boolean;
 };
 
+const esquemaDoPerfil = z.object({
+  nome: z
+    .string()
+    .trim()
+    .min(2, "Informe seu nome.")
+    .max(80, "Use no máximo 80 caracteres."),
+  telefone: telefoneOpcional,
+});
+
 /**
- * Salva o WhatsApp do personal.
+ * Salva o nome e o WhatsApp do personal — o cartão "Perfil" da tela.
  *
- * `trainers.phone` existe desde a migration 0001 e **ninguém escrevia nela**:
- * o doc 05 §11 pede um card no perfil do aluno com o botão que abre a conversa
- * direta, e sem este formulário esse botão nunca apareceria para ninguém. É a
- * outra metade da mesma costura.
+ * Os dois juntos porque o protótipo edita o perfil num gesto só, com um
+ * "Editar" no cabeçalho. O **e-mail não vai**: é a identidade em
+ * `auth.users` e o login, e muda por fluxo de confirmação, não por update de
+ * linha — mesma regra do perfil do aluno (14/09). `trainers.email` até aceita
+ * escrita pela policy, e é justamente por isso que o formulário não o envia:
+ * as duas cópias do endereço sairiam de sincronia.
  *
- * Vazio é resposta válida: o personal que não quer dar o número fica sem o
- * botão no app do aluno, e nada mais muda.
+ * `trainers.phone` existia desde a migration 0001 e ninguém escrevia nela até
+ * 15/09: é o número do botão de WhatsApp no app do aluno. Vazio é resposta
+ * válida — o personal que não quer dar o número fica sem o botão lá.
  *
- * Como em `salvarConfiguracoes`, não recebe id: o alvo é sempre `auth.uid()`.
+ * Não recebe id: o alvo é sempre `auth.uid()`.
  */
-export async function salvarContato(
-  _anterior: EstadoDoContato,
+export async function salvarPerfil(
+  _anterior: EstadoDoPerfil,
   dados: FormData,
-): Promise<EstadoDoContato> {
+): Promise<EstadoDoPerfil> {
   const { trainer } = await requireTrainer();
 
-  const bruto = { telefone: String(dados.get("telefone") ?? "") };
-  const analise = telefoneOpcional.safeParse(bruto.telefone);
+  const bruto = {
+    nome: String(dados.get("nome") ?? ""),
+    telefone: String(dados.get("telefone") ?? ""),
+  };
+  const analise = esquemaDoPerfil.safeParse(bruto);
 
   if (!analise.success) {
+    const { fieldErrors } = z.flattenError(analise.error);
     return {
       campos: bruto,
-      errosPorCampo: { telefone: analise.error.issues[0]?.message },
+      errosPorCampo: { nome: fieldErrors.nome?.[0], telefone: fieldErrors.telefone?.[0] },
     };
   }
 
   const supabase = await createClient();
   const { error } = await supabase
     .from("trainers")
-    .update({ phone: analise.data })
+    .update({ name: analise.data.nome, phone: analise.data.telefone })
     .eq("id", trainer.id);
 
   if (error) {
     return { campos: bruto, erro: "Não deu para salvar agora. Tente de novo." };
   }
 
-  // "layout" e não a página: o número aparece no app do aluno, que é outra
-  // árvore de rotas — e foi um `revalidatePath` de escopo errado que fez o
-  // Otávio não se ver no seletor de alunos em 13/09.
+  // "layout" e não a página: o nome aparece na navegação e no avatar de todo o
+  // painel, e nome e número aparecem no app do aluno, que é outra árvore de
+  // rotas — foi um `revalidatePath` de escopo errado que fez o Otávio não se
+  // ver no seletor de alunos em 13/09.
   revalidatePath("/painel", "layout");
   revalidatePath("/app", "layout");
+  return { sucesso: true };
+}
+
+export type EstadoDaSenha = {
+  erro?: string;
+  errosPorCampo?: Partial<Record<"atual" | "nova" | "confirmacao", string>>;
+  sucesso?: boolean;
+};
+
+const esquemaDaSenha = z.object({
+  atual: z.string().min(1, "Informe a senha que você usa hoje."),
+  nova: z.string().superRefine((valor, ctx) => {
+    const erro = erroDaSenha(valor);
+    if (erro) ctx.addIssue({ code: "custom", message: erro });
+  }),
+  confirmacao: z.string(),
+});
+
+/**
+ * Troca a senha de quem está logado, **pedindo a atual antes**.
+ *
+ * A sessão sozinha bastaria para o Supabase, e é por isso que a tela pede mais:
+ * o painel roda no computador da academia e no notebook que fica aberto, e
+ * quem sentar na frente de uma sessão esquecida não deve conseguir trancar o
+ * dono fora da própria conta. A conferência é um `signInWithPassword` com o
+ * e-mail **de `auth.users`** — não o de `trainers.email`, que é uma cópia e
+ * poderia divergir —, e a regra de força é a mesma de todo lugar
+ * (`lib/domain/senha.ts`, 17/09).
+ *
+ * As senhas nunca voltam no estado: formulário de senha que devolve o que foi
+ * digitado põe a senha no payload da resposta.
+ */
+export async function trocarSenha(
+  _anterior: EstadoDaSenha,
+  dados: FormData,
+): Promise<EstadoDaSenha> {
+  await requireTrainer();
+
+  const analise = esquemaDaSenha.safeParse({
+    atual: String(dados.get("atual") ?? ""),
+    nova: String(dados.get("nova") ?? ""),
+    confirmacao: String(dados.get("confirmacao") ?? ""),
+  });
+
+  if (!analise.success) {
+    const { fieldErrors } = z.flattenError(analise.error);
+    return { errosPorCampo: { atual: fieldErrors.atual?.[0], nova: fieldErrors.nova?.[0] } };
+  }
+  if (analise.data.nova !== analise.data.confirmacao) {
+    return { errosPorCampo: { confirmacao: "As duas senhas novas precisam ser iguais." } };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.email) return { erro: "Sua sessão terminou. Entre de novo para trocar a senha." };
+
+  const conferencia = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: analise.data.atual,
+  });
+  if (conferencia.error) {
+    // "E-mail ou senha incorretos" seria estranho aqui: o e-mail não foi
+    // digitado. Excesso de tentativas continua com a frase dele.
+    return /invalid login credentials/i.test(conferencia.error.message)
+      ? { errosPorCampo: { atual: "Essa não é a sua senha atual." } }
+      : { erro: traduzErro(conferencia.error.message) };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password: analise.data.nova });
+  if (error) return { erro: traduzErro(error.message) };
+
   return { sucesso: true };
 }

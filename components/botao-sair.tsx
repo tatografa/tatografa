@@ -19,11 +19,14 @@ export function BotaoSair({
   variant = "secondary",
   size = "sm",
   block = false,
+  rotulo = "Sair",
 }: {
   variant?: "secondary" | "danger";
   /** `sm` cabe na barra do painel; no celular o alvo precisa dos 44px. */
   size?: "sm" | "md";
   block?: boolean;
+  /** "Sair da conta" onde o botão mora longe do nome de quem está logado. */
+  rotulo?: string;
 }) {
   const [saindo, iniciarTransicao] = useTransition();
 
@@ -35,7 +38,7 @@ export function BotaoSair({
       disabled={saindo}
       onClick={() => iniciarTransicao(() => sair())}
     >
-      {saindo ? "Saindo…" : "Sair"}
+      {saindo ? "Saindo…" : rotulo}
     </Button>
   );
 }
