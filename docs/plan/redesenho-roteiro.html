@@ -1,0 +1,855 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roteiro do redesenho · Reps Club</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+  /* Tema único, escuro de propósito: é a mesma cara da tela de execução do
+     treino, que é onde este roteiro vai ser lido — no celular, na academia.
+     Todas as cores são pintadas explicitamente para a página não herdar o
+     fundo do hospedeiro. */
+  :root {
+    --ground: #14120f;
+    --surface: #1e1b17;
+    --surface-2: #262219;
+    --line: #332e26;
+    --line-strong: #4a4337;
+    --text: #f3f0ea;
+    --text-2: #cbc4b8;
+    --text-dim: #a39c91;
+    --accent: #ff2a2a;      /* --color-brand-on-dark do app */
+    --ok: #6cc08a;
+    --ok-bg: #1b2b21;
+    --fail: #ff6a5c;
+    --fail-bg: #2e1c19;
+
+    --passo: clamp(15px, 4vw, 15.5px);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .envelope {
+    max-width: 580px;
+    margin: 0 auto;
+    padding-inline: 18px;
+    padding-block: 0 72px;
+  }
+
+  /* ---------------------------------------------------------- cabeçalho -- */
+
+  .topo {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: color-mix(in srgb, var(--ground) 94%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .topo-interno {
+    max-width: 580px;
+    margin: 0 auto;
+    padding-inline: 18px;
+    padding-block: 11px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .topo-linha {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .marca {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .marca b { color: var(--accent); font-weight: 700; }
+
+  .contagens {
+    display: flex;
+    gap: 12px;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .c-ok { color: var(--ok); }
+  .c-fail { color: var(--fail); }
+  .c-resta { color: var(--text-dim); }
+
+  .barra {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--line);
+    overflow: hidden;
+    display: flex;
+  }
+  .barra span { display: block; height: 100%; transition: width .25s ease; }
+  .barra .b-ok { background: var(--ok); }
+  .barra .b-fail { background: var(--fail); }
+
+  /* ------------------------------------------------------------ abertura -- */
+
+  .abertura { padding-block: 26px 6px; }
+
+  h1 {
+    font-size: clamp(25px, 6.6vw, 30px);
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    font-weight: 800;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+
+  .sub {
+    margin: 0;
+    color: var(--text-2);
+    font-size: 14.5px;
+    line-height: 1.6;
+  }
+  .sub + .sub { margin-top: 10px; }
+  .sub strong { color: var(--text); font-weight: 600; }
+
+  .aviso-salvo {
+    margin-top: 16px;
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    padding: 12px 13px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+  .aviso-salvo .ponto {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--ok); margin-top: 6px; flex: none;
+  }
+  .aviso-salvo[data-estado="offline"] .ponto { background: var(--fail); }
+
+  .preparo {
+    margin-top: 18px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+    padding: 16px 16px 14px;
+  }
+  .preparo h2 { font-size: 15px; margin: 0 0 10px; }
+  .preparo ul {
+    margin: 0;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .preparo li {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+  .preparo li b { color: var(--text); font-weight: 600; }
+  .preparo code {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12.5px;
+    color: var(--text);
+    background: var(--surface-2);
+    border-radius: 5px;
+    padding: 1px 5px;
+  }
+  .preparo .ressalva {
+    margin: 12px 0 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--text-dim);
+  }
+  .preparo .ressalva b { color: var(--text-2); font-weight: 600; }
+
+  /* -------------------------------------------------------------- partes -- */
+
+  section { margin-top: 34px; }
+
+  .cabeca {
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+    margin-bottom: 4px;
+  }
+  .parte-n {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+  }
+  h2 {
+    font-size: 18.5px;
+    font-weight: 800;
+    letter-spacing: -0.015em;
+    margin: 0;
+  }
+  .duracao {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-left: auto;
+    flex: none;
+  }
+  .nota-parte {
+    margin: 0 0 14px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+
+  section.critica .lista {
+    border-left: 2px solid var(--accent);
+    padding-left: 13px;
+    margin-left: 1px;
+  }
+
+  .lista { display: flex; flex-direction: column; gap: 8px; }
+
+  /* --------------------------------------------------------------- passo -- */
+
+  .passo {
+    border: 1px solid var(--line);
+    border-radius: 13px;
+    background: var(--surface);
+    padding: 12px 13px;
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    gap: 4px 10px;
+    align-items: start;
+  }
+  .passo[data-estado="ok"] { border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); }
+  .passo[data-estado="fail"] { border-color: color-mix(in srgb, var(--fail) 55%, var(--line)); }
+
+  .num {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-dim);
+    padding-top: 2px;
+  }
+  .passo[data-estado="ok"] .num { color: var(--ok); }
+  .passo[data-estado="fail"] .num { color: var(--fail); }
+
+  .texto {
+    font-size: var(--passo);
+    line-height: 1.5;
+    color: var(--text-2);
+  }
+  .texto strong { color: var(--text); font-weight: 600; }
+
+  .marcas {
+    grid-column: 2;
+    display: flex;
+    gap: 7px;
+    margin-top: 9px;
+  }
+
+  .marcar {
+    flex: 1;
+    min-height: 40px;
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    background: var(--surface-2);
+    color: var(--text-dim);
+    font-family: Inter, sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transition: background .14s ease, color .14s ease, border-color .14s ease;
+  }
+  .marcar:hover { border-color: var(--text-dim); color: var(--text-2); }
+  .marcar:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .marcar[aria-pressed="true"][data-tipo="ok"] {
+    background: var(--ok-bg); border-color: var(--ok); color: var(--ok);
+  }
+  .marcar[aria-pressed="true"][data-tipo="fail"] {
+    background: var(--fail-bg); border-color: var(--fail); color: var(--fail);
+  }
+
+  .glifo { font-family: "JetBrains Mono", monospace; font-size: 14px; font-weight: 700; }
+
+  .caixa-nota { grid-column: 2; margin-top: 9px; }
+  .caixa-nota[hidden] { display: none; }
+
+  label.rotulo {
+    display: block;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--fail);
+    margin-bottom: 6px;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 74px;
+    resize: vertical;
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    background: var(--ground);
+    color: var(--text);
+    font-family: Inter, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 10px 11px;
+  }
+  textarea::placeholder { color: #7a736a; }
+  textarea:focus { outline: none; border-color: var(--fail); }
+  textarea:focus-visible { outline: 2px solid var(--fail); outline-offset: 1px; }
+
+  /* ----------------------------------------------------------------- fim -- */
+
+  .fim {
+    margin-top: 38px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+    padding: 18px 16px;
+  }
+  .fim h2 { margin-bottom: 8px; }
+  .fim p { margin: 0 0 10px; font-size: 14px; line-height: 1.6; color: var(--text-2); }
+  .fim p:last-child { margin-bottom: 0; }
+
+  .placar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 14px 0 4px;
+  }
+  .ficha {
+    flex: 1 1 96px;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: var(--surface-2);
+    padding: 10px 12px;
+  }
+  .ficha .n {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 22px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+    display: block;
+  }
+  .ficha .r {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .ficha.f-ok .n { color: var(--ok); }
+  .ficha.f-fail .n { color: var(--fail); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 1ms !important; animation-duration: 1ms !important; }
+  }
+</style>
+
+<header class="topo">
+  <div class="topo-interno">
+    <div class="topo-linha">
+      <span class="marca"><b>Reps Club</b> · Redesenho</span>
+      <span class="contagens">
+        <span class="c-ok" id="n-ok">0 ok</span>
+        <span class="c-fail" id="n-fail">0 ✗</span>
+        <span class="c-resta" id="n-resta">— a fazer</span>
+      </span>
+    </div>
+    <div class="barra" role="img" aria-label="Progresso do roteiro" id="barra">
+      <span class="b-ok" id="b-ok" style="width:0%"></span>
+      <span class="b-fail" id="b-fail" style="width:0%"></span>
+    </div>
+  </div>
+</header>
+
+<main class="envelope">
+  <div class="abertura">
+    <h1>O painel redesenhado, e o que veio junto</h1>
+    <p class="sub">Tudo o que entrou <strong>depois da rodada de 57 passos de 17/09</strong>: o painel inteiro refeito no layout dos protótipos (barra lateral, dashboard, alunos, perfil do aluno, treinos, exercícios, feed, agenda e configurações), o <strong>menu ⋮</strong> da execução, o <strong>“Como fazer”</strong> com vídeo, o <strong>RIR</strong>, a <strong>pausa de acesso</strong> do aluno inativo e o novo <strong>portão de termos</strong>. Leva cerca de <strong>1h20</strong> — dá para fazer em duas sentadas: Partes 1 a 6 numa, 7 a 12 na outra.</p>
+    <p class="sub">Em cada passo, marque <strong>ok</strong> ou <strong>✗</strong>. Quando marcar ✗, escreva <strong>a frase que apareceu na tela</strong>.</p>
+    <div class="aviso-salvo" id="aviso">
+      <span class="ponto"></span>
+      <span id="aviso-texto">Marque à vontade: cada toque é salvo e eu leio daqui quando você terminar.</span>
+    </div>
+
+    <div class="preparo">
+      <h2>Antes de começar</h2>
+      <ul>
+        <li><b>Onde:</b> <code>repsclub.com.br</code>, painel no computador e app no celular ao mesmo tempo.</li>
+        <li><b>A Parte 1 vem primeiro porque trava o resto:</b> os documentos mudaram de versão e todo mundo — você no painel e cada aluno no app — passa por um portão de aceite.</li>
+        <li><b>Duas contas de aluno:</b> você mesmo (aluno de si mesmo) e mais uma (raul ou Vinicius). A outra é necessária nas Partes 1, 10 e 12.</li>
+        <li><b>A Parte 12 depende de mim.</b> Não existe botão para arquivar um aluno — explico lá. Quando chegar nela, me mande uma mensagem e eu faço pelo banco.</li>
+        <li><b>O banco é o de desenvolvimento.</b> Pode criar, apagar e refazer à vontade.</li>
+        <li><b>Faça na ordem.</b> O treino montado na Parte 6 é o que você executa na Parte 8 e confere de volta no perfil.</li>
+      </ul>
+      <p class="ressalva">Não consigo conferir daqui se o último deploy subiu — a rede bloqueia o domínio. O sinal de que é o código de agora: <b>clicar num espaço vazio da barra lateral</b> do painel faz ela <b>recolher</b>.</p>
+    </div>
+  </div>
+
+  <div id="partes"></div>
+
+  <div class="fim">
+    <h2>Quando terminar</h2>
+    <div class="placar">
+      <div class="ficha f-ok"><span class="n" id="f-ok">0</span><span class="r">passaram</span></div>
+      <div class="ficha f-fail"><span class="n" id="f-fail">0</span><span class="r">falharam</span></div>
+      <div class="ficha"><span class="n" id="f-resta">—</span><span class="r">a fazer</span></div>
+    </div>
+    <p>Me diga que terminou — eu leio as marcações e as notas direto daqui.</p>
+    <p>As duas partes que mais importam são a <strong>6</strong> (o segundo “Enviar para o aluno” não pode apagar histórico) e a <strong>12</strong> (aluno pausado não pode ver a turma nem treinar). Se as duas passarem, o redesenho do painel está validado em campo.</p>
+  </div>
+</main>
+
+<script>
+const PARTES = [
+  {
+    n: "Parte 1", titulo: "O portão de termos, dos dois lados", duracao: "5 min",
+    nota: "Os documentos subiram de versão porque o aluno ganhou quatro campos novos no perfil — um deles, <b>perfil biológico</b>, é dado de saúde. Desde 17/09 <b>o personal também aceita os termos</b>, então o portão aparece no painel e no app. Cada lado lê a mudança do seu ponto de vista.",
+    passos: [
+      "<strong>No computador</strong>, abra o painel. Antes de qualquer tela aparece o <strong>portão de aceite</strong>, e ele fala com você como personal: a ficha do aluno passa a mostrar <strong>telefone, cidade, meta de peso e perfil biológico</strong>, e quem preenche é o aluno, não você.",
+      "Tente ir direto a <code>repsclub.com.br/painel/alunos</code> pela barra de endereço. <strong>Volta para o portão</strong> — ele não é uma faixa que se fecha.",
+      "Aceite. O painel abre normalmente.",
+      "<strong>No celular</strong>, abra o app como <strong>você mesmo</strong> (aluno de si mesmo). O portão <strong>não aparece</strong>: o aceite é por pessoa, e você acabou de aceitar no painel.",
+      "Entre com a <strong>outra conta de aluno</strong>. O portão aparece, e agora a frase é a do aluno: <strong>“Seu perfil ganhou quatro campos opcionais…”</strong>, dizendo que a terapia hormonal é dado de saúde e que dá para voltar a “não informado”.",
+      "Aceite com a conta do aluno. Abra <strong>Perfil → Editar</strong>: os quatro campos novos estão lá (telefone, cidade/UF, meta de peso, perfil biológico), todos <strong>em branco</strong>. Preencha os quatro e salve — a Parte 5 vai procurá-los.",
+    ],
+  },
+  {
+    n: "Parte 2", titulo: "A barra lateral", duracao: "5 min",
+    nota: "A barra do topo virou uma barra lateral, e desde ontem ela <b>recolhe com um clique em qualquer lugar vazio</b> dela — não só na seta. <b>Macrotreinos</b> e <b>Reavaliações</b> saíram do menu: viraram parte de <b>Treinos</b> e de <b>Agenda</b>.",
+    passos: [
+      "O menu tem, nesta ordem: <strong>Painel, Alunos, Feed, Treinos, Exercícios, Agenda</strong>, uma linha fina, e <strong>Treinar, Configurações</strong>. Não há “Macrotreinos” nem “Reavaliações”.",
+      "Clique num <strong>espaço vazio</strong> da barra (abaixo de Configurações). Ela <strong>recolhe</strong> para uma faixa só de ícones. Clique de novo num espaço vazio: <strong>expande</strong>.",
+      "Com a barra recolhida, clique no ícone de <strong>Alunos</strong>. A página muda para Alunos e a barra <strong>continua recolhida</strong> — clicar num item não mexe nela.",
+      "Recarregue a página (F5). A barra volta <strong>como você deixou</strong>.",
+      "A setinha no topo da barra também recolhe e expande. <em>Ela fica porque é o único jeito pelo teclado.</em>",
+      "No pé da barra aberta: suas <strong>iniciais, seu nome e “Sua conta”</strong>, e um ícone de sair ao lado. Clique no nome: abre <strong>Configurações</strong>.",
+      "Recolha a barra: no pé ficam <strong>as iniciais e, embaixo, o ícone de sair</strong>. Antes, recolhida, não dava para sair sem expandir.",
+      "Digite <code>repsclub.com.br/painel/macrotreinos</code> e depois <code>repsclub.com.br/painel/reavaliacoes</code>. O primeiro leva a <strong>Treinos</strong>, o segundo à <strong>Agenda</strong> — link antigo salvo no WhatsApp não quebra.",
+    ],
+  },
+  {
+    n: "Parte 3", titulo: "O dashboard", duracao: "5 min",
+    nota: "O <code>/painel</code> no layout do protótipo: duas colunas, e três gráficos que saem de dado que já existia. Sem receita, plano ou renovação — o Reps Club não cobra ninguém.",
+    passos: [
+      "Título <strong>“Painel”</strong> e, embaixo, <strong>quatro números</strong> em ladrilhos cinza: Alunos ativos, Treinos na semana, Aderência média e Reavaliações.",
+      "À esquerda: “Precisam de atenção” (só se alguém estiver parado), “Convites pendentes” (só se houver) e os gráficos <strong>“Evolução mensal de alunos”</strong> e <strong>“Atividade diária”</strong>. À direita: <strong>“Top 10 progressões”</strong> e <strong>“Treinos recentes”</strong>.",
+      "Na <strong>Evolução mensal</strong>, a linha começa do <strong>zero</strong> e nunca desce num mês em que ninguém saiu — é o total acumulado, não os novos do mês.",
+      "Passe o mouse numa barra da <strong>Atividade diária</strong>: aparece o dia e quantos treinos. Um dia sem treino é só um toco cinza.",
+      "Nas <strong>Top 10 progressões</strong>, os números estão em <strong>percentual</strong> (“+25%”), não em quilos. <em>Em quilos o agachamento ganharia de toda rosca.</em>",
+      "Recolha a barra lateral: a página se reorganiza sem nada ficar cortado nem órfão num canto.",
+    ],
+  },
+  {
+    n: "Parte 4", titulo: "A tela de alunos", duracao: "6 min",
+    nota: "No layout do protótipo, com as colunas de cobrança trocadas pelo que sobra delas: <b>Plano</b> virou <b>Programa</b>, <b>Vencimento</b> virou <b>Aderência</b>.",
+    passos: [
+      "Quatro ladrilhos: <strong>Total de alunos, Ativos, Precisam de atenção, Inativos</strong>.",
+      "A tabela tem: <strong>Aluno</strong> (iniciais, nome, e-mail), <strong>Programa</strong> (nome e “Semana X de Y”), <strong>Perfil biológico</strong>, <strong>Status</strong> (pílula com bolinha), <strong>Último treino</strong> e <strong>Aderência</strong>.",
+      "O aluno da Parte 1 mostra o <strong>perfil biológico</strong> que você preencheu lá.",
+      "Quem passou do seu limite de dias sem treinar aparece com o <strong>último treino em vermelho, com um triângulo</strong>. Quem nunca treinou fica em cinza, “Nunca treinou”, sem triângulo.",
+      "Clique no ladrilho <strong>“Precisam de atenção”</strong> (se for maior que zero). A tabela filtra só esses alunos, o ladrilho ganha uma <strong>borda preta</strong> e abre o painel <strong>“Filtros avançados”</strong> com “7+ dias” (ou o seu limite) marcado. Clique no ladrilho de novo: <strong>desfaz</strong>.",
+      "Clique em <strong>“Filtros”</strong>. Três grupos: Status, Programa, Tempo sem treino. Escolha “Sem programa”: o botão Filtros mostra <strong>“1”</strong> e aparece <strong>“Limpar filtros”</strong>. Limpe.",
+      "Busque um nome <strong>sem acento</strong> (“jose” acha “José”). Embaixo da tabela: <strong>“Mostrando X de Y alunos”</strong>.",
+      "Clique no cabeçalho <strong>“Último treino”</strong>: o primeiro clique põe <strong>quem está sumido há mais tempo</strong> no topo, e “Nunca treinou” vai para o fim.",
+      "Clique em qualquer lugar de uma linha: abre o <strong>perfil do aluno</strong>.",
+    ],
+  },
+  {
+    n: "Parte 5", titulo: "O perfil do aluno", duracao: "10 min",
+    nota: "Três colunas, como no protótipo: <b>quem é o aluno</b> à esquerda, <b>a atividade</b> no meio, <b>o programa</b> à direita. Use o aluno que tem mais treinos registrados.",
+    passos: [
+      "Título <strong>“Perfil do aluno”</strong>, link <strong>“Voltar para alunos”</strong> e o botão vermelho <strong>“Agendar sessão”</strong>.",
+      "À esquerda: iniciais grandes, nome, status, <strong>Sessões totais</strong> e <strong>Dias seguidos</strong>, e a lista de dados — o <strong>telefone, a cidade e o perfil biológico</strong> que o aluno preencheu na Parte 1.",
+      "Se ele tem meta de peso, o cartão <strong>“Meta de peso”</strong> mostra “Faltam X kg · Y% do caminho” e a barra com um traço no fim (a meta). Inicial, atual e meta embaixo.",
+      "No meio: a faixa escura <strong>“Reps Club · Atividade de …”</strong> e <strong>um cartão por treino</strong>, com os exercícios e as cargas na caixa escura.",
+      "Embaixo de cada treino: duração, <strong>“X de Y séries”</strong>, volume e o link <strong>“Série a série”</strong>. Clique nele: abre a sessão completa.",
+      "Um treino que <strong>virou publicação</strong> tem foto (ou “Sem foto nesta execução”), curtidas e a conversa com o rótulo <strong>COMENTÁRIOS</strong>. Um treino que não virou publicação <strong>não tem</strong> curtir nem comentar.",
+      "Responda a um comentário daqui. A resposta aparece embaixo, com o selo <strong>PERSONAL</strong>. Abra o <strong>Feed</strong>: a mesma resposta está lá.",
+      "À direita, <strong>“Programa atual”</strong>, aba <strong>Planilha</strong>. Clique num exercício que o aluno já treinou: abre <strong>“Proposto: 3x12 · …”</strong>, um <strong>Recorde</strong> em vermelho e um bloco por data com cada série.",
+      "Troque para <strong>“Série”</strong>: os blocos viram “Série 1”, “Série 2”… com as datas dentro.",
+      "<strong>O número do Recorde bate com o do app do aluno</strong> (celular, Progresso, naquele exercício). <em>Se discordar, é o defeito mais sério desta parte — anote os dois números.</em>",
+      "Aba <strong>Gráfico</strong>: métricas Carga, Repetições e Volume, e barras por exercício. A barra mais à direita de Carga é a <strong>maior carga do último treino</strong>.",
+      "Abaixo do programa: a última <strong>reavaliação</strong> comparada com a anterior e as <strong>observações privadas</strong> (só você vê).",
+      "Clique <strong>“Agendar sessão”</strong>: a Agenda abre com o diálogo de nova sessão <strong>já com este aluno escolhido</strong>.",
+    ],
+  },
+  {
+    n: "Parte 6", titulo: "Treinos: a divisão de treino", duracao: "12 min", critica: true,
+    nota: "“Treinos” virou a tela do protótipo: um aluno por vez, o programa à esquerda e um cartão por treino, lado a lado. O salvar mudou — <b>é um botão só, sem sair da tela</b> —, e é aqui que mora o risco: um segundo salvar mal feito <b>apagaria histórico</b>. Os passos 10 e 11 são o motivo desta parte ser crítica.",
+    passos: [
+      "Painel → <strong>Treinos</strong>. Escolha um aluno. À esquerda: o aluno, as abas <strong>Atual · Histórico · Novo</strong>, o <strong>objetivo</strong>, a <strong>frequência semanal</strong> (1x a 7x) e o <strong>volume geral semanal</strong>.",
+      "À direita, um cartão por treino (“Treino A”, “Treino B”…), num quadro pontilhado. Os botões <strong>− / % / +</strong> no canto mudam o zoom.",
+      "Mude o <strong>objetivo</strong>. Salva sozinho, sem botão. Recarregue: continua o novo.",
+      "Num cartão, abra um exercício: campos <strong>Séries, Reps, RIR, Descanso, Técnica, Observação</strong>. Ponha <strong>RIR “0-2”</strong>.",
+      "Ponha <strong>RIR “11”</strong> em outro exercício e clique <strong>“Enviar para o aluno”</strong> (no cabeçalho). O erro aparece <strong>no próprio cartão</strong>, e os outros cartões salvam mesmo assim. Corrija para “2”.",
+      "Acrescente um exercício novo a um treino e clique <strong>“Enviar para o aluno”</strong>. A tela <strong>não sai do lugar</strong>.",
+      "Clique <strong>“Enviar para o aluno”</strong> de novo, sem mudar nada. <strong>Não aparecem cópias</strong> do exercício que você acabou de pôr.",
+      "Recarregue a página. Os treinos estão exatamente como você deixou, <strong>sem exercício duplicado e sem exercício faltando</strong>.",
+      "Mude a frequência para um número <strong>menor</strong> (ex.: de 4x para 3x). Aparece uma confirmação dizendo <strong>qual treino some</strong>. Cancele.",
+      "<strong>O teste que importa:</strong> no celular, com a conta desse aluno, faça <strong>uma série</strong> de um exercício antigo (que já existia antes do passo 6) e saia. No painel, mude as <strong>reps</strong> desse exercício e clique <strong>“Enviar para o aluno”</strong> duas vezes.",
+      "Abra o <strong>perfil do aluno</strong> → Planilha → esse exercício. <strong>A série que ele acabou de fazer continua lá.</strong> <em>Se sumiu, pare e me chame: é perda de histórico.</em>",
+      "Aba <strong>Histórico</strong> → abra um programa arquivado. O quadro diz <strong>“Arquivado · o aluno não vê”</strong> e o botão vira <strong>“Salvar rascunho”</strong>.",
+      "No celular, abra o treino do passo 4. O exercício com RIR diz <strong>“Pare com 0 a 2 repetições sobrando (RIR)”</strong>, em palavras.",
+    ],
+  },
+  {
+    n: "Parte 7", titulo: "Exercícios e o “Como fazer”", duracao: "7 min",
+    nota: "A tela virou uma biblioteca: lista por grupo à esquerda, o exercício à direita. O exercício ganhou <b>vídeo, descrição e instruções de segurança</b>, e o aluno vê isso no meio do treino.",
+    passos: [
+      "Painel → <strong>Exercícios</strong>. À esquerda, a lista agrupada por grupo muscular, com busca e filtros. Clique num exercício: à direita, os detalhes.",
+      "Crie um exercício seu. No campo de vídeo cole um link <strong>que não é do YouTube nem do Vimeo</strong> (ex.: <code>https://google.com</code>). É <strong>recusado</strong> com uma mensagem em português.",
+      "Troque por um link de <strong>YouTube</strong> de verdade, escreva uma descrição e uma instrução de segurança, e salve. À direita aparece o <strong>vídeo tocando dentro da tela</strong>.",
+      "Em Treinos, ponha esse exercício num treino do seu próprio programa e envie.",
+      "No celular, comece esse treino. No exercício novo aparece o botão <strong>“Como fazer”</strong>. Toque: sobe uma folha de baixo com o vídeo, a descrição e a segurança. Feche: você <strong>continua na série</strong>, e o cronômetro não parou.",
+      "Num exercício do catálogo, sem vídeo nem texto, o botão <strong>“Como fazer” não aparece</strong>.",
+    ],
+  },
+  {
+    n: "Parte 8", titulo: "No celular: o menu ⋮ do treino", duracao: "6 min",
+    nota: "<strong>No celular, no meio de um treino.</strong> O menu que o handoff pedia e nunca existiu. A observação que o aluno escreve aqui é o que explica ao personal por que a carga caiu.",
+    passos: [
+      "No topo da tela de execução há um <strong>⋮</strong>. Toque: sobe uma folha com <strong>“Anotar algo sobre o treino”</strong>, <strong>“Última vez neste exercício”</strong> e <strong>“Encerrar treino agora”</strong>.",
+      "Toque <strong>“Última vez neste exercício”</strong>: mostra as séries da última vez (ou diz que é a primeira).",
+      "Toque <strong>“Anotar algo sobre o treino”</strong>, escreva <strong>“ombro incomodou no supino”</strong> e salve. Abra o menu de novo: o item virou <strong>“Editar observação do treino”</strong>, com o texto embaixo.",
+      "No rodapé da tela de execução, toque <strong>“Pular exercício”</strong>. As séries que faltavam ficam como puladas, e o treino segue para o próximo exercício.",
+      "Toque <strong>“Encerrar treino agora”</strong>. O treino fecha e salva o que foi feito.",
+      "<strong>No painel</strong>, no perfil desse aluno: o cartão desse treino tem <strong>“Observação: ombro incomodou no supino”</strong>. Em “Série a série”, as séries puladas aparecem como <strong>“Série pulada”</strong>, diferente de “Não registrada”.",
+    ],
+  },
+  {
+    n: "Parte 9", titulo: "O feed do painel", duracao: "4 min",
+    nota: "Uma coluna, como no protótipo — e cada post traz <b>o treino que o gerou, exercício por exercício</b>. Lá no app do aluno, o colega vê só o total; aqui quem lê é você.",
+    passos: [
+      "Painel → <strong>Feed</strong>. A faixa escura diz <strong>“Atividade de todos os alunos · N publicações”</strong> e, se houver, <strong>“· N sem sua resposta”</strong>.",
+      "Os filtros: <strong>“Todos os alunos”</strong> e o período, que já vem em <strong>“Todo o período”</strong>. Há a opção <strong>90 dias</strong>.",
+      "Um post que veio de um treino mostra a caixa escura com cada exercício, tipo <strong>“Supino reto · 4x8 · 62 kg”</strong>. Um exercício todo pulado aparece como <strong>“pulado”</strong>, não some.",
+      "Responda a um post que estava <strong>sem resposta</strong>: o “N sem sua resposta” da faixa <strong>diminui um</strong>.",
+      "Filtre por um aluno: só os posts dele. Clique no nome do aluno num post: abre o <strong>perfil</strong> dele.",
+    ],
+  },
+  {
+    n: "Parte 10", titulo: "Agenda e reavaliações, numa tela só", duracao: "9 min",
+    nota: "Agenda e Reavaliações viraram uma tela: os dois respondem a “o que eu tenho com cada aluno e o que está esperando”. A <b>reavaliação não tem hora</b>, então aparece numa faixa no alto do dia, não na grade.",
+    passos: [
+      "Painel → <strong>Agenda</strong>. Título <strong>“Agenda e reavaliações”</strong> e quatro números: Próximos 7 dias, Esperando o aluno, Esperando você e Comparecimento.",
+      "O calendário abre na <strong>semana</strong>, com grade de horas das 6h às 22h, que <strong>rola dentro do cartão</strong>. A semana começa na <strong>segunda</strong>. Hoje está destacado.",
+      "Setas <strong>‹ ›</strong> trocam de semana e <strong>“Hoje”</strong> volta. Troque para <strong>Mês</strong>: um quadrado por dia; clicar no número do dia abre aquela semana.",
+      "Clique <strong>“Agendar sessão”</strong> e marque uma sessão para <strong>hoje, daqui a pouco</strong>. Ela aparece na grade, no horário certo.",
+      "Clique na sessão na grade: abre uma caixinha com <strong>Veio, Faltou e Cancelar</strong>. Marque <strong>Veio</strong>: ela muda de cor.",
+      "Marque uma sessão <strong>passada</strong> que ainda estava agendada: ela sai de <strong>“Esperando sua marcação”</strong> à direita, e o número <strong>“Esperando você”</strong> cai.",
+      "Clique <strong>“Liberar reavaliação”</strong> para a outra conta de aluno. Na faixa do alto do dia de hoje aparece um chip de <strong>reavaliação liberada</strong>, e ela entra em <strong>“Reavaliações esperando o aluno”</strong>.",
+      "No celular, com a conta desse aluno, responda à reavaliação. De volta ao painel (recarregue): ela sai de “esperando” e aparece em <strong>“Respondidas recentemente”</strong>. Clique: abre a <strong>comparação</strong>.",
+      "O <strong>Comparecimento</strong> é em %, e sessão <strong>cancelada não conta</strong> como falta. Sem nenhuma sessão fechada no mês, ele mostra <strong>“—”</strong>, não 0%.",
+    ],
+  },
+  {
+    n: "Parte 11", titulo: "Configurações", duracao: "6 min",
+    nota: "O cartão de perfil em cima e dois cartões embaixo. No lugar de “Plano e assinatura” está o alerta de inatividade. Você passa a poder <b>mudar o próprio nome</b>, que é o que o aluno vê no app.",
+    passos: [
+      "Painel → <strong>Configurações</strong>. Cartão <strong>Perfil</strong> com suas iniciais, nome, e-mail (“É o seu login”) e WhatsApp.",
+      "Clique <strong>“Editar perfil”</strong> (no topo). Mude seu nome — acrescente um sobrenome — e salve. O pé da barra lateral e o avatar do canto <strong>já mostram o nome novo</strong>.",
+      "No celular, com a conta do outro aluno, abra o Perfil: o card do personal mostra o <strong>nome novo</strong>. Volte seu nome ao que era.",
+      "Em <strong>Segurança → Trocar senha</strong>, digite uma senha atual <strong>errada</strong>. Aparece <strong>“Essa não é a sua senha atual.”</strong>",
+      "Senha atual certa, nova <strong>“12345678”</strong>: recusada, pede <strong>uma letra</strong>. <em>Antes dava para trocar uma senha forte por “12345678” justamente aqui.</em>",
+      "Troque para uma senha válida: aparece <strong>“Senha trocada.”</strong> Clique <strong>“Sair da conta”</strong> e entre com a senha nova.",
+      "<strong>Alerta de inatividade:</strong> mude de 7 para 5 dias e salve. Em Alunos, o filtro vira <strong>“5+ dias”</strong>. Volte para 7.",
+    ],
+  },
+  {
+    n: "Parte 12", titulo: "O aluno pausado", duracao: "7 min", critica: true,
+    nota: "<strong>Não existe botão no painel para arquivar um aluno</strong> — nunca existiu, e eu só percebi montando este roteiro. A regra está pronta no banco e no app desde 26/09; falta a porta. <b>Quando chegar aqui, me mande “pode pausar o [nome]”</b> e eu mudo pelo banco. Esta parte é crítica porque um defeito deixaria um aluno pausado ver a turma.",
+    passos: [
+      "Depois da minha confirmação, abra o app com a conta do aluno pausado. A home vira <strong>“Seu acesso está pausado”</strong>, dizendo que <strong>nada foi apagado</strong>. Não diz “arquivado” nem o motivo.",
+      "A tela mostra o card do personal (“Fale com quem te treina”) e as duas portas que continuam abertas: <strong>“Seu histórico”</strong> e o <strong>Perfil</strong>.",
+      "Tente abrir <code>repsclub.com.br/app/treinos</code> e o <strong>Feed</strong> pela barra de endereço. Os dois caem na <strong>mesma tela de pausa</strong>.",
+      "Abra <strong>Seu histórico</strong>: os treinos antigos estão lá, série por série. Abra o <strong>Perfil</strong>: dá para editar os próprios dados.",
+      "Com a sua conta (você mesmo, aluno ativo), abra o Feed: um post <strong>antigo</strong> do aluno pausado <strong>continua aparecendo, com o nome dele</strong>. <em>Pausar alguém não apaga o que os colegas já viram.</em>",
+      "No painel, o aluno aparece como <strong>Inativo</strong> em Alunos e sai de “Precisam de atenção”. Você <strong>continua conseguindo comentar</strong> num post dele.",
+      "Me mande <strong>“pode reativar”</strong>. Com a conta dele, recarregue o app: a home volta ao normal e dá para começar treino.",
+    ],
+  },
+];
+
+const TOTAL = PARTES.reduce((s, p) => s + p.passos.length, 0);
+
+/* O documento onde as marcações deste roteiro vivem.
+ *
+ * **Uma constante, e não a string repetida nos dois lugares.** A escrita e o
+ * `onSnapshot` precisam apontar para o mesmo documento, e quando os roteiros
+ * foram criados por cópia a leitura ganhou chave nova e a escrita ficou com a
+ * do original: os três gravavam em "roteiro/m3" e liam de três lugares
+ * diferentes. O sintoma não é erro nenhum — é a página abrir vazia ao ser
+ * recarregada, e um roteiro sobrescrever as marcações do outro em silêncio.
+ */
+const DOCUMENTO = "roteiro/redesenho";
+
+/* Estado local. A chave de cada passo é o número que aparece na tela, para a
+   nota que o Otávio escrever e o passo que ele cita conversarem sem tradução. */
+let estado = {};
+let db = null;
+let gravando = null;
+
+/*
+ * O que foi marcado aqui e o servidor ainda não confirmou.
+ *
+ * Existe por causa de um defeito real: o `onSnapshot` substituía `estado` pelo
+ * que vinha do servidor, e `hasPendingWrites` só protege enquanto uma escrita
+ * está em voo — **não durante o intervalo do debounce**, quando ainda não há
+ * escrita nenhuma. Um retrato do servidor chegando nessa janela apagava a marca
+ * recém-feita, e a escrita seguinte gravava o estado já atropelado. Para quem
+ * está marcando, isso é "clico e não acontece nada".
+ *
+ * Agora o retrato do servidor é a **base**, e o que foi tocado aqui é aplicado
+ * por cima. `null` guarda o caso de desmarcar: é uma ausência deliberada, e sem
+ * ele o servidor ressuscitaria a marca que acabou de ser tirada.
+ */
+let meus = {};
+/* Cresce a cada toque. Serve para saber se algo mudou enquanto a escrita ia. */
+let edicoes = 0;
+
+function contar() {
+  let ok = 0, fail = 0;
+  for (const v of Object.values(estado)) {
+    if (v && v.marca === "ok") ok++;
+    if (v && v.marca === "fail") fail++;
+  }
+  return { ok, fail, resta: TOTAL - ok - fail };
+}
+
+function pintarContagens() {
+  const { ok, fail, resta } = contar();
+  document.getElementById("n-ok").textContent = ok + " ok";
+  document.getElementById("n-fail").textContent = fail + " ✗";
+  document.getElementById("n-resta").textContent = resta + " a fazer";
+  document.getElementById("b-ok").style.width = (ok / TOTAL * 100) + "%";
+  document.getElementById("b-fail").style.width = (fail / TOTAL * 100) + "%";
+  document.getElementById("f-ok").textContent = ok;
+  document.getElementById("f-fail").textContent = fail;
+  document.getElementById("f-resta").textContent = resta;
+}
+
+function pintarPasso(n) {
+  const linha = document.getElementById("passo-" + n);
+  if (!linha) return;
+  const marca = (estado[n] && estado[n].marca) || null;
+  linha.dataset.estado = marca || "";
+  for (const botao of linha.querySelectorAll(".marcar")) {
+    botao.setAttribute("aria-pressed", String(botao.dataset.tipo === marca));
+  }
+  const caixa = document.getElementById("nota-caixa-" + n);
+  caixa.hidden = marca !== "fail";
+  const campo = document.getElementById("nota-" + n);
+  const texto = (estado[n] && estado[n].nota) || "";
+  // Não reescreve o campo em foco: sobrescrever o que está sendo digitado é
+  // como um salvamento automático engole o texto de quem escreve devagar.
+  if (document.activeElement !== campo && campo.value !== texto) campo.value = texto;
+}
+
+function pintarTudo() {
+  for (let n = 1; n <= TOTAL; n++) pintarPasso(n);
+  pintarContagens();
+}
+
+function salvar() {
+  if (!db) return;
+  clearTimeout(gravando);
+  gravando = setTimeout(async () => {
+    const naEscrita = edicoes;
+    try {
+      await db
+        .doc(DOCUMENTO)
+        .set({ passos: estado, atualizadoEm: new Date().toISOString() });
+
+      // Só solta o que foi enviado se nada mudou enquanto a escrita ia e
+      // voltava — senão o toque dado no meio do caminho perderia a proteção.
+      if (edicoes === naEscrita) meus = {};
+      avisar(null);
+    } catch {
+      // Fica pendente de propósito: a próxima escrita leva tudo junto, e a
+      // tela avisa em vez de fingir que gravou.
+      avisar("Não consegui salvar a última marcação. Ela continua na tela e eu tento de novo no próximo toque.");
+    }
+  }, 300);
+}
+
+/** Registra um toque: na tela, e na lista do que o servidor ainda não sabe. */
+function registrar(n, valor) {
+  if (valor) {
+    estado[n] = valor;
+    meus[n] = valor;
+  } else {
+    delete estado[n];
+    meus[n] = null;
+  }
+  edicoes += 1;
+  salvar();
+}
+
+function marcar(n, tipo) {
+  const atual = (estado[n] && estado[n].marca) || null;
+  const nova = atual === tipo ? null : tipo;
+  const nota = (estado[n] && estado[n].nota) || "";
+  registrar(n, nova || nota ? { marca: nova, nota } : null);
+  pintarPasso(n);
+  pintarContagens();
+  if (nova === "fail") {
+    const campo = document.getElementById("nota-" + n);
+    requestAnimationFrame(() => campo.focus());
+  }
+}
+
+function anotar(n, texto) {
+  registrar(n, { marca: (estado[n] && estado[n].marca) || "fail", nota: texto });
+}
+
+/* ------------------------------------------------------------- montagem -- */
+
+const alvo = document.getElementById("partes");
+let numero = 0;
+
+for (const parte of PARTES) {
+  const secao = document.createElement("section");
+  if (parte.critica) secao.className = "critica";
+
+  const cabeca = document.createElement("div");
+  cabeca.className = "cabeca";
+  cabeca.innerHTML =
+    '<span class="parte-n">' + parte.n + '</span>' +
+    '<h2>' + parte.titulo + '</h2>' +
+    '<span class="duracao">' + parte.duracao + '</span>';
+  secao.appendChild(cabeca);
+
+  const nota = document.createElement("p");
+  nota.className = "nota-parte";
+  nota.innerHTML = parte.nota;
+  secao.appendChild(nota);
+
+  const lista = document.createElement("div");
+  lista.className = "lista";
+
+  for (const texto of parte.passos) {
+    numero += 1;
+    const n = numero;
+
+    const linha = document.createElement("div");
+    linha.className = "passo";
+    linha.id = "passo-" + n;
+    linha.innerHTML =
+      '<span class="num">' + n + '</span>' +
+      '<div class="texto">' + texto + '</div>' +
+      '<div class="marcas">' +
+        '<button type="button" class="marcar" data-tipo="ok" id="ok-' + n + '" aria-pressed="false">' +
+          '<span class="glifo" aria-hidden="true">✓</span>ok</button>' +
+        '<button type="button" class="marcar" data-tipo="fail" id="fail-' + n + '" aria-pressed="false">' +
+          '<span class="glifo" aria-hidden="true">✗</span>deu errado</button>' +
+      '</div>' +
+      '<div class="caixa-nota" id="nota-caixa-' + n + '" hidden>' +
+        '<label class="rotulo" for="nota-' + n + '">O que apareceu na tela?</label>' +
+        '<textarea id="nota-' + n + '" placeholder="A frase exata, mesmo que pareça bobo."></textarea>' +
+      '</div>';
+
+    linha.querySelector('[data-tipo="ok"]').setAttribute("aria-label", "Passo " + n + " passou");
+    linha.querySelector('[data-tipo="fail"]').setAttribute("aria-label", "Passo " + n + " deu errado");
+    lista.appendChild(linha);
+  }
+
+  secao.appendChild(lista);
+  alvo.appendChild(secao);
+}
+
+alvo.addEventListener("click", (evento) => {
+  const botao = evento.target.closest(".marcar");
+  if (!botao) return;
+  marcar(Number(botao.id.split("-")[1]), botao.dataset.tipo);
+});
+
+alvo.addEventListener("input", (evento) => {
+  const campo = evento.target.closest("textarea");
+  if (!campo) return;
+  anotar(Number(campo.id.split("-")[1]), campo.value);
+});
+
+pintarTudo();
+
+/* ---------------------------------------------------------- persistência -- */
+
+const aviso = document.getElementById("aviso");
+const avisoTexto = document.getElementById("aviso-texto");
+const AVISO_NORMAL = avisoTexto.textContent;
+
+/** `null` devolve o aviso ao normal; texto o põe em estado de problema. */
+function avisar(texto) {
+  aviso.dataset.estado = texto ? "offline" : "";
+  avisoTexto.textContent = texto || AVISO_NORMAL;
+}
+
+(async () => {
+
+  db = await window.claude?.use?.("db");
+
+  if (!db) {
+    avisar("As marcações desta sessão não estão sendo salvas. Dá para usar o roteiro assim mesmo, mas não feche a aba — e me conte o resultado por mensagem.");
+    return;
+  }
+
+  db.doc(DOCUMENTO).onSnapshot(
+    (snapshot) => {
+      // Enquanto a escrita própria não confirma, a tela local já está certa:
+      // adotar a volta do servidor aqui faria o toque piscar para trás.
+      if (snapshot.metadata.hasPendingWrites) return;
+
+      // O servidor é a base; o que foi tocado aqui e ainda não foi confirmado
+      // vai por cima. Substituir direto era o defeito — apagava a marca feita
+      // durante o intervalo do debounce.
+      const dados = snapshot.data();
+      const doServidor = { ...((dados && dados.passos) || {}) };
+      for (const [n, valor] of Object.entries(meus)) {
+        if (valor) doServidor[n] = valor;
+        else delete doServidor[n];
+      }
+      estado = doServidor;
+      pintarTudo();
+    },
+    () => {
+      avisar("Perdemos a conexão com o armazenamento. O que você marcar agora fica só nesta aba.");
+    },
+  );
+})();
+</script>

@@ -9,6 +9,7 @@ lista, e ela mora no HTML.
     python3 docs/plan/gerar-roteiro.py                 # M3-roteiro
     python3 docs/plan/gerar-roteiro.py M3-reteste
     python3 docs/plan/gerar-roteiro.py painel-roteiro
+    python3 docs/plan/gerar-roteiro.py redesenho-roteiro
 """
 
 import html
@@ -113,9 +114,42 @@ Em cada passo: **aconteceu o que está escrito?**
 - ❌ não → **escreva a frase que apareceu na tela**
 """
 
+CABECALHO_REDESENHO = """# Roteiro · o painel redesenhado, e o que veio junto
+
+> **Este arquivo é gerado** por `docs/plan/gerar-roteiro.py redesenho-roteiro`, a
+> partir de `redesenho-roteiro.html` — a página que o Otávio abre para marcar.
+> Editar os passos aqui não muda a página; edite o HTML e rode o script.
+>
+> **Página para marcar:** <https://claude.ai/artifact/Nk9iSr4VhP39ZxzcTuj5Vx>
+>
+> Tudo o que entrou **depois da rodada de 57 passos de 17/09**: o painel inteiro no
+> layout dos protótipos, o menu ⋮ da execução, o "Como fazer", o RIR, a pausa de
+> acesso do aluno inativo e o portão de termos dos dois lados. Cerca de 1h20, em
+> duas sentadas (Partes 1–6 e 7–12).
+
+## Antes de começar
+
+- **Onde:** `repsclub.com.br`, painel no computador e app no celular ao mesmo tempo.
+- **A Parte 1 vem primeiro porque trava o resto:** os documentos mudaram de versão.
+- **Duas contas de aluno:** você mesmo e mais uma (Partes 1, 10 e 12).
+- **A Parte 12 depende de mim:** não existe botão para arquivar aluno; eu mudo o
+  status pelo banco quando você chegar lá.
+- **Faça na ordem.** O treino montado na Parte 6 é o executado na Parte 8.
+
+O sinal de que o deploy chegou: clicar num espaço vazio da barra lateral a recolhe.
+
+## O que anotar
+
+Em cada passo: **aconteceu o que está escrito?**
+
+- ✅ sim
+- ❌ não → **escreva a frase que apareceu na tela**
+"""
+
 CABECALHOS = {
     "M3-reteste": CABECALHO_RETESTE,
     "painel-roteiro": CABECALHO_PAINEL,
+    "redesenho-roteiro": CABECALHO_REDESENHO,
 }
 
 CABECALHO = CABECALHOS.get(NOME, CABECALHO_COMPLETO)
@@ -145,7 +179,22 @@ doc 06 fecha. O que sobra do painel é a sidebar colapsável e o dashboard maior
 dos protótipos — e esse depende de decidir se o Reps Club vai cuidar de cobrança.
 """
 
-RODAPE = RODAPE_PAINEL if NOME == "painel-roteiro" else RODAPE_M3
+RODAPE_REDESENHO = """
+---
+
+## Quando terminar
+
+Me diga que terminou — eu leio as marcações e as notas direto da página.
+
+As duas partes que mais importam são a **6** (o segundo "Enviar para o aluno" não
+pode apagar histórico) e a **12** (aluno pausado não pode ver a turma nem treinar).
+Se as duas passarem, o redesenho do painel está validado em campo.
+"""
+
+RODAPE = {
+    "painel-roteiro": RODAPE_PAINEL,
+    "redesenho-roteiro": RODAPE_REDESENHO,
+}.get(NOME, RODAPE_M3)
 
 
 def para_markdown(trecho: str) -> str:
