@@ -450,6 +450,16 @@ Provar que funciona sem o Otávio ler código:
   que são duas coisas. Última reavaliação e anotações privadas continuam abaixo do
   programa (o protótipo não as desenha), e o "Falar no WhatsApp" desceu para o fim do
   cartão de identidade, depois dos dados.
+- **[2026-09-28, pedido do Otávio]** **A barra lateral recolhe e expande com um clique em
+  qualquer lugar livre dela**, não só na seta. Link e botão continuam fazendo o que
+  fazem — o clique neles não alterna (`closest("a, button, …")`). **A seta fica**: é o
+  caminho do teclado e do leitor de tela, porque um `<aside>` clicável não recebe foco
+  nem se anuncia; o clique na barra é atalho de mouse, não o único jeito. O pé da barra
+  virou um cartão com as iniciais, o nome e "Sua conta" (levando às configurações) e a
+  saída como ícone ao lado; **recolhida, a saída continua lá**, embaixo das iniciais —
+  antes a faixa de ícones mostrava só as iniciais, e sair exigia expandir primeiro. O
+  indicador de desenvolvimento do Next foi para o canto direito: no esquerdo ele cobria
+  exatamente esse pé.
 - **[2026-09-28, pedido do Otávio]** **Configurações segue o protótipo:** o cartão
   "Perfil" em cima (iniciais, nome, e-mail e WhatsApp), com "Editar perfil" no
   cabeçalho da página, e embaixo dois cartões — **Alerta de inatividade** no lugar de

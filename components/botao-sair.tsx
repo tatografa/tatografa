@@ -1,5 +1,6 @@
 "use client";
 
+import { LogOut } from "lucide-react";
 import { useTransition } from "react";
 
 import { Button } from "@/components/ui";
@@ -20,6 +21,7 @@ export function BotaoSair({
   size = "sm",
   block = false,
   rotulo = "Sair",
+  apenasIcone = false,
 }: {
   variant?: "secondary" | "danger";
   /** `sm` cabe na barra do painel; no celular o alvo precisa dos 44px. */
@@ -27,8 +29,29 @@ export function BotaoSair({
   block?: boolean;
   /** "Sair da conta" onde o botão mora longe do nome de quem está logado. */
   rotulo?: string;
+  /**
+   * Só o ícone, para o pé da barra lateral do painel: ao lado do nome de quem
+   * está logado, a palavra "Sair" repete o que o ícone já diz, e na barra
+   * recolhida não há largura para ela. O nome continua no `aria-label`.
+   */
+  apenasIcone?: boolean;
 }) {
   const [saindo, iniciarTransicao] = useTransition();
+
+  if (apenasIcone) {
+    return (
+      <button
+        type="button"
+        disabled={saindo}
+        onClick={() => iniciarTransicao(() => sair())}
+        aria-label={saindo ? "Saindo…" : rotulo}
+        title={rotulo}
+        className="flex size-9 shrink-0 items-center justify-center rounded-[9px] text-ink-4 transition hover:bg-surface hover:text-brand disabled:opacity-60"
+      >
+        <LogOut size={17} aria-hidden />
+      </button>
+    );
+  }
 
   return (
     <Button

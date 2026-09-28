@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  /*
+   * O indicador do Next (o "N" preto, só em desenvolvimento) nasce no canto
+   * inferior esquerdo — exatamente em cima do pé da barra lateral do painel,
+   * onde ficam o nome e o botão de sair. No canto direito ele não cobre nada.
+   */
+  devIndicators: { position: "bottom-right" },
+
   experimental: {
     /*
      * Detecção de conexão e **reenvio automático** de navegação, prefetch e

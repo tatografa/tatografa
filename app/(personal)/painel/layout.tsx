@@ -73,7 +73,7 @@ export default async function PainelLayout({
       <NavegacaoLateral
         nome={trainer.name}
         alunos={alunos}
-        sair={<BotaoSair />}
+        sair={<BotaoSair apenasIcone rotulo="Sair da conta" />}
       />
 
       {/*

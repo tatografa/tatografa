@@ -114,14 +114,28 @@ function Lateral({
 
   const pathname = usePathname();
 
+  /*
+   * Clicar em qualquer lugar livre da barra recolhe ou expande (pedido do
+   * Otávio, 28/09): o alvo do botão é pequeno, e a barra inteira é um alvo que
+   * não se erra. Link e botão continuam fazendo o que fazem — o clique neles
+   * não chega a alternar. O botão da seta fica, porque é o caminho do teclado e
+   * do leitor de tela: um `<aside>` clicável não recebe foco nem se anuncia.
+   */
+  function aoClicarNaBarra(evento: React.MouseEvent<HTMLElement>) {
+    if ((evento.target as HTMLElement).closest("a, button, input, select, textarea")) return;
+    alternar();
+  }
+
   return (
     <aside
+      onClick={aoClicarNaBarra}
+      title={colapsada ? "Clique para expandir o menu" : undefined}
       data-colapsada={colapsada ? "" : undefined}
       // Um cartão flutuando no fundo cinza, como no protótipo: 13px da borda
       // da janela, cantos de 20px. Pregado com `sticky` e não `fixed` — a
       // janela continua sendo quem rola, e o conteúdo ao lado não precisa
       // reservar espaço para ele.
-      className={`sticky top-[13px] flex h-[calc(100dvh-26px)] shrink-0 flex-col rounded-[20px] bg-surface py-[18px] shadow-xs transition-[width] duration-200 ${
+      className={`sticky top-[13px] flex h-[calc(100dvh-26px)] shrink-0 cursor-pointer flex-col rounded-[20px] bg-surface py-[18px] shadow-xs transition-[width] duration-200 ${
         colapsada ? "w-[68px]" : "w-[252px]"
       }`}
     >
@@ -166,23 +180,42 @@ function Lateral({
         </ul>
       </nav>
 
-      <div className={`mx-3.5 border-t border-border-soft pt-3 ${colapsada ? "flex justify-center" : ""}`}>
-        {colapsada ? (
-          <span
-            title={nome}
-            aria-hidden
-            className="flex size-9 items-center justify-center rounded-full bg-ink text-[12px] font-bold text-white"
+      {/*
+        O pé da barra: quem está logado e a saída. Um cartão só, com as
+        iniciais levando às configurações — é onde a conta mora, como o avatar
+        do canto da página. Recolhida, as iniciais e a saída ficam uma sobre a
+        outra: antes a faixa de ícones mostrava só as iniciais, e sair exigia
+        expandir a barra primeiro.
+      */}
+      <div className="mx-3 mt-3">
+        <div
+          className={`flex items-center rounded-[12px] border border-border-soft bg-canvas ${
+            colapsada ? "flex-col gap-1.5 px-1 py-2" : "gap-2.5 py-2 pr-1.5 pl-2"
+          }`}
+        >
+          <Link
+            href="/painel/configuracoes"
+            aria-label={`Sua conta: ${nome}`}
+            title={colapsada ? nome : undefined}
+            className={`flex min-w-0 items-center gap-2.5 rounded-[9px] transition hover:opacity-85 ${
+              colapsada ? "" : "flex-1"
+            }`}
           >
-            {iniciaisDe(nome)}
-          </span>
-        ) : (
-          <div className="flex items-center justify-between gap-2">
-            <span className="min-w-0 truncate text-[13px] font-semibold text-ink-2">
-              {nome}
+            <span
+              aria-hidden
+              className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-[12px] font-bold text-white"
+            >
+              {iniciaisDe(nome)}
             </span>
-            {sair}
-          </div>
-        )}
+            {!colapsada && (
+              <span className="min-w-0" aria-hidden>
+                <span className="block truncate text-[13px] font-semibold text-ink">{nome}</span>
+                <span className="block truncate text-[11.5px] text-ink-4">Sua conta</span>
+              </span>
+            )}
+          </Link>
+          {sair}
+        </div>
       </div>
     </aside>
   );
