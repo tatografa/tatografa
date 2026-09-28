@@ -410,6 +410,10 @@ Provar que funciona sem o Otávio ler código:
   de…" e um cartão por treino) e o **programa atual** à direita, com as abas Planilha e
   Gráfico. Colunas por container query: três a partir de 1040px de conteúdo, duas
   (identidade + programa em cima da atividade) a partir de 680, uma abaixo disso.
+  **As laterais são percentuais (26% e 37%, pedido do Otávio, 28/09)**, e a atividade
+  fica com o que sobra: a primeira versão tinha 230 e 350px fixos, e a 1440px o feed
+  ocupava 45% da largura — a coluna que se lê rolando era a maior, e as duas que se
+  consultam num relance ficavam espremidas.
 - **[2026-09-28]** **Na atividade o cartão nasce da sessão, e o post pendura nela pelo
   `session_id`** (`montarAtividade`, `lib/domain/atividade.ts`). É o treino que o
   personal vem conferir; a foto é o que às vezes veio junto. Post avulso vira cartão

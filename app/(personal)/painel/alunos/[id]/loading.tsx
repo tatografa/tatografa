@@ -14,7 +14,7 @@ export default function CarregandoFichaDoAluno() {
           <Esqueleto className="h-[14px] w-32" />
         </div>
         <div className="@container">
-          <div className="grid gap-4 @min-[680px]:grid-cols-[220px_minmax(0,1fr)] @min-[1040px]:grid-cols-[230px_minmax(0,1fr)_minmax(300px,350px)]">
+          <div className="grid gap-4 @min-[680px]:grid-cols-[220px_minmax(0,1fr)] @min-[1040px]:grid-cols-[minmax(230px,26%)_minmax(0,1fr)_minmax(300px,37%)]">
             <Esqueleto className="h-[520px] rounded-[12px]" />
             <div className="space-y-3.5">
               <Esqueleto className="h-[78px] rounded-[12px]" />

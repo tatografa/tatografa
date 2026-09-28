@@ -129,7 +129,7 @@ export function FichaDoAluno({
       />
 
       <div className="@container">
-        <div className="grid items-start gap-4 @min-[680px]:grid-cols-[220px_minmax(0,1fr)] @min-[680px]:grid-rows-[auto_1fr] @min-[1040px]:grid-cols-[230px_minmax(0,1fr)_minmax(300px,350px)]">
+        <div className="grid items-start gap-4 @min-[680px]:grid-cols-[220px_minmax(0,1fr)] @min-[680px]:grid-rows-[auto_1fr] @min-[1040px]:grid-cols-[minmax(230px,26%)_minmax(0,1fr)_minmax(300px,37%)]">
           {/* ------------------------------------------- quem é o aluno --- */}
           <div className="flex min-w-0 flex-col gap-4 @min-[680px]:row-span-2">
             <IdentidadeDoAluno aluno={aluno} resumo={resumo} pesoInicial={pesoInicial} />
