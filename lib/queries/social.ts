@@ -29,6 +29,8 @@ export type PostDaCarteira = {
   semResposta: boolean;
   /** O treino que gerou o post, exercício por exercício. Nulo = post avulso. */
   treino: TreinoDoPostNoPainel | null;
+  /** A sessão que gerou o post — o perfil do aluno pendura o post nela. */
+  sessaoId: string | null;
 };
 
 export type TreinoDoPostNoPainel = {
@@ -155,6 +157,7 @@ export async function lerPostsDaCarteira(
       comentarios: doPost,
       semResposta: !doPost.some((c) => c.doPersonal),
       treino: p.session_id ? (treinos.get(p.session_id) ?? null) : null,
+      sessaoId: p.session_id,
     };
   });
 }
@@ -170,8 +173,12 @@ export async function lerPostsDaCarteira(
  *
  * Três idas fixas para o lote inteiro (sessões e séries em paralelo, depois as
  * linhas de prescrição) mais os nomes dos exercícios; nunca uma por post.
+ *
+ * Exportada porque o perfil do aluno desenha o mesmo bloco para a sessão que
+ * não virou post. Quem chama limita o lote: as séries vêm numa consulta só, e
+ * o corte de página do PostgREST é silencioso.
  */
-async function treinosDasSessoes(ids: string[]): Promise<Map<string, TreinoDoPostNoPainel>> {
+export async function treinosDasSessoes(ids: string[]): Promise<Map<string, TreinoDoPostNoPainel>> {
   const resultado = new Map<string, TreinoDoPostNoPainel>();
   if (!ids.length) return resultado;
 

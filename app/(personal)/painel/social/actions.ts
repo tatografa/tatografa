@@ -39,6 +39,8 @@ export async function responder(
   if (!ok) return { erro: "Não conseguimos enviar sua resposta agora.", texto: bruto.texto };
 
   revalidatePath("/painel/social");
+  // O mesmo post aparece na coluna "Atividade" do perfil do aluno.
+  revalidatePath("/painel/alunos/[id]", "page");
   return {};
 }
 
@@ -48,6 +50,9 @@ export async function curtirDoPainel(
 ): Promise<{ ok: boolean }> {
   const { trainer } = await requireTrainer();
   const ok = await gravarCurtida(trainer.id, postId, curtido);
-  if (ok) revalidatePath("/painel/social");
+  if (ok) {
+    revalidatePath("/painel/social");
+    revalidatePath("/painel/alunos/[id]", "page");
+  }
   return { ok };
 }

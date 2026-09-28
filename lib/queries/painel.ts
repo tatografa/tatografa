@@ -18,7 +18,7 @@ import {
   type Progressao,
 } from "@/lib/domain/dashboard";
 import { contarFeitas, rotuloDoDia } from "@/lib/domain/historico";
-import { volumeDaSessao } from "@/lib/domain/treino";
+import { semanaAtual, volumeDaSessao } from "@/lib/domain/treino";
 import { createClient } from "@/lib/supabase/server";
 
 import { listarAlunos, type AlunoDaLista } from "./alunos";
@@ -159,6 +159,12 @@ export type AlunoNaTabela = AlunoDaLista & {
    * primeiro quadro e "Há 2 dias" no seguinte.
    */
   dias_sem_treinar: number | null;
+  /**
+   * A semana do programa ativo, "3" de `programa.total_weeks`. Contada aqui
+   * pelo mesmo motivo de `dias_sem_treinar`: a conta é de dia de calendário,
+   * e no navegador usaria o relógio do aparelho.
+   */
+  semana_do_programa: number | null;
 };
 
 /**
@@ -195,6 +201,9 @@ export async function lerAlunosDaCarteira(): Promise<AlunoNaTabela[]> {
         programa?.total_treinos ?? 0,
       ),
       dias_sem_treinar: diasSemTreinar(aluno.ultima_sessao),
+      semana_do_programa: programa
+        ? semanaAtual(programa.started_at, programa.total_weeks)
+        : null,
     };
   });
 }

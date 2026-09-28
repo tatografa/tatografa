@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CalendarClock, ChevronLeft, ChevronRight, Dumbbell, Ruler, User } from "lucide-react";
 
 import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
+import { NumeroDoTopo } from "@/components/personal/numero-do-topo";
 import {
   CartaoDoPainel,
   LINHA_DO_CARTAO,
@@ -130,21 +131,21 @@ export function TelaAgenda({
           aria-label="Resumo da agenda"
           className="mb-4 grid grid-cols-2 gap-3.5 @min-[760px]:grid-cols-4"
         >
-          <Numero titulo="Próximos 7 dias" valor={String(indicadores.proximos7Dias)} apoio="sessões agendadas" />
-          <Numero
+          <NumeroDoTopo titulo="Próximos 7 dias" valor={String(indicadores.proximos7Dias)} apoio="sessões agendadas" />
+          <NumeroDoTopo
             titulo="Esperando o aluno"
             valor={String(pendentes.length)}
             apoio={pendentes.length === 1 ? "reavaliação sem resposta" : "reavaliações sem resposta"}
           />
-          <Numero
+          <NumeroDoTopo
             titulo="Esperando você"
             valor={String(semMarcacao.length)}
             apoio="sessões sem marcação"
             // A única que é trabalho do personal: presença que ninguém marcou
             // é aderência que o painel calcula errado.
-            destaque={semMarcacao.length > 0 ? "Marque quem veio" : undefined}
+            selo={semMarcacao.length > 0 ? "Marque quem veio" : undefined}
           />
-          <Numero
+          <NumeroDoTopo
             titulo="Comparecimento"
             valor={
               indicadores.comparecimento === null
@@ -268,35 +269,6 @@ export function TelaAgenda({
 }
 
 // ------------------------------------------------------------ o topo ---
-
-function Numero({
-  titulo,
-  valor,
-  apoio,
-  destaque,
-}: {
-  titulo: string;
-  valor: string;
-  apoio: string;
-  destaque?: string;
-}) {
-  return (
-    <div className="min-w-0 rounded-[12px] bg-canvas p-4">
-      <p className="text-[13px] text-ink-4">{titulo}</p>
-      <p className="mt-0.5 text-[26px] leading-tight font-bold tracking-[-0.02em] text-ink tabular-nums">
-        {valor}
-      </p>
-      <p className="mt-1 flex flex-wrap items-center gap-1.5 text-[12.5px] text-ink-4">
-        {apoio}
-        {destaque ? (
-          <span className="rounded-full bg-warning-bg px-2 py-px text-[11.5px] font-semibold text-warning">
-            {destaque}
-          </span>
-        ) : null}
-      </p>
-    </div>
-  );
-}
 
 function NavegacaoDoCalendario({
   visao,

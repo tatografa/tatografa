@@ -7,6 +7,7 @@ import {
   LINHAS_DO_CARTAO,
 } from "@/components/personal/cartao-do-painel";
 
+import { NumeroDoTopo } from "@/components/personal/numero-do-topo";
 import { comoPorcentagem, haQuantosDias } from "@/lib/domain/atencao";
 import { iniciaisDe } from "@/lib/domain/nome";
 import type {
@@ -48,22 +49,22 @@ export function Indicadores({
         aria-label="Resumo da carteira"
         className="grid grid-cols-2 gap-3.5 @min-[640px]:grid-cols-4"
       >
-        <Indicador
+        <NumeroDoTopo
           titulo="Alunos ativos"
           valor={String(alunosAtivos)}
           apoio="com acesso ao app"
         />
-        <Indicador
+        <NumeroDoTopo
           titulo="Treinos na semana"
           valor={String(treinosNaSemana)}
           apoio="desde segunda-feira"
         />
-        <Indicador
+        <NumeroDoTopo
           titulo="Aderência média"
           valor={comoPorcentagem(aderenciaMedia)}
           apoio="feitos sobre prescritos"
         />
-        <Indicador
+        <NumeroDoTopo
           titulo="Reavaliações"
           valor={String(reavaliacoesPendentes)}
           apoio="esperando resposta"
@@ -73,58 +74,6 @@ export function Indicadores({
       </section>
     </div>
   );
-}
-
-/**
- * Um ladrilho do topo, no desenho do protótipo: fundo preenchido e sem borda,
- * o nome em cima, o número grande no meio e uma frase curta embaixo.
- *
- * **Sem a pílula de variação ("+12%") que o protótipo põe no canto.** Ela
- * compara com o mês anterior, e o painel não guarda o valor do mês anterior de
- * nenhum destes quatro — calcular aderência de trinta dias atrás é refazer a
- * conta com outra janela, e mostrar a pílula sem essa conta seria número
- * inventado no lugar mais visível da tela.
- */
-function Indicador({
-  titulo,
-  valor,
-  apoio,
-  destaque = false,
-  href,
-}: {
-  titulo: string;
-  valor: string;
-  apoio: string;
-  /** Pinta o número de `brand` quando há o que fazer com ele. */
-  destaque?: boolean;
-  href?: string;
-}) {
-  const classes = [
-    "block min-w-0 rounded-[12px] bg-canvas p-4 transition",
-    href ? "hover:bg-canvas-sunken" : "",
-  ].join(" ");
-
-  const conteudo = (
-    <>
-      <p className="text-[13px] text-ink-4">{titulo}</p>
-      <p
-        className={`mt-0.5 text-[26px] leading-tight font-bold tracking-[-0.02em] tabular-nums ${
-          destaque ? "text-brand" : "text-ink"
-        }`}
-      >
-        {valor}
-      </p>
-      <p className="mt-1 text-[12.5px] text-ink-4">{apoio}</p>
-    </>
-  );
-
-  if (href)
-    return (
-      <Link href={href} className={classes}>
-        {conteudo}
-      </Link>
-    );
-  return <div className={classes}>{conteudo}</div>;
 }
 
 /**

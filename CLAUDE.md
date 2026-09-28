@@ -376,6 +376,60 @@ Provar que funciona sem o Otávio ler código:
   Faltou e Cancelar moram no próprio popover, então marcar presença não exige sair do
   calendário; e a tela inteira continua componente servidor — os únicos pedaços cliente
   são os botões que já existiam.
+- **[2026-09-28, pedido do Otávio]** **Alunos segue o protótipo:** os quatro números em
+  ladrilho cinza, a busca com o botão "Filtros" que abre os filtros avançados em chips
+  (Status, Programa, Tempo sem treino), a tabela com avatar, pílula de status com ponto e
+  "Último treino" em vermelho com triângulo para quem passou do limiar, e o rodapé
+  "Mostrando N de M alunos". **As colunas de cobrança viraram as perguntas que sobram
+  delas:** "Plano" → **Programa** (nome e semana), "Vencimento" → **Aderência**,
+  "Tipo biológico" entrou como **Perfil biológico**. O filtro "Vencimento" não tem
+  equivalente e saiu; "Plano" virou "com programa / sem programa".
+- **[2026-09-28]** **Do protótipo de Alunos, três coisas não entraram.** *Caixinha de
+  seleção por linha:* não existe ação em lote, e caixa que se marca sem nada para fazer
+  com a marcação é controle mentindo. *Paginação de seis em seis:* carteira de piloto
+  cabe numa página, e paginar esconde do Ctrl+F e da ordenação o aluno que se procura —
+  quando a carteira passar de uma página de consulta, a busca vira filtro do servidor e a
+  paginação vem junto. *Avatar colorido por aluno:* cor por nome não carrega informação
+  e pediria seis tokens novos sem contraste medido; ficou o `brand-soft` do feed.
+  *Inativo* é cinza, não vermelho: arquivar é decisão do personal, não problema — o
+  vermelho da tabela é o do "último treino", que é o alerta.
+- **[2026-09-28]** **"Precisam de atenção" virou botão que liga o filtro "N+ dias" da
+  própria tabela**, com `aria-pressed`, e o degrau do filtro é o limiar configurado, não
+  o "4+ dias" fixo do protótipo: o número do ladrilho e o tamanho da lista que ele abre
+  saem da mesma função (`precisaDeAtencao`). **E o arquivado deixou de contar** — o
+  indicador somava quem o personal arquivou de propósito, ao contrário do alerta do
+  dashboard, que sempre o pulou. Só apareceu com o triângulo vermelho na linha de um
+  inativo, no screenshot.
+- **[2026-09-28]** **Terceiro ladrilho de número, e virou um só** (`NumeroDoTopo`):
+  painel, agenda e alunos tinham cada um a sua cópia, e a da agenda já tinha um selo que
+  as outras não sabiam desenhar. O conteúdo é `span`, não `p`, porque o mesmo ladrilho
+  vira `<button>`.
+- **[2026-09-28, pedido do Otávio]** **O perfil do aluno segue o protótipo em três
+  colunas:** quem é o aluno (avatar, status, sessões e dias seguidos, os dados e a meta de
+  peso num cartão à parte), a **atividade** no meio (faixa escura "Reps Club · Atividade
+  de…" e um cartão por treino) e o **programa atual** à direita, com as abas Planilha e
+  Gráfico. Colunas por container query: três a partir de 1040px de conteúdo, duas
+  (identidade + programa em cima da atividade) a partir de 680, uma abaixo disso.
+- **[2026-09-28]** **Na atividade o cartão nasce da sessão, e o post pendura nela pelo
+  `session_id`** (`montarAtividade`, `lib/domain/atividade.ts`). É o treino que o
+  personal vem conferir; a foto é o que às vezes veio junto. Post avulso vira cartão
+  próprio. O cartão é o **mesmo** do feed do painel (`CartaoDeAtividade`) — duas cópias
+  divergiriam, e a moldura de "sem foto" já tinha mudado uma vez. A sessão que não virou
+  post **não** desenha "Sem foto nesta execução": ela não ficou sem foto, ela não foi
+  publicada; e não tem curtida nem comentário, porque não há post onde comentar. Embaixo
+  do treino vai o que o histórico antigo mostrava numa linha — duração, "14 de 16
+  séries", volume, a observação do aluno e **"Série a série"**. Quinze cartões; o resto
+  das cinquenta sessões continua em "Treinos anteriores", compacto. O bloco escuro das
+  sessões sem post é buscado **só para os quinze cartões**: as séries vêm numa consulta
+  só, e o corte de página do PostgREST é silencioso.
+- **[2026-09-28]** **O "Gráfico" do programa é a evolução por exercício que já existia**,
+  não as barras "Carga / Repetição / Loads" do protótipo: é a mesma linha que o aluno vê
+  no app (M2-04), e duas curvas para "quanto ele evoluiu" fariam os dois conversarem sobre
+  números diferentes. A **Planilha** abre cada exercício num `<details>` com RIR,
+  descanso, técnica e observação. Última reavaliação e anotações privadas ficam na coluna
+  da direita, abaixo do programa — o protótipo não as desenha, e são o trabalho do
+  personal sobre o aluno. Nenhuma consulta nova: os posts saem de `lerPostsDaCarteira`
+  filtrado pelo aluno, e curtir/responder agora revalidam também o perfil.
 - **[2026-09-26, decisão do Otávio]** **Aluno inativo perde o acesso ao app.** O dado
   histórico fica — não se apaga nada —, mas o login é limitado até ele voltar a pagar.
   Duas camadas: o **banco** tranca a escrita (migration 0036) e a **tela** explica

@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { NumeroDoTopo } from "@/components/personal/numero-do-topo";
 import type { IndicadoresDaCarteira } from "@/lib/domain/carteira";
 import { DIAS_DE_ENTRADA } from "@/lib/domain/carteira";
 
@@ -13,15 +12,21 @@ import { DIAS_DE_ENTRADA } from "@/lib/domain/carteira";
  *
  * No lugar de renovações entra **quem precisa de atenção** — a única das quatro
  * que é fila de trabalho, e por isso a única que vira link. Zero não vira link:
- * levar a uma lista vazia é pior que não levar. Mesma regra do quarto indicador
- * do dashboard.
+ * levar a uma lista vazia é pior que não levar. Ela ocupa a terceira casa, onde
+ * o protótipo põe "Renovações", pelo mesmo motivo: é a que pede ação.
  */
 export function IndicadoresDaCarteiraNoTopo({
   indicadores,
   diasParaAlerta,
+  filtrandoAtencao,
+  aoFiltrarAtencao,
 }: {
   indicadores: IndicadoresDaCarteira;
   diasParaAlerta: number;
+  /** O filtro "N+ dias" da tabela está ligado. */
+  filtrandoAtencao: boolean;
+  /** Liga e desliga aquele filtro. */
+  aoFiltrarAtencao: () => void;
 }) {
   const { total, novosNoMes, ativos, fatiaDeAtivos, inativos, precisamDeAtencao } =
     indicadores;
@@ -29,78 +34,44 @@ export function IndicadoresDaCarteiraNoTopo({
   return (
     <section
       aria-label="Resumo da carteira"
-      className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+      className="grid grid-cols-2 gap-3.5 @min-[760px]:grid-cols-4"
     >
-      <Indicador
-        rotulo="Total de alunos"
-        valor={total}
+      <NumeroDoTopo
+        titulo="Total de alunos"
+        valor={String(total)}
         apoio={
           novosNoMes === 0
             ? `nenhum novo em ${DIAS_DE_ENTRADA} dias`
             : `${novosNoMes} ${novosNoMes === 1 ? "novo" : "novos"} em ${DIAS_DE_ENTRADA} dias`
         }
       />
-      <Indicador
-        rotulo="Ativos"
-        valor={ativos}
+      <NumeroDoTopo
+        titulo="Ativos"
+        valor={String(ativos)}
         apoio={fatiaDeAtivos === null ? "sem base para medir" : `${fatiaDeAtivos}% da carteira`}
-      />
-      <Indicador
-        rotulo="Inativos"
-        valor={inativos}
-        apoio={inativos === 0 ? "ninguém arquivado" : "arquivados por você"}
       />
       {/*
         "Precisam de atenção" usa o limiar que o personal configurou em
         /painel/configuracoes, e não um número fixo: é ajuste dele, e o texto
         precisa dizer qual é — "3 alunos" sem o "há 7 dias" não é informação.
+        O clique liga o filtro "N+ dias" da tabela logo abaixo, e não leva ao
+        painel: mandar para outra página para ver as mesmas pessoas seria um
+        clique para longe do que ele queria. Botão com `aria-pressed`, e não
+        link, porque o que ele faz é ligar e desligar.
       */}
-      <Indicador
-        rotulo="Precisam de atenção"
-        valor={precisamDeAtencao}
-        apoio={`sem treinar há ${diasParaAlerta} dias ou mais`}
+      <NumeroDoTopo
+        titulo="Precisam de atenção"
+        valor={String(precisamDeAtencao)}
+        apoio={`sem treinar há ${diasParaAlerta}+ dias`}
         destaque={precisamDeAtencao > 0}
-        href={precisamDeAtencao > 0 ? "/painel" : undefined}
+        aoClicar={precisamDeAtencao > 0 || filtrandoAtencao ? aoFiltrarAtencao : undefined}
+        ativo={filtrandoAtencao}
+      />
+      <NumeroDoTopo
+        titulo="Inativos"
+        valor={String(inativos)}
+        apoio={inativos === 0 ? "ninguém arquivado" : "arquivados por você"}
       />
     </section>
-  );
-}
-
-function Indicador({
-  rotulo,
-  valor,
-  apoio,
-  destaque = false,
-  href,
-}: {
-  rotulo: string;
-  valor: number;
-  apoio: string;
-  destaque?: boolean;
-  href?: string;
-}) {
-  const conteudo = (
-    <>
-      <p className="eyebrow text-ink-4">{rotulo}</p>
-      <p
-        className={`text-[26px] font-extrabold leading-none tracking-[-0.02em] tabular-nums ${
-          destaque ? "text-brand" : "text-ink"
-        }`}
-      >
-        {valor}
-      </p>
-      <p className="text-[12px] text-ink-4">{apoio}</p>
-    </>
-  );
-
-  const classe =
-    "block space-y-2 rounded-card border border-border bg-surface px-4 py-3.5";
-
-  return href ? (
-    <Link href={href} className={`${classe} transition hover:border-border-strong hover:bg-canvas-sunken`}>
-      {conteudo}
-    </Link>
-  ) : (
-    <div className={classe}>{conteudo}</div>
   );
 }

@@ -1,6 +1,6 @@
 import { Flame, MessageCircle, Zap } from "lucide-react";
 
-import { Badge } from "@/components/ui";
+import { StatusDoAluno } from "@/components/personal/status-do-aluno";
 import { diaLocal } from "@/lib/domain/fuso";
 import { formatarNumero } from "@/lib/domain/historico";
 import { iniciaisDe } from "@/lib/domain/nome";
@@ -8,7 +8,7 @@ import { idadeEmAnos, metaDePeso } from "@/lib/domain/perfil";
 import { formatarMedida } from "@/lib/domain/reavaliacao";
 import { formatarTelefone, linkDoWhatsApp } from "@/lib/domain/telefone";
 import type { AlunoDaFicha, ResumoDoAluno } from "@/lib/queries/alunos";
-import { NIVEL, OBJETIVO, PERFIL_BIOLOGICO, STATUS_DO_ALUNO } from "@/lib/rotulos";
+import { NIVEL, OBJETIVO, PERFIL_BIOLOGICO } from "@/lib/rotulos";
 
 /**
  * A coluna de identidade da ficha do aluno (doc 06 §4).
@@ -47,8 +47,21 @@ export function IdentidadeDoAluno({
     numeroOuNulo(aluno.weight_goal_kg),
   );
 
-  const linhas: { rotulo: string; valor: string }[] = [
-    { rotulo: "E-mail", valor: aluno.email },
+  // O e-mail quebra depois do "@", e não no meio do domínio: numa coluna de
+  // 230px ele não cabe numa linha, e "email.co / m" parece outro endereço.
+  const [usuario, dominio] = aluno.email.split("@");
+  const linhas: { rotulo: string; valor: React.ReactNode }[] = [
+    {
+      rotulo: "E-mail",
+      valor: dominio ? (
+        <>
+          {usuario}@<wbr />
+          {dominio}
+        </>
+      ) : (
+        aluno.email
+      ),
+    },
     { rotulo: "Telefone", valor: aluno.phone ? formatarTelefone(aluno.phone) : "Não informado" },
     {
       rotulo: "Cidade/UF",
@@ -72,66 +85,74 @@ export function IdentidadeDoAluno({
   ];
 
   return (
-    <aside className="space-y-4 rounded-card border border-border bg-surface p-5">
-      <div className="flex flex-col items-center gap-2.5 text-center">
-        <span
-          aria-hidden
-          className="flex size-[68px] items-center justify-center rounded-full bg-canvas-sunken text-[22px] font-extrabold text-ink-2"
-        >
-          {iniciaisDe(aluno.name)}
-        </span>
-        <h1 className="text-[20px] font-extrabold leading-tight tracking-[-0.02em] text-ink">
-          {aluno.name}
-        </h1>
-        <Badge tone={aluno.status === "ativo" ? "sucesso" : "neutro"}>
-          {STATUS_DO_ALUNO[aluno.status]}
-        </Badge>
-      </div>
+    <>
+      <section
+        aria-label={`Dados de ${aluno.name}`}
+        className="space-y-4 rounded-[12px] border border-border bg-surface p-5"
+      >
+        <div className="flex flex-col items-center gap-2 text-center">
+          <span
+            aria-hidden
+            className="flex size-[72px] items-center justify-center rounded-full bg-brand-soft text-[24px] font-bold text-brand"
+          >
+            {iniciaisDe(aluno.name)}
+          </span>
+          <h1 className="text-[18px] leading-tight font-semibold tracking-[-0.01em] text-ink">
+            {aluno.name}
+          </h1>
+          <StatusDoAluno status={aluno.status} />
+        </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        <Numero
-          Icone={Zap}
-          valor={formatarNumero(resumo.sessoesTotais)}
-          rotulo={resumo.sessoesTotais === 1 ? "sessão total" : "sessões totais"}
-        />
-        <Numero
-          Icone={Flame}
-          valor={String(resumo.diasSeguidos)}
-          rotulo={resumo.diasSeguidos === 1 ? "dia seguido" : "dias seguidos"}
-        />
-      </div>
+        {/* Um bloco com os dois números empilhados, como no protótipo: numa
+            coluna de 250px, lado a lado cada um teria 100px para "sessões
+            totais". */}
+        <div className="divide-y divide-border-soft rounded-[10px] bg-canvas">
+          <Numero
+            Icone={Zap}
+            valor={formatarNumero(resumo.sessoesTotais)}
+            rotulo={resumo.sessoesTotais === 1 ? "Sessão total" : "Sessões totais"}
+          />
+          <Numero
+            Icone={Flame}
+            valor={String(resumo.diasSeguidos)}
+            rotulo={resumo.diasSeguidos === 1 ? "Dia seguido" : "Dias seguidos"}
+          />
+        </div>
 
-      {/*
-        O WhatsApp fecha a volta: o aluno já tinha o botão do personal desde
-        15/09, e o personal não tinha o do aluno. Sem número o botão some — o
-        resto do cartão continua, porque ele diz quem é o aluno, e sumir por
-        falta de telefone faria a ficha mudar de forma por um dado opcional.
-      */}
-      {whatsapp ? (
-        <a
-          href={whatsapp}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex min-h-10 w-full items-center justify-center gap-2 rounded-input border-[1.5px] border-border bg-surface text-[13px] font-bold text-ink transition hover:border-border-strong hover:bg-canvas-sunken"
-        >
-          <MessageCircle size={15} aria-hidden />
-          Falar no WhatsApp
-        </a>
-      ) : null}
+        {/*
+          O WhatsApp fecha a volta: o aluno já tinha o botão do personal desde
+          15/09, e o personal não tinha o do aluno. Sem número o botão some — o
+          resto do cartão continua, porque ele diz quem é o aluno, e sumir por
+          falta de telefone faria a ficha mudar de forma por um dado opcional.
+        */}
+        {whatsapp ? (
+          <a
+            href={whatsapp}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex min-h-10 w-full items-center justify-center gap-2 rounded-input border-[1.5px] border-border bg-surface text-[13px] font-bold text-ink transition hover:border-border-strong hover:bg-canvas-sunken"
+          >
+            <MessageCircle size={15} aria-hidden />
+            Falar no WhatsApp
+          </a>
+        ) : null}
 
-      <dl className="divide-y divide-border-soft border-t border-border-soft">
-        {linhas.map((linha) => (
-          <div key={linha.rotulo} className="flex items-baseline justify-between gap-3 py-2">
-            <dt className="shrink-0 text-[12.5px] text-ink-4">{linha.rotulo}</dt>
-            <dd className="min-w-0 truncate text-right text-[12.5px] font-semibold text-ink">
-              {linha.valor}
-            </dd>
-          </div>
-        ))}
-      </dl>
+        {/* O valor quebra linha em vez de truncar: e-mail comprido numa coluna
+            estreita é o dado que o personal veio copiar. */}
+        <dl className="divide-y divide-border-soft border-t border-border-soft">
+          {linhas.map((linha) => (
+            <div key={linha.rotulo} className="flex items-baseline justify-between gap-3 py-2">
+              <dt className="shrink-0 text-[12.5px] text-ink-4">{linha.rotulo}</dt>
+              <dd className="min-w-0 text-right text-[12.5px] font-medium break-words text-ink">
+                {linha.valor}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </section>
 
       {meta ? <BarraDaMeta meta={meta} /> : null}
-    </aside>
+    </>
   );
 }
 
@@ -140,14 +161,14 @@ function Numero({
   valor,
   rotulo,
 }: {
-  Icone: React.ComponentType<{ size?: number; "aria-hidden"?: boolean }>;
+  Icone: React.ComponentType<{ size?: number; "aria-hidden"?: boolean; className?: string }>;
   valor: string;
   rotulo: string;
 }) {
   return (
-    <div className="space-y-0.5 rounded-card bg-canvas-sunken px-3 py-3 text-center">
-      <Icone size={15} aria-hidden />
-      <p className="text-[19px] font-extrabold leading-none tracking-[-0.02em] text-ink tabular-nums">
+    <div className="flex flex-col items-center gap-0.5 px-3 py-3 text-center">
+      <Icone size={15} aria-hidden className="text-brand" />
+      <p className="text-[19px] leading-none font-bold tracking-[-0.02em] text-ink tabular-nums">
         {valor}
       </p>
       <p className="text-[11px] text-ink-4">{rotulo}</p>
@@ -170,10 +191,10 @@ function BarraDaMeta({
 }) {
   const chegou = meta.faltam < 0.05;
   return (
-    <section className="space-y-2 border-t border-border-soft pt-3.5">
-      <div className="flex items-baseline justify-between gap-2">
-        <h2 className="eyebrow text-ink-4">Meta de peso</h2>
-        <p className="text-[11.5px] text-ink-4">
+    <section className="space-y-2.5 rounded-[12px] border border-border bg-surface p-5">
+      <div>
+        <h2 className="text-[14px] font-medium text-ink">Meta de peso</h2>
+        <p className="mt-0.5 text-[12px] text-ink-5">
           {chegou
             ? "Meta alcançada"
             : `Faltam ${formatarMedida(meta.faltam)} kg · ${Math.round(meta.progresso * 100)}% do caminho`}
@@ -191,10 +212,19 @@ function BarraDaMeta({
         />
       </div>
 
-      <div className="flex justify-between font-mono text-[10.5px] text-ink-5 tabular-nums">
-        <span>{formatarMedida(meta.inicial)} kg · inicial</span>
-        <span className="font-bold text-ink">{formatarMedida(meta.atual)} kg · atual</span>
-        <span>{formatarMedida(meta.meta)} kg · meta</span>
+      <div className="flex justify-between gap-2 text-[12px] tabular-nums">
+        <span className="text-ink-3">
+          {formatarMedida(meta.inicial)} kg
+          <span className="block text-[11px] text-ink-5">inicial</span>
+        </span>
+        <span className="text-center font-bold text-ink">
+          {formatarMedida(meta.atual)} kg
+          <span className="block text-[11px] font-normal text-ink-5">atual</span>
+        </span>
+        <span className="text-right text-ink-3">
+          {formatarMedida(meta.meta)} kg
+          <span className="block text-[11px] text-ink-5">meta</span>
+        </span>
       </div>
     </section>
   );

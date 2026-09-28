@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
 import { ConvidarAluno } from "@/app/(personal)/painel/convidar-aluno";
-import { IndicadoresDaCarteiraNoTopo } from "@/components/personal/indicadores-da-carteira";
 import { TabelaDeAlunos } from "@/components/personal/tabela-de-alunos";
 import { requireTrainer } from "@/lib/auth/session";
 import { indicadoresDaCarteira } from "@/lib/domain/carteira";
@@ -42,21 +41,19 @@ export default async function AlunosPage() {
   );
 
   return (
-    <div className="space-y-8">
+    <div className="@container">
       <CabecalhoDaPagina
         titulo="Alunos"
         subtitulo="Visualize e gerencie todos os alunos da sua consultoria"
         acoes={<ConvidarAluno />}
       />
 
-      {alunos.length > 0 && (
-        <IndicadoresDaCarteiraNoTopo
-          indicadores={indicadores}
-          diasParaAlerta={trainer.dias_para_alerta}
-        />
-      )}
-
-      <TabelaDeAlunos alunos={alunos} idDoPersonal={trainer.id} />
+      <TabelaDeAlunos
+        alunos={alunos}
+        idDoPersonal={trainer.id}
+        indicadores={indicadores}
+        diasParaAlerta={trainer.dias_para_alerta}
+      />
     </div>
   );
 }

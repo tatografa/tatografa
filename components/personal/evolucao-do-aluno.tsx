@@ -43,57 +43,64 @@ export function EvolucaoDoAluno({
   const atual = exercicios.find((e) => e.chave === chave) ?? exercicios[0];
 
   return (
-    <div className="grid gap-5 md:grid-cols-[minmax(0,230px)_minmax(0,1fr)]">
-      <ul
-        aria-label="Exercícios com histórico"
-        className="max-h-[420px] space-y-1 overflow-y-auto pr-1"
-      >
-        {exercicios.map((exercicio) => (
-          <li key={exercicio.chave}>
-            <button
-              type="button"
-              onClick={() => setChave(exercicio.chave)}
-              aria-current={exercicio.chave === atual.chave ? "true" : undefined}
-              className={cn(
-                "w-full rounded-[9px] px-3 py-2 text-left transition",
-                exercicio.chave === atual.chave
-                  ? "bg-canvas-sunken"
-                  : "hover:bg-canvas-sunken/60",
-              )}
-            >
-              <span className="block truncate text-[13.5px] font-semibold text-ink">
-                {exercicio.nome}
-              </span>
-              <span className="mt-0.5 block text-[12px] text-ink-4">
-                {ultimoRegistro(exercicio)} ·{" "}
-                {exercicio.sessoes.length === 1
-                  ? "1 treino"
-                  : `${exercicio.sessoes.length} treinos`}
-              </span>
-            </button>
-          </li>
-        ))}
-      </ul>
+    // Colunas pela largura de onde ele está, não da janela: no perfil do aluno
+    // o gráfico mora numa coluna de 360px, e a lista ao lado do gráfico
+    // espremeria os dois.
+    <div className="@container">
+      <div className="grid gap-5 @min-[560px]:grid-cols-[minmax(0,230px)_minmax(0,1fr)]">
+        <ul
+          aria-label="Exercícios com histórico"
+          className="max-h-[200px] space-y-1 overflow-y-auto pr-1 @min-[560px]:max-h-[420px]"
+        >
+          {exercicios.map((exercicio) => (
+            <li key={exercicio.chave}>
+              <button
+                type="button"
+                onClick={() => setChave(exercicio.chave)}
+                aria-current={
+                  exercicio.chave === atual.chave ? "true" : undefined
+                }
+                className={cn(
+                  "w-full rounded-[9px] px-3 py-2 text-left transition",
+                  exercicio.chave === atual.chave
+                    ? "bg-canvas-sunken"
+                    : "hover:bg-canvas-sunken/60",
+                )}
+              >
+                <span className="block truncate text-[13.5px] font-semibold text-ink">
+                  {exercicio.nome}
+                </span>
+                <span className="mt-0.5 block text-[12px] text-ink-4">
+                  {ultimoRegistro(exercicio)} ·{" "}
+                  {exercicio.sessoes.length === 1
+                    ? "1 treino"
+                    : `${exercicio.sessoes.length} treinos`}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
 
-      {/*
+        {/*
         Largura máxima no gráfico: o SVG escala com o contêiner, e numa tela de
         1280px ele passaria de 480px de altura — uma linha gigante para ler um
         número. Limitar aqui, e não no componente, mantém o gráfico do app do
         aluno de borda a borda no celular, que é o que o doc 05 pede.
       */}
-      <div className="min-w-0 max-w-[620px] space-y-4">
-        <div>
-          <h3 className="text-[16px] font-extrabold tracking-[-0.02em] text-ink">
-            {atual.nome}
-          </h3>
+        <div className="min-w-0 max-w-[620px] space-y-4">
+          <div>
+            <h3 className="text-[16px] font-extrabold tracking-[-0.02em] text-ink">
+              {atual.nome}
+            </h3>
+          </div>
+
+          <FiltroDeIntervalo valor={intervalo} aoEscolher={setIntervalo} />
+
+          <GraficoDeCarga
+            nome={atual.nome}
+            sessoes={recortarIntervalo(atual.sessoes, intervalo)}
+          />
         </div>
-
-        <FiltroDeIntervalo valor={intervalo} aoEscolher={setIntervalo} />
-
-        <GraficoDeCarga
-          nome={atual.nome}
-          sessoes={recortarIntervalo(atual.sessoes, intervalo)}
-        />
       </div>
     </div>
   );

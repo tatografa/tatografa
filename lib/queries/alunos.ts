@@ -7,7 +7,14 @@ import type { Tables } from "@/types/database";
 
 export type AlunoDaLista = Pick<
   Tables<"students">,
-  "id" | "name" | "email" | "goal" | "status" | "created_at" | "onboarded_at"
+  | "id"
+  | "name"
+  | "email"
+  | "goal"
+  | "status"
+  | "created_at"
+  | "onboarded_at"
+  | "biological_profile"
 > & {
   ultima_sessao: string | null;
 };
@@ -32,7 +39,7 @@ export async function listarAlunos(): Promise<AlunoDaLista[]> {
   const [alunos, sessoes] = await Promise.all([
     supabase
       .from("students")
-      .select("id, name, email, goal, status, created_at, onboarded_at")
+      .select("id, name, email, goal, status, created_at, onboarded_at, biological_profile")
       .order("created_at", { ascending: false }),
     supabase.rpc("ultima_sessao_por_aluno"),
   ]);
