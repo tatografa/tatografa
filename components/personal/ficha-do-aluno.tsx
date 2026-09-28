@@ -111,7 +111,6 @@ export function FichaDoAluno({
     <>
       <CabecalhoDaPagina
         titulo="Perfil do aluno"
-        subtitulo={aluno.name}
         voltar={{ href: "/painel/alunos", rotulo: "Voltar para alunos" }}
         acoes={
           /*
@@ -143,7 +142,6 @@ export function FichaDoAluno({
               treinos={treinos}
               exercicios={exercicios}
               alunoId={aluno.id}
-              primeiroNome={nome}
             />
             <Reavaliacoes reavaliacoes={reavaliacoes} alunoId={aluno.id} />
             <ObservacoesDoAluno alunoId={aluno.id} observacoes={observacoes} nome={nome} />
@@ -185,6 +183,7 @@ export function FichaDoAluno({
                         fotoUrl={item.post.fotoUrl}
                         legenda={item.post.legenda}
                         treino={item.post.treino}
+                        rotuloDosComentarios
                         conversa={{
                           curtir: curtir(item.post),
                           comentarios: item.post.comentarios,
@@ -211,6 +210,7 @@ export function FichaDoAluno({
                             : null)
                         }
                         rodape={<RodapeDaSessao sessao={item.sessao} alunoId={aluno.id} />}
+                        rotuloDosComentarios
                         conversa={
                           item.post
                             ? {

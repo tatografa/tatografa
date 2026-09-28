@@ -426,14 +426,30 @@ Provar que funciona sem o Otávio ler código:
   das cinquenta sessões continua em "Treinos anteriores", compacto. O bloco escuro das
   sessões sem post é buscado **só para os quinze cartões**: as séries vêm numa consulta
   só, e o corte de página do PostgREST é silencioso.
-- **[2026-09-28]** **O "Gráfico" do programa é a evolução por exercício que já existia**,
-  não as barras "Carga / Repetição / Loads" do protótipo: é a mesma linha que o aluno vê
-  no app (M2-04), e duas curvas para "quanto ele evoluiu" fariam os dois conversarem sobre
-  números diferentes. A **Planilha** abre cada exercício num `<details>` com RIR,
-  descanso, técnica e observação. Última reavaliação e anotações privadas ficam na coluna
-  da direita, abaixo do programa — o protótipo não as desenha, e são o trabalho do
-  personal sobre o aluno. Nenhuma consulta nova: os posts saem de `lerPostsDaCarteira`
-  filtrado pelo aluno, e curtir/responder agora revalidam também o perfil.
+- **[2026-09-28, revisto no mesmo dia a pedido do Otávio]** **O "Gráfico" do programa é
+  em barras, como no protótipo** — por treino (o primeiro abre sozinho), um gráfico por
+  exercício com as seis sessões mais recentes e as métricas Carga, Repetições e Volume.
+  A primeira versão reaproveitava a linha do app do aluno para os dois não conversarem
+  sobre números diferentes; **isso continua garantido pelo número, não pelo desenho**: a
+  barra de Carga é a carga máxima da sessão, o mesmo ponto da linha e o mesmo critério do
+  recorde (`barrasDoExercicio`, `lib/domain/planilha-do-aluno.ts`). No peso corporal a
+  "carga" vira repetições, e o cabeçalho diz "em reps". "Loads" do protótipo virou
+  **Volume**: é a palavra que o resto do produto usa para carga × repetições.
+- **[2026-09-28]** **Abrir um exercício na Planilha mostra o que o aluno fez nele**, como
+  no protótipo: o proposto (séries × reps, RIR, descanso, técnica), o **recorde** — a
+  maior carga já levantada, o mesmo da tela de recordes — e cada sessão, **por data ou
+  por série** (a série 1 de cada dia, depois a 2…, que é como se vê a última série caindo
+  semana a semana). O destaque de cada bloco diz "maior", e não "Recorde" como no
+  protótipo: recorde neste produto é um número só, o de todos os tempos, e chamar de
+  recorde o melhor de um dia faria o painel ter dez recordes para um exercício. Um
+  exercício aberto por vez. A prescrição casa com o histórico pela chave
+  `(origem, id)` (`chaveDe`), que a consulta agora também usa — duas cópias do formato da
+  chave seriam o jeito de elas pararem de casar.
+- **[2026-09-28]** **O coração continua coração.** O protótipo curte com 🔥 no painel; o
+  aluno curte com coração no app, e o mesmo gesto com dois ícones faria o personal achar
+  que são duas coisas. Última reavaliação e anotações privadas continuam abaixo do
+  programa (o protótipo não as desenha), e o "Falar no WhatsApp" desceu para o fim do
+  cartão de identidade, depois dos dados.
 - **[2026-09-28, pedido do Otávio]** **Configurações segue o protótipo:** o cartão
   "Perfil" em cima (iniciais, nome, e-mail e WhatsApp), com "Editar perfil" no
   cabeçalho da página, e embaixo dois cartões — **Alerta de inatividade** no lugar de

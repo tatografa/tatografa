@@ -1,5 +1,6 @@
 import "server-only";
 
+import { chaveDe } from "@/lib/domain/planilha-do-aluno";
 import { normalizarParaBusca } from "@/lib/domain/texto";
 import { createClient } from "@/lib/supabase/server";
 import type { Enums } from "@/types/database";
@@ -94,7 +95,7 @@ export type ReferenciaDeExercicio = {
 
 /** Chave estável para o mapa: o id sozinho não distingue as duas origens. */
 export function chaveDoExercicio(ref: ReferenciaDeExercicio): string {
-  return `${ref.exercise_source}:${ref.exercise_id}`;
+  return chaveDe(ref.exercise_source, ref.exercise_id);
 }
 
 /**

@@ -31,6 +31,7 @@ export function CartaoDeAtividade({
   treino,
   rodape,
   conversa = null,
+  rotuloDosComentarios = false,
 }: {
   /** O nome do `<article>` para leitor de tela. */
   rotulo: string;
@@ -49,6 +50,8 @@ export function CartaoDeAtividade({
     comentarios: ComentarioDoPost[];
     responder: React.ReactNode;
   } | null;
+  /** O "COMENTÁRIOS" em cima da conversa, que o protótipo põe só no perfil. */
+  rotuloDosComentarios?: boolean;
 }) {
   return (
     <article
@@ -161,6 +164,9 @@ export function CartaoDeAtividade({
           </div>
 
           <div className="flex flex-col gap-2.5 border-t border-border-soft pt-2.5">
+            {rotuloDosComentarios && conversa.comentarios.length ? (
+              <p className="text-[10px] font-bold tracking-[0.08em] text-ink-5">COMENTÁRIOS</p>
+            ) : null}
             {conversa.comentarios.length ? (
               <ul className="flex flex-col gap-2.5">
                 {conversa.comentarios.map((c) => (

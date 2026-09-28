@@ -88,7 +88,7 @@ export function IdentidadeDoAluno({
     <>
       <section
         aria-label={`Dados de ${aluno.name}`}
-        className="space-y-4 rounded-[12px] border border-border bg-surface p-5"
+        className="space-y-4 rounded-[12px] border border-border bg-surface p-6"
       >
         <div className="flex flex-col items-center gap-2 text-center">
           <span
@@ -97,7 +97,7 @@ export function IdentidadeDoAluno({
           >
             {iniciaisDe(aluno.name)}
           </span>
-          <h1 className="text-[18px] leading-tight font-semibold tracking-[-0.01em] text-ink">
+          <h1 className="text-[18px] leading-tight font-bold tracking-[-0.01em] text-ink">
             {aluno.name}
           </h1>
           <StatusDoAluno status={aluno.status} />
@@ -114,10 +114,23 @@ export function IdentidadeDoAluno({
           />
           <Numero
             Icone={Flame}
-            valor={String(resumo.diasSeguidos)}
-            rotulo={resumo.diasSeguidos === 1 ? "Dia seguido" : "Dias seguidos"}
+            valor={`${resumo.diasSeguidos} ${resumo.diasSeguidos === 1 ? "dia" : "dias"}`}
+            rotulo="Dias seguidos"
           />
         </div>
+
+        {/* O valor quebra linha em vez de truncar: e-mail comprido numa coluna
+            estreita é o dado que o personal veio copiar. */}
+        <dl className="flex flex-col gap-[11px] border-t border-border-soft pt-[18px] text-left">
+          {linhas.map((linha) => (
+            <div key={linha.rotulo} className="flex items-baseline justify-between gap-2.5">
+              <dt className="shrink-0 text-[12.5px] text-ink-4">{linha.rotulo}</dt>
+              <dd className="min-w-0 text-right text-[13px] font-medium break-words text-ink-2">
+                {linha.valor}
+              </dd>
+            </div>
+          ))}
+        </dl>
 
         {/*
           O WhatsApp fecha a volta: o aluno já tinha o botão do personal desde
@@ -137,18 +150,6 @@ export function IdentidadeDoAluno({
           </a>
         ) : null}
 
-        {/* O valor quebra linha em vez de truncar: e-mail comprido numa coluna
-            estreita é o dado que o personal veio copiar. */}
-        <dl className="divide-y divide-border-soft border-t border-border-soft">
-          {linhas.map((linha) => (
-            <div key={linha.rotulo} className="flex items-baseline justify-between gap-3 py-2">
-              <dt className="shrink-0 text-[12.5px] text-ink-4">{linha.rotulo}</dt>
-              <dd className="min-w-0 text-right text-[12.5px] font-medium break-words text-ink">
-                {linha.valor}
-              </dd>
-            </div>
-          ))}
-        </dl>
       </section>
 
       {meta ? <BarraDaMeta meta={meta} /> : null}
@@ -166,9 +167,9 @@ function Numero({
   rotulo: string;
 }) {
   return (
-    <div className="flex flex-col items-center gap-0.5 px-3 py-3 text-center">
-      <Icone size={15} aria-hidden className="text-brand" />
-      <p className="text-[19px] leading-none font-bold tracking-[-0.02em] text-ink tabular-nums">
+    <div className="flex flex-col items-center gap-[3px] px-1.5 py-[11px] text-center">
+      <Icone size={16} aria-hidden className="text-brand" />
+      <p className="text-[18px] leading-[1.1] font-bold text-ink tabular-nums">
         {valor}
       </p>
       <p className="text-[11px] text-ink-4">{rotulo}</p>
@@ -191,39 +192,43 @@ function BarraDaMeta({
 }) {
   const chegou = meta.faltam < 0.05;
   return (
-    <section className="space-y-2.5 rounded-[12px] border border-border bg-surface p-5">
-      <div>
+    <section className="rounded-[12px] border border-border bg-surface px-6 py-5">
+      <div className="mb-3.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
         <h2 className="text-[14px] font-medium text-ink">Meta de peso</h2>
-        <p className="mt-0.5 text-[12px] text-ink-5">
+        <p className="text-[12px] text-ink-4">
           {chegou
             ? "Meta alcançada"
             : `Faltam ${formatarMedida(meta.faltam)} kg · ${Math.round(meta.progresso * 100)}% do caminho`}
         </p>
       </div>
 
+      {/* O traço no fim é a meta: a barra anda até ele. */}
       <div
         role="img"
         aria-label={`De ${formatarMedida(meta.inicial)} para ${formatarMedida(meta.meta)} quilos. Hoje ${formatarMedida(meta.atual)}: ${Math.round(meta.progresso * 100)}% do caminho.`}
-        className="h-2 overflow-hidden rounded-full bg-canvas-sunken"
+        className="relative mb-2 h-2.5 rounded-[6px] bg-canvas-sunken"
       >
         <div
-          className="h-full rounded-full bg-brand"
+          className="absolute inset-y-0 left-0 rounded-[6px] bg-brand"
           style={{ width: `${meta.progresso * 100}%` }}
         />
+        <div aria-hidden className="absolute -top-[3px] right-0 h-4 w-[2.5px] rounded-[2px] bg-ink-3" />
       </div>
 
-      <div className="flex justify-between gap-2 text-[12px] tabular-nums">
-        <span className="text-ink-3">
+      {/* Valor em cima e rótulo embaixo, cada um na sua ponta: numa coluna de
+          250px os três em linha quebram no meio de "70 kg · meta". */}
+      <div className="flex justify-between gap-2 text-[13px] tabular-nums">
+        <span className="font-medium text-ink-2">
           {formatarMedida(meta.inicial)} kg
-          <span className="block text-[11px] text-ink-5">inicial</span>
+          <span className="block text-[12px] font-normal text-ink-5">inicial</span>
         </span>
-        <span className="text-center font-bold text-ink">
+        <span className="text-center font-semibold text-brand">
           {formatarMedida(meta.atual)} kg
-          <span className="block text-[11px] font-normal text-ink-5">atual</span>
+          <span className="block text-[12px] font-normal text-ink-5">atual</span>
         </span>
-        <span className="text-right text-ink-3">
+        <span className="text-right font-medium text-ink-2">
           {formatarMedida(meta.meta)} kg
-          <span className="block text-[11px] text-ink-5">meta</span>
+          <span className="block text-[12px] font-normal text-ink-5">meta</span>
         </span>
       </div>
     </section>
