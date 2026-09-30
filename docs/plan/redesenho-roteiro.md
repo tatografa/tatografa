@@ -162,7 +162,7 @@ Três colunas, como no protótipo: quem é o aluno à esquerda, a atividade no m
 
 ## Parte 6 · Treinos: a divisão de treino (12 min) — **o teste que mais importa**
 
-“Treinos” virou a tela do protótipo: um aluno por vez, o programa à esquerda e um cartão por treino, lado a lado. O salvar mudou — é um botão só, sem sair da tela —, e é aqui que mora o risco: um segundo salvar mal feito apagaria histórico. Os passos 10 e 11 são o motivo desta parte ser crítica.
+“Treinos” virou a tela do protótipo: um aluno por vez, o programa à esquerda e um cartão por treino, lado a lado. O salvar mudou — é um botão só, sem sair da tela —, e é aqui que mora o risco: um segundo salvar mal feito apagaria histórico. Os passos 52 e 53 são o motivo desta parte ser crítica. Use o mesmo aluno do começo ao fim, com programa ativo, e depois de cada “Enviar” olhe o cabeçalho: ele tem que dizer “Tudo salvo”. Se o F5 perguntar se você quer sair da página, é porque algo ficou sem enviar.
 
 43. Painel → **Treinos**. Escolha um aluno. À esquerda: o aluno, as abas
     **Atual · Histórico · Novo**, o **objetivo**, a **frequência semanal**
@@ -172,29 +172,37 @@ Três colunas, como no protótipo: quem é o aluno à esquerda, a atividade no m
 45. Mude o **objetivo**. Salva sozinho, sem botão. Recarregue: continua o
     novo.
 46. Num cartão, abra um exercício: campos **Séries, Reps, RIR, Descanso,
-    Técnica, Observação**. Ponha **RIR “0-2”**.
+    Técnica, Observação**. Ponha **RIR “0-2”** e clique **“Enviar para o
+    aluno”**. O cabeçalho passa a dizer **“Tudo salvo”**.
 47. Ponha **RIR “11”** em outro exercício e clique **“Enviar para o
-    aluno”** (no cabeçalho). O erro aparece **no próprio cartão**, e os
-    outros cartões salvam mesmo assim. Corrija para “2”.
+    aluno”**. O erro aparece **no próprio cartão**, e esse cartão **não é
+    enviado** — o cabeçalho continua em “1 treino alterado”. Corrija para
+    “2” e clique **“Enviar para o aluno” de novo**: agora diz “Tudo
+    salvo”.
 48. Acrescente um exercício novo a um treino e clique **“Enviar para o
     aluno”**. A tela **não sai do lugar**.
 49. Clique **“Enviar para o aluno”** de novo, sem mudar nada. **Não
     aparecem cópias** do exercício que você acabou de pôr.
-50. Recarregue a página. Os treinos estão exatamente como você deixou,
-    **sem exercício duplicado e sem exercício faltando**.
+50. Recarregue a página (F5). Os treinos estão exatamente como você deixou
+    — **os RIR “0-2” e “2” continuam lá**, sem exercício duplicado e sem
+    exercício faltando.
 51. Mude a frequência para um número **menor** (ex.: de 4x para 3x).
-    Aparece uma confirmação dizendo **qual treino some**. Cancele.
+    Aparece uma confirmação dizendo **qual treino some**. Clique em
+    **Cancelar** — “Excluir” apaga o treino na hora, com as séries que o
+    aluno registrou nele.
 52. **O teste que importa:** no celular, com a conta desse aluno, faça
-    **uma série** de um exercício antigo (que já existia antes do passo 6)
-    e saia. No painel, mude as **reps** desse exercício e clique **“Enviar
-    para o aluno”** duas vezes.
+    **uma série** de um exercício antigo (que já existia antes do passo
+    48) e saia. No painel, recarregue Treinos, mude as **reps** desse
+    exercício e clique **“Enviar para o aluno”** (“Tudo salvo”). Mude as
+    reps de novo e envie outra vez.
 53. Abra o **perfil do aluno** → Planilha → esse exercício. **A série que
     ele acabou de fazer continua lá.** Se sumiu, pare e me chame: é perda
     de histórico.
 54. Aba **Histórico** → abra um programa arquivado. O quadro diz
     **“Arquivado · o aluno não vê”** e o botão vira **“Salvar rascunho”**.
-55. No celular, abra o treino do passo 4. O exercício com RIR diz **“Pare
-    com 0 a 2 repetições sobrando (RIR)”**, em palavras.
+55. No celular, com a conta desse aluno, abra o treino do passo 46. O
+    exercício com RIR diz **“Pare com 0 a 2 repetições sobrando (RIR)”**,
+    em palavras.
 
 ## Parte 7 · Exercícios e o “Como fazer” (7 min)
 

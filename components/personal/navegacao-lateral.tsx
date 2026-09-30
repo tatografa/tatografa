@@ -16,8 +16,8 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { Logo } from "@/components/logo";
+import { COOKIE_DA_BARRA_RECOLHIDA } from "@/lib/domain/painel";
 import { iniciaisDe } from "@/lib/domain/nome";
-import { useMontado } from "@/lib/usar-montado";
 
 /**
  * As seções do painel, na ordem do protótipo do doc 06.
@@ -43,8 +43,6 @@ const NAVEGACAO = [
   { href: "/painel/configuracoes", rotulo: "Configurações", Icone: Settings, fim: true },
 ] as const;
 
-const CHAVE = "reps:painel:sidebar-colapsada";
-
 /**
  * A navegação lateral do painel (doc 04, "sidebar colapsável à esquerda").
  *
@@ -64,52 +62,32 @@ export function NavegacaoLateral({
   nome,
   alunos,
   sair,
+  recolhidaInicial,
 }: {
   nome: string;
   /** Vai no marcador de "Alunos", como no protótipo. */
   alunos: number;
   /** O botão de sair, recebido pronto: ele serve aos dois lados do produto. */
   sair: React.ReactNode;
-}) {
-  const montado = useMontado();
-  return <Lateral key={String(montado)} nome={nome} alunos={alunos} sair={sair} montado={montado} />;
-}
-
-function Lateral({
-  nome,
-  alunos,
-  sair,
-  montado,
-}: {
-  nome: string;
-  alunos: number;
-  sair: React.ReactNode;
-  montado: boolean;
+  /** A preferência lida do cookie pelo layout, no servidor. */
+  recolhidaInicial: boolean;
 }) {
   /*
-   * O estado colapsado vem do armazenamento **no inicializador**, e o
-   * componente só é montado com `montado = true` por causa da `key` acima.
-   * Ler no render de hidratação daria HTML diferente do servidor; ler em efeito
-   * seria `setState` dentro de efeito, que o lint recusa.
+   * A preferência mora num **cookie**, e não mais no `localStorage` (teste de
+   * campo, 29/09). O servidor não enxerga o `localStorage`: a página chegava
+   * sempre com a barra aberta e só depois da hidratação ela recolhia — um
+   * relance de barra larga a cada F5, com o item ativo piscando no meio da
+   * troca. Com o cookie, o HTML já sai do servidor do jeito que o personal
+   * deixou, e não há segundo desenho.
    */
-  const [colapsada, setColapsada] = useState(() => {
-    if (!montado) return false;
-    try {
-      return window.localStorage.getItem(CHAVE) === "1";
-    } catch {
-      // Navegador com armazenamento bloqueado abre expandida, que é o padrão.
-      return false;
-    }
-  });
+  const [colapsada, setColapsada] = useState(recolhidaInicial);
 
   function alternar() {
     const proximo = !colapsada;
     setColapsada(proximo);
-    try {
-      window.localStorage.setItem(CHAVE, proximo ? "1" : "0");
-    } catch {
-      // A preferência não sobrevive ao recarregar, e a navegação continua.
-    }
+    // Um ano, no caminho do painel. Se o navegador recusar o cookie, a barra
+    // continua alternando — só não lembra no próximo F5.
+    document.cookie = `${COOKIE_DA_BARRA_RECOLHIDA}=${proximo ? "1" : "0"}; path=/painel; max-age=31536000; samesite=lax`;
   }
 
   const pathname = usePathname();

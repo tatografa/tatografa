@@ -450,6 +450,14 @@ Provar que funciona sem o Otávio ler código:
   que são duas coisas. Última reavaliação e anotações privadas continuam abaixo do
   programa (o protótipo não as desenha), e o "Falar no WhatsApp" desceu para o fim do
   cartão de identidade, depois dos dados.
+- **[2026-09-30, do teste de campo]** **A barra recolhida mora num cookie, não mais no
+  `localStorage`.** O servidor não enxerga o `localStorage`: todo F5 chegava com a barra
+  aberta e só recolhia depois da hidratação — um relance de barra larga, com o item ativo
+  piscando na troca (passo 10 do roteiro do redesenho). Com o cookie
+  (`reps_painel_barra_recolhida`, caminho `/painel`), o layout lê a preferência e o HTML
+  já sai do jeito que o personal deixou. Isso também aposenta o `useMontado()` + troca de
+  `key` da barra, registrado em 18/09. Quem recolheu antes da mudança recolhe uma vez de
+  novo: a preferência antiga fica no `localStorage` e ninguém mais a lê.
 - **[2026-09-28, pedido do Otávio]** **A barra lateral recolhe e expande com um clique em
   qualquer lugar livre dela**, não só na seta. Link e botão continuam fazendo o que
   fazem — o clique neles não alterna (`closest("a, button, …")`). **A seta fica**: é o

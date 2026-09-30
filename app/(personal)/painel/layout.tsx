@@ -1,4 +1,5 @@
 
+import { cookies } from "next/headers";
 import Link from "next/link";
 
 import { BotaoSair } from "@/components/botao-sair";
@@ -12,6 +13,7 @@ import {
 } from "@/lib/legal/documentos";
 import { aceiteEstaEmDia } from "@/lib/queries/aceite";
 import { iniciaisDe } from "@/lib/domain/nome";
+import { COOKIE_DA_BARRA_RECOLHIDA } from "@/lib/domain/painel";
 import { contarAlunos } from "@/lib/queries/alunos";
 
 import { aceitarAtualizacaoDoPersonal } from "../acoes-de-aceite";
@@ -67,12 +69,14 @@ export default async function PainelLayout({
   // do painel, e trazer as linhas para contá-las seria pagar a leitura mais
   // cara do produto pela informação mais barata dele.
   const alunos = await contarAlunos();
+  const recolhida = (await cookies()).get(COOKIE_DA_BARRA_RECOLHIDA)?.value === "1";
 
   return (
     <div className="flex min-h-dvh items-start gap-[11px] bg-canvas-sunken p-[13px]">
       <NavegacaoLateral
         nome={trainer.name}
         alunos={alunos}
+        recolhidaInicial={recolhida}
         sair={<BotaoSair apenasIcone rotulo="Sair da conta" />}
       />
 
