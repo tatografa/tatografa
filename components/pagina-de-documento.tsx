@@ -43,7 +43,7 @@ export function PaginaDeDocumento({ documento }: { documento: Documento }) {
 
         <div className="mt-9 space-y-8">
           {documento.secoes.map((secao) => (
-            <section key={secao.titulo}>
+            <section key={secao.titulo} id={secao.ancora} className="scroll-mt-6">
               <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink">
                 {secao.titulo}
               </h2>

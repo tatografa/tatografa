@@ -127,6 +127,45 @@ export type Database = {
           },
         ]
       }
+      contatos_do_site: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          nome: string
+          objetivos: string[] | null
+          perfil: string
+          plataforma_atual: string | null
+          quantos_alunos: string | null
+          telefone: string
+          tem_personal: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          nome: string
+          objetivos?: string[] | null
+          perfil: string
+          plataforma_atual?: string | null
+          quantos_alunos?: string | null
+          telefone: string
+          tem_personal?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          nome?: string
+          objetivos?: string[] | null
+          perfil?: string
+          plataforma_atual?: string | null
+          quantos_alunos?: string | null
+          telefone?: string
+          tem_personal?: boolean | null
+        }
+        Relationships: []
+      }
       exercises: {
         Row: {
           created_at: string

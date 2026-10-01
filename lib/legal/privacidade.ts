@@ -134,6 +134,15 @@ export const PRIVACIDADE: Documento = {
       ],
     },
     {
+      titulo: "Se você nos escreveu pelo site",
+      ancora: "contato-pelo-site",
+      paragrafos: [
+        "O formulário “Entrar em contato” da página inicial é para quem **ainda não usa** o Reps Club. Ele guarda o que você digitou: nome, e-mail, WhatsApp e as respostas das duas perguntas do fim — quantos alunos você tem e o que usa hoje, se você é personal; se já tem personal e qual é o seu objetivo, se você é aluno.",
+        "**Serve para uma coisa só: a nossa equipe te responder pelo WhatsApp.** Não vira conta, não entra em lista de e-mail, não é repassado a ninguém — nem a um personal, sem você pedir — e não aparece para nenhum usuário do app. Quem lê é quem opera o Reps Club.",
+        `Para ver, corrigir ou apagar o que você enviou, escreva para ${OPERADOR.contato}. Apagamos em até 15 dias.`,
+      ],
+    },
+    {
       titulo: "Menores de idade",
       paragrafos: [
         "O Reps Club é para maiores de 18 anos. Menor de 18 só pode usar com consentimento de quem tem a guarda, dado ao personal que o convida.",

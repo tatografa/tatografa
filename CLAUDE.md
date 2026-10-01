@@ -450,6 +450,45 @@ Provar que funciona sem o Otávio ler código:
   que são duas coisas. Última reavaliação e anotações privadas continuam abaixo do
   programa (o protótipo não as desenha), e o "Falar no WhatsApp" desceu para o fim do
   cartão de identidade, depois dos dados.
+- **[2026-10-01, pedido do Otávio]** **A landing segue o protótipo** (`Landing Page.dc.html`,
+  pacote `Reps_Club_Student_Onboarding_2`): herói escuro com o seletor "Para Personais /
+  Para Alunos", o painel num navegador (personal) ou três celulares (aluno), três pilares
+  de demonstração só para o personal, o fechamento e o rodapé em cartões escuros, e o
+  formulário de contato. **O perfil vai na URL** (`/?para=alunos`), não em estado: é o
+  link que o personal cola no WhatsApp para o aluno, e o seletor é feito de links. A
+  página inteira é servidor; o único pedaço cliente é o formulário.
+- **[2026-10-01]** **As capturas da landing são do produto, não as do protótipo.** As que
+  vieram no pacote mostram receita mensal, churn, ticket médio, plano, vencimento, busca
+  global e modo escuro — tudo o que o produto decidiu **não** ter (18/09, 27/09). Numa
+  página pública isso é anunciar o que não existe. As de `public/landing/` são as telas
+  reais (painel, alunos, divisão de treino, perfil do aluno, home, execução e progresso
+  do aluno) com dados de demonstração coerentes entre si, tiradas de uma rota
+  descartável. **Refazer as capturas quando uma dessas telas mudar de cara.**
+- **[2026-10-01]** **Três frases do protótipo foram ajustadas, e uma porque não era
+  verdade.** "Acompanhe a execução **em tempo real**": o personal vê cada série que o
+  aluno registra, mas ao abrir a tela — nada atualiza sozinho —, e virou "veja cada série
+  que seus alunos registram". "Adesão" virou **aderência**, a palavra do resto do
+  produto. E **Instagram e LinkedIn saíram do rodapé**: no protótipo são `href="#"`, e
+  não há endereço para eles; voltam quando houver.
+- **[2026-10-01]** **O formulário de contato grava, e ninguém lê pela API** (migration
+  0040, `contatos_do_site`). No protótipo ele dizia "Recebemos seu contato" e não guardava
+  nada. Insert para `anon` e `authenticated`, nenhuma policy de select, update nem delete
+  — a ausência é a trava, como em `trainer_notes` —, e `check` de tamanho e formato,
+  porque a porta é pública. **Quem lê é o Otávio, pelo painel do Supabase**; uma tela
+  disso precisaria de papel de administrador, que não existe. Onze provas: duas de envio
+  legítimo, cinco de burla (visitante e personal logado lendo, alterando, apagando) e
+  quatro de lixo recusado. Campo-armadilha para robô, que responde "recebido" sem gravar.
+- **[2026-10-01]** **A política de privacidade declara o formulário, e a versão não
+  subiu.** Seção nova, "Se você nos escreveu pelo site", com âncora para o link do
+  próprio formulário. Não subiu a versão porque não mudou nada do que se coleta **de quem
+  aceitou** os documentos: quem preenche o formulário ainda não é usuário, e o aviso
+  está embaixo do botão de enviar. Re-aceite cobraria dos três alunos concordância com
+  algo que não é sobre eles.
+- **[2026-10-01]** **Surgir ao rolar é CSS, não JavaScript** (`lp-surge`, linha do tempo
+  de rolagem). No protótipo o bloco nasce invisível e um IntersectionObserver o mostra:
+  sem JavaScript, ou antes da hidratação, a página tinha três buracos brancos. Aqui o
+  navegador que não conhece `animation-timeline` mostra o bloco parado, e quem pediu
+  menos movimento também.
 - **[2026-10-01, do teste de campo]** **O perfil do aluno ganhou "Pausar acesso ao app" e
   "Reativar acesso"** (`AcessoDoAluno`, `mudarAcessoDoAluno`). A regra de 26/09 trancava
   o app pelo `students.status`, e **nenhuma tela mudava o status** — o roteiro do

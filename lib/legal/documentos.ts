@@ -84,5 +84,6 @@ export type Documento = {
   slug: "termos" | "privacidade";
   titulo: string;
   resumo: string;
-  secoes: { titulo: string; paragrafos: string[] }[];
+  /** `ancora`: para outra tela apontar direto para a seção (`/privacidade#…`). */
+  secoes: { titulo: string; paragrafos: string[]; ancora?: string }[];
 };

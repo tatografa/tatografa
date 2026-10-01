@@ -117,6 +117,12 @@
   --shadow-cartao: 0 4px 18px rgba(10, 10, 10, 0.06);
   --shadow-flutuante: 0 10px 30px rgba(10, 10, 10, 0.12);
 
+  /* Landing (01/10): as capturas flutuam sobre o herói escuro e sobre o cinza
+     dos pilares, medidas no protótipo. */
+  --shadow-vitrine: 0 30px 60px rgba(0, 0, 0, 0.55);
+  --shadow-celular: 0 24px 50px rgba(0, 0, 0, 0.5);
+  --shadow-captura: 0 18px 44px rgba(10, 10, 10, 0.12);
+
   /* ---- Transições ------------------------------------------------------ */
   /* 150ms para cor e fundo. Nada acima de 250ms na UI. */
   --default-transition-duration: 150ms;
@@ -169,4 +175,46 @@
   line-height: 1;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+/*
+ * Landing: o bloco surge ao entrar na tela (protótipo `Landing Page.dc.html`).
+ *
+ * Só CSS, por linha do tempo de rolagem, e não por IntersectionObserver como no
+ * protótipo: lá o bloco nasce invisível e depende do JavaScript para aparecer —
+ * sem ele, ou antes da hidratação, a página fica com três buracos brancos.
+ * Aqui o navegador que não conhece `animation-timeline` simplesmente mostra o
+ * bloco parado, e quem pediu menos movimento também.
+ */
+@utility lp-surge {
+  @supports (animation-timeline: view()) {
+    animation: lp-surge linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes lp-surge {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* O brilho atrás das capturas do herói: o vermelho vivo, que é o da marca
+   sobre fundo escuro, diluído até virar luz e não cor. */
+@utility lp-brilho {
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--color-brand-on-dark) 16%, transparent) 0%,
+    color-mix(in srgb, var(--color-dark-text) 5%, transparent) 40%,
+    transparent 70%
+  );
 }
