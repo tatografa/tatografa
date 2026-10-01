@@ -1,9 +1,10 @@
 import { Flame, MessageCircle, Zap } from "lucide-react";
 
+import { AcessoDoAluno } from "@/components/personal/acesso-do-aluno";
 import { StatusDoAluno } from "@/components/personal/status-do-aluno";
 import { diaLocal } from "@/lib/domain/fuso";
 import { formatarNumero } from "@/lib/domain/historico";
-import { iniciaisDe } from "@/lib/domain/nome";
+import { iniciaisDe, primeiroNome } from "@/lib/domain/nome";
 import { idadeEmAnos, metaDePeso } from "@/lib/domain/perfil";
 import { formatarMedida } from "@/lib/domain/reavaliacao";
 import { formatarTelefone, linkDoWhatsApp } from "@/lib/domain/telefone";
@@ -28,6 +29,7 @@ export function IdentidadeDoAluno({
   aluno,
   resumo,
   pesoInicial,
+  ehVoce,
 }: {
   aluno: AlunoDaFicha;
   resumo: ResumoDoAluno;
@@ -37,6 +39,8 @@ export function IdentidadeDoAluno({
    * ele nunca respondeu uma reavaliação: aí o cadastro é o que existe.
    */
   pesoInicial: number | null;
+  /** A linha do personal que treina a si mesmo: ele não pausa o próprio app. */
+  ehVoce: boolean;
 }) {
   const idade = idadeEmAnos(aluno.birth_date, diaLocal(new Date()));
   const whatsapp = linkDoWhatsApp(aluno.phone);
@@ -150,6 +154,15 @@ export function IdentidadeDoAluno({
           </a>
         ) : null}
 
+        {/* Convidado ainda não tem conta para pausar; o próprio personal não se
+            pausa (trancaria o app em que ele treina). */}
+        {!ehVoce && aluno.status !== "convidado" ? (
+          <AcessoDoAluno
+            alunoId={aluno.id}
+            primeiroNome={primeiroNome(aluno.name)}
+            pausado={aluno.status === "inativo"}
+          />
+        ) : null}
       </section>
 
       {meta ? <BarraDaMeta meta={meta} /> : null}

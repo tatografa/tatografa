@@ -77,6 +77,7 @@ export default async function AlunoDoPainel(
   return (
     <FichaDoAluno
       aluno={aluno}
+      ehVoce={aluno.id === trainer.id}
       programa={programa}
       // A semana sai da mesma função que o app do aluno usa, e aqui no
       // servidor: no navegador a conta usaria o relógio do aparelho.

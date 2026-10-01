@@ -450,6 +450,24 @@ Provar que funciona sem o Otávio ler código:
   que são duas coisas. Última reavaliação e anotações privadas continuam abaixo do
   programa (o protótipo não as desenha), e o "Falar no WhatsApp" desceu para o fim do
   cartão de identidade, depois dos dados.
+- **[2026-10-01, do teste de campo]** **O perfil do aluno ganhou "Pausar acesso ao app" e
+  "Reativar acesso"** (`AcessoDoAluno`, `mudarAcessoDoAluno`). A regra de 26/09 trancava
+  o app pelo `students.status`, e **nenhuma tela mudava o status** — o roteiro do
+  redesenho precisava que eu pausasse pelo banco, e o Otávio não achou a porta na
+  plataforma. Pausar confirma antes e diz o que **não** acontece (nada é apagado);
+  reativar não pergunta. O botão não aparece na linha do personal que treina a si mesmo
+  (trancaria o app em que ele treina), nem para convidado.
+- **[2026-10-01]** **Oitava vez do mesmo formato, e esta deixava a trava inteira de 26/09
+  sem efeito** (migration 0039). `students_update` deixa o aluno escrever na própria
+  linha para editar o perfil, e nada restringia a coluna `status`: o aluno pausado se
+  reativava com um `update` direto. Provado antes da correção (1 linha, `ativo`). O
+  gatilho `students_status_e_do_personal` recusa mudar o status a quem não é o
+  `trainer_id` da linha — a forma de `students_dado_do_corpo` com o papel invertido.
+  Nove provas: quatro de burla (aluno pausado se reativando, aluno ativo mudando o
+  próprio status, aluno mexendo no colega, outro personal) e cinco de caminho legítimo,
+  incluindo o pausado **continuando a editar o próprio nome** e a 0034 intacta.
+  **Efeito colateral aceito:** sem usuário logado (SQL do MCP), o status também não muda
+  — mudar status é coisa do personal, pela tela.
 - **[2026-09-30, do teste de campo]** **A barra recolhida mora num cookie, não mais no
   `localStorage`.** O servidor não enxerga o `localStorage`: todo F5 chegava com a barra
   aberta e só recolhia depois da hidratação — um relance de barra larga, com o item ativo

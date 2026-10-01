@@ -132,8 +132,8 @@ CABECALHO_REDESENHO = """# Roteiro · o painel redesenhado, e o que veio junto
 - **Onde:** `repsclub.com.br`, painel no computador e app no celular ao mesmo tempo.
 - **A Parte 1 vem primeiro porque trava o resto:** os documentos mudaram de versão.
 - **Duas contas de aluno:** você mesmo e mais uma (Partes 1, 10 e 12).
-- **A Parte 12 depende de mim:** não existe botão para arquivar aluno; eu mudo o
-  status pelo banco quando você chegar lá.
+- **A Parte 12 usa um aluno que não seja você:** o botão "Pausar acesso ao app"
+  fica no perfil do aluno (desde 01/10) e não aparece no seu próprio perfil.
 - **Faça na ordem.** O treino montado na Parte 6 é o executado na Parte 8.
 
 O sinal de que o deploy chegou: clicar num espaço vazio da barra lateral a recolhe.

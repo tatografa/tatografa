@@ -414,7 +414,7 @@
         <li><b>Onde:</b> <code>repsclub.com.br</code>, painel no computador e app no celular ao mesmo tempo.</li>
         <li><b>A Parte 1 vem primeiro porque trava o resto:</b> os documentos mudaram de versão e todo mundo — você no painel e cada aluno no app — passa por um portão de aceite.</li>
         <li><b>Duas contas de aluno:</b> você mesmo (aluno de si mesmo) e mais uma (raul ou Vinicius). A outra é necessária nas Partes 1, 10 e 12.</li>
-        <li><b>A Parte 12 depende de mim.</b> Não existe botão para arquivar um aluno — explico lá. Quando chegar nela, me mande uma mensagem e eu faço pelo banco.</li>
+        <li><b>A Parte 12 usa um aluno que não seja você.</b> O botão de pausar fica no perfil do aluno e não aparece no seu próprio perfil — pausar a si mesmo trancaria o app em que você treina.</li>
         <li><b>O banco é o de desenvolvimento.</b> Pode criar, apagar e refazer à vontade.</li>
         <li><b>Faça na ordem.</b> O treino montado na Parte 6 é o que você executa na Parte 8 e confere de volta no perfil.</li>
       </ul>
@@ -594,15 +594,15 @@ const PARTES = [
   },
   {
     n: "Parte 12", titulo: "O aluno pausado", duracao: "7 min", critica: true,
-    nota: "<strong>Não existe botão no painel para arquivar um aluno</strong> — nunca existiu, e eu só percebi montando este roteiro. A regra está pronta no banco e no app desde 26/09; falta a porta. <b>Quando chegar aqui, me mande “pode pausar o [nome]”</b> e eu mudo pelo banco. Esta parte é crítica porque um defeito deixaria um aluno pausado ver a turma.",
+    nota: "Desde 01/10 o perfil do aluno tem o botão <strong>“Pausar acesso ao app”</strong>, no fim do cartão da esquerda, embaixo do WhatsApp. Antes a regra existia no banco e no app, mas não havia porta. Use um aluno que <b>não seja você</b> e que tenha pelo menos um post antigo no feed. Esta parte é crítica porque um defeito deixaria um aluno pausado ver a turma — ou se reativar sozinho, furo que fechei no banco no mesmo dia.",
     passos: [
-      "Depois da minha confirmação, abra o app com a conta do aluno pausado. A home vira <strong>“Seu acesso está pausado”</strong>, dizendo que <strong>nada foi apagado</strong>. Não diz “arquivado” nem o motivo.",
+      "No painel, abra o <strong>perfil do aluno</strong> e clique <strong>“Pausar acesso ao app”</strong>. A confirmação diz o que muda e que <strong>nada é apagado</strong>; confirme. O status vira <strong>Inativo</strong> e o botão vira “Reativar acesso”. Depois, abra o app com a conta desse aluno. A home vira <strong>“Seu acesso está pausado”</strong>, dizendo que <strong>nada foi apagado</strong>. Não diz “arquivado” nem o motivo.",
       "A tela mostra o card do personal (“Fale com quem te treina”) e as duas portas que continuam abertas: <strong>“Seu histórico”</strong> e o <strong>Perfil</strong>.",
       "Tente abrir <code>repsclub.com.br/app/treinos</code> e o <strong>Feed</strong> pela barra de endereço. Os dois caem na <strong>mesma tela de pausa</strong>.",
       "Abra <strong>Seu histórico</strong>: os treinos antigos estão lá, série por série. Abra o <strong>Perfil</strong>: dá para editar os próprios dados.",
       "Com a sua conta (você mesmo, aluno ativo), abra o Feed: um post <strong>antigo</strong> do aluno pausado <strong>continua aparecendo, com o nome dele</strong>. <em>Pausar alguém não apaga o que os colegas já viram.</em>",
       "No painel, o aluno aparece como <strong>Inativo</strong> em Alunos e sai de “Precisam de atenção”. Você <strong>continua conseguindo comentar</strong> num post dele.",
-      "Me mande <strong>“pode reativar”</strong>. Com a conta dele, recarregue o app: a home volta ao normal e dá para começar treino.",
+      "No perfil do aluno, clique <strong>“Reativar acesso”</strong>. Com a conta do aluno, recarregue o app: a home volta ao normal e dá para começar treino.",
     ],
   },
 ];

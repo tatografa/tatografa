@@ -55,6 +55,8 @@ export type FichaDoAlunoProps = {
   curtir: (post: PostDaCarteira) => React.ReactNode;
   responder: (post: PostDaCarteira) => React.ReactNode;
   /** Para os rótulos "Hoje"/"Ontem"; parâmetro para a tela abrir com data fixa. */
+  /** A linha do personal que treina a si mesmo (13/09): não oferece pausar. */
+  ehVoce?: boolean;
   agora?: Date;
 };
 
@@ -93,6 +95,7 @@ export function FichaDoAluno({
   resumo,
   curtir,
   responder,
+  ehVoce = false,
   agora = new Date(),
 }: FichaDoAlunoProps) {
   /*
@@ -131,7 +134,12 @@ export function FichaDoAluno({
         <div className="grid items-start gap-4 @min-[680px]:grid-cols-[220px_minmax(0,1fr)] @min-[680px]:grid-rows-[auto_1fr] @min-[1040px]:grid-cols-[minmax(230px,26%)_minmax(0,1fr)_minmax(300px,37%)]">
           {/* ------------------------------------------- quem é o aluno --- */}
           <div className="flex min-w-0 flex-col gap-4 @min-[680px]:row-span-2">
-            <IdentidadeDoAluno aluno={aluno} resumo={resumo} pesoInicial={pesoInicial} />
+            <IdentidadeDoAluno
+              aluno={aluno}
+              resumo={resumo}
+              pesoInicial={pesoInicial}
+              ehVoce={ehVoce}
+            />
           </div>
 
           {/* -------------------------------------------------- programa --- */}

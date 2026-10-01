@@ -150,3 +150,50 @@ export async function apagarObservacao(
   revalidatePath(`/painel/alunos/${alunoId}`);
   return {};
 }
+
+export type EstadoDoAcesso = { erro?: string };
+
+/**
+ * Pausa ou reativa o acesso do aluno ao app (decisão do Otávio, 26/09).
+ *
+ * Até 01/10 não havia tela para isto: a trava inteira (0035, 0036) lia
+ * `students.status` e ninguém conseguia mudá-lo sem mexer no banco. Pausar não
+ * apaga nada — o histórico e o perfil continuam abertos para o aluno.
+ *
+ * Quem garante que só o personal muda o status é o banco: o RLS de
+ * `students_update` limita a linha à carteira, e o gatilho
+ * `students_status_e_do_personal` (0039) recusa o próprio aluno. O filtro por
+ * `trainer_id` aqui é para a consulta dizer de quem é o dado, e a contagem é
+ * porque update recusado pelo RLS afeta zero linhas sem erro nenhum.
+ */
+export async function mudarAcessoDoAluno(
+  _anterior: EstadoDoAcesso,
+  formData: FormData,
+): Promise<EstadoDoAcesso> {
+  const analise = z
+    .object({ alunoId: z.string().uuid(), status: z.enum(["ativo", "inativo"]) })
+    .safeParse({ alunoId: formData.get("alunoId"), status: formData.get("status") });
+  if (!analise.success) return { erro: "Pedido inválido. Recarregue a página." };
+
+  const { trainer } = await requireTrainer();
+  const { alunoId, status } = analise.data;
+
+  // Quem treina a si mesmo (13/09) não se pausa por aqui: trancaria o próprio
+  // app de treino, e a tela não oferece o botão. Conferir de novo porque a
+  // ação é um endereço que aceita POST de qualquer lugar.
+  if (alunoId === trainer.id) return { erro: "Você não pode pausar o seu próprio acesso." };
+
+  const supabase = await createClient();
+  const { error, count } = await supabase
+    .from("students")
+    .update({ status }, { count: "exact" })
+    .eq("id", alunoId)
+    .eq("trainer_id", trainer.id);
+
+  if (error || count === 0) return { erro: "Não conseguimos mudar o acesso agora. Tente de novo." };
+
+  revalidatePath(`/painel/alunos/${alunoId}`);
+  revalidatePath("/painel/alunos");
+  revalidatePath("/painel");
+  return {};
+}
