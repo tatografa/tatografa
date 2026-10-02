@@ -134,7 +134,7 @@ export const PRIVACIDADE: Documento = {
       ],
     },
     {
-      titulo: "Se você nos escreveu pelo site",
+      titulo: "Se você entrou na lista pelo site",
       ancora: "contato-pelo-site",
       paragrafos: [
         "A página inicial tem um jeito de falar com a gente, para quem **ainda não usa** o Reps Club: **“Entrar na lista”**. Ele guarda o seu e-mail e se você estava na versão da página para personal trainers ou para alunos — mais nada.",

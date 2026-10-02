@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useActionState, useId } from "react";
 
 import { entrarNaLista } from "@/app/(marketing)/actions";
-import type { EstadoDaLista, PerfilDaLista } from "@/lib/domain/contato";
+import type { EstadoDaLista, PerfilDaLista } from "@/lib/domain/lista-de-espera";
 
 const INICIAL: EstadoDaLista = {};
 

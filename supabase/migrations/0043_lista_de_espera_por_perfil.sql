@@ -11,7 +11,7 @@
 -- a sessão remota não consegue dar (a mesma trava da 0042). A de um argumento
 -- continua de pé e grava `personal` pelo padrão da coluna — que é o que o site
 -- no ar faz até o deploy terminar. O PostgREST escolhe pela lista de nomes dos
--- argumentos, então as duas não se confundem. A antiga sai na 0044.
+-- argumentos, então as duas não se confundem. A antiga sai na 0045.
 --
 -- O e-mail continua único: quem entrou por uma página e volta pela outra fica
 -- com o perfil da primeira vez, e a resposta é a mesma de sempre — a função não
