@@ -299,6 +299,24 @@ export type Database = {
           },
         ]
       }
+      lista_de_espera: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       mesocycles: {
         Row: {
           created_at: string
@@ -858,6 +876,7 @@ export type Database = {
         Args: { p_mesocycle_id: string }
         Returns: undefined
       }
+      entrar_na_lista: { Args: { p_email: string }; Returns: undefined }
       convite_por_token: {
         Args: { p_token: string }
         Returns: {

@@ -6,6 +6,7 @@ import {
   OBJETIVOS_DO_CONTATO,
   QUANTOS_ALUNOS,
   type CampoDoContato,
+  type EstadoDaLista,
   type EstadoDoContato,
 } from "@/lib/domain/contato";
 import { telefoneOpcional } from "@/lib/domain/telefone";
@@ -17,6 +18,7 @@ const base = {
     .string()
     .trim()
     .toLowerCase()
+    .min(1, "Digite seu e-mail.")
     .max(120, "E-mail muito longo.")
     .email("Esse e-mail não parece certo."),
   // A mesma regra do telefone do aluno e do personal: com DDD, guardado só com
@@ -140,4 +142,31 @@ export async function enviarContato(
       campos,
     };
   return { enviado: true };
+}
+
+/**
+ * "Entrar na lista", da versão para personais da landing (02/10): só o e-mail.
+ *
+ * Passa por `entrar_na_lista` (migration 0041), a única porta da tabela, que
+ * ignora o repetido em silêncio — então a resposta é a mesma para quem entrou
+ * agora e para quem já estava, e ninguém descobre por aqui quem está na lista.
+ * O mesmo campo-armadilha do formulário de contato.
+ */
+export async function entrarNaLista(
+  _anterior: EstadoDaLista,
+  formData: FormData,
+): Promise<EstadoDaLista> {
+  const digitado = String(formData.get("email") ?? "");
+  if (String(formData.get("site") ?? "") !== "") return { email: digitado.trim().toLowerCase() };
+
+  const analise = base.email.safeParse(digitado);
+  if (!analise.success) {
+    return { erro: analise.error.issues[0]?.message ?? "Confira o e-mail.", digitado };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("entrar_na_lista", { p_email: analise.data });
+  if (error) return { erro: "Não conseguimos registrar agora. Tente de novo em instantes.", digitado };
+
+  return { email: analise.data };
 }

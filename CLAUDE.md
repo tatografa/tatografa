@@ -450,6 +450,17 @@ Provar que funciona sem o Otávio ler código:
   que são duas coisas. Última reavaliação e anotações privadas continuam abaixo do
   programa (o protótipo não as desenha), e o "Falar no WhatsApp" desceu para o fim do
   cartão de identidade, depois dos dados.
+- **[2026-10-02, pedido do Otávio]** **"Quero começar" virou "Entrar na lista", com o
+  campo de e-mail à esquerda**, no herói e no fechamento da versão para personais. Só o
+  e-mail. O aluno continua com "Entrar em contato" e o formulário: ele não entra numa
+  lista, ele chega a um personal. **A lista é tabela fechada com porta por função**
+  (migration 0041, `entrar_na_lista`, `security definer`): `on conflict do nothing` com
+  RLS exige policy de select — provado, o `anon` foi recusado com 42501 —, e sem ele o
+  e-mail repetido devolveria erro de chave única, contando a qualquer um quem já está na
+  lista. A função responde igual nos dois casos. E-mail guardado em minúsculas, único.
+  Dez provas: três de caminho legítimo (inclusive o repetido sem erro), duas de lixo e
+  quatro de burla. O formulário de contato do personal (quantos alunos, plataforma atual)
+  ficou sem botão que o abra — o código e a coluna continuam, para o dia em que voltar.
 - **[2026-10-01, pedido do Otávio]** **A landing segue o protótipo** (`Landing Page.dc.html`,
   pacote `Reps_Club_Student_Onboarding_2`): herói escuro com o seletor "Para Personais /
   Para Alunos", o painel num navegador (personal) ou três celulares (aluno), três pilares

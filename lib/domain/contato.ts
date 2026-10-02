@@ -51,3 +51,12 @@ export type EstadoDoContato = {
     objetivos: string[];
   };
 };
+
+/** O retorno de "Entrar na lista": só o e-mail, e a frase do erro quando há. */
+export type EstadoDaLista = {
+  /** O e-mail que entrou, para a confirmação dizer para onde vamos escrever. */
+  email?: string;
+  erro?: string;
+  /** O que foi digitado, de volta ao campo depois de um erro. */
+  digitado?: string;
+};

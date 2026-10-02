@@ -137,8 +137,8 @@ export const PRIVACIDADE: Documento = {
       titulo: "Se você nos escreveu pelo site",
       ancora: "contato-pelo-site",
       paragrafos: [
-        "O formulário “Entrar em contato” da página inicial é para quem **ainda não usa** o Reps Club. Ele guarda o que você digitou: nome, e-mail, WhatsApp e as respostas das duas perguntas do fim — quantos alunos você tem e o que usa hoje, se você é personal; se já tem personal e qual é o seu objetivo, se você é aluno.",
-        "**Serve para uma coisa só: a nossa equipe te responder pelo WhatsApp.** Não vira conta, não entra em lista de e-mail, não é repassado a ninguém — nem a um personal, sem você pedir — e não aparece para nenhum usuário do app. Quem lê é quem opera o Reps Club.",
+        "A página inicial tem dois jeitos de falar com a gente, para quem **ainda não usa** o Reps Club. **“Entrar na lista”**, para personal trainers, guarda só o seu e-mail. **“Entrar em contato”**, para alunos, guarda o que você digitou: nome, e-mail, WhatsApp, se você já tem personal e qual é o seu objetivo.",
+        "**Serve para uma coisa só: a nossa equipe falar com você** — por e-mail, se você entrou na lista; pelo WhatsApp, se mandou o contato. Não vira conta, não entra em lista de propaganda, não é repassado a ninguém — nem a um personal, sem você pedir — e não aparece para nenhum usuário do app. Quem lê é quem opera o Reps Club.",
         `Para ver, corrigir ou apagar o que você enviou, escreva para ${OPERADOR.contato}. Apagamos em até 15 dias.`,
       ],
     },

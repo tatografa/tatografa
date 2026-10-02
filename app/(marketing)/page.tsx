@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { UserRound } from "lucide-react";
 
+import { EntrarNaLista } from "@/components/landing/entrar-na-lista";
 import { ChamadaDeContato } from "@/components/landing/formulario-de-contato";
 import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
@@ -98,7 +99,7 @@ export default async function LandingPage({
             <p className="mx-auto mb-8 max-w-[560px] text-[15.5px] leading-[1.7] text-dark-muted">
               {texto.apoio}
             </p>
-            <ChamadaDeContato perfil={perfil} rotulo={texto.chamada} />
+            <Chamada perfil={perfil} />
           </div>
 
           {perfil === "personal" ? <NavegadorDoPainel /> : <CelularesDoAluno />}
@@ -164,7 +165,7 @@ export default async function LandingPage({
             <p className="mb-8 text-[15px] text-dark-muted">
               {texto.fechamentoApoio}
             </p>
-            <ChamadaDeContato perfil={perfil} rotulo={texto.chamada} />
+            <Chamada perfil={perfil} />
           </div>
         </section>
       </main>
@@ -201,9 +202,8 @@ const TEXTOS = {
     titulo: "A plataforma completa para gerenciar seus alunos.",
     apoio:
       "Crie treinos, cadastre exercícios, veja cada série que seus alunos registram e acompanhe a evolução de cada um em um só lugar.",
-    chamada: "Quero começar",
     fechamento: "Gerencie seus alunos com o Reps Club.",
-    fechamentoApoio: "Fale com a gente e comece a usar a plataforma hoje.",
+    fechamentoApoio: "Deixe seu e-mail e a gente fala com você.",
     entrar: { href: "/entrar", rotulo: "Entrar no painel", curto: "Entrar" },
   },
   aluno: {
@@ -211,13 +211,27 @@ const TEXTOS = {
     titulo: "Seu treino, sua evolução, no seu bolso.",
     apoio:
       "Receba os treinos que seu personal monta, veja como fazer cada exercício, registre carga e repetições na academia e acompanhe sua evolução.",
-    chamada: "Entrar em contato",
     fechamento: "Treine com acompanhamento real, direto no seu bolso.",
     fechamentoApoio:
       "Fale com a gente e comece a treinar com acompanhamento de verdade.",
     entrar: { href: "/acesso", rotulo: "Entrar no app", curto: "Entrar" },
   },
 } as const;
+
+/**
+ * A chamada do herói e do fechamento. Para o personal, o e-mail e "Entrar na
+ * lista" (pedido do Otávio, 02/10) — o "Quero começar" do protótipo abria o
+ * formulário inteiro, e a lista pede só o que é preciso para avisar. Para o
+ * aluno continua o formulário de contato: ele não entra numa lista, ele chega
+ * a um personal.
+ */
+function Chamada({ perfil }: { perfil: Perfil }) {
+  return perfil === "personal" ? (
+    <EntrarNaLista />
+  ) : (
+    <ChamadaDeContato perfil="aluno" rotulo="Entrar em contato" />
+  );
+}
 
 /**
  * "Para Personais" e "Para Alunos". Links, e não botões: cada um é um
