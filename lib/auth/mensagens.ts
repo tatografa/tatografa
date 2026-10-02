@@ -39,6 +39,17 @@ const TRADUCOES: Array<[RegExp, string]> = [
   [/email not confirmed/i, "Confirme seu e-mail antes de entrar. Veja a caixa de entrada."],
   [/user already registered|already been registered/i, "Já existe uma conta com esse e-mail."],
   [/password should be at least/i, "A senha precisa de pelo menos 8 caracteres."],
+  /*
+    O Supabase tem a própria regra de composição (Authentication → Email →
+    Password requirements), e ela pode ser mais dura que a de
+    `lib/domain/senha.ts`. Quando é, a senha passa na tela e volta recusada
+    daqui — e sem esta linha a pessoa lia "Não foi possível concluir", sem saber
+    que o problema era a senha (achado no print do painel, 02/10).
+  */
+  [
+    /password should contain|weak.?password/i,
+    "Essa senha é fraca demais. Misture letras maiúsculas e minúsculas, números e símbolos.",
+  ],
   [/for security purposes|only request this after|rate limit/i, "Muitas tentativas seguidas. Espere um minuto e tente de novo."],
   [/new password should be different/i, "A nova senha precisa ser diferente da anterior."],
   [/(token|link).*(expired|invalid)|invalid.*(token|link)/i, "Esse link expirou ou já foi usado. Peça outro."],
