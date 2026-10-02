@@ -5,34 +5,26 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 
 import { enviarContato } from "@/app/(marketing)/actions";
-import { Button, Dialog, Input, Select } from "@/components/ui";
+import { Button, Dialog, Input } from "@/components/ui";
 import {
   OBJETIVOS_DO_CONTATO,
-  QUANTOS_ALUNOS,
   type EstadoDoContato,
-  type PerfilDoContato,
 } from "@/lib/domain/contato";
 
 const INICIAL: EstadoDoContato = {};
 
 /**
- * O botão de chamada da landing e o formulário que ele abre (protótipo
- * `Landing Page.dc.html`). O que muda por perfil são as duas perguntas do
- * fim: o personal diz quantos alunos tem e o que usa hoje; o aluno diz se já
- * tem personal e o que quer.
+ * "Entrar em contato", da versão para alunos da landing (protótipo
+ * `Landing Page.dc.html`): nome, e-mail, WhatsApp, se já tem personal e o que
+ * quer. O personal não tem formulário — tem "Entrar na lista", só com o
+ * e-mail (02/10).
  *
  * Cada botão monta o seu formulário, e não há um diálogo só para a página:
  * o herói e o fechamento têm o mesmo botão, e um estado compartilhado entre
  * dois pontos da página precisaria de um componente cliente em volta dela
  * inteira — a landing inteira viraria JavaScript por causa de um diálogo.
  */
-export function ChamadaDeContato({
-  perfil,
-  rotulo,
-}: {
-  perfil: PerfilDoContato;
-  rotulo: string;
-}) {
+export function ChamadaDeContato({ rotulo }: { rotulo: string }) {
   const [aberto, setAberto] = useState(false);
   // A `key` muda a cada abertura: o formulário volta limpo, sem o "recebemos"
   // da vez anterior, e sem precisar zerar estado em efeito.
@@ -55,38 +47,24 @@ export function ChamadaDeContato({
         aberto={aberto}
         aoFechar={() => setAberto(false)}
         titulo="Entrar em contato"
-        descricao={
-          perfil === "personal"
-            ? "Conte um pouco sobre você e nosso time retorna pelo WhatsApp."
-            : "Deixe seus dados e nosso time retorna pelo WhatsApp."
-        }
+        descricao="Deixe seus dados e nosso time retorna pelo WhatsApp."
         // `text-left`: o diálogo mora dentro do herói, que é centralizado.
         className="max-w-[480px] text-left"
       >
-        <Formulario
-          key={vez}
-          perfil={perfil}
-          aoFechar={() => setAberto(false)}
-        />
+        <Formulario key={vez} aoFechar={() => setAberto(false)} />
       </Dialog>
     </>
   );
 }
 
-function Formulario({
-  perfil,
-  aoFechar,
-}: {
-  perfil: PerfilDoContato;
-  aoFechar: () => void;
-}) {
+function Formulario({ aoFechar }: { aoFechar: () => void }) {
   const [estado, acao, enviando] = useActionState(enviarContato, INICIAL);
   const erros = estado.errosPorCampo ?? {};
   const campos = estado.campos;
 
   // O formulário é montado de novo a cada resposta, com os valores devolvidos
   // como padrão. Só `defaultValue` não basta: o React limpa o formulário depois
-  // do envio, e o `<select>` volta para "Selecione" mesmo com o padrão certo.
+  // do envio, e o rádio e as caixas voltariam desmarcados.
   const [tentativa, setTentativa] = useState(0);
   const [ultimoEstado, setUltimoEstado] = useState(estado);
   if (estado !== ultimoEstado) {
@@ -117,7 +95,6 @@ function Formulario({
 
   return (
     <form key={tentativa} action={acao} noValidate className="space-y-3.5">
-      <input type="hidden" name="perfil" value={perfil} />
       {/* Armadilha para robô: fora da tela, fora do teclado e do leitor de tela. */}
       <div
         aria-hidden
@@ -157,96 +134,67 @@ function Formulario({
         error={erros.telefone}
       />
 
-      {perfil === "personal" ? (
-        <>
-          <Select
-            label="Quantos alunos você tem?"
-            name="quantosAlunos"
-            defaultValue={campos?.quantosAlunos ?? ""}
-            error={erros.quantosAlunos}
+      <fieldset className="space-y-[7px]">
+        <legend className="eyebrow mb-[7px] text-ink-3">
+          Já tem personal ou consultoria?
+        </legend>
+        {/* Rádio de verdade, desenhado como pílula: as setas do teclado e
+            o leitor de tela já sabem o que fazer com ele. */}
+        <div className="flex gap-2.5">
+          {(["sim", "nao"] as const).map((valor) => (
+            <label
+              key={valor}
+              className="flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-border bg-surface text-[13.5px] font-semibold text-ink-2 transition hover:border-border-strong has-checked:border-brand has-checked:bg-brand has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-brand"
+            >
+              <input
+                type="radio"
+                name="temPersonal"
+                value={valor}
+                defaultChecked={campos?.temPersonal === valor}
+                aria-describedby={
+                  erros.temPersonal ? "erro-tem-personal" : undefined
+                }
+                className="sr-only"
+              />
+              {valor === "sim" ? "Sim" : "Não"}
+            </label>
+          ))}
+        </div>
+        {erros.temPersonal ? (
+          <p
+            id="erro-tem-personal"
+            className="text-[12.5px] font-semibold text-danger"
           >
-            <option value="" disabled>
-              Selecione
-            </option>
-            {QUANTOS_ALUNOS.map((q) => (
-              <option key={q.valor} value={q.valor}>
-                {q.rotulo}
-              </option>
-            ))}
-          </Select>
-          <Input
-            label="Já usa alguma plataforma para gerenciar alunos?"
-            name="plataformaAtual"
-            placeholder="Ex.: planilhas, outro app, nenhuma"
-            defaultValue={campos?.plataformaAtual}
-            error={erros.plataformaAtual}
-          />
-        </>
-      ) : (
-        <>
-          <fieldset className="space-y-[7px]">
-            <legend className="eyebrow mb-[7px] text-ink-3">
-              Já tem personal ou consultoria?
-            </legend>
-            {/* Rádio de verdade, desenhado como pílula: as setas do teclado e
-                o leitor de tela já sabem o que fazer com ele. */}
-            <div className="flex gap-2.5">
-              {(["sim", "nao"] as const).map((valor) => (
-                <label
-                  key={valor}
-                  className="flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-border bg-surface text-[13.5px] font-semibold text-ink-2 transition hover:border-border-strong has-checked:border-brand has-checked:bg-brand has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-brand"
-                >
-                  <input
-                    type="radio"
-                    name="temPersonal"
-                    value={valor}
-                    defaultChecked={campos?.temPersonal === valor}
-                    aria-describedby={
-                      erros.temPersonal ? "erro-tem-personal" : undefined
-                    }
-                    className="sr-only"
-                  />
-                  {valor === "sim" ? "Sim" : "Não"}
-                </label>
-              ))}
-            </div>
-            {erros.temPersonal ? (
-              <p
-                id="erro-tem-personal"
-                className="text-[12.5px] font-semibold text-danger"
-              >
-                {erros.temPersonal}
-              </p>
-            ) : null}
-          </fieldset>
+            {erros.temPersonal}
+          </p>
+        ) : null}
+      </fieldset>
 
-          <fieldset className="space-y-2">
-            <legend className="eyebrow mb-[7px] text-ink-3">
-              Qual é o seu objetivo?
-            </legend>
-            {OBJETIVOS_DO_CONTATO.map((o) => (
-              <label
-                key={o.valor}
-                className="flex min-h-9 items-center gap-2.5 text-[13.5px] text-ink-2"
-              >
-                <input
-                  type="checkbox"
-                  name="objetivos"
-                  value={o.valor}
-                  defaultChecked={campos?.objetivos.includes(o.valor)}
-                  className="size-4 accent-brand"
-                />
-                {o.rotulo}
-              </label>
-            ))}
-            {erros.objetivos ? (
-              <p className="text-[12.5px] font-semibold text-danger">
-                {erros.objetivos}
-              </p>
-            ) : null}
-          </fieldset>
-        </>
-      )}
+      <fieldset className="space-y-2">
+        <legend className="eyebrow mb-[7px] text-ink-3">
+          Qual é o seu objetivo?
+        </legend>
+        {OBJETIVOS_DO_CONTATO.map((o) => (
+          <label
+            key={o.valor}
+            className="flex min-h-9 items-center gap-2.5 text-[13.5px] text-ink-2"
+          >
+            <input
+              type="checkbox"
+              name="objetivos"
+              value={o.valor}
+              defaultChecked={campos?.objetivos.includes(o.valor)}
+              className="size-4 accent-brand"
+            />
+            {o.rotulo}
+          </label>
+        ))}
+        {erros.objetivos ? (
+          <p className="text-[12.5px] font-semibold text-danger">
+            {erros.objetivos}
+          </p>
+        ) : null}
+      </fieldset>
 
       {estado.erro ? (
         <p

@@ -4,7 +4,6 @@ import { z } from "zod";
 
 import {
   OBJETIVOS_DO_CONTATO,
-  QUANTOS_ALUNOS,
   type CampoDoContato,
   type EstadoDaLista,
   type EstadoDoContato,
@@ -29,22 +28,7 @@ const base = {
   ),
 };
 
-const doPersonal = z.object({
-  perfil: z.literal("personal"),
-  ...base,
-  quantosAlunos: z.enum(
-    QUANTOS_ALUNOS.map((q) => q.valor),
-    { error: "Escolha uma faixa." },
-  ),
-  plataformaAtual: z
-    .string()
-    .trim()
-    .min(1, "Conte o que você usa hoje — pode ser “nenhuma”.")
-    .max(120, "Resposta muito longa."),
-});
-
 const doAluno = z.object({
-  perfil: z.literal("aluno"),
   ...base,
   temPersonal: z.enum(["sim", "nao"], { error: "Escolha sim ou não." }),
   objetivos: z
@@ -53,7 +37,9 @@ const doAluno = z.object({
 });
 
 /**
- * Guarda o contato que chega pela landing (migration 0040).
+ * Guarda o contato que chega pela landing (migration 0040). Só do aluno: o
+ * personal entra na lista com o e-mail (`entrarNaLista`), e o formulário
+ * dele saiu em 02/10 (migration 0042).
  *
  * Sem `requireTrainer()` nem `requireStudent()`: a página é pública, e quem
  * escreve é qualquer visitante. O que segura a porta é o banco — só insert,
@@ -70,36 +56,15 @@ export async function enviarContato(
 ): Promise<EstadoDoContato> {
   if (String(formData.get("site") ?? "") !== "") return { enviado: true };
 
-  const perfil = formData.get("perfil") === "aluno" ? "aluno" : "personal";
-  const comum = {
-    perfil,
+  const campos = {
     nome: String(formData.get("nome") ?? ""),
     email: String(formData.get("email") ?? ""),
     telefone: String(formData.get("telefone") ?? ""),
-  };
-
-  const campos = {
-    nome: comum.nome,
-    email: comum.email,
-    telefone: comum.telefone,
-    quantosAlunos: String(formData.get("quantosAlunos") ?? ""),
-    plataformaAtual: String(formData.get("plataformaAtual") ?? ""),
     temPersonal: String(formData.get("temPersonal") ?? ""),
     objetivos: formData.getAll("objetivos").map(String),
   };
 
-  const analise =
-    perfil === "personal"
-      ? doPersonal.safeParse({
-          ...comum,
-          quantosAlunos: String(formData.get("quantosAlunos") ?? ""),
-          plataformaAtual: String(formData.get("plataformaAtual") ?? ""),
-        })
-      : doAluno.safeParse({
-          ...comum,
-          temPersonal: String(formData.get("temPersonal") ?? ""),
-          objetivos: formData.getAll("objetivos").map(String),
-        });
+  const analise = doAluno.safeParse(campos);
 
   if (!analise.success) {
     const errosPorCampo: Partial<Record<CampoDoContato, string>> = {};
@@ -116,25 +81,13 @@ export async function enviarContato(
 
   // Insert sem `.select()`: o visitante não tem permissão de leitura, e pedir
   // a linha de volta transformaria um envio que deu certo num erro.
-  const { error } = await supabase.from("contatos_do_site").insert(
-    dados.perfil === "personal"
-      ? {
-          perfil: "personal",
-          nome: dados.nome,
-          email: dados.email,
-          telefone: dados.telefone as string,
-          quantos_alunos: dados.quantosAlunos,
-          plataforma_atual: dados.plataformaAtual,
-        }
-      : {
-          perfil: "aluno",
-          nome: dados.nome,
-          email: dados.email,
-          telefone: dados.telefone as string,
-          tem_personal: dados.temPersonal === "sim",
-          objetivos: dados.objetivos,
-        },
-  );
+  const { error } = await supabase.from("contatos_do_site").insert({
+    nome: dados.nome,
+    email: dados.email,
+    telefone: dados.telefone as string,
+    tem_personal: dados.temPersonal === "sim",
+    objetivos: dados.objetivos,
+  });
 
   if (error)
     return {

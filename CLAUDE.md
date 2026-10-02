@@ -459,8 +459,16 @@ Provar que funciona sem o Otávio ler código:
   e-mail repetido devolveria erro de chave única, contando a qualquer um quem já está na
   lista. A função responde igual nos dois casos. E-mail guardado em minúsculas, único.
   Dez provas: três de caminho legítimo (inclusive o repetido sem erro), duas de lixo e
-  quatro de burla. O formulário de contato do personal (quantos alunos, plataforma atual)
-  ficou sem botão que o abra — o código e a coluna continuam, para o dia em que voltar.
+  quatro de burla.
+- **[2026-10-02, pedido do Otávio]** **O formulário de contato do personal saiu** (quantos
+  alunos, plataforma atual) — tela, validação e banco. O formulário é só do aluno, e o
+  personal tem a lista. A tabela estava vazia. **No banco foi em dois passos:** a 0042
+  (aplicada) faz `perfil` valer `aluno` por padrão e recusar outro valor, e a 0043
+  (**pendente**) tira as três colunas. O MCP do Supabase pede confirmação para
+  `drop column`, e a sessão remota não a consegue dar — três tentativas expiraram sem a
+  consulta chegar ao banco. A 0042 deixa o site certo sem depender da 0043: o código
+  não manda mais `perfil`. **De quebra fechou um furo da 0040:** `cardinality(null)` é
+  nulo, `check` nulo passa, e contato de aluno sem objetivo nenhum entrava. Dez provas.
 - **[2026-10-01, pedido do Otávio]** **A landing segue o protótipo** (`Landing Page.dc.html`,
   pacote `Reps_Club_Student_Onboarding_2`): herói escuro com o seletor "Para Personais /
   Para Alunos", o painel num navegador (personal) ou três celulares (aluno), três pilares

@@ -133,36 +133,36 @@ export type Database = {
           email: string
           id: string
           nome: string
-          objetivos: string[] | null
+          objetivos: string[]
           perfil: string
           plataforma_atual: string | null
           quantos_alunos: string | null
           telefone: string
-          tem_personal: boolean | null
+          tem_personal: boolean
         }
         Insert: {
           created_at?: string
           email: string
           id?: string
           nome: string
-          objetivos?: string[] | null
-          perfil: string
+          objetivos: string[]
+          perfil?: string
           plataforma_atual?: string | null
           quantos_alunos?: string | null
           telefone: string
-          tem_personal?: boolean | null
+          tem_personal: boolean
         }
         Update: {
           created_at?: string
           email?: string
           id?: string
           nome?: string
-          objetivos?: string[] | null
+          objetivos?: string[]
           perfil?: string
           plataforma_atual?: string | null
           quantos_alunos?: string | null
           telefone?: string
-          tem_personal?: boolean | null
+          tem_personal?: boolean
         }
         Relationships: []
       }

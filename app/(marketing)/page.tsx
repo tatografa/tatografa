@@ -229,7 +229,7 @@ function Chamada({ perfil }: { perfil: Perfil }) {
   return perfil === "personal" ? (
     <EntrarNaLista />
   ) : (
-    <ChamadaDeContato perfil="aluno" rotulo="Entrar em contato" />
+    <ChamadaDeContato rotulo="Entrar em contato" />
   );
 }
 
