@@ -965,11 +965,26 @@ function FormularioSeguro({
         }
         const form = evento.currentTarget;
         const botao = (evento.nativeEvent as SubmitEvent).submitter;
-        evento.preventDefault();
+        // **Sem nada por salvar, o envio original segue — e não é re-enviado.**
+        // `seguro` chama `continuar` na hora quando não há o que perguntar, e
+        // `requestSubmit` dentro do próprio evento de submit é ignorado pelo
+        // navegador (o formulário ainda está "disparando o envio"). A primeira
+        // versão fazia isso: cancelava o envio e pedia outro que nunca saía, e
+        // "Criar e ativar" não fazia nada justamente no caso comum (teste do
+        // Otávio, 02/10). Só quando há confirmação o envio é cancelado e
+        // refeito depois, já fora do evento.
+        let naHora = true;
+        let liberouNaHora = false;
         seguro(() => {
+          if (naHora) {
+            liberouNaHora = true;
+            return;
+          }
           liberado.current = true;
           form.requestSubmit(botao instanceof HTMLElement ? botao : undefined);
         });
+        naHora = false;
+        if (!liberouNaHora) evento.preventDefault();
       }}
     >
       {children}

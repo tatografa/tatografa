@@ -502,6 +502,20 @@ Provar que funciona sem o Otávio ler código:
   `ChamadaDaMoldura` decide pelo endereço, porque o layout não sabe que página está
   dentro dele; sai pronto no HTML do servidor. `/entrar` e `/recuperar`, que servem os
   dois papéis, ficam com o texto do personal.
+- **[2026-10-02, do teste de campo]** **Os cinco botões do painel de macrociclos não
+  faziam nada no caso comum** — Criar e ativar, Ativar (dois), Arquivar e Duplicar,
+  desde o redesenho de 27/09. Todos passam por `FormularioSeguro`, que cancelava o envio,
+  perguntava a `seguro` se havia cartão por salvar e pedia um envio novo com
+  `requestSubmit`. Sem nada por salvar, `seguro` responde **na hora**, ainda dentro do
+  evento de submit — e o navegador **ignora `requestSubmit` enquanto o formulário está
+  disparando o envio**. Nenhum erro, nenhum POST: o botão simplesmente não respondia.
+  Com cartão por salvar funcionava, porque o pedido novo saía depois da confirmação,
+  fora do evento — e foi o único caminho em que eu tinha pensado. Agora o envio original
+  só é cancelado quando há o que perguntar. Reproduzido numa rota descartável antes da
+  correção (1 submit, 0 POST) e conferido depois nos dois caminhos (sem alteração: POST
+  direto; com alteração: "Sair sem salvar?" e POST ao descartar). **A lição:** guarda
+  que chama de volta precisa ser testada no caminho em que ela **não** tem nada a
+  guardar — é o mais comum e o que eu não abri no navegador.
 - **[2026-10-01, pedido do Otávio]** **A landing segue o protótipo** (`Landing Page.dc.html`,
   pacote `Reps_Club_Student_Onboarding_2`): herói escuro com o seletor "Para Personais /
   Para Alunos", o painel num navegador (personal) ou três celulares (aluno), três pilares
