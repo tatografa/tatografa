@@ -49,10 +49,14 @@ const TRADUCOES: Array<[RegExp, string]> = [
     um 500 no login não pode virar "não conseguimos enviar o e-mail". Quem
     decide o que aparece nas telas de link é `falhaDeEnvioVisivel`; aqui é só a
     frase em português quando o erro é reconhecidamente de envio.
+
+    A frase é neutra de papel: ela aparece no cadastro do personal e na
+    recuperação de senha dos dois, e "peça ajuda ao seu personal" mandava o
+    próprio personal pedir ajuda a si mesmo (teste do Otávio, 02/10).
   */
   [
     /not authorized|error sending|failed to send|smtp|email provider|5\.7\.\d|\b535\b/i,
-    "Não conseguimos enviar o e-mail agora. O problema é nosso, não seu — tente de novo em alguns minutos ou peça ajuda ao seu personal.",
+    "Não conseguimos enviar o e-mail agora. O problema é nosso, não seu — tente de novo em alguns minutos.",
   ],
 ];
 
