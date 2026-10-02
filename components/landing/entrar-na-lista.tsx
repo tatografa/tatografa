@@ -5,19 +5,20 @@ import Link from "next/link";
 import { useActionState, useId } from "react";
 
 import { entrarNaLista } from "@/app/(marketing)/actions";
-import type { EstadoDaLista } from "@/lib/domain/contato";
+import type { EstadoDaLista, PerfilDaLista } from "@/lib/domain/contato";
 
 const INICIAL: EstadoDaLista = {};
 
 /**
  * O campo de e-mail com "Entrar na lista" ao lado (pedido do Otávio, 02/10),
- * no lugar do "Quero começar" da versão para personais. Mora no herói e no
- * fechamento, os dois escuros.
+ * nas duas versões da landing — no lugar do "Quero começar" do personal e do
+ * "Entrar em contato" do aluno. Mora no herói e no fechamento, os dois escuros.
+ * O perfil vai junto, num campo escondido: é a página em que a pessoa está.
  *
  * Campo e botão numa pílula só, como a busca de um site: a frase "entrar na
  * lista" pede uma coisa, e dois controles soltos pareceriam duas.
  */
-export function EntrarNaLista() {
+export function EntrarNaLista({ perfil }: { perfil: PerfilDaLista }) {
   const [estado, acao, enviando] = useActionState(entrarNaLista, INICIAL);
   const id = useId();
 
@@ -38,6 +39,7 @@ export function EntrarNaLista() {
 
   return (
     <form action={acao} noValidate className="mx-auto w-full max-w-[460px]">
+      <input type="hidden" name="perfil" value={perfil} />
       {/* Armadilha para robô: fora da tela, do teclado e do leitor de tela. */}
       <div aria-hidden className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
         <label>

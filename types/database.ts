@@ -304,16 +304,19 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          perfil: string
         }
         Insert: {
           created_at?: string
           email: string
           id?: string
+          perfil?: string
         }
         Update: {
           created_at?: string
           email?: string
           id?: string
+          perfil?: string
         }
         Relationships: []
       }
@@ -876,7 +879,9 @@ export type Database = {
         Args: { p_mesocycle_id: string }
         Returns: undefined
       }
-      entrar_na_lista: { Args: { p_email: string }; Returns: undefined }
+      entrar_na_lista:
+        | { Args: { p_email: string }; Returns: undefined }
+        | { Args: { p_email: string; p_perfil: string }; Returns: undefined }
       convite_por_token: {
         Args: { p_token: string }
         Returns: {

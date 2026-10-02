@@ -7,6 +7,7 @@ import {
   type CampoDoContato,
   type EstadoDaLista,
   type EstadoDoContato,
+  type PerfilDaLista,
 } from "@/lib/domain/contato";
 import { telefoneOpcional } from "@/lib/domain/telefone";
 import { createClient } from "@/lib/supabase/server";
@@ -98,7 +99,10 @@ export async function enviarContato(
 }
 
 /**
- * "Entrar na lista", da versão para personais da landing (02/10): só o e-mail.
+ * "Entrar na lista", nas duas versões da landing (02/10): o e-mail e a página
+ * de onde ele veio, para a equipe saber se escreve a um personal ou a um aluno.
+ * O perfil vem de um campo escondido, então qualquer coisa que não seja
+ * "aluno" vira "personal" — o mesmo critério da página com `?para=`.
  *
  * Passa por `entrar_na_lista` (migration 0041), a única porta da tabela, que
  * ignora o repetido em silêncio — então a resposta é a mesma para quem entrou
@@ -117,8 +121,13 @@ export async function entrarNaLista(
     return { erro: analise.error.issues[0]?.message ?? "Confira o e-mail.", digitado };
   }
 
+  const perfil: PerfilDaLista = formData.get("perfil") === "aluno" ? "aluno" : "personal";
+
   const supabase = await createClient();
-  const { error } = await supabase.rpc("entrar_na_lista", { p_email: analise.data });
+  const { error } = await supabase.rpc("entrar_na_lista", {
+    p_email: analise.data,
+    p_perfil: perfil,
+  });
   if (error) return { erro: "Não conseguimos registrar agora. Tente de novo em instantes.", digitado };
 
   return { email: analise.data };

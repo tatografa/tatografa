@@ -463,12 +463,21 @@ Provar que funciona sem o Otávio ler código:
 - **[2026-10-02, pedido do Otávio]** **O formulário de contato do personal saiu** (quantos
   alunos, plataforma atual) — tela, validação e banco. O formulário é só do aluno, e o
   personal tem a lista. A tabela estava vazia. **No banco foi em dois passos:** a 0042
-  (aplicada) faz `perfil` valer `aluno` por padrão e recusar outro valor, e a 0043
+  (aplicada) faz `perfil` valer `aluno` por padrão e recusar outro valor, e a 0044
   (**pendente**) tira as três colunas. O MCP do Supabase pede confirmação para
   `drop column`, e a sessão remota não a consegue dar — três tentativas expiraram sem a
-  consulta chegar ao banco. A 0042 deixa o site certo sem depender da 0043: o código
+  consulta chegar ao banco. A 0042 deixa o site certo sem depender da 0044: o código
   não manda mais `perfil`. **De quebra fechou um furo da 0040:** `cardinality(null)` é
   nulo, `check` nulo passa, e contato de aluno sem objetivo nenhum entrava. Dez provas.
+- **[2026-10-02, pedido do Otávio]** **"Para Alunos" também ganhou o e-mail com "Entrar na
+  lista"**, no lugar de "Entrar em contato". A lista passa a guardar **de qual versão o
+  e-mail veio** (`lista_de_espera.perfil`, migration 0043): escrever a um personal e a um
+  aluno são duas conversas. E-mail continua único — quem volta pela outra página fica com
+  o perfil da primeira vez, e a resposta não conta que já estava lá. **Função nova ao lado
+  da antiga**, `entrar_na_lista(email, perfil)`: trocar a assinatura exige `drop function`,
+  a mesma trava de confirmação; a de um argumento sai na 0044, pendente. Onze provas. A
+  política de privacidade agora descreve só a lista. **O formulário do aluno ficou sem
+  botão** — `ChamadaDeContato` e `contatos_do_site` continuam, à espera de decisão.
 - **[2026-10-01, pedido do Otávio]** **A landing segue o protótipo** (`Landing Page.dc.html`,
   pacote `Reps_Club_Student_Onboarding_2`): herói escuro com o seletor "Para Personais /
   Para Alunos", o painel num navegador (personal) ou três celulares (aluno), três pilares

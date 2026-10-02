@@ -6,12 +6,12 @@
 -- validação saíram; aqui o banco para de aceitar a forma do personal.
 --
 -- **Em duas migrations, e esta é a que não apaga nada.** O certo é tirar as
--- colunas (`0043`): coluna que nenhuma tela escreve é a história de
+-- colunas (`0044`): coluna que nenhuma tela escreve é a história de
 -- `posts.session_id` e `trainers.phone`, a intenção escrita no schema que
 -- alguém um dia lê como algo que o produto faz. Mas `drop column` passa por
 -- uma confirmação que a sessão remota não consegue dar, e o código novo não
 -- manda mais `perfil` — sem o padrão abaixo, todo envio de aluno quebraria até
--- a 0043 entrar. Esta deixa o site certo agora; a 0043 limpa o schema.
+-- a 0044 entrar. Esta deixa o site certo agora; a 0044 limpa o schema.
 --
 -- **E fecha um furo da 0040.** `contatos_campos_do_perfil` pedia
 -- `cardinality(objetivos) > 0`, e `cardinality(null)` é nulo — `check` nulo

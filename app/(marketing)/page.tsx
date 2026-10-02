@@ -5,7 +5,6 @@ import Link from "next/link";
 import { UserRound } from "lucide-react";
 
 import { EntrarNaLista } from "@/components/landing/entrar-na-lista";
-import { ChamadaDeContato } from "@/components/landing/formulario-de-contato";
 import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
 
@@ -34,7 +33,7 @@ type Perfil = "personal" | "aluno";
  * estado: o link "para alunos" é o que o personal cola no WhatsApp para quem
  * ele treina, e um botão que só troca estado na tela não sobrevive a um link.
  * Por isso o seletor do topo é feito de links, e a página inteira é servidor —
- * o único pedaço cliente é o formulário de contato.
+ * o único pedaço cliente é o campo de "Entrar na lista".
  *
  * **As capturas são do produto, não do protótipo.** As imagens que vieram com
  * o protótipo mostram receita mensal, churn, ticket médio, plano, vencimento,
@@ -212,25 +211,19 @@ const TEXTOS = {
     apoio:
       "Receba os treinos que seu personal monta, veja como fazer cada exercício, registre carga e repetições na academia e acompanhe sua evolução.",
     fechamento: "Treine com acompanhamento real, direto no seu bolso.",
-    fechamentoApoio:
-      "Fale com a gente e comece a treinar com acompanhamento de verdade.",
+    fechamentoApoio: "Deixe seu e-mail e a gente fala com você.",
     entrar: { href: "/acesso", rotulo: "Entrar no app", curto: "Entrar" },
   },
 } as const;
 
 /**
- * A chamada do herói e do fechamento. Para o personal, o e-mail e "Entrar na
- * lista" (pedido do Otávio, 02/10) — o "Quero começar" do protótipo abria o
- * formulário inteiro, e a lista pede só o que é preciso para avisar. Para o
- * aluno continua o formulário de contato: ele não entra numa lista, ele chega
- * a um personal.
+ * A chamada do herói e do fechamento: o e-mail e "Entrar na lista", nas duas
+ * versões (pedidos do Otávio, 02/10). O "Quero começar" e o "Entrar em
+ * contato" do protótipo abriam um formulário inteiro, e a lista pede só o que
+ * é preciso para avisar. A lista guarda de qual versão o e-mail veio.
  */
 function Chamada({ perfil }: { perfil: Perfil }) {
-  return perfil === "personal" ? (
-    <EntrarNaLista />
-  ) : (
-    <ChamadaDeContato rotulo="Entrar em contato" />
-  );
+  return <EntrarNaLista perfil={perfil} />;
 }
 
 /**
