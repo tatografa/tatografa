@@ -26,14 +26,15 @@ export const metadata: Metadata = {
   },
   description:
     "Personal trainers montam os treinos. Alunos executam e registram carga e repetições, série por série.",
-  // O iOS não lê o manifest: ícone e nome da tela inicial saem daqui.
+  // O iOS não lê o manifest: o nome da tela inicial sai daqui, e o ícone de
+  // `app/apple-icon.png`. Os ícones são todos por convenção de arquivo
+  // (`favicon.ico`, `icon.svg`, `apple-icon.png`): um `icons` aqui **substitui**
+  // a lista que o Next monta a partir deles, e foi assim que o `icon.svg` ficou
+  // de fora da página na primeira tentativa (02/10).
   appleWebApp: {
     capable: true,
     title: "Reps Club",
     statusBarStyle: "black-translucent",
-  },
-  icons: {
-    apple: "/apple-icon.png",
   },
 };
 
