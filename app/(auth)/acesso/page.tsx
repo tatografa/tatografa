@@ -1,35 +1,38 @@
 import type { Metadata } from "next";
 
-import { FormularioAcesso } from "./formulario-acesso";
+import { FormularioLogin } from "../entrar/formulario-login";
 
 export const metadata: Metadata = {
   title: "Entrar · Reps Club",
-  description: "Receba um link de acesso no seu e-mail.",
+  description: "Entre no app com o seu e-mail e a sua senha.",
+};
+
+const AVISOS: Record<string, string> = {
+  "sem-perfil": "Sua conta não está ligada a nenhum personal. Peça um convite.",
 };
 
 /**
- * Entrada do aluno nos acessos seguintes (doc 02).
+ * Entrada do aluno: e-mail e senha (pedido do Otávio, 02/10).
  *
- * Link mágico, não senha: "o aluno usa o app na academia, no meio do treino.
- * Senha esquecida ali é abandono garantido." A senha definida no onboarding
- * continua valendo como alternativa, em `/entrar`.
+ * Até aqui a tela abria com um botão "Entrar com senha" que levava a `/entrar`
+ * e, embaixo, o link por e-mail. A senha já era a ação que sempre funciona — o
+ * aluno a cria no onboarding do convite, e o link depende de o e-mail chegar
+ * enquanto ele está na academia. Agora ela é a tela inteira; quem esqueceu a
+ * senha tem "Esqueci minha senha", que manda o link pelo mesmo SMTP.
+ *
+ * `?proximo` chega do `proxy.ts` quando o aluno abre um endereço do app sem
+ * sessão, e é por ele que entrar o devolve ao treino que estava abrindo.
  */
 export default async function AcessoPage({
   searchParams,
 }: PageProps<"/acesso">) {
-  const { erro } = await searchParams;
+  const { proximo, erro } = await searchParams;
 
   return (
-    <>
-      {erro === "sem-perfil" && (
-        <p
-          role="alert"
-          className="mb-5 rounded-[9px] bg-warning-bg px-3 py-2.5 text-[12.5px] font-semibold text-warning"
-        >
-          Sua conta não está ligada a nenhum personal. Peça um convite.
-        </p>
-      )}
-      <FormularioAcesso />
-    </>
+    <FormularioLogin
+      para="aluno"
+      proximo={typeof proximo === "string" ? proximo : undefined}
+      aviso={typeof erro === "string" ? AVISOS[erro] : undefined}
+    />
   );
 }

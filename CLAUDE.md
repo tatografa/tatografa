@@ -485,6 +485,18 @@ Provar que funciona sem o Otávio ler código:
   porque porta pública que nenhuma tela usa só junta lixo de robô — e **sai na 0045,
   pendente**, junto com a `entrar_na_lista` de um argumento: `drop` exige a confirmação
   que a sessão remota não dá. Aplicar a 0045 pelo SQL Editor e regerar os tipos.
+- **[2026-10-02, pedido do Otávio]** **`/acesso` é e-mail e senha.** Era um botão
+  "Entrar com senha" levando a `/entrar` e, embaixo, o pedido de link por e-mail. A senha
+  já era o caminho que sempre funciona (o aluno a cria no onboarding, e o link depende de
+  o e-mail chegar com ele na academia); agora é a tela inteira, e quem esqueceu tem
+  "Esqueci minha senha". **O link mágico saiu** — tela e `enviarLinkDeAcesso`; a
+  recuperação de senha continua. **Um formulário só para as duas portas**
+  (`FormularioLogin`, com `para="aluno"`): muda o texto e o destino padrão, `/app`.
+  `destinoSeguro` passou a aceitar `/app`, comparando por segmento inteiro (`/apple` não
+  passa), e `/acesso` agora honra o `?proximo` que o `proxy.ts` sempre mandou e a tela
+  ignorava — o aluno que abre um link do app sem sessão volta para ele depois de entrar.
+  O slogan da moldura virou parágrafo: o `h1` é o título do formulário, e no celular a
+  moldura esconde o slogan — a tela ficava sem título nenhum.
 - **[2026-10-01, pedido do Otávio]** **A landing segue o protótipo** (`Landing Page.dc.html`,
   pacote `Reps_Club_Student_Onboarding_2`): herói escuro com o seletor "Para Personais /
   Para Alunos", o painel num navegador (personal) ou três celulares (aluno), três pilares

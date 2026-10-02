@@ -72,14 +72,19 @@ function errosDe(erro: z.ZodError): EstadoAuth["errosPorCampo"] {
 }
 
 /**
- * Só aceita caminho interno do painel como destino pós-login. Sem isso, um
- * `?proximo=https://site-falso` transforma o login em redirecionador aberto.
+ * Só aceita caminho interno do painel ou do app como destino pós-login. Sem
+ * isso, um `?proximo=https://site-falso` transforma o login em redirecionador
+ * aberto. A comparação é por segmento inteiro: `/apple` não é `/app`.
  */
 function destinoSeguro(valor: FormDataEntryValue | null): string {
   const caminho = typeof valor === "string" ? valor : "";
-  return caminho.startsWith("/painel") && !caminho.startsWith("//")
-    ? caminho
-    : "/painel";
+  const interno = ["/painel", "/app"].some(
+    (raiz) =>
+      caminho === raiz ||
+      caminho.startsWith(`${raiz}/`) ||
+      caminho.startsWith(`${raiz}?`),
+  );
+  return interno ? caminho : "/painel";
 }
 
 export async function entrar(
@@ -194,44 +199,6 @@ export async function enviarLinkDeRecuperacao(
   // quem tem conta. **Calar falha de envio não era** — e era o que acontecia.
   // Sem SMTP próprio o Supabase recusa todo endereço fora da equipe do projeto,
   // e esta tela dizia "link enviado" para um e-mail que nunca saiu.
-  if (error) registraFalhaDeEnvio(error.message);
-  if (error && falhaDeEnvioVisivel(error.message)) {
-    return { erro: traduzErro(error.message), campos: bruto };
-  }
-
-  return { sucesso: "link-enviado", campos: bruto };
-}
-
-/**
- * Link mágico do aluno (`/acesso`).
- *
- * Difere da recuperação de senha em dois pontos: o destino é `/app`, e
- * `shouldCreateUser: false` — sem isso, digitar um e-mail qualquer criaria uma
- * conta órfã, sem personal e sem treino.
- */
-export async function enviarLinkDeAcesso(
-  _anterior: EstadoAuth,
-  formData: FormData,
-): Promise<EstadoAuth> {
-  const bruto = { email: String(formData.get("email") ?? "") };
-
-  const analise = esquemaEmail.safeParse(bruto);
-  if (!analise.success) {
-    return { errosPorCampo: errosDe(analise.error), campos: bruto };
-  }
-
-  const supabase = await createClient();
-  const origem = await getSiteOrigin();
-
-  const { error } = await supabase.auth.signInWithOtp({
-    email: analise.data.email,
-    options: {
-      shouldCreateUser: false,
-      emailRedirectTo: `${origem}/auth/confirmar?proximo=/app`,
-    },
-  });
-
-  // Mesma regra do `enviarLinkDeRecuperacao`.
   if (error) registraFalhaDeEnvio(error.message);
   if (error && falhaDeEnvioVisivel(error.message)) {
     return { erro: traduzErro(error.message), campos: bruto };
