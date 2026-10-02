@@ -497,6 +497,11 @@ Provar que funciona sem o Otávio ler código:
   ignorava — o aluno que abre um link do app sem sessão volta para ele depois de entrar.
   O slogan da moldura virou parágrafo: o `h1` é o título do formulário, e no celular a
   moldura esconde o slogan — a tela ficava sem título nenhum.
+  **E o painel escuro da moldura passou a dizer "Área do aluno"** em `/acesso` (pedido do
+  Otávio, 02/10): o aluno que entrava pelo computador lia "Área do personal trainer".
+  `ChamadaDaMoldura` decide pelo endereço, porque o layout não sabe que página está
+  dentro dele; sai pronto no HTML do servidor. `/entrar` e `/recuperar`, que servem os
+  dois papéis, ficam com o texto do personal.
 - **[2026-10-01, pedido do Otávio]** **A landing segue o protótipo** (`Landing Page.dc.html`,
   pacote `Reps_Club_Student_Onboarding_2`): herói escuro com o seletor "Para Personais /
   Para Alunos", o painel num navegador (personal) ou três celulares (aluno), três pilares

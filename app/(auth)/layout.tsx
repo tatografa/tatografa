@@ -3,8 +3,10 @@ import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { RodapeLegal } from "@/components/rodape-legal";
 
+import { ChamadaDaMoldura } from "./chamada-da-moldura";
+
 /**
- * Moldura das telas de autenticação do personal.
+ * Moldura das telas de entrada — as do personal e `/acesso`, a do aluno.
  *
  * Duas colunas no desktop, como no protótipo `Fluxo do Personal - Login`:
  * painel escuro da marca à esquerda, formulário à direita. No celular o painel
@@ -21,16 +23,7 @@ export default function AuthLayout({
           <Logo />
         </Link>
 
-        <div className="hidden max-w-[400px] lg:block">
-          <p className="eyebrow mb-3.5 text-brand-on-dark">Área do personal trainer</p>
-          <p className="mb-4 text-[32px] font-extrabold leading-[1.2] tracking-[-0.02em]">
-            Seus alunos, seus treinos, um só painel.
-          </p>
-          <p className="text-[14.5px] font-medium leading-[1.6] text-dark-muted">
-            Monte os treinos, acompanhe as execuções e veja a evolução de cada
-            aluno série por série.
-          </p>
-        </div>
+        <ChamadaDaMoldura />
 
         <p className="hidden text-[12px] font-medium text-dark-muted lg:block">
           Reps Club
