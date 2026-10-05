@@ -6,6 +6,12 @@
       "sourceType": "github",
       "skillPath": "skills/career-transitions/SKILL.md",
       "computedHash": "b6c9db12a31127b619916888679886f5db3bb7997863425d4dbe470b66520b91"
+    },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "computedHash": "913b9d37d0d54047dd65222bb8c67b2bf04e3cb87dcad1729068d7a8b2c8c396"
     }
   }
 }
