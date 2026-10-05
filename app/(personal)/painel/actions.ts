@@ -5,6 +5,9 @@ import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import type { TextosDoPainel } from "@/lib/i18n/painel";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
+
 import { requireTrainer } from "@/lib/auth/session";
 import { getSiteOrigin } from "@/lib/auth/site-url";
 import { createClient } from "@/lib/supabase/server";
@@ -18,15 +21,18 @@ export type EstadoConvite = {
   nomeConvidado?: string;
 };
 
-const esquemaConvite = z.object({
-  nome: z.string().trim().min(2, "Informe o nome do aluno."),
-  email: z
-    .string()
-    .trim()
-    .min(1, "Informe o e-mail do aluno.")
-    .email("E-mail inválido.")
-    .transform((valor) => valor.toLowerCase()),
-});
+/** O esquema com as mensagens no idioma do painel — montado na hora, por isso. */
+function esquemaConvite(m: TextosDoPainel["dashboard"]["convidar"]["erros"]) {
+  return z.object({
+    nome: z.string().trim().min(2, m.nome),
+    email: z
+      .string()
+      .trim()
+      .min(1, m.emailVazio)
+      .email(m.emailInvalido)
+      .transform((valor) => valor.toLowerCase()),
+  });
+}
 
 /**
  * 24 bytes em hex = 192 bits de entropia, 48 caracteres seguros em URL.
@@ -47,7 +53,8 @@ export async function convidarAluno(
   };
   const campos = bruto;
 
-  const analise = esquemaConvite.safeParse(bruto);
+  const m = (await textosDoPainel()).t.dashboard.convidar.erros;
+  const analise = esquemaConvite(m).safeParse(bruto);
   if (!analise.success) {
     const errosPorCampo: EstadoConvite["errosPorCampo"] = {};
     for (const problema of analise.error.issues) {
@@ -71,7 +78,7 @@ export async function convidarAluno(
 
   if (jaAluno) {
     return {
-      erro: "Esse e-mail já é de um aluno seu.",
+      erro: m.jaEAluno,
       campos,
     };
   }
@@ -103,7 +110,7 @@ export async function convidarAluno(
   });
 
   if (error) {
-    return { erro: "Não deu para criar o convite. Tente de novo.", campos };
+    return { erro: m.falha, campos };
   }
 
   revalidatePath("/painel");

@@ -93,3 +93,34 @@ export function oQueMudouNoIdioma(idioma: Idioma) {
   const traducao = O_QUE_MUDOU_TRADUZIDO[idioma];
   return traducao && traducao.versao === VERSAO_DOS_DOCUMENTOS ? traducao : null;
 }
+
+/**
+ * O mesmo, para o portão do **painel** (`O_QUE_MUDOU.personal`): a mudança é a
+ * mesma, a leitura é do outro lado (17/09). Mesma regra de versão.
+ */
+export const O_QUE_MUDOU_DO_PERSONAL: Record<
+  Idioma,
+  { versao: string; oQueMudou: string; oQueNaoMuda: string } | null
+> = {
+  pt: null,
+  en: {
+    versao: "2026-09-18",
+    oQueMudou:
+      "The client file now shows phone, city, weight goal and hormone profile (natural, replacement therapy or hormone use), when the client fills them in. The client fills them in, not you: the database refuses your writes to the last two, on purpose — the hormone profile is health data, and recording an assumption about someone's body on your own is the kind of thing that can't be undone. The client was told in the app that you see these fields.",
+    oQueNaoMuda:
+      "Your clients, your workouts and everything you built stay exactly as they were. To keep using the dashboard, confirm that you've read the new text.",
+  },
+  es: {
+    versao: "2026-09-18",
+    oQueMudou:
+      "La ficha del alumno ahora muestra teléfono, ciudad, meta de peso y perfil biológico (natural, reposición u hormonizado), cuando el alumno los completa. Quien los completa es el alumno, no tú: la base de datos rechaza tu escritura en los dos últimos, a propósito — el perfil biológico es un dato de salud, y registrar por tu cuenta una suposición sobre el cuerpo de alguien es el tipo de cosa que no se deshace. Al alumno se le avisó en la app que tú ves estos campos.",
+    oQueNaoMuda:
+      "Tus alumnos, tus entrenamientos y todo lo que armaste siguen exactamente como estaban. Para seguir usando el panel, confirma que leíste el texto nuevo.",
+  },
+};
+
+/** A tradução do portão do painel, se for da versão vigente; senão, nulo. */
+export function oQueMudouDoPersonalNoIdioma(idioma: Idioma) {
+  const traducao = O_QUE_MUDOU_DO_PERSONAL[idioma];
+  return traducao && traducao.versao === VERSAO_DOS_DOCUMENTOS ? traducao : null;
+}

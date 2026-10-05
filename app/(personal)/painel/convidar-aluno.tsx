@@ -2,7 +2,9 @@
 
 import { useActionState, useEffect, useState } from "react";
 
+import { usePainel } from "@/components/personal/idioma-do-painel";
 import { Button, Dialog, Input } from "@/components/ui";
+import { preencher } from "@/lib/i18n/texto";
 
 import { convidarAluno, type EstadoConvite } from "./actions";
 
@@ -11,19 +13,21 @@ const INICIAL: EstadoConvite = {};
 export function ConvidarAluno() {
   const [aberto, setAberto] = useState(false);
   const [estado, acao, enviando] = useActionState(convidarAluno, INICIAL);
+  const { t } = usePainel();
+  const c = t.dashboard.convidar;
 
   return (
     <>
-      <Button onClick={() => setAberto(true)}>Convidar aluno</Button>
+      <Button onClick={() => setAberto(true)}>{c.botao}</Button>
 
       <Dialog
         aberto={aberto}
         aoFechar={() => setAberto(false)}
-        titulo={estado.link ? "Convite pronto" : "Convidar aluno"}
+        titulo={estado.link ? c.pronto : c.botao}
         descricao={
           estado.link
-            ? `Mande esse link para ${estado.nomeConvidado}. Vale por 7 dias e só pode ser usado uma vez.`
-            : "O aluno recebe um link para criar a conta e completar o perfil."
+            ? preencher(c.prontoApoio, { nome: estado.nomeConvidado ?? "" })
+            : c.apoio
         }
       >
         {estado.link ? (
@@ -31,23 +35,23 @@ export function ConvidarAluno() {
         ) : (
           <form action={acao} noValidate className="space-y-4">
             <Input
-              label="Nome"
+              label={c.nome}
               name="nome"
               autoComplete="off"
-              placeholder="Como você chama esse aluno"
+              placeholder={c.nomeExemplo}
               defaultValue={estado.campos?.nome}
               error={estado.errosPorCampo?.nome}
               required
             />
             <Input
-              label="E-mail"
+              label={c.email}
               name="email"
               type="email"
               autoComplete="off"
-              placeholder="aluno@email.com"
+              placeholder={c.emailExemplo}
               defaultValue={estado.campos?.email}
               error={estado.errosPorCampo?.email}
-              hint="É o e-mail que ele vai usar para entrar."
+              hint={c.emailDica}
               required
             />
 
@@ -67,10 +71,10 @@ export function ConvidarAluno() {
                 block
                 onClick={() => setAberto(false)}
               >
-                Cancelar
+                {t.comum.cancelar}
               </Button>
               <Button type="submit" block disabled={enviando}>
-                {enviando ? "Gerando…" : "Gerar link"}
+                {enviando ? c.gerando : c.gerar}
               </Button>
             </div>
           </form>
@@ -88,6 +92,8 @@ function LinkDoConvite({
   aoFechar: () => void;
 }) {
   const [copiado, setCopiado] = useState(false);
+  const { t } = usePainel();
+  const c = t.dashboard.convidar;
 
   useEffect(() => {
     if (!copiado) return;
@@ -107,13 +113,13 @@ function LinkDoConvite({
   }
 
   const zap = `https://wa.me/?text=${encodeURIComponent(
-    `Seu acesso ao Reps Club: ${link}`,
+    preencher(c.mensagem, { link }),
   )}`;
 
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-[7px]">
-        <span className="eyebrow text-ink-3">Link do convite</span>
+        <span className="eyebrow text-ink-3">{c.link}</span>
         <input
           readOnly
           value={link}
@@ -124,11 +130,11 @@ function LinkDoConvite({
 
       <div className="flex gap-2.5">
         <Button type="button" variant="secondary" block onClick={copiar}>
-          {copiado ? "Copiado" : "Copiar link"}
+          {copiado ? c.copiado : c.copiar}
         </Button>
         <a href={zap} target="_blank" rel="noopener noreferrer" className="flex-1">
           <Button type="button" block>
-            Abrir WhatsApp
+            {c.whatsapp}
           </Button>
         </a>
       </div>
@@ -138,7 +144,7 @@ function LinkDoConvite({
         onClick={aoFechar}
         className="w-full text-center text-[13px] font-semibold text-ink-4 transition hover:text-ink-2"
       >
-        Fechar
+        {t.comum.fechar}
       </button>
     </div>
   );

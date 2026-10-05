@@ -8,6 +8,12 @@ import {
   rotuloDoDia,
 } from "@/lib/domain/historico";
 import { langDe, type Idioma } from "@/lib/domain/idioma";
+import {
+  rotuloDoDiaComSemana,
+  rotuloDoDiaCurto,
+  rotuloDoMes,
+  rotuloDoMesPorExtenso,
+} from "@/lib/domain/dashboard";
 import { dataCurta } from "@/lib/domain/progresso";
 
 /**
@@ -129,6 +135,41 @@ export function formatos(idioma: Idioma) {
       }).format(new Date(diaLocalEmMs(diaDoCalendario))),
     /** "18h" / "18h30" em português; "18:00" / "18:30" nos outros. */
     horaDaAgenda: (iso: string) => (pt ? horaDaSessaoNaAgenda(iso) : hora(iso)),
+    /** Um mês ("2026-09") no eixo: "set" / "Sep". */
+    mesCurto: (mes: string) =>
+      pt
+        ? rotuloDoMes(mes)
+        : semPontoFinal(
+            new Intl.DateTimeFormat(locale, { timeZone: "UTC", month: "short" }).format(
+              new Date(diaLocalEmMs(`${mes}-01`)),
+            ),
+          ),
+    /** "setembro de 2026" / "September 2026". */
+    mesPorExtenso: (mes: string) =>
+      pt
+        ? rotuloDoMesPorExtenso(mes)
+        : new Intl.DateTimeFormat(locale, { timeZone: "UTC", month: "long", year: "numeric" }).format(
+            new Date(diaLocalEmMs(`${mes}-01`)),
+          ),
+    /** Um dia de calendário curto: "09/09" / "09/09" (es) / "9/9" (en). */
+    diaCurto: (dia: string) =>
+      pt
+        ? rotuloDoDiaCurto(dia)
+        : new Intl.DateTimeFormat(locale, { timeZone: "UTC", day: "2-digit", month: "2-digit" }).format(
+            new Date(diaLocalEmMs(dia)),
+          ),
+    /** "qua, 09/09" / "Wed, 09/09". */
+    diaComSemana: (dia: string) =>
+      pt
+        ? rotuloDoDiaComSemana(dia)
+        : semPontoFinal(
+            new Intl.DateTimeFormat(locale, {
+              timeZone: "UTC",
+              weekday: "short",
+              day: "2-digit",
+              month: "2-digit",
+            }).format(new Date(diaLocalEmMs(dia))),
+          ),
     /** "48min", "1h05", "—" — igual nos três idiomas. */
     duracao: duracaoCurta,
     /** "45min", "1h", "1h30" — igual nos três idiomas. */

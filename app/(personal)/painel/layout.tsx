@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 
 import { BotaoSair } from "@/components/botao-sair";
+import { ProvedorDoPainel } from "@/components/personal/idioma-do-painel";
 import { NavegacaoLateral } from "@/components/personal/navegacao-lateral";
 import { PortaoDeAceite } from "@/components/portao-de-aceite";
 import { requireTrainer } from "@/lib/auth/session";
@@ -12,6 +13,10 @@ import {
   VERSAO_DOS_DOCUMENTOS,
 } from "@/lib/legal/documentos";
 import { aceiteEstaEmDia } from "@/lib/queries/aceite";
+import { langDe } from "@/lib/domain/idioma";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
+import { preencher } from "@/lib/i18n/texto";
+import { oQueMudouDoPersonalNoIdioma } from "@/lib/legal/por-idioma";
 import { iniciaisDe } from "@/lib/domain/nome";
 import { COOKIE_DA_BARRA_RECOLHIDA } from "@/lib/domain/painel";
 import { contarAlunos } from "@/lib/queries/alunos";
@@ -41,6 +46,8 @@ export default async function PainelLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const { trainer } = await requireTrainer();
+  // O idioma do painel (etapa 3): o mesmo cookie do app e da landing.
+  const { idioma, t } = await textosDoPainel();
 
   /*
    * O portão de re-aceite, agora também deste lado (decisão do Otávio, 17/09).
@@ -52,13 +59,15 @@ export default async function PainelLayout({
    * ler o que se está aceitando não pode depender de aceitar.
    */
   if (!(await aceiteEstaEmDia(trainer.id))) {
+    const traducao = oQueMudouDoPersonalNoIdioma(idioma);
     return (
-      <div className="min-h-dvh bg-canvas">
+      <div lang={langDe(idioma)} className="min-h-dvh bg-canvas">
         <PortaoDeAceite
           versao={VERSAO_DOS_DOCUMENTOS}
-          oQueMudou={O_QUE_MUDOU.personal}
-          oQueNaoMuda={O_QUE_NAO_MUDA.personal}
+          oQueMudou={traducao?.oQueMudou ?? O_QUE_MUDOU.personal}
+          oQueNaoMuda={traducao?.oQueNaoMuda ?? O_QUE_NAO_MUDA.personal}
           aoAceitar={aceitarAtualizacaoDoPersonal}
+          textos={t.portao}
         />
       </div>
     );
@@ -72,12 +81,19 @@ export default async function PainelLayout({
   const recolhida = (await cookies()).get(COOKIE_DA_BARRA_RECOLHIDA)?.value === "1";
 
   return (
-    <div className="flex min-h-dvh items-start gap-[11px] bg-canvas-sunken p-[13px]">
+    <ProvedorDoPainel idioma={idioma} textos={t}>
+    <div lang={langDe(idioma)} className="flex min-h-dvh items-start gap-[11px] bg-canvas-sunken p-[13px]">
       <NavegacaoLateral
         nome={trainer.name}
         alunos={alunos}
         recolhidaInicial={recolhida}
-        sair={<BotaoSair apenasIcone rotulo="Sair da conta" />}
+        sair={
+          <BotaoSair
+            apenasIcone
+            rotulo={t.comum.nav.sairDaConta}
+            rotuloSaindo={t.comum.nav.saindo}
+          />
+        }
       />
 
       {/*
@@ -96,7 +112,7 @@ export default async function PainelLayout({
         */}
         <Link
           href="/painel/configuracoes"
-          aria-label={`Sua conta: ${trainer.name}`}
+          aria-label={preencher(t.comum.nav.suaContaDe, { nome: trainer.name })}
           title={trainer.name}
           className="absolute top-[25px] right-7 z-10 flex size-10 items-center justify-center rounded-full bg-ink text-[13px] font-semibold text-white transition hover:opacity-85"
         >
@@ -106,5 +122,6 @@ export default async function PainelLayout({
         {children}
       </main>
     </div>
+    </ProvedorDoPainel>
   );
 }

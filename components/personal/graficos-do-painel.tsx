@@ -6,24 +6,40 @@ import {
   LINHAS_DO_CARTAO,
 } from "@/components/personal/cartao-do-painel";
 import {
-  crescimentoEmPalavras,
   DIAS_DA_ATIVIDADE,
   DIAS_DAS_PROGRESSOES,
   ehFimDeSemana,
-  faixaDeCarga,
-  formatarGanho,
   ganhoPercentual,
   linhaDoCrescimento,
   LIMITE_DAS_PROGRESSOES,
   resumoDaAtividade,
-  rotuloDoDiaComSemana,
-  rotuloDoDiaCurto,
-  rotuloDoMes,
-  rotuloDoMesPorExtenso,
   type DiaDaAtividade,
   type PontoDoMes,
   type Progressao,
 } from "@/lib/domain/dashboard";
+import type { Idioma } from "@/lib/domain/idioma";
+import { formatos, type Formatos } from "@/lib/i18n/formatos";
+import { TEXTOS_DO_PAINEL, type TextosDoPainel } from "@/lib/i18n/painel";
+import { plural, preencher } from "@/lib/i18n/texto";
+
+/**
+ * A frase inteira do gráfico de crescimento, para o `aria-label` — a mesma conta
+ * de `crescimentoEmPalavras` (`lib/domain/dashboard.ts`), no idioma do painel.
+ */
+function crescimentoNoIdioma(pontos: PontoDoMes[], t: TextosDoPainel, f: Formatos): string {
+  const c = t.dashboard.crescimento;
+  if (!pontos.length) return c.semHistorico;
+  const primeiro = pontos[0];
+  const ultimo = pontos[pontos.length - 1];
+  const variacao = ultimo.total - primeiro.total;
+  const agora = preencher(c.agora, {
+    alunos: plural(ultimo.total, t.comum.alunos),
+    mes: f.mesPorExtenso(ultimo.mes),
+  });
+  const mes = f.mesPorExtenso(primeiro.mes);
+  if (variacao === 0) return preencher(c.igual, { agora, mes });
+  return preencher(variacao > 0 ? c.maisQue : c.menosQue, { agora, n: Math.abs(variacao), mes });
+}
 
 /*
  * Os três gráficos do doc 06 §2.
@@ -52,7 +68,10 @@ const ALTURA = 120;
 
 /* ------------------------------------------- evolução mensal de alunos --- */
 
-export function CrescimentoDaCarteira({ pontos }: { pontos: PontoDoMes[] }) {
+export function CrescimentoDaCarteira({ pontos, idioma }: { pontos: PontoDoMes[]; idioma: Idioma }) {
+  const t = TEXTOS_DO_PAINEL[idioma];
+  const c = t.dashboard.crescimento;
+  const f = formatos(idioma);
   const linha = linhaDoCrescimento(pontos, LARGURA, ALTURA);
   const atual = pontos.length ? pontos[pontos.length - 1].total : 0;
   const doPrimeiro = pontos.length ? pontos[0].total : 0;
@@ -60,18 +79,18 @@ export function CrescimentoDaCarteira({ pontos }: { pontos: PontoDoMes[] }) {
 
   return (
     <Bloco
-      titulo="Evolução mensal de alunos"
-      apoio={`Total ao fim de cada mês · últimos ${pontos.length} meses`}
+      titulo={c.titulo}
+      apoio={preencher(c.apoio, { n: pontos.length })}
       // O acumulado, e não as entradas do mês: com um aluno novo em março e
       // nenhum em abril, "novos por mês" desenharia uma queda onde ninguém saiu.
-      resumo={`${atual} ${atual === 1 ? "aluno" : "alunos"} · ${
+      resumo={`${plural(atual, t.comum.alunos)} · ${
         variacao === 0
-          ? "sem mudança"
-          : `${variacao > 0 ? "+" : "−"}${Math.abs(variacao)} no período`
+          ? c.semMudanca
+          : preencher(c.noPeriodo, { sinal: variacao > 0 ? "+" : "−", n: Math.abs(variacao) })
       }`}
     >
       {!linha || linha.maximo === 0 ? (
-        <Vazio>Nenhum aluno cadastrado ainda.</Vazio>
+        <Vazio>{c.vazio}</Vazio>
       ) : (
         <>
           <div className="relative">
@@ -79,7 +98,7 @@ export function CrescimentoDaCarteira({ pontos }: { pontos: PontoDoMes[] }) {
               viewBox={`0 0 ${LARGURA} ${ALTURA}`}
               className="w-full overflow-visible"
               role="img"
-              aria-label={crescimentoEmPalavras(pontos)}
+              aria-label={crescimentoNoIdioma(pontos, t, f)}
             >
               <path d={linha.area} fill="var(--color-brand-tint)" />
               <path
@@ -111,8 +130,7 @@ export function CrescimentoDaCarteira({ pontos }: { pontos: PontoDoMes[] }) {
                 <div key={ponto.mes} className="group relative flex-1">
                   <div className="h-full rounded-[6px] transition group-hover:bg-canvas-sunken/60" />
                   <Dica>
-                    {rotuloDoMesPorExtenso(ponto.mes)} · {ponto.total}{" "}
-                    {ponto.total === 1 ? "aluno" : "alunos"}
+                    {f.mesPorExtenso(ponto.mes)} · {plural(ponto.total, t.comum.alunos)}
                   </Dica>
                 </div>
               ))}
@@ -120,7 +138,7 @@ export function CrescimentoDaCarteira({ pontos }: { pontos: PontoDoMes[] }) {
           </div>
 
           <Eixo
-            rotulos={pontos.map((p) => rotuloDoMes(p.mes))}
+            rotulos={pontos.map((p) => f.mesCurto(p.mes))}
             // Doze rótulos de três letras se encavalam numa coluna de metade da
             // tela; um sim, um não mantém o começo, o meio e o fim legíveis.
             passo={2}
@@ -134,30 +152,37 @@ export function CrescimentoDaCarteira({ pontos }: { pontos: PontoDoMes[] }) {
 
 /* --------------------------------------------------- atividade diária --- */
 
-export function AtividadeDiaria({ dias }: { dias: DiaDaAtividade[] }) {
+export function AtividadeDiaria({ dias, idioma }: { dias: DiaDaAtividade[]; idioma: Idioma }) {
+  const t = TEXTOS_DO_PAINEL[idioma];
+  const a = t.dashboard.atividade;
+  const f = formatos(idioma);
   const { total, diasComTreino, melhorDia } = resumoDaAtividade(dias);
   const maximo = Math.max(1, ...dias.map((d) => d.total));
 
   return (
     <Bloco
-      titulo="Atividade diária"
-      apoio={`Treinos concluídos por dia · últimos ${DIAS_DA_ATIVIDADE} dias`}
-      resumo={`${total} ${total === 1 ? "treino" : "treinos"} em ${diasComTreino} ${
-        diasComTreino === 1 ? "dia" : "dias"
-      }`}
+      titulo={a.titulo}
+      apoio={preencher(a.apoio, { n: DIAS_DA_ATIVIDADE })}
+      resumo={preencher(a.resumo, {
+        treinos: plural(total, t.comum.treinos),
+        dias: plural(diasComTreino, t.comum.dias),
+      })}
     >
       {total === 0 ? (
         <Vazio>
-          Ninguém da carteira concluiu treino nos últimos {DIAS_DA_ATIVIDADE}{" "}
-          dias.
+          {preencher(a.vazio, { n: DIAS_DA_ATIVIDADE })}
         </Vazio>
       ) : (
         <>
           <div
             role="img"
-            aria-label={`${total} treinos concluídos em ${diasComTreino} dos últimos ${DIAS_DA_ATIVIDADE} dias${
+            aria-label={`${preencher(a.descricao, {
+              treinos: plural(total, t.comum.treinos),
+              dias: diasComTreino,
+              n: DIAS_DA_ATIVIDADE,
+            })}${
               melhorDia
-                ? `; o dia mais cheio foi ${rotuloDoDiaComSemana(melhorDia.dia)}, com ${melhorDia.total}`
+                ? preencher(a.melhorDia, { dia: f.diaComSemana(melhorDia.dia), n: melhorDia.total })
                 : ""
             }.`}
             style={{ height: ALTURA }}
@@ -185,15 +210,14 @@ export function AtividadeDiaria({ dias }: { dias: DiaDaAtividade[] }) {
                   }`}
                 />
                 <Dica>
-                  {rotuloDoDiaComSemana(dia.dia)} · {dia.total}{" "}
-                  {dia.total === 1 ? "treino" : "treinos"}
+                  {f.diaComSemana(dia.dia)} · {plural(dia.total, t.comum.treinos)}
                 </Dica>
               </div>
             ))}
           </div>
 
           <Eixo
-            rotulos={dias.map((d) => rotuloDoDiaCurto(d.dia))}
+            rotulos={dias.map((d) => f.diaCurto(d.dia))}
             // Trinta datas não cabem: de cinco em cinco dá seis marcas, que é o
             // que basta para localizar uma barra no mês.
             passo={5}
@@ -209,22 +233,24 @@ export function AtividadeDiaria({ dias }: { dias: DiaDaAtividade[] }) {
 
 export function TopDeProgressoes({
   progressoes,
+  idioma,
 }: {
   progressoes: Progressao[];
+  idioma: Idioma;
 }) {
+  const tp = TEXTOS_DO_PAINEL[idioma].dashboard.progressoes;
+  const f = formatos(idioma);
   return (
     <CartaoDoPainel
-      titulo={`Top ${LIMITE_DAS_PROGRESSOES} progressões`}
-      apoio={`Maiores ganhos de carga · ${DIAS_DAS_PROGRESSOES} dias`}
+      titulo={preencher(tp.titulo, { n: LIMITE_DAS_PROGRESSOES })}
+      apoio={preencher(tp.apoio, { n: DIAS_DAS_PROGRESSOES })}
       Icone={Trophy}
     >
       {progressoes.length === 0 ? (
         <p
           className={`text-[13px] leading-relaxed text-ink-3 ${LINHA_DO_CARTAO}`}
         >
-          Ainda não há como comparar. Uma progressão aparece aqui quando o mesmo
-          exercício, com carga, é executado em dois treinos diferentes dentro
-          dos últimos {DIAS_DAS_PROGRESSOES} dias.
+          {preencher(tp.vazio, { n: DIAS_DAS_PROGRESSOES })}
         </p>
       ) : (
         // Lista ordenada de verdade: a posição no ranking é conteúdo, e num
@@ -262,10 +288,10 @@ export function TopDeProgressoes({
               */}
               <div className="shrink-0 text-right">
                 <p className="text-[12.5px] font-semibold text-success tabular-nums">
-                  {formatarGanho(ganhoPercentual(p.cargaInicial, p.cargaFinal))}
+                  +{f.numero(Math.round(ganhoPercentual(p.cargaInicial, p.cargaFinal) * 10) / 10)}%
                 </p>
                 <p className="text-[11px] text-ink-5 tabular-nums">
-                  {faixaDeCarga(p.cargaInicial, p.cargaFinal)}
+                  {f.numero(p.cargaInicial)} → {f.carga(p.cargaFinal)}
                 </p>
               </div>
             </li>

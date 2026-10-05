@@ -3,11 +3,10 @@
 import { revalidatePath } from "next/cache";
 
 import { requireTrainer } from "@/lib/auth/session";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
 import { registrarAceite } from "@/lib/legal/aceite";
 
 import type { EstadoDoAceite } from "@/app/(aluno)/acoes-de-aceite";
-
-const ERRO = "Não conseguimos registrar seu aceite agora. Tente de novo.";
 
 /**
  * O aceite do **personal** (decisão do Otávio, 17/09).
@@ -20,7 +19,9 @@ export async function aceitarAtualizacaoDoPersonal(
   _anterior: EstadoDoAceite,
 ): Promise<EstadoDoAceite> {
   const { trainer } = await requireTrainer();
-  if (!(await registrarAceite(trainer.id))) return { erro: ERRO };
+  if (!(await registrarAceite(trainer.id))) {
+    return { erro: (await textosDoPainel()).t.portao.erro };
+  }
 
   revalidatePath("/painel", "layout");
   return {};

@@ -1,8 +1,9 @@
 "use client";
 
 import { AvisoDeFalha } from "@/components/aviso-de-falha";
+import { usePainel } from "@/components/personal/idioma-do-painel";
 
-/** Falha de leitura dentro do painel. A barra de navegação continua montada. */
+/** Falha dentro do painel: o layout fica de pé, e o idioma chega pelo provedor. */
 export default function ErroDoPainel({
   error,
   retry,
@@ -10,10 +11,13 @@ export default function ErroDoPainel({
   error: Error & { digest?: string };
   retry: () => void;
 }) {
+  const { t } = usePainel();
   return (
     <AvisoDeFalha
-      titulo="Não deu para carregar"
-      texto="Alguma coisa falhou do nosso lado. Nada do que você montou foi perdido — é só tentar de novo."
+      titulo={t.comum.erro.titulo}
+      texto={t.comum.erro.texto}
+      rotuloDoBotao={t.comum.erro.tentar}
+      rotuloDoCodigo={t.comum.erro.codigo}
       digest={error.digest}
       aoTentarDeNovo={retry}
     />

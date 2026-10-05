@@ -22,6 +22,10 @@ import { Card, classesDeBotao } from "@/components/ui";
 import { requireTrainer } from "@/lib/auth/session";
 import { listarConvitesPendentes } from "@/lib/queries/alunos";
 import { lerGraficosDoPainel, lerResumoDaCarteira } from "@/lib/queries/painel";
+import type { Idioma } from "@/lib/domain/idioma";
+import { TEXTOS_DO_PAINEL } from "@/lib/i18n/painel";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
+import { plural, preencher } from "@/lib/i18n/texto";
 
 import { cancelarConvite } from "./actions";
 import { ConvidarAluno } from "./convidar-aluno";
@@ -31,25 +35,27 @@ export default async function PainelPage() {
 
   // O limiar sai da linha do personal, não de uma constante: é ajuste dele,
   // editável em /painel/configuracoes.
-  const [{ alunos, alertas, indicadores, atividade }, convites, graficos] =
+  const [{ alunos, alertas, indicadores, atividade }, convites, graficos, { idioma, t }] =
     await Promise.all([
       lerResumoDaCarteira(trainer.id, trainer.dias_para_alerta),
       listarConvitesPendentes(),
       lerGraficosDoPainel(),
+      textosDoPainel(),
     ]);
+  const d = t.dashboard;
 
   return (
     <>
       <CabecalhoDaPagina
         // "Painel" e não "Dashboard" como no protótipo: é o nome do item no
         // menu ao lado, e a interface é inteira em português.
-        titulo="Painel"
-        subtitulo="Aqui está o resumo da sua consultoria hoje"
+        titulo={d.titulo}
+        subtitulo={d.subtitulo}
         acoes={<ConvidarAluno />}
       />
 
       {alunos.length === 0 && convites.length === 0 ? (
-        <VazioSemAluno />
+        <VazioSemAluno idioma={idioma} />
       ) : (
         /*
           Duas colunas como no protótipo, decididas por **container query** e
@@ -62,7 +68,7 @@ export default async function PainelPage() {
         <div className="@container">
           <div className="grid items-start gap-4 @min-[720px]:grid-cols-[minmax(0,1fr)_clamp(260px,32%,340px)]">
             <div className="min-w-0 space-y-4">
-              <Indicadores indicadores={indicadores} />
+              <Indicadores indicadores={indicadores} idioma={idioma} />
 
               {/*
               Primeiro cartão depois dos números, e antes dos gráficos que o
@@ -73,29 +79,29 @@ export default async function PainelPage() {
               <AlunosQuePrecisamDeAtencao
                 alertas={alertas}
                 diasParaAlerta={trainer.dias_para_alerta}
+                idioma={idioma}
               />
 
-              {convites.length > 0 && <ConvitesPendentes convites={convites} />}
+              {convites.length > 0 && <ConvitesPendentes convites={convites} idioma={idioma} />}
 
-              <CrescimentoDaCarteira pontos={graficos.crescimento} />
-              <AtividadeDiaria dias={graficos.atividade} />
+              <CrescimentoDaCarteira pontos={graficos.crescimento} idioma={idioma} />
+              <AtividadeDiaria dias={graficos.atividade} idioma={idioma} />
             </div>
 
             <div className="min-w-0 space-y-4">
-              <TopDeProgressoes progressoes={graficos.progressoes} />
+              <TopDeProgressoes progressoes={graficos.progressoes} idioma={idioma} />
               {/*
               A lista inteira não mora aqui: ela é `/painel/alunos` (doc 06
               §3), com tabela, busca e filtro. O dashboard guarda o que é
               decisão de hoje, e a carteira fica a um clique — no rodapé deste
               cartão, onde o olho termina a coluna.
             */}
-              <AtividadeRecente sessoes={atividade} />
+              <AtividadeRecente sessoes={atividade} idioma={idioma} />
               <Link
                 href="/painel/alunos"
                 className="inline-flex min-h-8 items-center px-1 text-[13px] font-medium text-ink-3 transition hover:text-ink"
               >
-                Ver todos os {alunos.length}{" "}
-                {alunos.length === 1 ? "aluno" : "alunos"} →
+                {plural(alunos.length, d.verTodos)}
               </Link>
             </div>
           </div>
@@ -107,13 +113,17 @@ export default async function PainelPage() {
 
 function ConvitesPendentes({
   convites,
+  idioma,
 }: {
   convites: Awaited<ReturnType<typeof listarConvitesPendentes>>;
+  idioma: Idioma;
 }) {
+  const t = TEXTOS_DO_PAINEL[idioma];
+  const c = t.dashboard.convites;
   return (
     <CartaoDoPainel
-      titulo={`Convites pendentes · ${convites.length}`}
-      apoio="Links enviados que ainda não viraram conta"
+      titulo={preencher(c.titulo, { n: convites.length })}
+      apoio={c.apoio}
       Icone={Send}
     >
       <ul className={LINHAS_DO_CARTAO}>
@@ -127,7 +137,7 @@ function ConvitesPendentes({
                 {convite.name}
               </p>
               <p className="truncate text-[12px] text-ink-4">
-                {convite.email} · expira em {diasAte(convite.expires_at)}
+                {preencher(c.expira, { email: convite.email, quando: diasAte(convite.expires_at, t) })}
               </p>
             </div>
             <form action={cancelarConvite}>
@@ -136,7 +146,7 @@ function ConvitesPendentes({
                 type="submit"
                 className="inline-flex min-h-8 items-center text-[12.5px] font-medium text-ink-4 transition hover:text-danger"
               >
-                Cancelar
+                {c.cancelar}
               </button>
             </form>
           </li>
@@ -146,31 +156,30 @@ function ConvitesPendentes({
   );
 }
 
-function VazioSemAluno() {
+function VazioSemAluno({ idioma }: { idioma: Idioma }) {
+  const v = TEXTOS_DO_PAINEL[idioma].dashboard.vazio;
   return (
     <Card size="lg" className="max-w-xl space-y-4">
       <div className="space-y-2">
         <h2 className="text-[18px] font-extrabold tracking-[-0.02em] text-ink">
-          Comece convidando um aluno
+          {v.titulo}
         </h2>
         <p className="text-[14px] leading-[1.6] text-ink-3">
-          Você gera um link, manda pelo WhatsApp e o aluno cria a conta sozinho.
-          Depois é só montar o treino e atribuir a ele.
+          {v.texto}
         </p>
       </div>
       <Link href="/painel/treinos" className={classesDeBotao({ variant: "secondary" })}>
-        Ver meus treinos
+        {v.verTreinos}
       </Link>
     </Card>
   );
 }
 
 /** "3 dias" / "hoje" — o suficiente para o personal saber se vai expirar. */
-function diasAte(iso: string): string {
+function diasAte(iso: string, t: (typeof TEXTOS_DO_PAINEL)["pt"]): string {
   const dias = Math.ceil(
     (new Date(iso).getTime() - Date.now()) / (24 * 60 * 60 * 1000),
   );
-  if (dias <= 0) return "hoje";
-  if (dias === 1) return "1 dia";
-  return `${dias} dias`;
+  if (dias <= 0) return t.dashboard.convites.hoje;
+  return plural(dias, t.comum.dias);
 }

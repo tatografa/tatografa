@@ -8,7 +8,11 @@ import {
 } from "@/components/personal/cartao-do-painel";
 
 import { NumeroDoTopo } from "@/components/personal/numero-do-topo";
-import { comoPorcentagem, haQuantosDias } from "@/lib/domain/atencao";
+import { comoPorcentagem } from "@/lib/domain/atencao";
+import type { Idioma } from "@/lib/domain/idioma";
+import { formatos } from "@/lib/i18n/formatos";
+import { TEXTOS_DO_PAINEL, type TextosDoPainel } from "@/lib/i18n/painel";
+import { plural, preencher } from "@/lib/i18n/texto";
 import { iniciaisDe } from "@/lib/domain/nome";
 import type {
   AlunoEmAlerta,
@@ -30,9 +34,12 @@ import type {
  */
 export function Indicadores({
   indicadores,
+  idioma,
 }: {
   indicadores: IndicadoresDoPainel;
+  idioma: Idioma;
 }) {
+  const n = TEXTOS_DO_PAINEL[idioma].dashboard.numeros;
   const {
     alunosAtivos,
     treinosNaSemana,
@@ -46,28 +53,28 @@ export function Indicadores({
     // A régua é a largura da coluna (container query), não a da janela.
     <div className="@container">
       <section
-        aria-label="Resumo da carteira"
+        aria-label={n.rotulo}
         className="grid grid-cols-2 gap-3.5 @min-[640px]:grid-cols-4"
       >
         <NumeroDoTopo
-          titulo="Alunos ativos"
+          titulo={n.ativos}
           valor={String(alunosAtivos)}
-          apoio="com acesso ao app"
+          apoio={n.ativosApoio}
         />
         <NumeroDoTopo
-          titulo="Treinos na semana"
+          titulo={n.semana}
           valor={String(treinosNaSemana)}
-          apoio="desde segunda-feira"
+          apoio={n.semanaApoio}
         />
         <NumeroDoTopo
-          titulo="Aderência média"
+          titulo={n.aderencia}
           valor={comoPorcentagem(aderenciaMedia)}
-          apoio="feitos sobre prescritos"
+          apoio={n.aderenciaApoio}
         />
         <NumeroDoTopo
-          titulo="Reavaliações"
+          titulo={n.reavaliacoes}
           valor={String(reavaliacoesPendentes)}
-          apoio="esperando resposta"
+          apoio={n.reavaliacoesApoio}
           destaque={reavaliacoesPendentes > 0}
           href={reavaliacoesPendentes > 0 ? "/painel/agenda" : undefined}
         />
@@ -89,15 +96,20 @@ export function Indicadores({
 export function AlunosQuePrecisamDeAtencao({
   alertas,
   diasParaAlerta,
+  idioma,
 }: {
   alertas: AlunoEmAlerta[];
   diasParaAlerta: number;
+  idioma: Idioma;
 }) {
   if (!alertas.length) return null;
+  const a = TEXTOS_DO_PAINEL[idioma].dashboard.atencao;
+  const quando = (dias: number) =>
+    dias <= 0 ? a.hoje : dias === 1 ? a.ontem : preencher(a.ha, { n: dias });
 
   return (
     <CartaoDoPainel
-      titulo={`Precisam de atenção · ${alertas.length}`}
+      titulo={preencher(a.titulo, { n: alertas.length })}
       Icone={AlertTriangle}
       tom="warning"
       apoio={
@@ -105,8 +117,7 @@ export function AlunosQuePrecisamDeAtencao({
           href="/painel/configuracoes"
           className="transition hover:text-ink-3"
         >
-          Aviso depois de {diasParaAlerta}{" "}
-          {diasParaAlerta === 1 ? "dia" : "dias"} sem treinar · ajustar
+          {plural(diasParaAlerta, a.aviso)}
         </Link>
       }
     >
@@ -122,8 +133,8 @@ export function AlunosQuePrecisamDeAtencao({
               </p>
               <p className="shrink-0 text-[12px] font-medium text-warning">
                 {alerta.motivo === "nunca-treinou"
-                  ? `entrou ${haQuantosDias(alerta.dias)} e ainda não treinou`
-                  : `treinou ${haQuantosDias(alerta.dias)}`}
+                  ? preencher(a.nuncaTreinou, { quando: quando(alerta.dias) })
+                  : preencher(a.treinou, { quando: quando(alerta.dias) })}
               </p>
             </Link>
           </li>
@@ -146,19 +157,27 @@ export function AlunosQuePrecisamDeAtencao({
  * Cada linha leva à sessão, não ao aluno: quem clica em "Carla · A · 16 séries"
  * quer ver aquelas séries. Para a ficha há a tabela de alunos.
  */
-export function AtividadeRecente({ sessoes }: { sessoes: SessaoRecente[] }) {
+export function AtividadeRecente({
+  sessoes,
+  idioma,
+}: {
+  sessoes: SessaoRecente[];
+  idioma: Idioma;
+}) {
+  const t: TextosDoPainel = TEXTOS_DO_PAINEL[idioma];
+  const r = t.dashboard.recentes;
+  const f = formatos(idioma);
   return (
     <CartaoDoPainel
-      titulo="Treinos recentes"
-      apoio="Últimos treinos concluídos"
+      titulo={r.titulo}
+      apoio={r.apoio}
       Icone={History}
     >
       {!sessoes.length ? (
         <p
           className={`text-[13px] leading-relaxed text-ink-3 ${LINHA_DO_CARTAO}`}
         >
-          Nenhum treino concluído ainda. Assim que alguém terminar uma sessão,
-          ela aparece aqui.
+          {r.vazio}
         </p>
       ) : (
         <ul className={LINHAS_DO_CARTAO}>
@@ -180,7 +199,7 @@ export function AtividadeRecente({ sessoes }: { sessoes: SessaoRecente[] }) {
                       {sessao.aluno.nome}
                     </p>
                     <p className="shrink-0 text-[12px] text-ink-5 tabular-nums">
-                      {sessao.rotuloDoDia}
+                      {f.dia(sessao.finished_at)}
                     </p>
                   </div>
                   {/* Volume e duração ficam a um clique, na sessão: numa
@@ -189,10 +208,9 @@ export function AtividadeRecente({ sessoes }: { sessoes: SessaoRecente[] }) {
                   <p className="truncate text-[12px] text-ink-4 tabular-nums">
                     {sessao.treino
                       ? `${sessao.treino.label} · ${sessao.treino.name}`
-                      : "Treino removido"}
+                      : r.removido}
                     {" · "}
-                    {sessao.series_feitas}{" "}
-                    {sessao.series_feitas === 1 ? "série" : "séries"}
+                    {plural(sessao.series_feitas, t.comum.series)}
                   </p>
                 </div>
               </Link>

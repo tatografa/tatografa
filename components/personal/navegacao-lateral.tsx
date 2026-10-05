@@ -18,6 +18,9 @@ import { useState } from "react";
 import { Logo } from "@/components/logo";
 import { COOKIE_DA_BARRA_RECOLHIDA } from "@/lib/domain/painel";
 import { iniciaisDe } from "@/lib/domain/nome";
+import { preencher } from "@/lib/i18n/texto";
+
+import { usePainel } from "./idioma-do-painel";
 
 /**
  * As seções do painel, na ordem do protótipo do doc 06.
@@ -31,16 +34,16 @@ import { iniciaisDe } from "@/lib/domain/nome";
  * carteira. Misturados no meio, os dois parecem mais uma tela de trabalho.
  */
 const NAVEGACAO = [
-  { href: "/painel", rotulo: "Painel", Icone: LayoutDashboard },
-  { href: "/painel/alunos", rotulo: "Alunos", Icone: Users, contagem: true },
-  { href: "/painel/social", rotulo: "Feed", Icone: MessageCircle },
-  { href: "/painel/treinos", rotulo: "Treinos", Icone: Dumbbell },
-  { href: "/painel/exercicios", rotulo: "Exercícios", Icone: Library },
+  { href: "/painel", rotulo: "painel", Icone: LayoutDashboard },
+  { href: "/painel/alunos", rotulo: "alunos", Icone: Users, contagem: true },
+  { href: "/painel/social", rotulo: "feed", Icone: MessageCircle },
+  { href: "/painel/treinos", rotulo: "treinos", Icone: Dumbbell },
+  { href: "/painel/exercicios", rotulo: "exercicios", Icone: Library },
   // Agenda e reavaliações são uma tela só desde 27/09; a comparação de um
   // aluno continua em /painel/reavaliacoes/<id> e acende este item.
-  { href: "/painel/agenda", rotulo: "Agenda", Icone: CalendarDays, tambem: "/painel/reavaliacoes" },
-  { href: "/painel/treinar", rotulo: "Treinar", Icone: PlayCircle, fim: true },
-  { href: "/painel/configuracoes", rotulo: "Configurações", Icone: Settings, fim: true },
+  { href: "/painel/agenda", rotulo: "agenda", Icone: CalendarDays, tambem: "/painel/reavaliacoes" },
+  { href: "/painel/treinar", rotulo: "treinar", Icone: PlayCircle, fim: true },
+  { href: "/painel/configuracoes", rotulo: "configuracoes", Icone: Settings, fim: true },
 ] as const;
 
 /**
@@ -81,6 +84,8 @@ export function NavegacaoLateral({
    * deixou, e não há segundo desenho.
    */
   const [colapsada, setColapsada] = useState(recolhidaInicial);
+  const { t } = usePainel();
+  const n = t.comum.nav;
 
   function alternar() {
     const proximo = !colapsada;
@@ -107,7 +112,7 @@ export function NavegacaoLateral({
   return (
     <aside
       onClick={aoClicarNaBarra}
-      title={colapsada ? "Clique para expandir o menu" : undefined}
+      title={colapsada ? n.expandirAoClicar : undefined}
       data-colapsada={colapsada ? "" : undefined}
       // Um cartão flutuando no fundo cinza, como no protótipo: 13px da borda
       // da janela, cantos de 20px. Pregado com `sticky` e não `fixed` — a
@@ -118,7 +123,7 @@ export function NavegacaoLateral({
       }`}
     >
       <div className={`mb-[18px] flex items-center ${colapsada ? "justify-center px-2" : "justify-between pr-2.5 pl-[18px]"}`}>
-        <Link href="/painel" className="text-ink" aria-label="Painel do Reps Club">
+        <Link href="/painel" className="text-ink" aria-label={n.logo}>
           {colapsada ? <Logo size={32} apenasSimbolo /> : <Logo size={32} />}
         </Link>
         {!colapsada && <BotaoDeColapso colapsada={colapsada} aoAlternar={alternar} />}
@@ -130,10 +135,10 @@ export function NavegacaoLateral({
         </div>
       )}
 
-      <nav aria-label="Seções do painel" className="flex-1 overflow-y-auto px-3.5">
+      <nav aria-label={n.secoes} className="flex-1 overflow-y-auto px-3.5">
         {!colapsada && (
           <p className="mb-2 px-2 text-[12px] font-medium tracking-[0.02em] text-ink-5">
-            Navegação
+            {n.titulo}
           </p>
         )}
         <ul className="space-y-0.5">
@@ -146,6 +151,7 @@ export function NavegacaoLateral({
               ) : null}
               <ItemDaNavegacao
                 {...item}
+                rotulo={n[item.rotulo]}
                 alunos={alunos}
                 colapsada={colapsada}
                 ativo={
@@ -173,7 +179,7 @@ export function NavegacaoLateral({
         >
           <Link
             href="/painel/configuracoes"
-            aria-label={`Sua conta: ${nome}`}
+            aria-label={preencher(n.suaContaDe, { nome })}
             title={colapsada ? nome : undefined}
             className={`flex min-w-0 items-center gap-2.5 rounded-[9px] transition hover:opacity-85 ${
               colapsada ? "" : "flex-1"
@@ -188,7 +194,7 @@ export function NavegacaoLateral({
             {!colapsada && (
               <span className="min-w-0" aria-hidden>
                 <span className="block truncate text-[13px] font-semibold text-ink">{nome}</span>
-                <span className="block truncate text-[11.5px] text-ink-4">Sua conta</span>
+                <span className="block truncate text-[11.5px] text-ink-4">{n.suaConta}</span>
               </span>
             )}
           </Link>
@@ -206,11 +212,12 @@ function BotaoDeColapso({
   colapsada: boolean;
   aoAlternar: () => void;
 }) {
+  const { t } = usePainel();
   return (
     <button
       type="button"
       onClick={aoAlternar}
-      aria-label={colapsada ? "Expandir o menu" : "Recolher o menu"}
+      aria-label={colapsada ? t.comum.nav.expandir : t.comum.nav.recolher}
       aria-pressed={colapsada}
       className="flex size-9 items-center justify-center rounded-[9px] text-ink-4 transition hover:bg-canvas-sunken hover:text-ink-2"
     >

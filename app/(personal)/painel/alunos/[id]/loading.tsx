@@ -1,13 +1,15 @@
 import { Carregando, Esqueleto } from "@/components/esqueleto";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
 
 /**
  * O perfil lê sete coisas, e uma delas é o progresso inteiro do aluno. É a
  * tela mais lenta do painel. O esqueleto tem as mesmas três colunas da tela,
  * para ela não pular de forma quando chega.
  */
-export default function CarregandoFichaDoAluno() {
+export default async function CarregandoFichaDoAluno() {
+  const { t } = await textosDoPainel();
   return (
-    <Carregando rotulo="Carregando o perfil do aluno">
+    <Carregando rotulo={t.comum.carregando.aluno}>
       <div className="space-y-6 pt-6">
         <div className="space-y-2">
           <Esqueleto className="h-[22px] w-48" />

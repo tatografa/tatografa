@@ -1,8 +1,10 @@
 import { Carregando, Esqueleto } from "@/components/esqueleto";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
 
-export default function CarregandoPainel() {
+export default async function CarregandoPainel() {
+  const { t } = await textosDoPainel();
   return (
-    <Carregando rotulo="Carregando o painel">
+    <Carregando rotulo={t.comum.carregando.painel}>
       <div className="space-y-8">
         <div className="space-y-2">
           <Esqueleto className="h-[13px] w-32" />
