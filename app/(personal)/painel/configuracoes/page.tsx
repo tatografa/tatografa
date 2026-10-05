@@ -1,11 +1,7 @@
-import type { Metadata } from "next";
-
 import { requireTrainer } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 
 import { TelaDeConfiguracoes } from "./tela-de-configuracoes";
-
-export const metadata: Metadata = { title: "Configurações" };
 
 /**
  * Configurações do personal (doc 06, no layout do protótipo desde 28/09):

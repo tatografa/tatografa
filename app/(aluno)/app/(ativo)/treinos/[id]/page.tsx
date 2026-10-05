@@ -1,10 +1,7 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { TelaDetalheDoTreino } from "@/components/aluno/tela-detalhe-do-treino";
 import { lerTreino } from "@/lib/queries/treinos";
-
-export const metadata: Metadata = { title: "Detalhe do treino" };
 
 export default async function DetalheDoTreino(
   props: PageProps<"/app/treinos/[id]">,

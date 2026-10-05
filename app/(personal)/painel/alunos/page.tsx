@@ -1,13 +1,9 @@
-import type { Metadata } from "next";
-
 import { ConvidarAluno } from "@/app/(personal)/painel/convidar-aluno";
 import { TabelaDeAlunos } from "@/components/personal/tabela-de-alunos";
 import { requireTrainer } from "@/lib/auth/session";
 import { indicadoresDaCarteira } from "@/lib/domain/carteira";
 import { lerAlunosDaCarteira } from "@/lib/queries/painel";
 import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
-
-export const metadata: Metadata = { title: "Alunos" };
 
 /**
  * A carteira inteira em tabela, com busca e filtro (doc 06 §3).

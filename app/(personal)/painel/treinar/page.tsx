@@ -1,12 +1,8 @@
-import type { Metadata } from "next";
-
 import { requireTrainer } from "@/lib/auth/session";
 import { tenhoPerfilDeAluno } from "@/lib/queries/modo-aluno";
 
 import { CartaoDeModoAluno } from "./cartao-de-modo-aluno";
 import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
-
-export const metadata: Metadata = { title: "Treinar" };
 
 /**
  * O personal treinando também — como aluno dele mesmo.

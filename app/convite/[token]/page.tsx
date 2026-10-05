@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Button } from "@/components/ui";
@@ -6,8 +5,6 @@ import { Logo } from "@/components/logo";
 import { createClient } from "@/lib/supabase/server";
 
 import { FormularioOnboarding } from "./formulario-onboarding";
-
-export const metadata: Metadata = { title: "Criar acesso · Reps Club" };
 
 /**
  * Onboarding do aluno a partir do convite.

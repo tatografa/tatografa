@@ -1,5 +1,3 @@
-import type { Metadata } from "next";
-
 import { TelaHome } from "@/components/aluno/tela-home";
 import { requireStudent } from "@/lib/auth/session";
 import {
@@ -11,8 +9,6 @@ import { lerAgendaDoAluno, lerIndicadoresDoAluno } from "@/lib/queries/aluno";
 import { sessaoAbertaDoAluno } from "@/lib/queries/execucao";
 import { proximaSessaoDoAluno } from "@/lib/queries/agenda";
 import { temReavaliacaoAberta } from "@/lib/queries/reavaliacao";
-
-export const metadata: Metadata = { title: "Treinar" };
 
 export default async function HomeDoAluno() {
   const { student, personal } = await requireStudent();

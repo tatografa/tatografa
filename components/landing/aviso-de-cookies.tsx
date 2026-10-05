@@ -9,6 +9,7 @@ import {
   consentimentoDe,
   type Consentimento,
 } from "@/lib/domain/cookies";
+import type { TextosDaLanding } from "@/lib/landing/textos";
 
 /*
  * A escolha mora num cookie, e quem a lê é `useSyncExternalStore`: no servidor
@@ -49,29 +50,30 @@ function useConsentimento(): Consentimento | null | "carregando" {
  *
  * O texto diz a verdade de hoje: só há cookies essenciais. Medição de uso entra
  * só com "Aceitar", e publicidade nunca — a mesma frase da política de
- * privacidade, seção "Cookies".
+ * privacidade, seção "Cookies". Vem no idioma da landing.
+ *
+ * Centralizado embaixo da tela (pedido do Otávio, 05/10), e não no meio: no
+ * meio ele cobriria o título e o campo da lista, que é o que a pessoa veio ler.
  */
-export function AvisoDeCookies() {
+export function AvisoDeCookies({ textos }: { textos: TextosDaLanding["cookies"] }) {
   const consentimento = useConsentimento();
   if (consentimento !== null) return null;
 
   return (
     <section
-      aria-label="Aviso de cookies"
-      className="fixed inset-x-3 bottom-3 z-50 rounded-[20px] border border-dark-border-2 bg-dark-surface p-5 text-dark-text shadow-vitrine sm:inset-x-auto sm:left-6 sm:bottom-6 sm:max-w-[440px]"
+      aria-label={textos.regiao}
+      className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-[520px] rounded-[20px] border border-dark-border-2 bg-dark-surface p-5 text-center text-dark-text shadow-vitrine sm:bottom-6"
     >
       <p className="mb-1.5 text-[15px] font-extrabold tracking-[-0.01em]">
-        Cookies
+        {textos.titulo}
       </p>
       <p className="mb-4 text-[13.5px] leading-[1.6] text-dark-text-2">
-        Usamos cookies essenciais para o site funcionar e manter você
-        conectado. Cookies de medição de uso só entram se você aceitar — e
-        nunca usamos cookies de publicidade.{" "}
+        {textos.texto}{" "}
         <Link
           href="/privacidade#cookies"
           className="font-semibold text-dark-text underline underline-offset-2 hover:text-dark-text-2"
         >
-          Saiba mais
+          {textos.saibaMais}
         </Link>
       </p>
       <div className="flex gap-2.5">
@@ -80,14 +82,14 @@ export function AvisoDeCookies() {
           onClick={() => gravar("recusado")}
           className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full border-[1.5px] border-dark-border-2 px-5 text-[14px] font-bold text-dark-text transition hover:border-dark-muted"
         >
-          Recusar
+          {textos.recusar}
         </button>
         <button
           type="button"
           onClick={() => gravar("aceito")}
           className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-brand px-5 text-[14px] font-bold text-white transition hover:bg-brand-hover"
         >
-          Aceitar
+          {textos.aceitar}
         </button>
       </div>
     </section>
@@ -98,10 +100,16 @@ export function AvisoDeCookies() {
  * Link do rodapé para mudar de ideia: apaga a escolha e o aviso volta.
  * Retirar o consentimento tem de ser tão fácil quanto dar.
  */
-export function PreferenciasDeCookies({ className }: { className?: string }) {
+export function PreferenciasDeCookies({
+  rotulo,
+  className,
+}: {
+  rotulo: string;
+  className?: string;
+}) {
   return (
     <button type="button" onClick={() => gravar(null)} className={className}>
-      Cookies
+      {rotulo}
     </button>
   );
 }

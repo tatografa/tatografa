@@ -1,10 +1,6 @@
-import type { Metadata } from "next";
-
 import { TelaProgresso } from "@/components/aluno/tela-progresso";
 import { requireStudent } from "@/lib/auth/session";
 import { progressoDoAluno } from "@/lib/queries/progresso";
-
-export const metadata: Metadata = { title: "Progresso" };
 
 /**
  * A evolução do aluno por exercício (doc 05).

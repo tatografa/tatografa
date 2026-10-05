@@ -502,6 +502,28 @@ Provar que funciona sem o Otávio ler código:
   `ChamadaDaMoldura` decide pelo endereço, porque o layout não sabe que página está
   dentro dele; sai pronto no HTML do servidor. `/entrar` e `/recuperar`, que servem os
   dois papéis, ficam com o texto do personal.
+- **[2026-10-05, pedido do Otávio]** **A landing fala português, inglês e espanhol, pela
+  URL** (`?lang=en`, `?lang=es`; sem parâmetro é português), com o seletor PT · EN · ES ao
+  lado do botão de entrar — links, como o seletor de perfil, e os dois montam o endereço
+  pela mesma função (`enderecoDaLanding`), para um não perder o outro. **Só a landing é
+  traduzida**: login, app, termos e política continuam em português, e nos outros
+  idiomas os links para eles dizem "(in Portuguese)" / "(en portugués)". As capturas de
+  tela também são do produto em português. Todo o texto mora em `lib/landing/textos.ts`
+  (neutro: página, campo da lista e aviso de cookies leem dali), e a ação da lista passou
+  a devolver **código de erro** (`ErroDaLista`), não frase — o servidor não sabe em que
+  língua a pessoa lê. "Aluno" é *client* em inglês e *alumno* em espanhol. O `lang` vai
+  no contêiner da página, para o leitor de tela pronunciar certo; o `<html>` continua
+  `pt-BR`.
+- **[2026-10-05, pedido do Otávio]** **O nome da aba é sempre "Reps Club".** Os títulos
+  por página ("Treinos", "Alunos"…, 37 deles) saíram, em vez de ficarem declarados e
+  mascarados por um modelo sem `%s`: título escrito que não aparece em lugar nenhum é
+  código que mente. Página nova não declara título.
+- **[2026-10-05, pedido do Otávio]** **Entrar e criar conta têm "Voltar"** para a landing
+  (`VoltarAoInicio`): o aluno em `/acesso` volta para `/?para=alunos`, o resto para a
+  versão do personal, e "Criar nova senha" não tem — quem está ali veio do link do
+  e-mail no meio da troca. O botão de entrar da landing ficou **branco** (o branco da
+  pílula de perfil), e o aviso de cookies foi para o **centro, embaixo**: no meio da tela
+  ele cobriria o título e o campo da lista.
 - **[2026-10-05, pedido do Otávio]** **A landing tem aviso de cookies com "Aceitar" e
   "Recusar"** (`AvisoDeCookies`), e ele diz a verdade de hoje: **só há cookies
   essenciais** (sessão do Supabase, barra do painel e a própria escolha). Os dois botões

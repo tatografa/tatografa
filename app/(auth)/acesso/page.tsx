@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { FormularioLogin } from "../entrar/formulario-login";
 
 export const metadata: Metadata = {
-  title: "Entrar · Reps Club",
   description: "Entre no app com o seu e-mail e a sua senha.",
 };
 

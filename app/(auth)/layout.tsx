@@ -4,6 +4,7 @@ import { Logo } from "@/components/logo";
 import { RodapeLegal } from "@/components/rodape-legal";
 
 import { ChamadaDaMoldura } from "./chamada-da-moldura";
+import { VoltarAoInicio } from "./voltar-ao-inicio";
 
 /**
  * Moldura das telas de entrada — as do personal e `/acesso`, a do aluno.
@@ -31,7 +32,10 @@ export default function AuthLayout({
       </aside>
 
       <main className="flex flex-col items-center justify-center gap-8 px-7 py-12 lg:px-10">
-        <div className="w-full max-w-[372px]">{children}</div>
+        <div className="w-full max-w-[372px]">
+          <VoltarAoInicio />
+          {children}
+        </div>
         <RodapeLegal />
       </main>
     </div>

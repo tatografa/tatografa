@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { Comparacao } from "@/components/reavaliacao/comparacao";
@@ -8,8 +7,6 @@ import { pareceUuid } from "@/lib/domain/id";
 import { lerAluno } from "@/lib/queries/alunos";
 import { comparar, lerReavaliacoesDeUmAluno } from "@/lib/queries/reavaliacao";
 import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
-
-export const metadata: Metadata = { title: "Reavaliações do aluno" };
 
 /**
  * As reavaliações respondidas de um aluno, cada uma comparada com a anterior.

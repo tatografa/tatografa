@@ -2,18 +2,22 @@
 
 import { z } from "zod";
 
-import type { EstadoDaLista, PerfilDaLista } from "@/lib/domain/lista-de-espera";
+import type {
+  ErroDaLista,
+  EstadoDaLista,
+  PerfilDaLista,
+} from "@/lib/domain/lista-de-espera";
 import { createClient } from "@/lib/supabase/server";
 
-// Os mesmos limites do `check` de `lista_de_espera.email` (migration 0041); a
-// validação aqui é para devolver a frase certa, e o banco confere de novo.
+// Os mesmos limites do `check` de `lista_de_espera.email` (migration 0041). As
+// mensagens são códigos (`ErroDaLista`): a frase sai no idioma da página.
 const emailDaLista = z
   .string()
   .trim()
   .toLowerCase()
-  .min(1, "Digite seu e-mail.")
-  .max(120, "E-mail muito longo.")
-  .email("Esse e-mail não parece certo.");
+  .min(1, "vazio")
+  .max(120, "longo")
+  .email("invalido");
 
 /**
  * "Entrar na lista", nas duas versões da landing (02/10): o e-mail e a página
@@ -38,7 +42,10 @@ export async function entrarNaLista(
 
   const analise = emailDaLista.safeParse(digitado);
   if (!analise.success) {
-    return { erro: analise.error.issues[0]?.message ?? "Confira o e-mail.", digitado };
+    const codigo = analise.error.issues[0]?.message;
+    const erro: ErroDaLista =
+      codigo === "vazio" || codigo === "longo" ? codigo : "invalido";
+    return { erro, digitado };
   }
 
   const perfil: PerfilDaLista = formData.get("perfil") === "aluno" ? "aluno" : "personal";
@@ -48,7 +55,7 @@ export async function entrarNaLista(
     p_email: analise.data,
     p_perfil: perfil,
   });
-  if (error) return { erro: "Não conseguimos registrar agora. Tente de novo em instantes.", digitado };
+  if (error) return { erro: "falha", digitado };
 
   return { email: analise.data };
 }

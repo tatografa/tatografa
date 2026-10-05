@@ -1,8 +1,4 @@
-import type { Metadata } from "next";
-
 import { Logo } from "@/components/logo";
-
-export const metadata: Metadata = { title: "Sem conexão" };
 
 /**
  * A tela que o service worker serve quando a navegação falha.

@@ -1,12 +1,8 @@
-import type { Metadata } from "next";
-
 import { requireStudent } from "@/lib/auth/session";
 import { estaNaTurma } from "@/lib/domain/turma";
 import { lerFeed, type AbaDoFeed } from "@/lib/queries/feed";
 
 import { FeedNavegavel } from "./feed-navegavel";
-
-export const metadata: Metadata = { title: "Feed" };
 
 /**
  * O feed do aluno (doc 05, tela 9).

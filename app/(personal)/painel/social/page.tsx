@@ -1,5 +1,3 @@
-import type { Metadata } from "next";
-
 import { TelaSocial } from "@/components/personal/tela-social";
 import { requireTrainer } from "@/lib/auth/session";
 import { periodoDaUrl } from "@/lib/domain/feed";
@@ -7,8 +5,6 @@ import { alunosDoFiltro, lerPostsDaCarteira } from "@/lib/queries/social";
 
 import { CurtirDoPainel, ResponderDoPainel } from "./controles-do-post";
 import { FiltrosDoFeed } from "./filtros-do-feed";
-
-export const metadata: Metadata = { title: "Feed" };
 
 /**
  * Os posts dos alunos (doc 06, tela 8; layout do protótipo desde 27/09).

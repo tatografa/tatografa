@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
@@ -7,8 +6,6 @@ import { diaLocal } from "@/lib/domain/fuso";
 import { lerDivisaoDeTreino } from "@/lib/queries/divisao";
 
 import { DivisaoDeTreino } from "./divisao-de-treino";
-
-export const metadata: Metadata = { title: "Treinos" };
 
 /**
  * "Divisão de treino" — a tela do protótipo que juntou macrotreinos e treinos

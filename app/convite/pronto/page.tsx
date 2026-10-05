@@ -1,10 +1,7 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Button } from "@/components/ui";
 import { requireStudent } from "@/lib/auth/session";
-
-export const metadata: Metadata = { title: "Tudo pronto · Reps Club" };
 
 /**
  * Boas-vindas depois do onboarding (doc 05, tela 1.3).

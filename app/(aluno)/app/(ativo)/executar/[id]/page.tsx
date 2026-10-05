@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { requireStudent } from "@/lib/auth/session";
@@ -8,8 +7,6 @@ import { lerTreino } from "@/lib/queries/treinos";
 
 import { Execucao } from "./execucao";
 import { TelaComecar, TelaSessaoPendente } from "./inicio";
-
-export const metadata: Metadata = { title: "Executar treino" };
 
 /**
  * A tela de execução. Três estados, decididos no servidor:

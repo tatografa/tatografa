@@ -1,5 +1,3 @@
-import type { Metadata } from "next";
-
 import { requireTrainer } from "@/lib/auth/session";
 import { mesDe, semanaDe } from "@/lib/domain/agenda";
 import { diaLocal } from "@/lib/domain/fuso";
@@ -13,8 +11,6 @@ import { listarAlunos } from "@/lib/queries/alunos";
 import { lerReavaliacoesDaCarteira } from "@/lib/queries/reavaliacao";
 
 import { TelaAgenda } from "./tela-agenda";
-
-export const metadata: Metadata = { title: "Agenda e reavaliações" };
 
 /**
  * Agenda e reavaliações numa tela só (27/09, pedido do Otávio, layout da tela

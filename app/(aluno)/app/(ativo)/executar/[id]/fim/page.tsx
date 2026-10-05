@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
 import {
@@ -13,8 +12,6 @@ import { seriesDaSessao, ultimaSessaoConcluida } from "@/lib/queries/execucao";
 import { chaveDoExercicio } from "@/lib/queries/exercicios";
 import { recordesAntesDaSessao } from "@/lib/queries/recordes";
 import { lerTreino, type ExercicioPrescrito } from "@/lib/queries/treinos";
-
-export const metadata: Metadata = { title: "Treino concluído" };
 
 /**
  * Conclusão do treino (doc 05, seção 6).

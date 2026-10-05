@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { CheckCircle2, Ruler } from "lucide-react";
 
 import { LinkDeVoltar } from "@/components/aluno/link-de-voltar";
@@ -11,8 +10,6 @@ import { comparar, lerReavaliacoesDoAluno } from "@/lib/queries/reavaliacao";
 import { BotaoApagarFotos } from "./botao-apagar-fotos";
 import { Formulario } from "./formulario";
 import { primeiroNome } from "@/lib/domain/nome";
-
-export const metadata: Metadata = { title: "Reavaliação" };
 
 /**
  * A reavaliação do aluno (doc 05 §12).

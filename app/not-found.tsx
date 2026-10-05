@@ -1,9 +1,5 @@
-import type { Metadata } from "next";
-
 import { Logo } from "@/components/logo";
 import { NaoEncontrado } from "@/components/nao-encontrado";
-
-export const metadata: Metadata = { title: "Página não encontrada" };
 
 /**
  * O 404 de fora das áreas logadas — link velho, endereço digitado errado.

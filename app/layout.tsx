@@ -20,10 +20,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: {
-    default: "Reps Club",
-    template: "%s · Reps Club",
-  },
+  // O nome da aba é sempre "Reps Club" (pedido do Otávio, 05/10): nenhuma página
+  // define título próprio. Uma página que voltar a definir troca o nome da aba.
+  title: "Reps Club",
   description:
     "Personal trainers montam os treinos. Alunos executam e registram carga e repetições, série por série.",
   // O iOS não lê o manifest: o nome da tela inicial sai daqui, e o ícone de

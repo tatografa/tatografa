@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import {
@@ -17,8 +16,6 @@ import { listarObservacoes } from "@/lib/queries/observacoes";
 import { progressoDoAluno } from "@/lib/queries/progresso";
 import { lerReavaliacoesDeUmAluno } from "@/lib/queries/reavaliacao";
 import { lerPostsDaCarteira, treinosDasSessoes } from "@/lib/queries/social";
-
-export const metadata: Metadata = { title: "Aluno" };
 
 /**
  * O perfil do aluno (doc 06 §4, no layout do protótipo desde 27/09).

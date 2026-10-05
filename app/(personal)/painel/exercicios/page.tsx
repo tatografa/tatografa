@@ -1,5 +1,3 @@
-import type { Metadata } from "next";
-
 import { requireTrainer } from "@/lib/auth/session";
 import {
   listarCatalogo,
@@ -7,8 +5,6 @@ import {
 } from "@/lib/queries/exercicios";
 
 import { TelaDeExercicios } from "./tela-de-exercicios";
-
-export const metadata: Metadata = { title: "Exercícios" };
 
 /**
  * Catálogo base e exercícios próprios numa lista só (doc 06).

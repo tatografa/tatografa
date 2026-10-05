@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
@@ -8,8 +7,6 @@ import { Card } from "@/components/ui";
 import { requireStudent } from "@/lib/auth/session";
 
 import { FormularioDePerfil } from "./formulario-de-perfil";
-
-export const metadata: Metadata = { title: "Perfil" };
 
 /**
  * Perfil do aluno: ver, **corrigir** e sair.

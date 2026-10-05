@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Send } from "lucide-react";
@@ -26,8 +25,6 @@ import { lerGraficosDoPainel, lerResumoDaCarteira } from "@/lib/queries/painel";
 
 import { cancelarConvite } from "./actions";
 import { ConvidarAluno } from "./convidar-aluno";
-
-export const metadata: Metadata = { title: "Painel" };
 
 export default async function PainelPage() {
   const { trainer } = await requireTrainer();

@@ -1,8 +1,4 @@
-import type { Metadata } from "next";
-
 import { FormularioLogin } from "./formulario-login";
-
-export const metadata: Metadata = { title: "Entrar" };
 
 const AVISOS: Record<string, string> = {
   "sem-perfil":

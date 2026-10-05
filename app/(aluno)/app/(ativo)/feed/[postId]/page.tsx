@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { TelaDoPost } from "@/components/aluno/tela-do-post";
@@ -8,8 +7,6 @@ import { lerPost } from "@/lib/queries/feed";
 import { ApagarPost } from "./apagar-post";
 import { BotaoDeCurtir } from "./botao-de-curtir";
 import { FormularioDeComentario } from "./formulario-de-comentario";
-
-export const metadata: Metadata = { title: "Post" };
 
 export default async function PostDoFeedPage(
   props: PageProps<"/app/feed/[postId]">,

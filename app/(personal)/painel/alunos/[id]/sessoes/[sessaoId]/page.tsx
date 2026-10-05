@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { TelaSessaoDoHistorico } from "@/components/aluno/tela-sessao-do-historico";
@@ -6,8 +5,6 @@ import { requireTrainer } from "@/lib/auth/session";
 import { lerAluno } from "@/lib/queries/alunos";
 import { lerSessaoDoHistorico } from "@/lib/queries/historico";
 import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
-
-export const metadata: Metadata = { title: "Sessão do aluno" };
 
 /**
  * Uma sessão do aluno, série a série, vista pelo personal.

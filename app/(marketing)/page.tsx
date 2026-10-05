@@ -10,6 +10,14 @@ import {
 } from "@/components/landing/aviso-de-cookies";
 import { EntrarNaLista } from "@/components/landing/entrar-na-lista";
 import { Logo } from "@/components/logo";
+import {
+  IDIOMAS,
+  enderecoDaLanding,
+  idiomaDe,
+  type Idioma,
+  type PerfilDaLanding,
+} from "@/lib/domain/idioma";
+import { TEXTOS_DA_LANDING, type TextosDaLanding } from "@/lib/landing/textos";
 import { cn } from "@/lib/utils";
 
 import capturaAlunos from "@/public/landing/alunos.png";
@@ -20,15 +28,19 @@ import capturaPainel from "@/public/landing/painel.png";
 import capturaPerfil from "@/public/landing/perfil-do-aluno.png";
 import capturaTreinos from "@/public/landing/treinos.png";
 
-export const metadata: Metadata = {
-  title: {
-    absolute: "Reps Club · Treino montado pelo personal, executado pelo aluno",
-  },
-  description:
-    "Personal trainers montam os treinos, acompanham cada série e a evolução de cada aluno. Alunos recebem o treino no celular e registram carga e repetições na academia.",
-};
+type Busca = { para?: string; lang?: string };
 
-type Perfil = "personal" | "aluno";
+/** O nome da aba é o do site todo ("Reps Club"); muda só a descrição, por idioma. */
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<Busca>;
+}): Promise<Metadata> {
+  const { lang } = await searchParams;
+  return { description: TEXTOS_DA_LANDING[idiomaDe(lang)].descricao };
+}
+
+type Perfil = PerfilDaLanding;
 
 /**
  * A landing (protótipo `Landing Page.dc.html`, pedido do Otávio em 01/10).
@@ -45,6 +57,11 @@ type Perfil = "personal" | "aluno";
  * 27/09). Numa página pública isso é anunciar o que não existe. As de
  * `public/landing/` são as telas reais, com dados de demonstração.
  *
+ * **Três idiomas pela URL** (`?lang=en`, `?lang=es`; pedido do Otávio, 05/10):
+ * o texto mora em `lib/landing/textos.ts`, e a página só escolhe qual. O
+ * `lang` vai no contêiner, para o leitor de tela pronunciar em inglês o que
+ * está em inglês — o `<html>` continua `pt-BR`, porque o resto do site é.
+ *
  * **O que não entrou:** "Instagram" e "LinkedIn" no rodapé — o protótipo tem
  * `href="#"`, e não há endereço para eles; link que não leva a lugar nenhum é
  * pior que link nenhum. Volta quando houver o endereço.
@@ -52,39 +69,55 @@ type Perfil = "personal" | "aluno";
 export default async function LandingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ para?: string }>;
+  searchParams: Promise<Busca>;
 }) {
-  const { para } = await searchParams;
+  const { para, lang } = await searchParams;
   const perfil: Perfil = para === "alunos" ? "aluno" : "personal";
-  const texto = TEXTOS[perfil];
+  const idioma = idiomaDe(lang);
+  const t = TEXTOS_DA_LANDING[idioma];
+  const texto = t.porPerfil[perfil];
+  const entrarHref = ENTRAR[perfil];
 
   return (
-    <div className="bg-surface px-3 pt-3 pb-3 text-ink sm:px-6 sm:pt-6">
+    <div
+      lang={IDIOMAS.find((i) => i.valor === idioma)?.lang}
+      className="bg-surface px-3 pt-3 pb-3 text-ink sm:px-6 sm:pt-6"
+    >
       <main>
         {/* ------------------------------------------------------- herói --- */}
         <section className="relative overflow-hidden rounded-[28px] bg-dark-bg">
           <nav
-            aria-label="Principal"
+            aria-label={t.navegacao.principal}
             className="relative z-10 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-5 py-5 sm:px-9"
           >
             <Link
-              href="/"
+              href={enderecoDaLanding("personal", idioma)}
               className="text-dark-text"
-              aria-label="Reps Club, página inicial"
+              aria-label={t.navegacao.inicio}
             >
               <Logo size={28} />
             </Link>
 
-            <SeletorDePerfil perfil={perfil} />
+            <SeletorDePerfil perfil={perfil} idioma={idioma} rotulos={t.perfis} />
 
-            <Link
-              href={texto.entrar.href}
-              aria-label={texto.entrar.rotulo}
-              title={texto.entrar.rotulo}
-              className="flex size-10 items-center justify-center rounded-full border-[1.5px] border-dark-border-2 text-dark-text transition hover:-translate-y-px hover:border-dark-muted"
-            >
-              <UserRound size={17} aria-hidden />
-            </Link>
+            <div className="flex items-center gap-2">
+              <SeletorDeIdioma
+                perfil={perfil}
+                idioma={idioma}
+                rotulo={t.navegacao.idioma}
+              />
+              {/* Branco (pedido do Otávio, 05/10): o mesmo branco da pílula
+                  do perfil escolhido, para o botão de entrar não sumir no
+                  fundo escuro. */}
+              <Link
+                href={entrarHref}
+                aria-label={texto.entrar.rotulo}
+                title={texto.entrar.rotulo}
+                className="flex size-10 items-center justify-center rounded-full bg-surface text-ink transition hover:-translate-y-px hover:bg-dark-text-2"
+              >
+                <UserRound size={17} aria-hidden />
+              </Link>
+            </div>
           </nav>
 
           <div
@@ -102,10 +135,14 @@ export default async function LandingPage({
             <p className="mx-auto mb-8 max-w-[560px] text-[15.5px] leading-[1.7] text-dark-muted">
               {texto.apoio}
             </p>
-            <Chamada perfil={perfil} />
+            <Chamada perfil={perfil} textos={t.lista} />
           </div>
 
-          {perfil === "personal" ? <NavegadorDoPainel /> : <CelularesDoAluno />}
+          {perfil === "personal" ? (
+            <NavegadorDoPainel alt={t.capturas.painel} />
+          ) : (
+            <CelularesDoAluno capturas={t.capturas} />
+          )}
         </section>
 
         {/* ------------------------------------------- demonstração --- */}
@@ -116,36 +153,24 @@ export default async function LandingPage({
             className="mx-auto max-w-[1160px] px-3 pt-20 sm:px-6 sm:pt-24"
           >
             <p className="eyebrow mb-3.5 text-ink-4">
-              Demonstração da plataforma
+              {t.demonstracao.eyebrow}
             </p>
             <h2
               id="titulo-demonstracao"
               className="max-w-[760px] text-[32px] leading-[1.08] font-black tracking-[-0.02em] sm:text-[44px]"
             >
-              Tudo que você precisa para gerenciar seus alunos.
+              {t.demonstracao.titulo}
             </h2>
 
+            <Pilar {...t.demonstracao.pilares[0]} imagem={capturaAlunos} />
             <Pilar
-              eyebrow="Gestão de alunos"
-              titulo="Todos os seus alunos, em um só painel"
-              texto="Acompanhe aderência, último treino e status de cada aluno sem precisar de planilhas soltas ou grupos de WhatsApp."
-              imagem={capturaAlunos}
-              alt="A tela de alunos do painel: indicadores da carteira e uma tabela com programa, perfil biológico, status, último treino e aderência de cada aluno"
-            />
-            <Pilar
-              invertido
-              eyebrow="Treinos e exercícios"
-              titulo="Crie treinos e cadastre exercícios em minutos"
-              texto="Monte a divisão de treino do aluno com séries, repetições e RIR, a partir de uma biblioteca de exercícios própria, e envie direto para o app dele."
+              {...t.demonstracao.pilares[1]}
               imagem={capturaTreinos}
-              alt="O editor de divisão de treino: o aluno, o objetivo e a frequência à esquerda, e um cartão por treino com os exercícios prescritos"
+              invertido
             />
             <Pilar
-              eyebrow="Acompanhamento de cada treino"
-              titulo="Veja a execução e a evolução de cada aluno"
-              texto="Cada série que o aluno registra chega ao perfil dele, com carga e repetições. Acompanhe a evolução das cargas, a frequência e as reavaliações."
+              {...t.demonstracao.pilares[2]}
               imagem={capturaPerfil}
-              alt="O perfil do aluno: dados e sessões à esquerda, os treinos registrados no meio e o programa atual à direita"
               ultimo
             />
           </section>
@@ -168,7 +193,7 @@ export default async function LandingPage({
             <p className="mb-8 text-[15px] text-dark-muted">
               {texto.fechamentoApoio}
             </p>
-            <Chamada perfil={perfil} />
+            <Chamada perfil={perfil} textos={t.lista} />
           </div>
         </section>
       </main>
@@ -180,48 +205,33 @@ export default async function LandingPage({
             <Logo size={26} />
           </span>
           <nav
-            aria-label="Rodapé"
+            aria-label={t.navegacao.rodape}
             className="flex flex-wrap items-center gap-x-6 gap-y-2.5"
           >
             {perfil === "personal" ? (
-              <LinkDoRodape href="#demonstracao">Demonstração</LinkDoRodape>
+              <LinkDoRodape href="#demonstracao">
+                {t.rodape.demonstracao}
+              </LinkDoRodape>
             ) : null}
-            <LinkDoRodape href={texto.entrar.href}>
-              {texto.entrar.curto}
-            </LinkDoRodape>
-            <LinkDoRodape href="/termos">Termos</LinkDoRodape>
-            <LinkDoRodape href="/privacidade">Privacidade</LinkDoRodape>
-            <PreferenciasDeCookies className="cursor-pointer text-[13px] font-medium text-dark-text-2 transition hover:text-dark-text" />
+            <LinkDoRodape href={entrarHref}>{texto.entrar.curto}</LinkDoRodape>
+            <LinkDoRodape href="/termos">{t.rodape.termos}</LinkDoRodape>
+            <LinkDoRodape href="/privacidade">{t.rodape.privacidade}</LinkDoRodape>
+            <PreferenciasDeCookies
+              rotulo={t.rodape.cookies}
+              className="cursor-pointer text-[13px] font-medium text-dark-text-2 transition hover:text-dark-text"
+            />
           </nav>
           <p className="text-[12.5px] text-dark-muted">© 2026 Reps Club</p>
         </div>
       </footer>
 
-      <AvisoDeCookies />
+      <AvisoDeCookies textos={t.cookies} />
     </div>
   );
 }
 
-const TEXTOS = {
-  personal: {
-    selo: "Para personal trainers",
-    titulo: "A plataforma completa para gerenciar seus alunos.",
-    apoio:
-      "Crie treinos, cadastre exercícios, veja cada série que seus alunos registram e acompanhe a evolução de cada um em um só lugar.",
-    fechamento: "Gerencie seus alunos com o Reps Club.",
-    fechamentoApoio: "Deixe seu e-mail e a gente fala com você.",
-    entrar: { href: "/entrar", rotulo: "Entrar no painel", curto: "Entrar" },
-  },
-  aluno: {
-    selo: "Para alunos",
-    titulo: "Seu treino, sua evolução, no seu bolso.",
-    apoio:
-      "Receba os treinos que seu personal monta, veja como fazer cada exercício, registre carga e repetições na academia e acompanhe sua evolução.",
-    fechamento: "Treine com acompanhamento real, direto no seu bolso.",
-    fechamentoApoio: "Deixe seu e-mail e a gente fala com você.",
-    entrar: { href: "/acesso", rotulo: "Entrar no app", curto: "Entrar" },
-  },
-} as const;
+/** Login e app só existem em português: o destino não muda com o idioma. */
+const ENTRAR: Record<Perfil, string> = { personal: "/entrar", aluno: "/acesso" };
 
 /**
  * A chamada do herói e do fechamento: o e-mail e "Entrar na lista", nas duas
@@ -229,18 +239,32 @@ const TEXTOS = {
  * contato" do protótipo abriam um formulário inteiro, e a lista pede só o que
  * é preciso para avisar. A lista guarda de qual versão o e-mail veio.
  */
-function Chamada({ perfil }: { perfil: Perfil }) {
-  return <EntrarNaLista perfil={perfil} />;
+function Chamada({
+  perfil,
+  textos,
+}: {
+  perfil: Perfil;
+  textos: TextosDaLanding["lista"];
+}) {
+  return <EntrarNaLista perfil={perfil} textos={textos} />;
 }
 
 /**
  * "Para Personais" e "Para Alunos". Links, e não botões: cada um é um
  * endereço que se cola numa conversa. `aria-current` diz qual está aberta.
  */
-function SeletorDePerfil({ perfil }: { perfil: Perfil }) {
+function SeletorDePerfil({
+  perfil,
+  idioma,
+  rotulos,
+}: {
+  perfil: Perfil;
+  idioma: Idioma;
+  rotulos: TextosDaLanding["perfis"];
+}) {
   const opcoes: { valor: Perfil; rotulo: string; href: string }[] = [
-    { valor: "personal", rotulo: "Para Personais", href: "/" },
-    { valor: "aluno", rotulo: "Para Alunos", href: "/?para=alunos" },
+    { valor: "personal", rotulo: rotulos.personal, href: enderecoDaLanding("personal", idioma) },
+    { valor: "aluno", rotulo: rotulos.aluno, href: enderecoDaLanding("aluno", idioma) },
   ];
   return (
     <div className="order-last flex w-full justify-center sm:order-none sm:w-auto">
@@ -266,7 +290,51 @@ function SeletorDePerfil({ perfil }: { perfil: Perfil }) {
   );
 }
 
-function NavegadorDoPainel() {
+/**
+ * PT, EN e ES ao lado do botão de entrar (pedido do Otávio, 05/10). Links,
+ * pelo mesmo motivo do seletor de perfil: o idioma é parte do endereço. Cada
+ * sigla leva o nome do idioma escrito nele mesmo ("English", "Español"), que é
+ * como quem não lê português reconhece a própria língua.
+ */
+function SeletorDeIdioma({
+  perfil,
+  idioma,
+  rotulo,
+}: {
+  perfil: Perfil;
+  idioma: Idioma;
+  rotulo: string;
+}) {
+  return (
+    <nav
+      aria-label={rotulo}
+      className="flex items-center rounded-full border border-dark-border bg-dark-surface p-1"
+    >
+      {IDIOMAS.map((i) => (
+        <Link
+          key={i.valor}
+          href={enderecoDaLanding(perfil, i.valor)}
+          scroll={false}
+          hrefLang={i.lang}
+          lang={i.lang}
+          aria-label={i.nome}
+          title={i.nome}
+          aria-current={idioma === i.valor ? "page" : undefined}
+          className={cn(
+            "flex h-8 min-w-9 items-center justify-center rounded-full px-2 text-[11.5px] font-bold tracking-[0.02em] transition",
+            idioma === i.valor
+              ? "bg-surface text-ink"
+              : "text-dark-text-2 hover:text-dark-text",
+          )}
+        >
+          {i.sigla}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+function NavegadorDoPainel({ alt }: { alt: string }) {
   return (
     <div className="relative z-[1] flex justify-center px-4 pt-12 sm:px-6 sm:pt-14">
       <div className="w-full max-w-[980px] overflow-hidden rounded-t-[14px] border border-b-0 border-dark-border bg-dark-surface shadow-vitrine">
@@ -279,7 +347,7 @@ function NavegadorDoPainel() {
         </div>
         <Image
           src={capturaPainel}
-          alt="O painel do personal: alunos ativos, treinos na semana, aderência média, reavaliações, quem precisa de atenção, a evolução da carteira e o top 10 de progressões"
+          alt={alt}
           sizes="(min-width: 1040px) 980px, 100vw"
           priority
           placeholder="blur"
@@ -295,23 +363,27 @@ function NavegadorDoPainel() {
  * Os laterais encolhem antes do do meio (`flex` com base própria), e é por
  * isso que a cena cabe num celular sem virar uma pilha.
  */
-function CelularesDoAluno() {
+function CelularesDoAluno({
+  capturas,
+}: {
+  capturas: TextosDaLanding["capturas"];
+}) {
   return (
     <div className="relative z-[1] flex items-end justify-center px-4 pt-12 sm:px-6 sm:pt-14">
       <Celular
         imagem={capturaAppExecucao}
-        alt="A execução do treino: o exercício, a última vez que foi feito, o RIR em palavras e as séries com carga e repetições"
+        alt={capturas.execucao}
         className="-mr-6 w-[250px] flex-[0_1_250px] translate-y-[46px] -rotate-[8deg] sm:mr-0"
       />
       <Celular
         imagem={capturaAppHome}
-        alt="A home do aluno: dias seguidos, sessões totais, o programa ativo e o próximo treino"
+        alt={capturas.home}
         className="z-[2] w-[300px] flex-[0_1_300px] -translate-y-[14px]"
         frente
       />
       <Celular
         imagem={capturaAppProgresso}
-        alt="O progresso do aluno: a evolução da carga no supino nas últimas seis sessões"
+        alt={capturas.progresso}
         className="-ml-6 w-[250px] flex-[0_1_250px] translate-y-[46px] rotate-[8deg] sm:ml-0"
       />
     </div>

@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { requireStudent } from "@/lib/auth/session";
@@ -6,8 +5,6 @@ import { estaNaTurma } from "@/lib/domain/turma";
 import { resumoDaSessaoConcluida } from "@/lib/queries/feed";
 
 import { Compositor } from "./compositor";
-
-export const metadata: Metadata = { title: "Novo post" };
 
 /**
  * Publicar um treino (doc 05, tela 10).
