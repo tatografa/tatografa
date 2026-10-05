@@ -9,8 +9,11 @@ import { ProgramaAtual } from "@/components/personal/programa-atual";
 import { Comparacao } from "@/components/reavaliacao/comparacao";
 import { Badge, Card } from "@/components/ui";
 import { montarAtividade } from "@/lib/domain/atividade";
-import { duracaoCurta, formatarNumero, rotuloDoDia } from "@/lib/domain/historico";
+import type { Idioma } from "@/lib/domain/idioma";
 import { iniciaisDe, primeiroNome } from "@/lib/domain/nome";
+import { formatos, type Formatos } from "@/lib/i18n/formatos";
+import { TEXTOS_DO_PAINEL, type TextosDoPainel } from "@/lib/i18n/painel";
+import { partesEmVolta, plural, preencher } from "@/lib/i18n/texto";
 import type { AlunoDaFicha, ResumoDoAluno } from "@/lib/queries/alunos";
 import type { TreinoDaDivisao } from "@/lib/queries/divisao";
 import type { SessaoDoHistorico } from "@/lib/queries/historico";
@@ -58,6 +61,7 @@ export type FichaDoAlunoProps = {
   /** A linha do personal que treina a si mesmo (13/09): não oferece pausar. */
   ehVoce?: boolean;
   agora?: Date;
+  idioma?: Idioma;
 };
 
 /**
@@ -97,7 +101,11 @@ export function FichaDoAluno({
   responder,
   ehVoce = false,
   agora = new Date(),
+  idioma = "pt",
 }: FichaDoAlunoProps) {
+  const t = TEXTOS_DO_PAINEL[idioma];
+  const a = t.ficha.atividade;
+  const f = formatos(idioma);
   /*
    * O peso de onde a barra da meta parte: a reavaliação mais **antiga** que
    * trouxe peso. `reavaliacoes` vem da mais recente para a mais antiga, então
@@ -113,8 +121,8 @@ export function FichaDoAluno({
   return (
     <>
       <CabecalhoDaPagina
-        titulo="Perfil do aluno"
-        voltar={{ href: "/painel/alunos", rotulo: "Voltar para alunos" }}
+        titulo={t.ficha.titulo}
+        voltar={{ href: "/painel/alunos", rotulo: t.ficha.voltar }}
         acoes={
           /*
             A ação primária desta tela é agendar sessão (doc 06 e o protótipo).
@@ -125,7 +133,7 @@ export function FichaDoAluno({
             className="inline-flex min-h-9 items-center gap-2 rounded-input bg-brand px-3.5 text-[13px] font-semibold text-white shadow-botao transition hover:bg-brand-hover"
           >
             <CalendarPlus size={15} aria-hidden />
-            Agendar sessão
+            {t.ficha.agendar}
           </Link>
         }
       />
@@ -135,6 +143,7 @@ export function FichaDoAluno({
           {/* ------------------------------------------- quem é o aluno --- */}
           <div className="flex min-w-0 flex-col gap-4 @min-[680px]:row-span-2">
             <IdentidadeDoAluno
+              idioma={idioma}
               aluno={aluno}
               resumo={resumo}
               pesoInicial={pesoInicial}
@@ -151,32 +160,37 @@ export function FichaDoAluno({
               exercicios={exercicios}
               alunoId={aluno.id}
             />
-            <Reavaliacoes reavaliacoes={reavaliacoes} alunoId={aluno.id} />
+            <Reavaliacoes reavaliacoes={reavaliacoes} alunoId={aluno.id} t={t} f={f} />
             <ObservacoesDoAluno alunoId={aluno.id} observacoes={observacoes} nome={nome} />
           </div>
 
           {/* -------------------------------------------------- atividade --- */}
           <section
-            aria-label={`Atividade de ${aluno.name}`}
+            aria-label={preencher(a.rotulo, { nome: aluno.name })}
             className="flex min-w-0 flex-col gap-3.5 @min-[680px]:col-start-2 @min-[680px]:row-start-2 @min-[1040px]:row-start-1 @min-[1040px]:row-span-2"
           >
             <div className="rounded-[12px] bg-gradient-to-br from-dark-bg to-dark-elev px-5 py-[18px] text-dark-text">
               <p className="text-[15px] font-extrabold tracking-[-0.01em]">Reps Club</p>
               <p className="mt-0.5 text-[12.5px] font-medium text-dark-text-2">
-                Atividade de {aluno.name}
+                {preencher(a.faixa, { nome: aluno.name })}
                 {sessoes.length
-                  ? ` · ${sessoes.length >= LIMITE_DO_HISTORICO ? `${LIMITE_DO_HISTORICO}+` : sessoes.length} ${sessoes.length === 1 ? "treino" : "treinos"}`
+                  ? ` · ${plural(
+                      sessoes.length,
+                      t.comum.treinos,
+                      sessoes.length >= LIMITE_DO_HISTORICO
+                        ? `${LIMITE_DO_HISTORICO}+`
+                        : f.numero(sessoes.length),
+                    )}`
                   : ""}
               </p>
             </div>
 
             {itens.length === 0 ? (
               <div className="rounded-[12px] border border-border bg-surface px-5 py-11 text-center">
-                <p className="text-[14px] font-semibold text-ink">{nome} ainda não treinou</p>
-                <p className="mt-1.5 text-[13px] leading-relaxed text-ink-4">
-                  Cada treino concluído aparece aqui com carga e repetições — e a foto, quando
-                  houver publicação.
+                <p className="text-[14px] font-semibold text-ink">
+                  {preencher(a.naoTreinou, { nome })}
                 </p>
+                <p className="mt-1.5 text-[13px] leading-relaxed text-ink-4">{a.naoTreinouTexto}</p>
               </div>
             ) : (
               <ul className="flex flex-col gap-3.5">
@@ -184,7 +198,8 @@ export function FichaDoAluno({
                   <li key={item.chave}>
                     {item.tipo === "post" ? (
                       <CartaoDeAtividade
-                        rotulo={`Post de ${aluno.name}, ${item.post.rotuloDoDia}`}
+                        idioma={idioma}
+                        rotulo={preencher(a.postDe, { nome: aluno.name, dia: item.post.rotuloDoDia })}
                         autor={autor}
                         rotuloDoDia={item.post.rotuloDoDia}
                         visibilidade={item.post.visibilidade}
@@ -200,9 +215,13 @@ export function FichaDoAluno({
                       />
                     ) : (
                       <CartaoDeAtividade
-                        rotulo={`Treino de ${aluno.name}, ${rotuloDoDia(item.sessao.finished_at, agora)}`}
+                        idioma={idioma}
+                        rotulo={preencher(a.treinoDe, {
+                          nome: aluno.name,
+                          dia: f.dia(item.sessao.finished_at, agora),
+                        })}
                         autor={autor}
-                        rotuloDoDia={rotuloDoDia(item.sessao.finished_at, agora)}
+                        rotuloDoDia={f.dia(item.sessao.finished_at, agora)}
                         visibilidade={item.post?.visibilidade ?? null}
                         fotoUrl={item.post?.fotoUrl ?? null}
                         legenda={item.post?.legenda ?? null}
@@ -217,7 +236,7 @@ export function FichaDoAluno({
                               }
                             : null)
                         }
-                        rodape={<RodapeDaSessao sessao={item.sessao} alunoId={aluno.id} />}
+                        rodape={<RodapeDaSessao sessao={item.sessao} alunoId={aluno.id} t={t} f={f} />}
                         rotuloDosComentarios
                         conversa={
                           item.post
@@ -236,13 +255,19 @@ export function FichaDoAluno({
             )}
 
             {sessoesDeFora.length ? (
-              <SessoesAnteriores sessoes={sessoesDeFora} alunoId={aluno.id} agora={agora} />
+              <SessoesAnteriores
+                sessoes={sessoesDeFora}
+                alunoId={aluno.id}
+                agora={agora}
+                t={t}
+                f={f}
+              />
             ) : null}
 
             {/* Corte silencioso faria o personal achar que o aluno treinou menos. */}
             {sessoes.length >= LIMITE_DO_HISTORICO ? (
               <p className="text-[12px] text-ink-5">
-                Mostrando os {LIMITE_DO_HISTORICO} treinos mais recentes.
+                {preencher(a.limite, { n: LIMITE_DO_HISTORICO })}
               </p>
             ) : null}
           </section>
@@ -258,30 +283,44 @@ export function FichaDoAluno({
  * É a informação que o histórico antigo mostrava numa linha, e que o cartão
  * do protótipo não tem.
  */
-function RodapeDaSessao({ sessao, alunoId }: { sessao: SessaoDoHistorico; alunoId: string }) {
+function RodapeDaSessao({
+  sessao,
+  alunoId,
+  t,
+  f,
+}: {
+  sessao: SessaoDoHistorico;
+  alunoId: string;
+  t: TextosDoPainel;
+  f: Formatos;
+}) {
+  const a = t.ficha.atividade;
   return (
     <div className="space-y-2">
       {sessao.notes ? (
         <p className="rounded-[10px] bg-canvas px-3 py-2 text-[12.5px] leading-relaxed text-ink-2">
-          <span className="font-semibold text-ink">Observação: </span>
+          <span className="font-semibold text-ink">{a.observacao}</span>
           {sessao.notes}
         </p>
       ) : null}
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
         <p className="flex flex-wrap gap-x-3 text-[12.5px] text-ink-4 tabular-nums">
-          <span>{duracaoCurta(sessao.duration_seconds)}</span>
+          <span>{f.duracao(sessao.duration_seconds)}</span>
           <span>
             {sessao.series_prescritas > 0
-              ? `${sessao.series_feitas} de ${sessao.series_prescritas} séries`
-              : `${sessao.series_feitas} séries`}
+              ? preencher(a.seriesDe, {
+                  feitas: sessao.series_feitas,
+                  total: sessao.series_prescritas,
+                })
+              : plural(sessao.series_feitas, t.comum.series)}
           </span>
-          <span>{formatarNumero(sessao.volume_kg)} kg</span>
+          <span>{f.carga(sessao.volume_kg)}</span>
         </p>
         <Link
           href={`/painel/alunos/${alunoId}/sessoes/${sessao.id}`}
           className="inline-flex items-center gap-0.5 text-[12.5px] font-semibold text-brand transition hover:text-brand-hover"
         >
-          Série a série
+          {a.serieASerie}
           <ChevronRight size={13} aria-hidden />
         </Link>
       </div>
@@ -293,15 +332,20 @@ function SessoesAnteriores({
   sessoes,
   alunoId,
   agora,
+  t,
+  f,
 }: {
   sessoes: SessaoDoHistorico[];
   alunoId: string;
   agora: Date;
+  t: TextosDoPainel;
+  f: Formatos;
 }) {
+  const a = t.ficha.atividade;
   return (
     <section className="rounded-[12px] border border-border bg-surface">
       <h2 className="border-b border-border-soft px-[18px] py-3.5 text-[14px] font-medium text-ink">
-        Treinos anteriores
+        {a.anteriores}
       </h2>
       <ul className="divide-y divide-border-soft">
         {sessoes.map((sessao) => (
@@ -313,15 +357,18 @@ function SessoesAnteriores({
               <span className="min-w-0">
                 <span className="block truncate text-[13px] font-medium text-ink">
                   {sessao.treino
-                    ? `Treino ${sessao.treino.label} · ${sessao.treino.name}`
-                    : "Treino removido"}
+                    ? preencher(t.comum.treinoComNome, {
+                        label: sessao.treino.label,
+                        nome: sessao.treino.name,
+                      })
+                    : a.treinoRemovido}
                 </span>
                 <span className="block text-[12px] text-ink-4 first-letter:uppercase">
-                  {rotuloDoDia(sessao.finished_at, agora)}
+                  {f.dia(sessao.finished_at, agora)}
                 </span>
               </span>
               <span className="shrink-0 text-[12px] text-ink-4 tabular-nums">
-                {sessao.series_feitas} séries · {formatarNumero(sessao.volume_kg)} kg
+                {plural(sessao.series_feitas, t.comum.series)} · {f.carga(sessao.volume_kg)}
               </span>
             </Link>
           </li>
@@ -341,10 +388,16 @@ function SessoesAnteriores({
 function Reavaliacoes({
   reavaliacoes,
   alunoId,
+  t,
+  f,
 }: {
   reavaliacoes: Reavaliacao[];
   alunoId: string;
+  t: TextosDoPainel;
+  f: Formatos;
 }) {
+  const r = t.ficha.reavaliacoes;
+  const [antes, depois] = partesEmVolta(r.nenhuma, "agenda");
   const aberta = reavaliacoes.find((r) => r.enviadaEm === null) ?? null;
   const enviadas = reavaliacoes.filter((r) => r.enviadaEm !== null);
   const [ultima, penultima] = enviadas;
@@ -352,23 +405,23 @@ function Reavaliacoes({
   return (
     <section className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="eyebrow text-ink-4">Reavaliações</h2>
+        <h2 className="eyebrow text-ink-4">{r.titulo}</h2>
         {enviadas.length > 0 && (
           <Link
             href={`/painel/reavaliacoes/${alunoId}`}
             className="text-[12.5px] font-semibold text-brand transition hover:underline"
           >
-            {enviadas.length > 1 ? `Ver as ${enviadas.length}` : "Abrir"}
-            {ultima?.temFoto ? " · com fotos" : ""}
+            {enviadas.length > 1 ? preencher(r.verAs, { n: enviadas.length }) : r.abrir}
+            {ultima?.temFoto ? r.comFotos : ""}
           </Link>
         )}
       </div>
 
       {aberta && (
         <Card className="flex flex-wrap items-center gap-2.5">
-          <Badge tone="atencao">Pendente</Badge>
+          <Badge tone="atencao">{r.pendente}</Badge>
           <p className="text-[13px] text-ink-3">
-            Liberada {aberta.rotuloDaLiberacao} · esperando a resposta do aluno.
+            {preencher(r.liberada, { dia: f.diaNaFrase(aberta.liberadaEm) })}
           </p>
         </Card>
       )}
@@ -376,10 +429,13 @@ function Reavaliacoes({
       {ultima ? (
         <div className="space-y-2.5">
           <p className="text-[12.5px] text-ink-4">
-            Respondida {ultima.rotuloDoEnvio}
-            {penultima ? ` · comparada com ${penultima.rotuloDoEnvio}` : ""}
+            {preencher(r.respondida, { dia: f.diaNaFrase(ultima.enviadaEm as string) })}
+            {penultima
+              ? preencher(r.comparada, { dia: f.diaNaFrase(penultima.enviadaEm as string) })
+              : ""}
           </p>
           <Comparacao
+            idioma={f.idioma}
             atual={ultima}
             anterior={penultima ?? null}
             linhas={comparar(ultima, penultima ?? null)}
@@ -389,11 +445,11 @@ function Reavaliacoes({
         !aberta && (
           <Card>
             <p className="text-[13px] text-ink-4">
-              Nenhuma reavaliação ainda. Libere uma na{" "}
+              {antes}
               <Link href="/painel/agenda" className="font-semibold text-brand hover:underline">
-                Agenda
+                {r.agenda}
               </Link>
-              .
+              {depois}
             </p>
           </Card>
         )

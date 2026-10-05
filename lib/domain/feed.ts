@@ -57,14 +57,21 @@ export type SerieDoPost = { load_kg: number | null; reps: number | null; skipped
  * Sem carga (peso corporal), vale a série com mais repetições. Tudo pulado
  * diz "pulado", e não some — o personal precisa ver que o aluno abandonou.
  */
-export function resumoDoExercicioNoPost(series: SerieDoPost[]): string {
+export function resumoDoExercicioNoPost(
+  series: SerieDoPost[],
+  /** O número e a palavra "pulado" no idioma do painel; português por padrão. */
+  f: { numero: (valor: number) => string; pulado: string } = {
+    numero: formatarNumero,
+    pulado: "pulado",
+  },
+): string {
   const feitas = series.filter((s) => !s.skipped && s.reps !== null);
-  if (!feitas.length) return "pulado";
+  if (!feitas.length) return f.pulado;
 
   const comCarga = feitas.filter((s) => s.load_kg !== null && s.load_kg > 0);
   if (comCarga.length) {
     const topo = comCarga.reduce((a, b) => ((b.load_kg ?? 0) > (a.load_kg ?? 0) ? b : a));
-    return `${feitas.length}x${topo.reps} · ${formatarNumero(topo.load_kg as number)} kg`;
+    return `${feitas.length}x${topo.reps} · ${f.numero(topo.load_kg as number)} kg`;
   }
   const maisReps = feitas.reduce((a, b) => ((b.reps ?? 0) > (a.reps ?? 0) ? b : a));
   return `${feitas.length}x${maisReps.reps}`;

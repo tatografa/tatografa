@@ -3,13 +3,14 @@ import { Flame, MessageCircle, Zap } from "lucide-react";
 import { AcessoDoAluno } from "@/components/personal/acesso-do-aluno";
 import { StatusDoAluno } from "@/components/personal/status-do-aluno";
 import { diaLocal } from "@/lib/domain/fuso";
-import { formatarNumero } from "@/lib/domain/historico";
+import type { Idioma } from "@/lib/domain/idioma";
 import { iniciaisDe, primeiroNome } from "@/lib/domain/nome";
 import { idadeEmAnos, metaDePeso } from "@/lib/domain/perfil";
-import { formatarMedida } from "@/lib/domain/reavaliacao";
 import { formatarTelefone, linkDoWhatsApp } from "@/lib/domain/telefone";
 import type { AlunoDaFicha, ResumoDoAluno } from "@/lib/queries/alunos";
-import { NIVEL, OBJETIVO, PERFIL_BIOLOGICO } from "@/lib/rotulos";
+import { formatos, type Formatos } from "@/lib/i18n/formatos";
+import { TEXTOS_DO_PAINEL, type TextosDoPainel } from "@/lib/i18n/painel";
+import { plural, preencher } from "@/lib/i18n/texto";
 
 /**
  * A coluna de identidade da ficha do aluno (doc 06 §4).
@@ -30,7 +31,9 @@ export function IdentidadeDoAluno({
   resumo,
   pesoInicial,
   ehVoce,
+  idioma = "pt",
 }: {
+  idioma?: Idioma;
   aluno: AlunoDaFicha;
   resumo: ResumoDoAluno;
   /**
@@ -42,6 +45,10 @@ export function IdentidadeDoAluno({
   /** A linha do personal que treina a si mesmo: ele não pausa o próprio app. */
   ehVoce: boolean;
 }) {
+  const t = TEXTOS_DO_PAINEL[idioma];
+  const d = t.ficha.identidade;
+  const f = formatos(idioma);
+  const nao = t.comum.naoInformado;
   const idade = idadeEmAnos(aluno.birth_date, diaLocal(new Date()));
   const whatsapp = linkDoWhatsApp(aluno.phone);
 
@@ -56,7 +63,7 @@ export function IdentidadeDoAluno({
   const [usuario, dominio] = aluno.email.split("@");
   const linhas: { rotulo: string; valor: React.ReactNode }[] = [
     {
-      rotulo: "E-mail",
+      rotulo: d.email,
       valor: dominio ? (
         <>
           {usuario}@<wbr />
@@ -66,32 +73,33 @@ export function IdentidadeDoAluno({
         aluno.email
       ),
     },
-    { rotulo: "Telefone", valor: aluno.phone ? formatarTelefone(aluno.phone) : "Não informado" },
+    { rotulo: d.telefone, valor: aluno.phone ? formatarTelefone(aluno.phone) : nao },
     {
-      rotulo: "Cidade/UF",
-      valor: aluno.city ? [aluno.city, aluno.state].filter(Boolean).join(", ") : "Não informado",
+      rotulo: d.cidade,
+      valor: aluno.city ? [aluno.city, aluno.state].filter(Boolean).join(", ") : nao,
     },
-    { rotulo: "Idade", valor: idade === null ? "Não informado" : `${idade} anos` },
-    { rotulo: "Altura", valor: aluno.height_cm === null ? "Não informado" : `${aluno.height_cm} cm` },
+    { rotulo: d.idade, valor: idade === null ? nao : preencher(d.anos, { n: idade }) },
+    { rotulo: d.altura, valor: aluno.height_cm === null ? nao : `${aluno.height_cm} cm` },
     {
-      rotulo: "Peso atual",
-      valor: aluno.weight_kg === null ? "Não informado" : `${formatarMedida(aluno.weight_kg)} kg`,
+      rotulo: d.peso,
+      valor: aluno.weight_kg === null ? nao : f.carga(Number(aluno.weight_kg)),
     },
     {
-      rotulo: "Perfil biológico",
-      valor: aluno.biological_profile
-        ? PERFIL_BIOLOGICO[aluno.biological_profile]
-        : "Não informado",
+      rotulo: d.perfil,
+      valor: aluno.biological_profile ? t.rotulos.perfilBiologico[aluno.biological_profile] : nao,
     },
-    { rotulo: "Objetivo", valor: aluno.goal ? OBJETIVO[aluno.goal] : "Não informado" },
-    { rotulo: "Nível", valor: aluno.experience_level ? NIVEL[aluno.experience_level] : "Não informado" },
-    { rotulo: "Aluno desde", valor: mesEAno(aluno.created_at) },
+    { rotulo: d.objetivo, valor: aluno.goal ? t.rotulos.objetivo[aluno.goal] : nao },
+    {
+      rotulo: d.nivel,
+      valor: aluno.experience_level ? t.rotulos.nivel[aluno.experience_level] : nao,
+    },
+    { rotulo: d.desde, valor: mesEAno(aluno.created_at, f) },
   ];
 
   return (
     <>
       <section
-        aria-label={`Dados de ${aluno.name}`}
+        aria-label={preencher(d.dadosDe, { nome: aluno.name })}
         className="space-y-4 rounded-[12px] border border-border bg-surface p-6"
       >
         <div className="flex flex-col items-center gap-2 text-center">
@@ -104,7 +112,7 @@ export function IdentidadeDoAluno({
           <h1 className="text-[18px] leading-tight font-bold tracking-[-0.01em] text-ink">
             {aluno.name}
           </h1>
-          <StatusDoAluno status={aluno.status} />
+          <StatusDoAluno status={aluno.status} rotulo={t.rotulos.status[aluno.status]} />
         </div>
 
         {/* Um bloco com os dois números empilhados, como no protótipo: numa
@@ -113,13 +121,13 @@ export function IdentidadeDoAluno({
         <div className="divide-y divide-border-soft rounded-[10px] bg-canvas">
           <Numero
             Icone={Zap}
-            valor={formatarNumero(resumo.sessoesTotais)}
-            rotulo={resumo.sessoesTotais === 1 ? "Sessão total" : "Sessões totais"}
+            valor={f.numero(resumo.sessoesTotais)}
+            rotulo={resumo.sessoesTotais === 1 ? d.sessoesTotais.um : d.sessoesTotais.outros}
           />
           <Numero
             Icone={Flame}
-            valor={`${resumo.diasSeguidos} ${resumo.diasSeguidos === 1 ? "dia" : "dias"}`}
-            rotulo="Dias seguidos"
+            valor={plural(resumo.diasSeguidos, t.comum.dias)}
+            rotulo={d.diasSeguidos}
           />
         </div>
 
@@ -150,7 +158,7 @@ export function IdentidadeDoAluno({
             className="flex min-h-10 w-full items-center justify-center gap-2 rounded-input border-[1.5px] border-border bg-surface text-[13px] font-bold text-ink transition hover:border-border-strong hover:bg-canvas-sunken"
           >
             <MessageCircle size={15} aria-hidden />
-            Falar no WhatsApp
+            {d.whatsapp}
           </a>
         ) : null}
 
@@ -165,7 +173,7 @@ export function IdentidadeDoAluno({
         ) : null}
       </section>
 
-      {meta ? <BarraDaMeta meta={meta} /> : null}
+      {meta ? <BarraDaMeta meta={meta} t={t} f={f} /> : null}
     </>
   );
 }
@@ -200,25 +208,34 @@ function Numero({
  */
 function BarraDaMeta({
   meta,
+  t,
+  f,
 }: {
   meta: NonNullable<ReturnType<typeof metaDePeso>>;
+  t: TextosDoPainel;
+  f: Formatos;
 }) {
   const chegou = meta.faltam < 0.05;
+  const m = t.ficha.meta;
+  const pct = Math.round(meta.progresso * 100);
   return (
     <section className="rounded-[12px] border border-border bg-surface px-6 py-5">
       <div className="mb-3.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-        <h2 className="text-[14px] font-medium text-ink">Meta de peso</h2>
+        <h2 className="text-[14px] font-medium text-ink">{m.titulo}</h2>
         <p className="text-[12px] text-ink-4">
-          {chegou
-            ? "Meta alcançada"
-            : `Faltam ${formatarMedida(meta.faltam)} kg · ${Math.round(meta.progresso * 100)}% do caminho`}
+          {chegou ? m.alcancada : preencher(m.faltam, { kg: f.numero(meta.faltam), pct })}
         </p>
       </div>
 
       {/* O traço no fim é a meta: a barra anda até ele. */}
       <div
         role="img"
-        aria-label={`De ${formatarMedida(meta.inicial)} para ${formatarMedida(meta.meta)} quilos. Hoje ${formatarMedida(meta.atual)}: ${Math.round(meta.progresso * 100)}% do caminho.`}
+        aria-label={preencher(m.descricao, {
+          de: f.numero(meta.inicial),
+          para: f.numero(meta.meta),
+          hoje: f.numero(meta.atual),
+          pct,
+        })}
         className="relative mb-2 h-2.5 rounded-[6px] bg-canvas-sunken"
       >
         <div
@@ -232,16 +249,16 @@ function BarraDaMeta({
           250px os três em linha quebram no meio de "70 kg · meta". */}
       <div className="flex justify-between gap-2 text-[13px] tabular-nums">
         <span className="font-medium text-ink-2">
-          {formatarMedida(meta.inicial)} kg
-          <span className="block text-[12px] font-normal text-ink-5">inicial</span>
+          {f.carga(meta.inicial)}
+          <span className="block text-[12px] font-normal text-ink-5">{m.inicial}</span>
         </span>
         <span className="text-center font-semibold text-brand">
-          {formatarMedida(meta.atual)} kg
-          <span className="block text-[12px] font-normal text-ink-5">atual</span>
+          {f.carga(meta.atual)}
+          <span className="block text-[12px] font-normal text-ink-5">{m.atual}</span>
         </span>
         <span className="text-right font-medium text-ink-2">
-          {formatarMedida(meta.meta)} kg
-          <span className="block text-[12px] font-normal text-ink-5">meta</span>
+          {f.carga(meta.meta)}
+          <span className="block text-[12px] font-normal text-ink-5">{m.meta}</span>
         </span>
       </div>
     </section>
@@ -256,17 +273,13 @@ function numeroOuNulo(valor: number | null): number | null {
 /**
  * "Mai/2024" — mês e ano bastam para "aluno desde".
  *
- * Montado a partir do dia no fuso do produto, e não por `Intl` com `month:
- * "short"`: o formato curto do pt-BR devolve "mai. de 2024", com ponto e com
- * "de", que numa lista de rótulos curtos destoa de todas as outras linhas.
+ * Montado a partir do dia no fuso do produto e do mês curto do eixo dos
+ * gráficos ("mai", "May"), e não por `Intl` com mês e ano juntos: o formato
+ * curto do pt-BR devolve "mai. de 2024", com ponto e com "de", que numa lista
+ * de rótulos curtos destoa de todas as outras linhas.
  */
-function mesEAno(iso: string): string {
+function mesEAno(iso: string, f: Formatos): string {
   const dia = diaLocal(iso);
-  const mes = MESES[Number(dia.slice(5, 7)) - 1] ?? "";
-  return `${mes}/${dia.slice(0, 4)}`;
+  const mes = f.mesCurto(dia.slice(0, 7));
+  return `${mes.charAt(0).toUpperCase()}${mes.slice(1)}/${dia.slice(0, 4)}`;
 }
-
-const MESES = [
-  "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
-  "Jul", "Ago", "Set", "Out", "Nov", "Dez",
-];

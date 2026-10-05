@@ -6,6 +6,7 @@ import { COMUM_DO_PAINEL } from "./comum";
 import { DASHBOARD } from "./dashboard";
 import { FICHA } from "./ficha";
 import { ROTULOS } from "./rotulos";
+import { SOCIAL } from "./social";
 
 /**
  * Todo o texto do painel do personal, nos três idiomas (etapa 3 da tradução).
@@ -21,6 +22,7 @@ function textos(idioma: Idioma) {
     dashboard: DASHBOARD[idioma],
     alunos: ALUNOS[idioma],
     ficha: FICHA[idioma],
+    social: SOCIAL[idioma],
     /** O portão de re-aceite é o mesmo componente do app; o texto também. */
     portao: COMUM[idioma].portao,
   };

@@ -1,6 +1,9 @@
 import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 import { CartaoDeAtividade } from "@/components/personal/cartao-de-atividade";
-import { PERIODOS, type PeriodoDoSocial } from "@/lib/domain/feed";
+import type { PeriodoDoSocial } from "@/lib/domain/feed";
+import type { Idioma } from "@/lib/domain/idioma";
+import { TEXTOS_DO_PAINEL, type TextosDoPainel } from "@/lib/i18n/painel";
+import { plural, preencher } from "@/lib/i18n/texto";
 import type { PostDaCarteira } from "@/lib/queries/social";
 
 /**
@@ -19,6 +22,7 @@ import type { PostDaCarteira } from "@/lib/queries/social";
  * modelo; seria um tipo de post novo, não um desenho novo).
  */
 export function TelaSocial({
+  idioma = "pt",
   posts,
   periodo,
   filtrado,
@@ -26,6 +30,7 @@ export function TelaSocial({
   curtir,
   responder,
 }: {
+  idioma?: Idioma;
   posts: PostDaCarteira[];
   periodo: PeriodoDoSocial;
   /** Há um aluno escolhido no filtro — muda a frase do vazio. */
@@ -35,23 +40,24 @@ export function TelaSocial({
   responder: (post: PostDaCarteira) => React.ReactNode;
 }) {
   const semResposta = posts.filter((p) => p.semResposta).length;
+  const s = TEXTOS_DO_PAINEL[idioma].social;
 
   return (
     <>
       <CabecalhoDaPagina
-        titulo="Feed"
-        subtitulo="Todas as publicações dos seus alunos, das mais recentes às mais antigas"
+        titulo={s.titulo}
+        subtitulo={s.subtitulo}
       />
 
       <div className="mx-auto flex max-w-[680px] flex-col gap-3.5">
         <div className="rounded-[12px] bg-gradient-to-br from-dark-bg to-dark-elev px-5 py-[18px] text-dark-text">
           <p className="text-[15px] font-extrabold tracking-[-0.01em]">Reps Club</p>
           <p className="mt-0.5 text-[12.5px] font-medium text-dark-text-2">
-            Atividade de todos os alunos · {posts.length === 1 ? "1 publicação" : `${posts.length} publicações`}
+            {s.faixa} · {plural(posts.length, s.publicacoes)}
             {/* A fila de trabalho do personal: o que o protótipo não diz e
                 é o motivo de ele abrir esta tela. */}
             {semResposta > 0
-              ? ` · ${semResposta === 1 ? "1 sem sua resposta" : `${semResposta} sem sua resposta`}`
+              ? ` · ${plural(semResposta, s.semResposta)}`
               : ""}
           </p>
         </div>
@@ -62,12 +68,17 @@ export function TelaSocial({
           <ul className="flex flex-col gap-3.5">
             {posts.map((post) => (
               <li key={post.id}>
-                <CartaoDePost post={post} curtir={curtir(post)} responder={responder(post)} />
+                <CartaoDePost
+                  idioma={idioma}
+                  post={post}
+                  curtir={curtir(post)}
+                  responder={responder(post)}
+                />
               </li>
             ))}
           </ul>
         ) : (
-          <Vazio periodo={periodo} filtrado={filtrado} />
+          <Vazio s={s} periodo={periodo} filtrado={filtrado} />
         )}
       </div>
     </>
@@ -75,17 +86,23 @@ export function TelaSocial({
 }
 
 function CartaoDePost({
+  idioma,
   post,
   curtir,
   responder,
 }: {
+  idioma: Idioma;
   post: PostDaCarteira;
   curtir: React.ReactNode;
   responder: React.ReactNode;
 }) {
   return (
     <CartaoDeAtividade
-      rotulo={`Post de ${post.aluno.nome}, ${post.rotuloDoDia}`}
+      idioma={idioma}
+      rotulo={preencher(TEXTOS_DO_PAINEL[idioma].social.postDe, {
+        nome: post.aluno.nome,
+        dia: post.rotuloDoDia,
+      })}
       autor={post.aluno}
       linkDoAutor
       rotuloDoDia={post.rotuloDoDia}
@@ -98,23 +115,28 @@ function CartaoDePost({
   );
 }
 
-function Vazio({ periodo, filtrado }: { periodo: PeriodoDoSocial; filtrado: boolean }) {
-  const rotulo = PERIODOS.find((p) => p.valor === periodo)?.rotulo.toLowerCase();
+function Vazio({
+  s,
+  periodo,
+  filtrado,
+}: {
+  s: TextosDoPainel["social"];
+  periodo: PeriodoDoSocial;
+  filtrado: boolean;
+}) {
+  const { vazio } = s;
 
   // Três vazios diferentes, e cada um pede uma ação diferente: esperar, abrir
   // o período, ou tirar o filtro do aluno.
   const [titulo, apoio] =
     periodo === "tudo" && !filtrado
-      ? [
-          "Nenhum aluno publicou ainda",
-          "Quando um aluno registrar um treino com foto, o post aparece aqui — inclusive os que ele marcar para só você ver.",
-        ]
+      ? [vazio.nenhumTitulo, vazio.nenhumApoio]
       : filtrado
         ? [
-            periodo === "tudo" ? "Este aluno ainda não publicou" : `Nada deste aluno nos ${rotulo}`,
-            "Escolha “Todos os alunos” para ver a turma inteira.",
+            periodo === "tudo" ? vazio.alunoTudo : vazio.alunoNoPeriodo[periodo],
+            vazio.tirarFiltro,
           ]
-        : [`Nada publicado nos ${rotulo}`, "Experimente “Todo o período”."];
+        : [vazio.noPeriodo[periodo], vazio.abrirPeriodo];
 
   return (
     <div className="rounded-[12px] border border-border bg-surface px-5 py-11 text-center">

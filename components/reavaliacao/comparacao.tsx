@@ -33,7 +33,7 @@ export function Comparacao({
   atual: Reavaliacao;
   anterior: Reavaliacao | null;
   linhas: Linha[];
-  /** O app passa o idioma do aluno; o painel ainda é só português (etapa 3). */
+  /** O idioma de quem lê: o do aluno no app, o do personal no painel. */
   idioma?: Idioma;
 }) {
   const r = TEXTOS_DO_APP[idioma].perfil.reavaliacao;

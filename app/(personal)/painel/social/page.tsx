@@ -1,5 +1,6 @@
 import { TelaSocial } from "@/components/personal/tela-social";
 import { requireTrainer } from "@/lib/auth/session";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
 import { periodoDaUrl } from "@/lib/domain/feed";
 import { alunosDoFiltro, lerPostsDaCarteira } from "@/lib/queries/social";
 
@@ -23,12 +24,14 @@ export default async function Social({ searchParams }: PageProps<"/painel/social
   const escolhido = periodoDaUrl(periodo);
 
   const { trainer } = await requireTrainer();
+  const { idioma } = await textosDoPainel();
   const alunos = await alunosDoFiltro();
   const alunoId = alunos.some((a) => a.id === aluno) ? (aluno as string) : null;
-  const posts = await lerPostsDaCarteira(trainer.id, escolhido, alunoId);
+  const posts = await lerPostsDaCarteira(trainer.id, escolhido, alunoId, idioma);
 
   return (
     <TelaSocial
+      idioma={idioma}
       posts={posts}
       periodo={escolhido}
       filtrado={alunoId !== null}

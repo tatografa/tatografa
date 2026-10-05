@@ -1,6 +1,9 @@
 import { ImageOff, Lock, MessageCircle, Users } from "lucide-react";
 import Link from "next/link";
 
+import type { Idioma } from "@/lib/domain/idioma";
+import { TEXTOS_DO_PAINEL } from "@/lib/i18n/painel";
+import { plural, preencher } from "@/lib/i18n/texto";
 import type { ComentarioDoPost } from "@/lib/queries/feed";
 import type { TreinoDoPostNoPainel } from "@/lib/queries/social";
 import type { Enums } from "@/types/database";
@@ -21,6 +24,7 @@ import { cn } from "@/lib/utils";
  * embaixo do treino (duração, séries, o link série a série) entra por `rodape`.
  */
 export function CartaoDeAtividade({
+  idioma = "pt",
   rotulo,
   autor,
   linkDoAutor = false,
@@ -33,6 +37,7 @@ export function CartaoDeAtividade({
   conversa = null,
   rotuloDosComentarios = false,
 }: {
+  idioma?: Idioma;
   /** O nome do `<article>` para leitor de tela. */
   rotulo: string;
   autor: { id: string; nome: string; iniciais: string };
@@ -53,6 +58,8 @@ export function CartaoDeAtividade({
   /** O "COMENTÁRIOS" em cima da conversa, que o protótipo põe só no perfil. */
   rotuloDosComentarios?: boolean;
 }) {
+  const { comum, ficha } = TEXTOS_DO_PAINEL[idioma];
+  const t = ficha.cartao;
   return (
     <article
       aria-label={rotulo}
@@ -89,11 +96,11 @@ export function CartaoDeAtividade({
           >
             {visibilidade === "personal" ? (
               <>
-                <Lock size={10} aria-hidden /> Só para você
+                <Lock size={10} aria-hidden /> {t.soParaVoce}
               </>
             ) : (
               <>
-                <Users size={10} aria-hidden /> Turma
+                <Users size={10} aria-hidden /> {t.turma}
               </>
             )}
           </span>
@@ -105,7 +112,7 @@ export function CartaoDeAtividade({
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={fotoUrl}
-          alt={legenda ?? `Foto do treino de ${autor.nome}`}
+          alt={legenda ?? preencher(t.fotoDe, { nome: autor.nome })}
           className="aspect-[4/3] w-full rounded-[10px] bg-canvas object-cover"
           loading="lazy"
         />
@@ -117,7 +124,7 @@ export function CartaoDeAtividade({
         // o treino — que é o conteúdo deste cartão — para fora da tela.
         <div className="flex h-24 w-full flex-col items-center justify-center gap-1.5 rounded-[10px] border border-dashed border-border bg-canvas text-ink-5">
           <ImageOff size={20} aria-hidden />
-          <span className="text-[12px] font-medium">Sem foto nesta execução</span>
+          <span className="text-[12px] font-medium">{t.semFoto}</span>
         </div>
       ) : null}
 
@@ -126,7 +133,7 @@ export function CartaoDeAtividade({
       {treino ? (
         <div className="rounded-[10px] bg-dark-surface px-[18px] py-4 text-dark-text">
           <p className="mb-2.5 text-[14.5px] font-bold">
-            Treino {treino.rotulo} · {treino.nome}
+            {preencher(comum.treinoComNome, { label: treino.rotulo, nome: treino.nome })}
           </p>
           {treino.exercicios.length ? (
             <ul>
@@ -141,7 +148,7 @@ export function CartaoDeAtividade({
               ))}
             </ul>
           ) : (
-            <p className="text-[12.5px] text-dark-text-2">Nenhuma série registrada.</p>
+            <p className="text-[12.5px] text-dark-text-2">{t.nenhumaSerie}</p>
           )}
         </div>
       ) : null}
@@ -156,16 +163,14 @@ export function CartaoDeAtividade({
               <MessageCircle size={15} aria-hidden />
               <span aria-hidden>{conversa.comentarios.length}</span>
               <span className="sr-only">
-                {conversa.comentarios.length === 1
-                  ? "1 comentário"
-                  : `${conversa.comentarios.length} comentários`}
+                {plural(conversa.comentarios.length, t.comentarios)}
               </span>
             </span>
           </div>
 
           <div className="flex flex-col gap-2.5 border-t border-border-soft pt-2.5">
             {rotuloDosComentarios && conversa.comentarios.length ? (
-              <p className="text-[10px] font-bold tracking-[0.08em] text-ink-5">COMENTÁRIOS</p>
+              <p className="text-[10px] font-bold tracking-[0.08em] text-ink-5">{t.comentariosTitulo}</p>
             ) : null}
             {conversa.comentarios.length ? (
               <ul className="flex flex-col gap-2.5">
@@ -185,7 +190,7 @@ export function CartaoDeAtividade({
                         <span className="text-[12.5px] font-bold text-ink">{c.autorNome}</span>
                         {c.doPersonal ? (
                           <span className="rounded-full bg-brand px-[7px] py-px text-[9px] font-bold tracking-[0.04em] text-white">
-                            PERSONAL
+                            {t.personal}
                           </span>
                         ) : null}
                         <span className="ml-auto text-[11px] text-ink-5">{c.rotuloDoDia}</span>

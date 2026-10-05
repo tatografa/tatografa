@@ -3,6 +3,7 @@
 import { CalendarDays, ChevronDown, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+import { usePainel } from "@/components/personal/idioma-do-painel";
 import { PERIODOS, type PeriodoDoSocial } from "@/lib/domain/feed";
 
 /**
@@ -22,6 +23,7 @@ export function FiltrosDoFeed({
   periodo: PeriodoDoSocial;
 }) {
   const router = useRouter();
+  const t = usePainel().t.social.filtros;
 
   function ir(aluno: string | null, per: PeriodoDoSocial) {
     const busca = new URLSearchParams();
@@ -35,12 +37,12 @@ export function FiltrosDoFeed({
     <div className="grid grid-cols-2 gap-2.5">
       <Filtro Icone={User}>
         <select
-          aria-label="Filtrar por aluno"
+          aria-label={t.porAluno}
           value={alunoId ?? ""}
           onChange={(e) => ir(e.target.value || null, periodo)}
           className={SELECT}
         >
-          <option value="">Todos os alunos</option>
+          <option value="">{t.todosOsAlunos}</option>
           {alunos.map((a) => (
             <option key={a.id} value={a.id}>
               {a.nome}
@@ -50,14 +52,14 @@ export function FiltrosDoFeed({
       </Filtro>
       <Filtro Icone={CalendarDays}>
         <select
-          aria-label="Filtrar por período"
+          aria-label={t.porPeriodo}
           value={periodo}
           onChange={(e) => ir(alunoId, e.target.value as PeriodoDoSocial)}
           className={SELECT}
         >
           {PERIODOS.map((p) => (
             <option key={p.valor} value={p.valor}>
-              {p.rotulo}
+              {t.periodos[p.valor]}
             </option>
           ))}
         </select>

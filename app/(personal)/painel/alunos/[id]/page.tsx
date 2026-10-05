@@ -6,6 +6,7 @@ import {
 } from "@/app/(personal)/painel/social/controles-do-post";
 import { FichaDoAluno } from "@/components/personal/ficha-do-aluno";
 import { requireTrainer } from "@/lib/auth/session";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
 import { montarAtividade } from "@/lib/domain/atividade";
 import { semanaAtual } from "@/lib/domain/treino";
 import { lerAluno, resumoDoAluno } from "@/lib/queries/alunos";
@@ -34,6 +35,7 @@ export default async function AlunoDoPainel(
 ) {
   const { id } = await props.params;
   const { trainer } = await requireTrainer();
+  const { idioma } = await textosDoPainel();
 
   // Aluno de outro personal e id inexistente dão o mesmo 404: distinguir
   // contaria a um estranho que aquele id existe.
@@ -49,12 +51,12 @@ export default async function AlunoDoPainel(
       listarHistorico(aluno.id),
       progressoDoAluno(aluno.id),
       lerReavaliacoesDeUmAluno(trainer.id, aluno.id),
-      listarObservacoes(aluno.id),
+      listarObservacoes(aluno.id, idioma),
       // Sessões totais e dias seguidos vêm agregados do banco, e não de
       // `sessoes`: aquela lista tem teto de 50, e o total pararia em "50" para
       // sempre justamente no aluno que mais treina.
       resumoDoAluno(aluno.id),
-      lerPostsDaCarteira(trainer.id, "tudo", aluno.id),
+      lerPostsDaCarteira(trainer.id, "tudo", aluno.id, idioma),
     ]);
 
   /*
@@ -68,11 +70,12 @@ export default async function AlunoDoPainel(
 
   const [treinos, blocos] = await Promise.all([
     programa ? lerTreinosDoPrograma(programa.id) : Promise.resolve([]),
-    treinosDasSessoes(semPost),
+    treinosDasSessoes(semPost, idioma),
   ]);
 
   return (
     <FichaDoAluno
+      idioma={idioma}
       aluno={aluno}
       ehVoce={aluno.id === trainer.id}
       programa={programa}

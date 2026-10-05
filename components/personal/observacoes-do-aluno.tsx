@@ -3,12 +3,14 @@
 import { Lock, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useActionState, useState } from "react";
 
+import { usePainel } from "@/components/personal/idioma-do-painel";
 import { Button, Card, Textarea } from "@/components/ui";
 import {
   AVISO_DA_OBSERVACAO,
   LIMITE_DAS_OBSERVACOES,
   LIMITE_DA_OBSERVACAO,
 } from "@/lib/domain/observacao";
+import { plural, preencher } from "@/lib/i18n/texto";
 import type { Observacao } from "@/lib/queries/observacoes";
 
 import {
@@ -48,13 +50,14 @@ export function ObservacoesDoAluno({
   nome: string;
 }) {
   const [escrevendo, setEscrevendo] = useState(false);
+  const o = usePainel().t.ficha.observacoes;
 
   return (
     <section className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="eyebrow flex items-center gap-1.5 text-ink-4">
           <Lock aria-hidden size={12} />
-          Observações · só você vê
+          {o.titulo}
         </h2>
         {!escrevendo && (
           <button
@@ -62,7 +65,7 @@ export function ObservacoesDoAluno({
             onClick={() => setEscrevendo(true)}
             className="inline-flex min-h-8 items-center gap-1 text-[13px] font-semibold text-ink-3 transition hover:text-ink"
           >
-            <Plus aria-hidden size={14} /> Anotar
+            <Plus aria-hidden size={14} /> {o.anotar}
           </button>
         )}
       </div>
@@ -71,18 +74,15 @@ export function ObservacoesDoAluno({
         <Formulario
           alunoId={alunoId}
           aoFechar={() => setEscrevendo(false)}
-          rotulo="Salvar anotação"
+          rotulo={o.salvarAnotacao}
         />
       )}
 
       {observacoes.length === 0 ? (
         !escrevendo && (
           <Card className="text-[14px] leading-[1.6] text-ink-3">
-            Nada anotado sobre {nome} ainda. Lesão, preferência, motivo de
-            falta — o que te ajudar a montar o próximo treino.{" "}
-            <strong className="font-semibold text-ink-2">
-              O aluno não vê o que você escreve aqui.
-            </strong>
+            {preencher(o.vazio, { nome })}{" "}
+            <strong className="font-semibold text-ink-2">{o.alunoNaoVe}</strong>
           </Card>
         )
       ) : (
@@ -99,7 +99,7 @@ export function ObservacoesDoAluno({
 
       {observacoes.length >= LIMITE_DAS_OBSERVACOES && (
         <p className="text-[12.5px] text-ink-4">
-          Mostrando as {LIMITE_DAS_OBSERVACOES} anotações mais recentes.
+          {preencher(o.limite, { n: LIMITE_DAS_OBSERVACOES })}
         </p>
       )}
     </section>
@@ -117,6 +117,8 @@ function Linha({
   const [editando, setEditando] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
   const [estado, acao, apagando] = useActionState(apagarObservacao, EXCLUSAO);
+  const { t } = usePainel();
+  const o = t.ficha.observacoes;
 
   if (editando) {
     return (
@@ -125,7 +127,7 @@ function Linha({
           alunoId={alunoId}
           observacao={observacao}
           aoFechar={() => setEditando(false)}
-          rotulo="Salvar"
+          rotulo={t.comum.salvar}
         />
       </li>
     );
@@ -140,27 +142,27 @@ function Linha({
       <div className="mt-2.5 flex flex-wrap items-center justify-between gap-3">
         <p className="text-[12px] text-ink-5">
           {observacao.rotuloDoDia}
-          {observacao.editadaEm ? " · editada" : ""}
+          {observacao.editadaEm ? o.editada : ""}
         </p>
 
         {confirmando ? (
           <form action={acao} className="flex items-center gap-2">
             <input type="hidden" name="id" value={observacao.id} />
             <input type="hidden" name="alunoId" value={alunoId} />
-            <span className="text-[12.5px] text-ink-3">Apagar?</span>
+            <span className="text-[12.5px] text-ink-3">{o.apagar}</span>
             <button
               type="submit"
               disabled={apagando}
               className="text-[12.5px] font-semibold text-danger transition hover:underline disabled:opacity-60"
             >
-              {apagando ? "Apagando…" : "Sim, apagar"}
+              {apagando ? t.comum.apagando : o.simApagar}
             </button>
             <button
               type="button"
               onClick={() => setConfirmando(false)}
               className="text-[12.5px] font-semibold text-ink-4 transition hover:text-ink-2"
             >
-              Não
+              {o.nao}
             </button>
           </form>
         ) : (
@@ -170,14 +172,14 @@ function Linha({
               onClick={() => setEditando(true)}
               className="inline-flex min-h-8 items-center gap-1 text-[12.5px] font-semibold text-ink-4 transition hover:text-ink-2"
             >
-              <Pencil aria-hidden size={13} /> Editar
+              <Pencil aria-hidden size={13} /> {t.comum.editar}
             </button>
             <button
               type="button"
               onClick={() => setConfirmando(true)}
               className="inline-flex min-h-8 items-center gap-1 text-[12.5px] font-semibold text-ink-4 transition hover:text-danger"
             >
-              <Trash2 aria-hidden size={13} /> Apagar
+              <Trash2 aria-hidden size={13} /> {t.comum.apagar}
             </button>
           </div>
         )}
@@ -214,6 +216,8 @@ function Formulario({
     VAZIO,
   );
   const [texto, setTexto] = useState(observacao?.texto ?? "");
+  const { t } = usePainel();
+  const o = t.ficha.observacoes;
 
   /*
    * Fecha sozinho quando deu certo, **ajustando o estado no render** e
@@ -242,14 +246,14 @@ function Formulario({
 
         <Textarea
           name="texto"
-          label="Anotação"
+          label={o.anotacao}
           rows={4}
           autoFocus
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
           maxLength={LIMITE_DA_OBSERVACAO}
           error={estado.errosPorCampo?.texto ?? estado.erro}
-          hint="Só você lê. O aluno não vê esta anotação em lugar nenhum do app."
+          hint={o.dica}
         />
 
         {/*
@@ -260,7 +264,7 @@ function Formulario({
         */}
         {texto.length >= AVISO_DA_OBSERVACAO && (
           <p className="text-right text-[12px] text-ink-4 tabular-nums">
-            {restam} {restam === 1 ? "caractere" : "caracteres"}
+            {plural(restam, o.caracteres)}
           </p>
         )}
 
@@ -271,10 +275,10 @@ function Formulario({
             onClick={aoFechar}
             disabled={enviando}
           >
-            <X aria-hidden size={15} /> Cancelar
+            <X aria-hidden size={15} /> {t.comum.cancelar}
           </Button>
           <Button type="submit" disabled={enviando || !texto.trim()}>
-            {enviando ? "Salvando…" : rotulo}
+            {enviando ? t.comum.salvando : rotulo}
           </Button>
         </div>
       </form>

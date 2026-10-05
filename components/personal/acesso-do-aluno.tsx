@@ -3,7 +3,9 @@
 import { Pause, Play } from "lucide-react";
 import { useActionState, useState } from "react";
 
+import { usePainel } from "@/components/personal/idioma-do-painel";
 import { Button, Dialog } from "@/components/ui";
+import { preencher } from "@/lib/i18n/texto";
 import {
   mudarAcessoDoAluno,
   type EstadoDoAcesso,
@@ -31,6 +33,8 @@ export function AcessoDoAluno({
 }) {
   const [estado, acao, enviando] = useActionState(mudarAcessoDoAluno, INICIAL);
   const [confirmando, setConfirmando] = useState(false);
+  const { t } = usePainel();
+  const a = t.ficha.acesso;
 
   // Fecha a confirmação quando a ação responde, e não no clique: fechar no
   // clique desmontaria o formulário no meio do envio. Ajuste durante a
@@ -46,15 +50,14 @@ export function AcessoDoAluno({
       {pausado ? (
         <>
           <p className="text-[12.5px] leading-relaxed text-ink-4">
-            O acesso de {primeiroNome} ao app está pausado. O histórico e o perfil continuam
-            abertos para a pessoa.
+            {preencher(a.pausado, { nome: primeiroNome })}
           </p>
           <form action={acao}>
             <input type="hidden" name="alunoId" value={alunoId} />
             <input type="hidden" name="status" value="ativo" />
             <Button type="submit" size="sm" block disabled={enviando}>
               <Play size={14} aria-hidden />
-              {enviando ? "Reativando…" : "Reativar acesso"}
+              {enviando ? a.reativando : a.reativar}
             </Button>
           </form>
         </>
@@ -67,7 +70,7 @@ export function AcessoDoAluno({
           onClick={() => setConfirmando(true)}
         >
           <Pause size={14} aria-hidden />
-          Pausar acesso ao app
+          {a.pausar}
         </Button>
       )}
 
@@ -80,8 +83,8 @@ export function AcessoDoAluno({
       <Dialog
         aberto={confirmando}
         aoFechar={() => setConfirmando(false)}
-        titulo={`Pausar o acesso de ${primeiroNome}?`}
-        descricao={`${primeiroNome} deixa de abrir treino, de ver o feed da turma, de publicar e de responder reavaliação. Nada é apagado: o histórico e o perfil continuam abertos, e os posts antigos continuam visíveis para os colegas. Você reativa quando quiser.`}
+        titulo={preencher(a.confirmarTitulo, { nome: primeiroNome })}
+        descricao={preencher(a.confirmarTexto, { nome: primeiroNome })}
       >
         <form action={acao} className="flex gap-2.5">
           <input type="hidden" name="alunoId" value={alunoId} />
@@ -93,10 +96,10 @@ export function AcessoDoAluno({
             disabled={enviando}
             onClick={() => setConfirmando(false)}
           >
-            Cancelar
+            {t.comum.cancelar}
           </Button>
           <Button type="submit" block disabled={enviando}>
-            {enviando ? "Pausando…" : "Pausar acesso"}
+            {enviando ? a.pausando : a.confirmar}
           </Button>
         </form>
       </Dialog>

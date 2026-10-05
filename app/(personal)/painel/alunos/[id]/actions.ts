@@ -5,6 +5,8 @@ import { z } from "zod";
 
 import { requireTrainer } from "@/lib/auth/session";
 import { LIMITE_DA_OBSERVACAO } from "@/lib/domain/observacao";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
+import { preencher } from "@/lib/i18n/texto";
 import { createClient } from "@/lib/supabase/server";
 
 export type EstadoDaObservacao = {
@@ -13,17 +15,19 @@ export type EstadoDaObservacao = {
   ok?: boolean;
 };
 
-const texto = z
-  .string()
-  .trim()
-  .min(1, "Escreva alguma coisa antes de salvar.")
-  .max(
-    LIMITE_DA_OBSERVACAO,
-    `A anotação passa de ${LIMITE_DA_OBSERVACAO} caracteres.`,
-  );
+/** As mensagens das anotações no idioma do painel. */
+async function erros() {
+  return (await textosDoPainel()).t.ficha.observacoes.erros;
+}
 
-const aoCriar = z.object({ alunoId: z.string().uuid(), texto });
-const aoEditar = z.object({ id: z.string().uuid(), texto });
+/** O texto da anotação; montado por chamada, porque a mensagem é do idioma de quem enviou. */
+function texto(e: Awaited<ReturnType<typeof erros>>) {
+  return z
+    .string()
+    .trim()
+    .min(1, e.vazio)
+    .max(LIMITE_DA_OBSERVACAO, preencher(e.longo, { n: LIMITE_DA_OBSERVACAO }));
+}
 
 /**
  * Anota alguma coisa sobre o aluno.
@@ -40,7 +44,8 @@ export async function criarObservacao(
   _anterior: EstadoDaObservacao,
   formData: FormData,
 ): Promise<EstadoDaObservacao> {
-  const analise = aoCriar.safeParse({
+  const e = await erros();
+  const analise = z.object({ alunoId: z.string().uuid(), texto: texto(e) }).safeParse({
     alunoId: String(formData.get("alunoId") ?? ""),
     texto: String(formData.get("texto") ?? ""),
   });
@@ -58,7 +63,7 @@ export async function criarObservacao(
     body: analise.data.texto,
   });
 
-  if (error) return { erro: "Não conseguimos salvar agora. Tente de novo." };
+  if (error) return { erro: e.falha };
 
   revalidatePath(`/painel/alunos/${analise.data.alunoId}`);
   return { ok: true };
@@ -80,7 +85,8 @@ export async function editarObservacao(
   _anterior: EstadoDaObservacao,
   formData: FormData,
 ): Promise<EstadoDaObservacao> {
-  const analise = aoEditar.safeParse({
+  const e = await erros();
+  const analise = z.object({ id: z.string().uuid(), texto: texto(e) }).safeParse({
     id: String(formData.get("id") ?? ""),
     texto: String(formData.get("texto") ?? ""),
   });
@@ -105,12 +111,12 @@ export async function editarObservacao(
     .eq("id", analise.data.id)
     .eq("trainer_id", trainer.id);
 
-  if (error) return { erro: "Não conseguimos salvar agora. Tente de novo." };
+  if (error) return { erro: e.falha };
 
   // Update recusado pelo `using` do RLS não dá erro: afeta zero linhas em
   // silêncio. Sem esta conferência, a tela diria "salvo" para uma anotação que
   // continuou como estava.
-  if (count === 0) return { erro: "Essa anotação não existe mais." };
+  if (count === 0) return { erro: e.sumiu };
 
   revalidatePath(`/painel/alunos/${alunoId}`);
   return { ok: true };
@@ -132,8 +138,9 @@ export async function apagarObservacao(
 ): Promise<EstadoDaExclusao> {
   const id = String(formData.get("id") ?? "");
   const alunoId = String(formData.get("alunoId") ?? "");
+  const e = await erros();
   if (!z.string().uuid().safeParse(id).success) {
-    return { erro: "Anotação inválida." };
+    return { erro: e.invalida };
   }
 
   const { trainer } = await requireTrainer();
@@ -145,7 +152,7 @@ export async function apagarObservacao(
     .eq("id", id)
     .eq("trainer_id", trainer.id);
 
-  if (error) return { erro: "Não conseguimos apagar agora. Tente de novo." };
+  if (error) return { erro: e.falhaApagar };
 
   revalidatePath(`/painel/alunos/${alunoId}`);
   return {};
@@ -170,10 +177,11 @@ export async function mudarAcessoDoAluno(
   _anterior: EstadoDoAcesso,
   formData: FormData,
 ): Promise<EstadoDoAcesso> {
+  const e = (await textosDoPainel()).t.ficha.acesso.erros;
   const analise = z
     .object({ alunoId: z.string().uuid(), status: z.enum(["ativo", "inativo"]) })
     .safeParse({ alunoId: formData.get("alunoId"), status: formData.get("status") });
-  if (!analise.success) return { erro: "Pedido inválido. Recarregue a página." };
+  if (!analise.success) return { erro: e.invalido };
 
   const { trainer } = await requireTrainer();
   const { alunoId, status } = analise.data;
@@ -181,7 +189,7 @@ export async function mudarAcessoDoAluno(
   // Quem treina a si mesmo (13/09) não se pausa por aqui: trancaria o próprio
   // app de treino, e a tela não oferece o botão. Conferir de novo porque a
   // ação é um endereço que aceita POST de qualquer lugar.
-  if (alunoId === trainer.id) return { erro: "Você não pode pausar o seu próprio acesso." };
+  if (alunoId === trainer.id) return { erro: e.voce };
 
   const supabase = await createClient();
   const { error, count } = await supabase
@@ -190,7 +198,7 @@ export async function mudarAcessoDoAluno(
     .eq("id", alunoId)
     .eq("trainer_id", trainer.id);
 
-  if (error || count === 0) return { erro: "Não conseguimos mudar o acesso agora. Tente de novo." };
+  if (error || count === 0) return { erro: e.falha };
 
   revalidatePath(`/painel/alunos/${alunoId}`);
   revalidatePath("/painel/alunos");

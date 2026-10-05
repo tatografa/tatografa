@@ -1,10 +1,12 @@
 import "server-only";
 
 import { resumoDoExercicioNoPost, type PeriodoDoSocial, type SerieDoPost } from "@/lib/domain/feed";
-import { rotuloDoDia } from "@/lib/domain/historico";
+import type { Idioma } from "@/lib/domain/idioma";
 import { iniciaisDe } from "@/lib/domain/nome";
 import { chaveDoExercicio, exerciciosPorReferencia } from "@/lib/queries/exercicios";
 import { type ComentarioDoPost } from "@/lib/queries/feed";
+import { formatos } from "@/lib/i18n/formatos";
+import { TEXTOS_DO_PAINEL } from "@/lib/i18n/painel";
 import { createClient } from "@/lib/supabase/server";
 import type { Enums } from "@/types/database";
 
@@ -62,8 +64,12 @@ export async function lerPostsDaCarteira(
   periodo: PeriodoDoSocial,
   /** Já conferido contra a carteira pela página; nulo = todos. */
   alunoId: string | null = null,
+  /** O idioma do painel: "Hoje" e o resumo do treino saem prontos daqui. */
+  idioma: Idioma = "pt",
 ): Promise<PostDaCarteira[]> {
   const supabase = await createClient();
+  const { comum, social } = TEXTOS_DO_PAINEL[idioma];
+  const f = formatos(idioma);
 
   let consulta = supabase
     .from("posts")
@@ -106,7 +112,7 @@ export async function lerPostsDaCarteira(
     caminhos.length
       ? supabase.storage.from("treinos").createSignedUrls(caminhos, MINUTOS_DA_URL * 60)
       : Promise.resolve({ data: [] as { path: string | null; signedUrl: string }[] }),
-    treinosDasSessoes(sessoes),
+    treinosDasSessoes(sessoes, idioma),
   ]);
 
   if (alunos.error) throw alunos.error;
@@ -126,23 +132,23 @@ export async function lerPostsDaCarteira(
   const porPost = new Map<string, ComentarioDoPost[]>();
   for (const c of comentarios.data ?? []) {
     const doPersonal = c.author_id === trainerId;
-    const nome = doPersonal ? "Você" : (nomePor.get(c.author_id) ?? "Aluno");
+    const nome = doPersonal ? comum.voce : (nomePor.get(c.author_id) ?? social.dados.aluno);
     const lista = porPost.get(c.post_id) ?? [];
     lista.push({
       id: c.id,
       autorNome: nome,
-      autorIniciais: iniciaisDe(nome === "Você" ? "V" : nome),
+      autorIniciais: iniciaisDe(nome),
       doPersonal,
       meu: doPersonal,
       texto: c.body,
       criadoEm: c.created_at,
-      rotuloDoDia: rotuloDoDia(c.created_at),
+      rotuloDoDia: f.dia(c.created_at),
     });
     porPost.set(c.post_id, lista);
   }
 
   return posts.map((p) => {
-    const nome = nomePor.get(p.student_id) ?? "Aluno";
+    const nome = nomePor.get(p.student_id) ?? social.dados.aluno;
     const doPost = porPost.get(p.id) ?? [];
     return {
       id: p.id,
@@ -151,7 +157,7 @@ export async function lerPostsDaCarteira(
       fotoUrl: p.photo_path ? (urlPor.get(p.photo_path) ?? null) : null,
       visibilidade: p.visibility,
       criadoEm: p.created_at,
-      rotuloDoDia: rotuloDoDia(p.created_at),
+      rotuloDoDia: f.dia(p.created_at),
       curtidas: totalCurtidas.get(p.id) ?? 0,
       curtiPor: curti.has(p.id),
       comentarios: doPost,
@@ -178,9 +184,14 @@ export async function lerPostsDaCarteira(
  * não virou post. Quem chama limita o lote: as séries vêm numa consulta só, e
  * o corte de página do PostgREST é silencioso.
  */
-export async function treinosDasSessoes(ids: string[]): Promise<Map<string, TreinoDoPostNoPainel>> {
+export async function treinosDasSessoes(
+  ids: string[],
+  idioma: Idioma = "pt",
+): Promise<Map<string, TreinoDoPostNoPainel>> {
   const resultado = new Map<string, TreinoDoPostNoPainel>();
   if (!ids.length) return resultado;
+  const { dados } = TEXTOS_DO_PAINEL[idioma].social;
+  const { numero } = formatos(idioma);
 
   const supabase = await createClient();
   const [{ data: sessoes }, { data: series }] = await Promise.all([
@@ -221,8 +232,8 @@ export async function treinosDasSessoes(ids: string[]): Promise<Map<string, Trei
         const exercicio = linha ? nomes.get(chaveDoExercicio(linha)) : undefined;
         return {
           posicao: linha?.position ?? Number.MAX_SAFE_INTEGER,
-          nome: exercicio?.name ?? "Exercício removido",
-          resumo: resumoDoExercicioNoPost(lista),
+          nome: exercicio?.name ?? dados.exercicioRemovido,
+          resumo: resumoDoExercicioNoPost(lista, { numero, pulado: dados.pulado }),
         };
       })
       .sort((a, b) => a.posicao - b.posicao)

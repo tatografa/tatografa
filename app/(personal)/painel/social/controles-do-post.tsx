@@ -3,6 +3,8 @@
 import { Heart, SendHorizontal } from "lucide-react";
 import { useActionState, useState, useTransition } from "react";
 
+import { usePainel } from "@/components/personal/idioma-do-painel";
+import { plural, preencher } from "@/lib/i18n/texto";
 import { cn } from "@/lib/utils";
 
 import { curtirDoPainel, responder, type EstadoDaResposta } from "./actions";
@@ -25,6 +27,7 @@ export function CurtirDoPainel({
   const [curtido, setCurtido] = useState(curtiPor);
   const [total, setTotal] = useState(curtidas);
   const [, iniciar] = useTransition();
+  const c = usePainel().t.social.controles;
 
   // Quando o servidor revalida, quem manda é ele.
   const [ultimo, setUltimo] = useState({ curtidas, curtiPor });
@@ -58,7 +61,7 @@ export function CurtirDoPainel({
       <Heart size={15} aria-hidden className={cn(curtido && "fill-brand")} />
       <span aria-hidden>{total}</span>
       <span className="sr-only">
-        {curtido ? "Descurtir" : "Curtir"} · {total} {total === 1 ? "curtida" : "curtidas"}
+        {curtido ? c.descurtir : c.curtir} · {total} {plural(total, c.curtidas)}
       </span>
     </button>
   );
@@ -72,6 +75,7 @@ export function CurtirDoPainel({
  */
 export function ResponderDoPainel({ postId, aluno }: { postId: string; aluno: string }) {
   const [estado, acao, enviando] = useActionState(responder, INICIAL);
+  const c = usePainel().t.social.controles;
 
   return (
     <form action={acao} noValidate className="space-y-1.5">
@@ -87,8 +91,8 @@ export function ResponderDoPainel({ postId, aluno }: { postId: string; aluno: st
           key={estado.texto ?? "vazio"}
           name="texto"
           defaultValue={estado.texto}
-          placeholder="Adicionar comentário…"
-          aria-label={`Responder a ${aluno}`}
+          placeholder={c.adicionar}
+          aria-label={preencher(c.responderA, { nome: aluno })}
           aria-invalid={estado.erro ? true : undefined}
           maxLength={500}
           autoComplete="off"
@@ -101,8 +105,8 @@ export function ResponderDoPainel({ postId, aluno }: { postId: string; aluno: st
         <button
           type="submit"
           disabled={enviando}
-          aria-label="Enviar resposta"
-          title="Enviar"
+          aria-label={c.enviarResposta}
+          title={c.enviar}
           className="flex size-[38px] shrink-0 items-center justify-center rounded-[9px] bg-brand text-white transition hover:bg-brand-hover disabled:opacity-50"
         >
           <SendHorizontal size={15} aria-hidden />

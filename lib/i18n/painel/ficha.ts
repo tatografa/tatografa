@@ -64,6 +64,7 @@ const pt = {
     seriesDe: "{feitas} de {total} séries",
     serieASerie: "Série a série",
     anteriores: "Treinos anteriores",
+    treinoRemovido: "Treino removido",
   },
   cartao: {
     soParaVoce: "Só para você",
@@ -118,7 +119,7 @@ const pt = {
     liberada: "Liberada {dia} · esperando a resposta do aluno.",
     respondida: "Respondida {dia}",
     comparada: " · comparada com {dia}",
-    nenhumaAntes: "Nenhuma reavaliação ainda. Libere uma na ",
+    nenhuma: "Nenhuma reavaliação ainda. Libere uma na {agenda}.",
     agenda: "Agenda",
   },
   observacoes: {
@@ -208,6 +209,7 @@ const en: TextosDaFicha = {
     seriesDe: "{feitas} of {total} sets",
     serieASerie: "Set by set",
     anteriores: "Earlier workouts",
+    treinoRemovido: "Removed workout",
   },
   cartao: {
     soParaVoce: "Only for you",
@@ -262,7 +264,7 @@ const en: TextosDaFicha = {
     liberada: "Opened {dia} · waiting for the client's answer.",
     respondida: "Answered {dia}",
     comparada: " · compared with {dia}",
-    nenhumaAntes: "No reassessments yet. Open one in the ",
+    nenhuma: "No reassessments yet. Open one in the {agenda}.",
     agenda: "Schedule",
   },
   observacoes: {
@@ -350,6 +352,7 @@ const es: TextosDaFicha = {
     seriesDe: "{feitas} de {total} series",
     serieASerie: "Serie por serie",
     anteriores: "Entrenamientos anteriores",
+    treinoRemovido: "Entrenamiento eliminado",
   },
   cartao: {
     soParaVoce: "Solo para ti",
@@ -404,7 +407,7 @@ const es: TextosDaFicha = {
     liberada: "Habilitada {dia} · esperando la respuesta del alumno.",
     respondida: "Respondida {dia}",
     comparada: " · comparada con {dia}",
-    nenhumaAntes: "Todavía no hay reevaluaciones. Habilita una en la ",
+    nenhuma: "Todavía no hay reevaluaciones. Habilita una en la {agenda}.",
     agenda: "Agenda",
   },
   observacoes: {

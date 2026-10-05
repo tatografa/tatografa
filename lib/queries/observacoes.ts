@@ -1,6 +1,7 @@
 import "server-only";
 
-import { rotuloDoDia } from "@/lib/domain/historico";
+import type { Idioma } from "@/lib/domain/idioma";
+import { formatos } from "@/lib/i18n/formatos";
 import { LIMITE_DAS_OBSERVACOES } from "@/lib/domain/observacao";
 import { pareceUuid } from "@/lib/domain/id";
 import { createClient } from "@/lib/supabase/server";
@@ -35,6 +36,7 @@ export type Observacao = {
  */
 export async function listarObservacoes(
   alunoId: string,
+  idioma: Idioma = "pt",
 ): Promise<Observacao[]> {
   if (!pareceUuid(alunoId)) return [];
 
@@ -53,7 +55,7 @@ export async function listarObservacoes(
     id: linha.id,
     texto: linha.body,
     criadaEm: linha.created_at,
-    rotuloDoDia: rotuloDoDia(linha.created_at),
+    rotuloDoDia: formatos(idioma).dia(linha.created_at),
     editadaEm: linha.updated_at,
   }));
 }
