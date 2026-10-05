@@ -10,13 +10,13 @@ import {
 } from "@/components/landing/aviso-de-cookies";
 import { EntrarNaLista } from "@/components/landing/entrar-na-lista";
 import { Logo } from "@/components/logo";
+import { SeletorDeIdioma } from "@/components/seletor-de-idioma";
 import {
-  IDIOMAS,
   enderecoDaLanding,
-  idiomaDe,
-  type Idioma,
+  langDe,
   type PerfilDaLanding,
 } from "@/lib/domain/idioma";
+import { idiomaAtual } from "@/lib/i18n/idioma-atual";
 import { TEXTOS_DA_LANDING, type TextosDaLanding } from "@/lib/landing/textos";
 import { cn } from "@/lib/utils";
 
@@ -37,7 +37,7 @@ export async function generateMetadata({
   searchParams: Promise<Busca>;
 }): Promise<Metadata> {
   const { lang } = await searchParams;
-  return { description: TEXTOS_DA_LANDING[idiomaDe(lang)].descricao };
+  return { description: TEXTOS_DA_LANDING[await idiomaAtual(lang)].descricao };
 }
 
 type Perfil = PerfilDaLanding;
@@ -57,8 +57,9 @@ type Perfil = PerfilDaLanding;
  * 27/09). Numa página pública isso é anunciar o que não existe. As de
  * `public/landing/` são as telas reais, com dados de demonstração.
  *
- * **Três idiomas pela URL** (`?lang=en`, `?lang=es`; pedido do Otávio, 05/10):
- * o texto mora em `lib/landing/textos.ts`, e a página só escolhe qual. O
+ * **Três idiomas** (`?lang=en`, `?lang=es`, ou o cookie que a escolha deixa;
+ * pedido do Otávio, 05/10): o texto mora em `lib/landing/textos.ts`, e a
+ * página só escolhe qual. O
  * `lang` vai no contêiner, para o leitor de tela pronunciar em inglês o que
  * está em inglês — o `<html>` continua `pt-BR`, porque o resto do site é.
  *
@@ -73,14 +74,14 @@ export default async function LandingPage({
 }) {
   const { para, lang } = await searchParams;
   const perfil: Perfil = para === "alunos" ? "aluno" : "personal";
-  const idioma = idiomaDe(lang);
+  const idioma = await idiomaAtual(lang);
   const t = TEXTOS_DA_LANDING[idioma];
   const texto = t.porPerfil[perfil];
   const entrarHref = ENTRAR[perfil];
 
   return (
     <div
-      lang={IDIOMAS.find((i) => i.valor === idioma)?.lang}
+      lang={langDe(idioma)}
       className="bg-surface px-3 pt-3 pb-3 text-ink sm:px-6 sm:pt-6"
     >
       <main>
@@ -91,20 +92,20 @@ export default async function LandingPage({
             className="relative z-10 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-5 py-5 sm:px-9"
           >
             <Link
-              href={enderecoDaLanding("personal", idioma)}
+              href={enderecoDaLanding("personal")}
               className="text-dark-text"
               aria-label={t.navegacao.inicio}
             >
               <Logo size={28} />
             </Link>
 
-            <SeletorDePerfil perfil={perfil} idioma={idioma} rotulos={t.perfis} />
+            <SeletorDePerfil perfil={perfil} rotulos={t.perfis} />
 
             <div className="flex items-center gap-2">
               <SeletorDeIdioma
-                perfil={perfil}
                 idioma={idioma}
                 rotulo={t.navegacao.idioma}
+                tom="escuro"
               />
               {/* Branco (pedido do Otávio, 05/10): o mesmo branco da pílula
                   do perfil escolhido, para o botão de entrar não sumir no
@@ -255,16 +256,14 @@ function Chamada({
  */
 function SeletorDePerfil({
   perfil,
-  idioma,
   rotulos,
 }: {
   perfil: Perfil;
-  idioma: Idioma;
   rotulos: TextosDaLanding["perfis"];
 }) {
   const opcoes: { valor: Perfil; rotulo: string; href: string }[] = [
-    { valor: "personal", rotulo: rotulos.personal, href: enderecoDaLanding("personal", idioma) },
-    { valor: "aluno", rotulo: rotulos.aluno, href: enderecoDaLanding("aluno", idioma) },
+    { valor: "personal", rotulo: rotulos.personal, href: enderecoDaLanding("personal") },
+    { valor: "aluno", rotulo: rotulos.aluno, href: enderecoDaLanding("aluno") },
   ];
   return (
     <div className="order-last flex w-full justify-center sm:order-none sm:w-auto">
@@ -287,50 +286,6 @@ function SeletorDePerfil({
         ))}
       </div>
     </div>
-  );
-}
-
-/**
- * PT, EN e ES ao lado do botão de entrar (pedido do Otávio, 05/10). Links,
- * pelo mesmo motivo do seletor de perfil: o idioma é parte do endereço. Cada
- * sigla leva o nome do idioma escrito nele mesmo ("English", "Español"), que é
- * como quem não lê português reconhece a própria língua.
- */
-function SeletorDeIdioma({
-  perfil,
-  idioma,
-  rotulo,
-}: {
-  perfil: Perfil;
-  idioma: Idioma;
-  rotulo: string;
-}) {
-  return (
-    <nav
-      aria-label={rotulo}
-      className="flex items-center rounded-full border border-dark-border bg-dark-surface p-1"
-    >
-      {IDIOMAS.map((i) => (
-        <Link
-          key={i.valor}
-          href={enderecoDaLanding(perfil, i.valor)}
-          scroll={false}
-          hrefLang={i.lang}
-          lang={i.lang}
-          aria-label={i.nome}
-          title={i.nome}
-          aria-current={idioma === i.valor ? "page" : undefined}
-          className={cn(
-            "flex h-8 min-w-9 items-center justify-center rounded-full px-2 text-[11.5px] font-bold tracking-[0.02em] transition",
-            idioma === i.valor
-              ? "bg-surface text-ink"
-              : "text-dark-text-2 hover:text-dark-text",
-          )}
-        >
-          {i.sigla}
-        </Link>
-      ))}
-    </nav>
   );
 }
 

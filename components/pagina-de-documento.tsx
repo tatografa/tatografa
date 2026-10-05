@@ -2,7 +2,11 @@ import Link from "next/link";
 
 import { Logo } from "@/components/logo";
 import { RodapeLegal } from "@/components/rodape-legal";
+import { SeletorDeIdioma } from "@/components/seletor-de-idioma";
+import { langDe, type Idioma } from "@/lib/domain/idioma";
+import { TEXTOS_DA_AUTENTICACAO } from "@/lib/i18n/autenticacao";
 import { VERSAO_DOS_DOCUMENTOS, type Documento } from "@/lib/legal/documentos";
+import { DOCUMENTOS, MOLDURA_DO_DOCUMENTO } from "@/lib/legal/por-idioma";
 
 /**
  * A moldura dos termos e da política. As duas páginas são a mesma tela com
@@ -10,29 +14,44 @@ import { VERSAO_DOS_DOCUMENTOS, type Documento } from "@/lib/legal/documentos";
  *
  * Públicas de propósito: quem está decidindo se aceita ainda não tem conta, e
  * quem quer reler depois não deveria precisar entrar para isso.
+ *
+ * Em inglês e espanhol o aviso de que **o português é o que vale** vem antes
+ * da primeira seção, e não no rodapé: quem lê uma tradução jurídica precisa
+ * saber disso antes de ler, não depois.
  */
-export function PaginaDeDocumento({ documento }: { documento: Documento }) {
+export function PaginaDeDocumento({
+  slug,
+  idioma,
+}: {
+  slug: Documento["slug"];
+  idioma: Idioma;
+}) {
+  const documento = DOCUMENTOS[idioma][slug];
+  const t = MOLDURA_DO_DOCUMENTO[idioma];
+  const outro = slug === "termos" ? "privacidade" : "termos";
+
   return (
-    <div className="min-h-dvh bg-canvas">
+    <div lang={langDe(idioma)} className="min-h-dvh bg-canvas">
       <header className="border-b border-border bg-surface">
-        <div className="mx-auto flex max-w-[720px] items-center justify-between gap-4 px-6 py-4">
+        <div className="mx-auto flex max-w-[720px] flex-wrap items-center justify-between gap-x-4 gap-y-3 px-6 py-4">
           <Link href="/" className="text-ink">
             <Logo size={24} />
           </Link>
-          <Link
-            href={documento.slug === "termos" ? "/privacidade" : "/termos"}
-            className="text-[13px] font-semibold text-brand transition hover:text-brand-hover"
-          >
-            {documento.slug === "termos"
-              ? "Política de privacidade"
-              : "Termos de uso"}
-          </Link>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <Link
+              href={`/${outro}`}
+              className="text-[13px] font-semibold text-brand transition hover:text-brand-hover"
+            >
+              {t.outro[slug]}
+            </Link>
+            <SeletorDeIdioma idioma={idioma} rotulo={t.idioma} />
+          </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-[720px] px-6 py-10">
         <p className="eyebrow text-ink-4">
-          Versão de {dataPorExtenso(VERSAO_DOS_DOCUMENTOS)}
+          {t.versao.replace("{data}", dataPorExtenso(VERSAO_DOS_DOCUMENTOS, idioma))}
         </p>
         <h1 className="mt-3 text-[30px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink">
           {documento.titulo}
@@ -40,6 +59,23 @@ export function PaginaDeDocumento({ documento }: { documento: Documento }) {
         <p className="mt-2.5 text-[15px] leading-[1.6] text-ink-3">
           {documento.resumo}
         </p>
+
+        {t.referencia && (
+          <div
+            role="note"
+            className="mt-6 rounded-[12px] border border-border bg-surface px-4 py-3.5 text-[13.5px] leading-[1.55] text-ink-2"
+          >
+            {t.referencia.texto}{" "}
+            {/* Recarga inteira, como no seletor: o `?lang=` troca o cookie no proxy. */}
+            <a
+              href={`/${slug}?lang=pt`}
+              hrefLang="pt-BR"
+              className="font-semibold text-brand underline-offset-2 transition hover:text-brand-hover hover:underline"
+            >
+              {t.referencia.link}
+            </a>
+          </div>
+        )}
 
         <div className="mt-9 space-y-8">
           {documento.secoes.map((secao) => (
@@ -61,7 +97,10 @@ export function PaginaDeDocumento({ documento }: { documento: Documento }) {
           ))}
         </div>
 
-        <RodapeLegal className="mt-12 border-t border-border pt-6" />
+        <RodapeLegal
+          className="mt-12 border-t border-border pt-6"
+          textos={TEXTOS_DA_AUTENTICACAO[idioma].rodapeLegal}
+        />
       </main>
     </div>
   );
@@ -91,13 +130,13 @@ function ComDestaque({ texto }: { texto: string }) {
   );
 }
 
-function dataPorExtenso(iso: string): string {
-  // Data de calendário, sem hora: `new Date("2026-09-13")` seria UTC e viraria
-  // o dia 12 à noite no Brasil. Montar por partes evita a conversão.
-  const [ano, mes, dia] = iso.split("-").map(Number);
-  const meses = [
-    "janeiro", "fevereiro", "março", "abril", "maio", "junho",
-    "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
-  ];
-  return `${dia} de ${meses[mes - 1]} de ${ano}`;
+function dataPorExtenso(iso: string, idioma: Idioma): string {
+  // Data de calendário, sem hora: `new Date("2026-09-13")` é meia-noite UTC e
+  // viraria o dia 12 à noite no Brasil. Formatar em UTC mantém o dia.
+  return new Intl.DateTimeFormat(langDe(idioma), {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${iso}T00:00:00Z`));
 }

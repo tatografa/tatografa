@@ -3,7 +3,10 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import type { Idioma } from "@/lib/domain/idioma";
 import { erroDaSenha } from "@/lib/domain/senha";
+import { TEXTOS_DA_AUTENTICACAO } from "@/lib/i18n/autenticacao";
+import { idiomaAtual } from "@/lib/i18n/idioma-atual";
 import { VERSAO_DOS_DOCUMENTOS } from "@/lib/legal/documentos";
 
 import { getSiteOrigin } from "@/lib/auth/site-url";
@@ -23,38 +26,48 @@ export type EstadoAuth = {
   sucesso?: "confirme-email" | "link-enviado";
 };
 
-const email = z
-  .string()
-  .trim()
-  .min(1, "Informe seu e-mail.")
-  .email("E-mail inválido.")
-  .transform((valor) => valor.toLowerCase());
-
 /*
- * A regra vem de `lib/domain/senha.ts`, não escrita aqui. Antes este arquivo
- * exigia só o comprimento enquanto o cadastro do aluno exigia letra e número —
- * e como a **troca de senha** também passa por aqui, dava para sair de uma
- * senha forte para "12345678" pela tela de verdade.
+ * Os esquemas são montados por chamada, no idioma da tela que enviou
+ * (`idiomaAtual`, pelo cookie): a mensagem de validação aparece embaixo do
+ * campo, e um "E-mail inválido." numa tela em inglês é o tipo de remendo que
+ * faz o resto parecer tradução de máquina.
  */
-const senha = z.string().superRefine((valor, ctx) => {
-  const erro = erroDaSenha(valor);
-  if (erro) ctx.addIssue({ code: "custom", message: erro });
-});
+function esquemas(idioma: Idioma) {
+  const v = TEXTOS_DA_AUTENTICACAO[idioma].validacao;
 
-const esquemaLogin = z.object({ email, senha: z.string().min(1, "Informe sua senha.") });
-const esquemaCadastro = z.object({
-  nome: z.string().trim().min(2, "Informe seu nome."),
-  email,
-  senha,
-  // O personal também aceita os documentos (decisão do Otávio, 17/09). Os
-  // termos falam dele em cada seção — "o que é responsabilidade sua e do seu
-  // personal" — e até aqui nenhum personal tinha linha de aceite.
-  termos: z.literal("on", {
-    error: "É preciso aceitar os termos para criar a conta.",
-  }),
-});
-const esquemaEmail = z.object({ email });
-const esquemaNovaSenha = z.object({ senha });
+  const email = z
+    .string()
+    .trim()
+    .min(1, v.emailVazio)
+    .email(v.emailInvalido)
+    .transform((valor) => valor.toLowerCase());
+
+  /*
+   * A regra vem de `lib/domain/senha.ts`, não escrita aqui. Antes este arquivo
+   * exigia só o comprimento enquanto o cadastro do aluno exigia letra e número —
+   * e como a **troca de senha** também passa por aqui, dava para sair de uma
+   * senha forte para "12345678" pela tela de verdade.
+   */
+  const senha = z.string().superRefine((valor, ctx) => {
+    const erro = erroDaSenha(valor, idioma);
+    if (erro) ctx.addIssue({ code: "custom", message: erro });
+  });
+
+  return {
+    login: z.object({ email, senha: z.string().min(1, v.senhaVazia) }),
+    cadastro: z.object({
+      nome: z.string().trim().min(2, v.nome),
+      email,
+      senha,
+      // O personal também aceita os documentos (decisão do Otávio, 17/09). Os
+      // termos falam dele em cada seção — "o que é responsabilidade sua e do
+      // seu personal" — e até aqui nenhum personal tinha linha de aceite.
+      termos: z.literal("on", { error: v.termos }),
+    }),
+    email: z.object({ email }),
+    novaSenha: z.object({ senha }),
+  };
+}
 
 /** Achata os erros do zod no formato que os formulários consomem. */
 function errosDe(erro: z.ZodError): EstadoAuth["errosPorCampo"] {
@@ -96,8 +109,9 @@ export async function entrar(
     senha: String(formData.get("senha") ?? ""),
   };
   const campos = { email: bruto.email };
+  const idioma = await idiomaAtual();
 
-  const analise = esquemaLogin.safeParse(bruto);
+  const analise = esquemas(idioma).login.safeParse(bruto);
   if (!analise.success) {
     return { errosPorCampo: errosDe(analise.error), campos };
   }
@@ -108,7 +122,7 @@ export async function entrar(
     password: analise.data.senha,
   });
 
-  if (error) return { erro: traduzErro(error.message), campos };
+  if (error) return { erro: traduzErro(error.message, idioma), campos };
 
   redirect(destinoSeguro(formData.get("proximo")));
 }
@@ -124,8 +138,9 @@ export async function cadastrar(
     termos: formData.get("termos") ?? "",
   };
   const campos = { nome: bruto.nome, email: bruto.email };
+  const idioma = await idiomaAtual();
 
-  const analise = esquemaCadastro.safeParse(bruto);
+  const analise = esquemas(idioma).cadastro.safeParse(bruto);
   if (!analise.success) {
     return { errosPorCampo: errosDe(analise.error), campos };
   }
@@ -155,7 +170,7 @@ export async function cadastrar(
     },
   });
 
-  if (error) return { erro: traduzErro(error.message), campos };
+  if (error) return { erro: traduzErro(error.message, idioma), campos };
 
   // Confirmação de e-mail desligada: o Supabase já devolve sessão pronta.
   if (data.session) redirect("/painel");
@@ -181,8 +196,9 @@ export async function enviarLinkDeRecuperacao(
   formData: FormData,
 ): Promise<EstadoAuth> {
   const bruto = { email: String(formData.get("email") ?? "") };
+  const idioma = await idiomaAtual();
 
-  const analise = esquemaEmail.safeParse(bruto);
+  const analise = esquemas(idioma).email.safeParse(bruto);
   if (!analise.success) {
     return { errosPorCampo: errosDe(analise.error), campos: bruto };
   }
@@ -201,7 +217,7 @@ export async function enviarLinkDeRecuperacao(
   // e esta tela dizia "link enviado" para um e-mail que nunca saiu.
   if (error) registraFalhaDeEnvio(error.message);
   if (error && falhaDeEnvioVisivel(error.message)) {
-    return { erro: traduzErro(error.message), campos: bruto };
+    return { erro: traduzErro(error.message, idioma), campos: bruto };
   }
 
   return { sucesso: "link-enviado", campos: bruto };
@@ -213,11 +229,13 @@ export async function definirNovaSenha(
 ): Promise<EstadoAuth> {
   const bruto = { senha: String(formData.get("senha") ?? "") };
   const confirmacao = String(formData.get("confirmacao") ?? "");
+  const idioma = await idiomaAtual();
+  const v = TEXTOS_DA_AUTENTICACAO[idioma].validacao;
 
-  const analise = esquemaNovaSenha.safeParse(bruto);
+  const analise = esquemas(idioma).novaSenha.safeParse(bruto);
   if (!analise.success) return { errosPorCampo: errosDe(analise.error) };
   if (analise.data.senha !== confirmacao) {
-    return { errosPorCampo: { senha: "As duas senhas precisam ser iguais." } };
+    return { errosPorCampo: { senha: v.senhasDiferentes } };
   }
 
   const supabase = await createClient();
@@ -226,16 +244,14 @@ export async function definirNovaSenha(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return {
-      erro: "Esse link expirou ou já foi usado. Peça outro em “Esqueci minha senha”.",
-    };
+    return { erro: v.linkExpirado };
   }
 
   const { error } = await supabase.auth.updateUser({
     password: analise.data.senha,
   });
 
-  if (error) return { erro: traduzErro(error.message) };
+  if (error) return { erro: traduzErro(error.message, idioma) };
 
   redirect("/painel");
 }

@@ -3,16 +3,13 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import type { Idioma } from "@/lib/domain/idioma";
 import { erroDaSenha } from "@/lib/domain/senha";
 
 import { traduzErro } from "@/lib/auth/mensagens";
-import {
-  alturaDoAluno,
-  nascimentoDoAluno,
-  nivelDoAluno,
-  objetivoDoAluno,
-  pesoDoAluno,
-} from "@/lib/domain/perfil";
+import { camposObrigatoriosDoAluno } from "@/lib/domain/perfil";
+import { TEXTOS_DO_CONVITE } from "@/lib/i18n/convite";
+import { idiomaAtual } from "@/lib/i18n/idioma-atual";
 import { getSiteOrigin } from "@/lib/auth/site-url";
 import { createClient } from "@/lib/supabase/server";
 import { VERSAO_DOS_DOCUMENTOS } from "@/lib/legal/documentos";
@@ -57,24 +54,20 @@ export type EstadoOnboarding = {
  * e-mail ligada o `signUp` não devolve sessão — o aluno ficaria preso entre as
  * etapas. Juntando, o gatilho grava a linha de `students` completa de uma vez.
  */
-const esquema = z.object({
-  // A regra vive em `lib/domain/senha.ts`: o personal e a troca de senha usam
-  // a mesma, e era aqui que ela estava escrita a mais.
-  senha: z.string().superRefine((valor, ctx) => {
-    const erro = erroDaSenha(valor);
-    if (erro) ctx.addIssue({ code: "custom", message: erro });
-  }),
-  termos: z.literal("on", {
-    error: "É preciso aceitar os termos para continuar.",
-  }),
-  // As cinco regras de campo vêm de `lib/domain/perfil.ts`: o aluno edita os
-  // mesmos campos depois, em `/app/perfil`, e duas cópias divergiriam.
-  objetivo: objetivoDoAluno,
-  nivel: nivelDoAluno,
-  nascimento: nascimentoDoAluno,
-  peso: pesoDoAluno,
-  altura: alturaDoAluno,
-});
+function esquemaNoIdioma(idioma: Idioma) {
+  return z.object({
+    // A regra vive em `lib/domain/senha.ts`: o personal e a troca de senha usam
+    // a mesma, e era aqui que ela estava escrita a mais.
+    senha: z.string().superRefine((valor, ctx) => {
+      const erro = erroDaSenha(valor, idioma);
+      if (erro) ctx.addIssue({ code: "custom", message: erro });
+    }),
+    termos: z.literal("on", { error: TEXTOS_DO_CONVITE[idioma].termosObrigatorios }),
+    // As cinco regras de campo vêm de `lib/domain/perfil.ts`: o aluno edita os
+    // mesmos campos depois, em `/app/perfil`, e duas cópias divergiriam.
+    ...camposObrigatoriosDoAluno(idioma),
+  });
+}
 
 export async function criarAcesso(
   _anterior: EstadoOnboarding,
@@ -102,7 +95,11 @@ export async function criarAcesso(
     altura: bruto.altura,
   };
 
-  const analise = esquema.safeParse(bruto);
+  // A língua da tela que enviou, pelo cookie (`idiomaAtual`): a ação não vê a URL.
+  const idioma = await idiomaAtual();
+  const t = TEXTOS_DO_CONVITE[idioma];
+
+  const analise = esquemaNoIdioma(idioma).safeParse(bruto);
   if (!analise.success) {
     const errosPorCampo: EstadoOnboarding["errosPorCampo"] = {};
     for (const problema of analise.error.issues) {
@@ -124,10 +121,7 @@ export async function criarAcesso(
   const valido = convite?.[0];
 
   if (!valido) {
-    return {
-      erro: "Esse convite não vale mais. Peça um novo ao seu personal.",
-      campos,
-    };
+    return { erro: t.conviteInvalido, campos };
   }
 
   const { data, error } = await supabase.auth.signUp({
@@ -163,12 +157,9 @@ export async function criarAcesso(
     // O gatilho recusa convite inválido levantando exceção; o GoTrue devolve
     // isso como erro de banco, sem texto útil para o aluno.
     if (/convite_invalido|convite_email_divergente|database/i.test(error.message)) {
-      return {
-        erro: "Esse convite não vale mais. Peça um novo ao seu personal.",
-        campos,
-      };
+      return { erro: t.conviteInvalido, campos };
     }
-    return { erro: traduzErro(error.message), campos };
+    return { erro: traduzErro(error.message, idioma), campos };
   }
 
   if (data.session) redirect("/convite/pronto");

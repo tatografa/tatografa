@@ -4,42 +4,56 @@ import { useActionState, useState } from "react";
 
 import { Button, EscolhaCards, Input } from "@/components/ui";
 import { Logo } from "@/components/logo";
+import { SeletorDeIdioma } from "@/components/seletor-de-idioma";
+import { langDe, type Idioma } from "@/lib/domain/idioma";
+import type { TextosDaAutenticacao } from "@/lib/i18n/autenticacao";
+import {
+  partesEmVolta,
+  preencher,
+  type TextosDoConvite,
+} from "@/lib/i18n/convite";
 import { VERSAO_DOS_DOCUMENTOS } from "@/lib/legal/documentos";
-import { NIVEL, OBJETIVO } from "@/lib/rotulos";
 import { cn } from "@/lib/utils";
 
 import { criarAcesso, type EstadoOnboarding } from "./actions";
-import { erroDaSenha, REGRAS_DA_SENHA } from "@/lib/domain/senha";
+import { erroDaSenha, regrasDaSenha } from "@/lib/domain/senha";
 import { AceiteDosTermos } from "@/components/aceite-dos-termos";
 
 const INICIAL: EstadoOnboarding = {};
 
-// Os rótulos saem de `lib/rotulos.ts`, o mesmo lugar que o painel do personal
-// lê: duas listas soltas divergiam na primeira vez que um objetivo mudasse.
-const OBJETIVOS = [
-  { valor: "massa", rotulo: OBJETIVO.massa, icone: "💪" },
-  { valor: "gordura", rotulo: OBJETIVO.gordura, icone: "🔥" },
-  { valor: "condicionamento", rotulo: OBJETIVO.condicionamento, icone: "🏃" },
-  { valor: "saude", rotulo: OBJETIVO.saude, icone: "❤️" },
-];
-
-const NIVEIS = [
-  { valor: "iniciante", rotulo: NIVEL.iniciante },
-  { valor: "intermediario", rotulo: NIVEL.intermediario },
-  { valor: "avancado", rotulo: NIVEL.avancado },
-];
+/*
+ * Os rótulos vêm do texto do convite, no idioma da tela. Em português são os
+ * mesmos de `lib/rotulos.ts`, que o painel lê; quando o painel for traduzido
+ * (etapa 3), os dois passam a sair do mesmo dicionário.
+ */
+const ICONES = { massa: "💪", gordura: "🔥", condicionamento: "🏃", saude: "❤️" } as const;
 
 export function FormularioOnboarding({
   token,
   nome,
   email,
   personal,
+  idioma,
+  textos: t,
+  aceite,
 }: {
   token: string;
   nome: string;
   email: string;
   personal: string;
+  idioma: Idioma;
+  textos: TextosDoConvite;
+  aceite: TextosDaAutenticacao["aceite"];
 }) {
+  const OBJETIVOS = (Object.keys(ICONES) as (keyof typeof ICONES)[]).map((valor) => ({
+    valor,
+    rotulo: t.objetivos[valor],
+    icone: ICONES[valor],
+  }));
+  const NIVEIS = (["iniciante", "intermediario", "avancado"] as const).map((valor) => ({
+    valor,
+    rotulo: t.niveis[valor],
+  }));
   const [estado, acao, enviando] = useActionState(criarAcesso, INICIAL);
   const [etapa, setEtapa] = useState<1 | 2>(1);
   const [senha, setSenha] = useState("");
@@ -80,11 +94,11 @@ export function FormularioOnboarding({
     // A mesma função que a Server Action usa: a etapa 1 não pode aceitar uma
     // senha que o servidor vai recusar na etapa 2, depois do aluno preencher
     // mais cinco campos.
-    const erroDeSenha = erroDaSenha(senha);
+    const erroDeSenha = erroDaSenha(senha, idioma);
     if (erroDeSenha) erros.senha = erroDeSenha;
 
     if (!aceitouTermos) {
-      erros.termos = "É preciso aceitar os termos para continuar.";
+      erros.termos = t.termosObrigatorios;
     }
 
     setErroLocal(erros);
@@ -92,20 +106,22 @@ export function FormularioOnboarding({
   }
 
   const primeiroNome = nome.split(" ")[0];
+  const [definaAntes, definaDepois] = partesEmVolta(t.defina, "personal");
+  const [usaAntes, usaDepois] = partesEmVolta(t.usaEssesDados, "personal");
 
   if (estado.sucesso === "confirme-email") {
     return (
-      <Moldura>
+      <Moldura idioma={idioma} rotulo={t.idioma}>
         <div className="space-y-5 text-center">
           <div className="mx-auto flex size-13 items-center justify-center rounded-[15px] bg-brand-soft text-[22px] font-bold text-brand">
             ✓
           </div>
           <h1 className="text-[24px] font-extrabold tracking-[-0.02em] text-ink">
-            Confirme seu e-mail
+            {t.confirmeTitulo}
           </h1>
           <p className="text-[14px] font-medium leading-[1.6] text-ink-3">
-            Enviamos um link para <strong className="text-ink">{email}</strong>.
-            Abra o link e seus treinos estarão prontos.
+            {t.confirmeAntes} <strong className="text-ink">{email}</strong>
+            {t.confirmeDepois}
           </p>
         </div>
       </Moldura>
@@ -114,13 +130,13 @@ export function FormularioOnboarding({
 
   // A senha só some da tela ao trocar de etapa; os critérios abaixo dela
   // seguem o doc 05 (bolinha verde quando atendido).
-  const criterios = REGRAS_DA_SENHA.map((regra) => ({
+  const criterios = regrasDaSenha(idioma).map((regra) => ({
     ok: regra.ok(senha),
     texto: regra.texto,
   }));
 
   return (
-    <Moldura>
+    <Moldura idioma={idioma} rotulo={t.idioma}>
       <form action={acao} noValidate className="space-y-6">
         <input type="hidden" name="token" value={token} />
         <input type="hidden" name="nome" value={nome} />
@@ -137,7 +153,7 @@ export function FormularioOnboarding({
         />
 
         <header className="space-y-3.5">
-          <p className="eyebrow text-ink-5">Etapa {etapa} de 2</p>
+          <p className="eyebrow text-ink-5">{preencher(t.etapa, { n: etapa })}</p>
           <div className="flex gap-1.5" aria-hidden>
             <span className="h-1 flex-1 rounded-[2px] bg-brand" />
             <span
@@ -154,22 +170,23 @@ export function FormularioOnboarding({
         <div className={etapa === 1 ? "space-y-5" : "hidden"}>
           <div className="space-y-2">
             <h1 className="text-[25px] font-extrabold tracking-[-0.02em] text-ink">
-              Quase lá, {primeiroNome}!
+              {preencher(t.quaseLa, { nome: primeiroNome })}
             </h1>
             <p className="text-[14px] leading-[1.5] text-ink-3">
-              Defina sua senha para acessar os treinos da{" "}
-              <strong className="font-bold text-ink">{personal}</strong>.
+              {definaAntes}
+              <strong className="font-bold text-ink">{personal}</strong>
+              {definaDepois}
             </p>
           </div>
 
           <div className="flex flex-col gap-[7px]">
-            <span className="eyebrow text-ink-3">E-mail</span>
+            <span className="eyebrow text-ink-3">{t.email}</span>
             <div className="flex items-center gap-2 rounded-input border-[1.5px] border-border-soft bg-canvas-sunken px-3.5 py-[13px]">
               <span className="flex-1 truncate text-[14px] font-medium text-ink-2">
                 {email}
               </span>
               <span
-                aria-label="E-mail confirmado pelo convite"
+                aria-label={t.emailConfirmado}
                 className="flex size-[18px] shrink-0 items-center justify-center rounded-full bg-success text-[11px] font-bold text-white"
               >
                 ✓
@@ -179,7 +196,7 @@ export function FormularioOnboarding({
 
           <div className="space-y-2.5">
             <Input
-              label="Senha"
+              label={t.senha}
               name="senha"
               type={mostrarSenha ? "text" : "password"}
               autoComplete="new-password"
@@ -196,7 +213,7 @@ export function FormularioOnboarding({
                   onClick={() => setMostrarSenha((v) => !v)}
                   className="text-[12px] font-semibold text-brand transition hover:text-brand-hover"
                 >
-                  {mostrarSenha ? "Ocultar" : "Mostrar"}
+                  {mostrarSenha ? t.ocultar : t.mostrar}
                 </button>
               }
             />
@@ -231,26 +248,28 @@ export function FormularioOnboarding({
               setErroLocal((atual) => ({ ...atual, termos: undefined }));
             }}
             erro={erroLocal.termos ?? estado.errosPorCampo?.termos}
+            textos={aceite}
           />
 
           <Button type="button" block size="lg" onClick={avancar}>
-            Continuar
+            {t.continuar}
           </Button>
         </div>
 
         <div className={etapa === 2 ? "space-y-5" : "hidden"}>
           <div className="space-y-2">
             <h1 className="text-[25px] font-extrabold tracking-[-0.02em] text-ink">
-              Conta pra gente
+              {t.contaPraGente}
             </h1>
             <p className="text-[14px] leading-[1.5] text-ink-3">
-              A <strong className="font-bold text-ink">{personal}</strong> usa
-              esses dados para montar e ajustar seus treinos.
+              {usaAntes}
+              <strong className="font-bold text-ink">{personal}</strong>
+              {usaDepois}
             </p>
           </div>
 
           <EscolhaCards
-            label="Objetivo principal"
+            label={t.objetivo}
             name="objetivo"
             opcoes={OBJETIVOS}
             valor={objetivo}
@@ -267,7 +286,7 @@ export function FormularioOnboarding({
             campo. A senha fica de fora de propósito: ela não volta do servidor.
           */}
           <Input
-            label="Data de nascimento"
+            label={t.nascimento}
             name="nascimento"
             type="date"
             defaultValue={estado.campos?.nascimento}
@@ -276,17 +295,17 @@ export function FormularioOnboarding({
 
           <div className="grid grid-cols-2 gap-3">
             <Input
-              label="Peso atual (kg)"
+              label={t.peso}
               name="peso"
               type="number"
               inputMode="decimal"
               step="0.1"
-              placeholder="78,5"
+              placeholder={t.pesoPlaceholder}
               defaultValue={estado.campos?.peso}
               error={estado.errosPorCampo?.peso}
             />
             <Input
-              label="Altura (cm)"
+              label={t.altura}
               name="altura"
               type="number"
               inputMode="numeric"
@@ -297,7 +316,7 @@ export function FormularioOnboarding({
           </div>
 
           <EscolhaCards
-            label="Nível de experiência"
+            label={t.nivel}
             name="nivel"
             opcoes={NIVEIS}
             valor={nivel}
@@ -317,14 +336,14 @@ export function FormularioOnboarding({
 
           <div className="space-y-2.5">
             <Button type="submit" block size="lg" disabled={enviando}>
-              {enviando ? "Criando…" : "Concluir e entrar"}
+              {enviando ? t.criando : t.concluir}
             </Button>
             <button
               type="button"
               onClick={() => setEtapa(1)}
               className="w-full text-center text-[12.5px] font-semibold text-ink-4 transition hover:text-ink-2"
             >
-              Voltar
+              {t.voltar}
             </button>
           </div>
         </div>
@@ -333,14 +352,23 @@ export function FormularioOnboarding({
   );
 }
 
-function Moldura({ children }: { children: React.ReactNode }) {
+function Moldura({
+  children,
+  idioma,
+  rotulo,
+}: {
+  children: React.ReactNode;
+  idioma: Idioma;
+  rotulo: string;
+}) {
   return (
-    <div className="min-h-dvh bg-canvas px-7 pt-[18px] pb-10">
+    <div lang={langDe(idioma)} className="min-h-dvh bg-canvas px-7 pt-[18px] pb-10">
       <div className="mx-auto w-full max-w-[440px]">
-        <div className="mb-8 text-ink">
+        <header className="mb-8 flex items-center justify-between gap-3 text-ink">
           <Logo size={26} />
-        </div>
-        {children}
+          <SeletorDeIdioma idioma={idioma} rotulo={rotulo} />
+        </header>
+        <main>{children}</main>
       </div>
     </div>
   );

@@ -5,11 +5,17 @@ import { useActionState } from "react";
 
 import { Button, Input } from "@/components/ui";
 
+import type { TextosDaAutenticacao } from "@/lib/i18n/autenticacao";
+
 import { enviarLinkDeRecuperacao, type EstadoAuth } from "../actions";
 
 const INICIAL: EstadoAuth = {};
 
-export function FormularioRecuperar() {
+export function FormularioRecuperar({
+  textos: t,
+}: {
+  textos: TextosDaAutenticacao["recuperar"];
+}) {
   const [estado, acao, enviando] = useActionState(
     enviarLinkDeRecuperacao,
     INICIAL,
@@ -21,17 +27,17 @@ export function FormularioRecuperar() {
         <div className="mx-auto flex size-13 items-center justify-center rounded-[15px] bg-brand-soft text-[22px] font-bold text-brand">
           ✓
         </div>
-        <h2 className="text-[24px] font-extrabold tracking-[-0.02em] text-ink">
-          Link enviado
-        </h2>
+        <h1 className="text-[24px] font-extrabold tracking-[-0.02em] text-ink">
+          {t.enviadoTitulo}
+        </h1>
         <p className="text-[14px] font-medium leading-[1.6] text-ink-3">
-          Se existir uma conta com{" "}
-          <strong className="text-ink">{estado.campos?.email}</strong>, o link
-          para criar uma nova senha chega em instantes.
+          {t.enviadoAntes}{" "}
+          <strong className="text-ink">{estado.campos?.email}</strong>
+          {t.enviadoDepois}
         </p>
         <Link href="/entrar" className="block">
           <Button variant="secondary" block>
-            Voltar ao login
+            {t.voltarAoLogin}
           </Button>
         </Link>
       </div>
@@ -44,25 +50,25 @@ export function FormularioRecuperar() {
         href="/entrar"
         className="inline-block text-[12.5px] font-semibold text-ink-4 transition hover:text-ink-2"
       >
-        ← Voltar ao login
+        <span aria-hidden>←</span> {t.voltarAoLogin}
       </Link>
 
       <header className="space-y-2">
-        <h2 className="text-[25px] font-extrabold tracking-[-0.02em] text-ink">
-          Recuperar acesso
-        </h2>
+        <h1 className="text-[25px] font-extrabold tracking-[-0.02em] text-ink">
+          {t.titulo}
+        </h1>
         <p className="text-[14px] font-medium leading-[1.6] text-ink-3">
-          Informe seu e-mail e enviamos um link para criar uma nova senha.
+          {t.apoio}
         </p>
       </header>
 
       <div className="space-y-4">
         <Input
-          label="E-mail"
+          label={t.email}
           name="email"
           type="email"
           autoComplete="email"
-          placeholder="voce@assessoria.com"
+          placeholder={t.emailPlaceholder}
           defaultValue={estado.campos?.email}
           error={estado.errosPorCampo?.email}
           required
@@ -78,7 +84,7 @@ export function FormularioRecuperar() {
         )}
 
         <Button type="submit" block disabled={enviando}>
-          {enviando ? "Enviando…" : "Enviar link"}
+          {enviando ? t.enviando : t.botao}
         </Button>
       </div>
     </form>

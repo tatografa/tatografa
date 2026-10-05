@@ -505,15 +505,52 @@ Provar que funciona sem o Otávio ler código:
 - **[2026-10-05, pedido do Otávio]** **A landing fala português, inglês e espanhol, pela
   URL** (`?lang=en`, `?lang=es`; sem parâmetro é português), com o seletor PT · EN · ES ao
   lado do botão de entrar — links, como o seletor de perfil, e os dois montam o endereço
-  pela mesma função (`enderecoDaLanding`), para um não perder o outro. **Só a landing é
-  traduzida**: login, app, termos e política continuam em português, e nos outros
-  idiomas os links para eles dizem "(in Portuguese)" / "(en portugués)". As capturas de
-  tela também são do produto em português. Todo o texto mora em `lib/landing/textos.ts`
+  pela mesma função (`enderecoDaLanding`), para um não perder o outro. _No mesmo dia a
+  tradução passou das telas de entrada (etapa 1, abaixo), e o "(in Portuguese)" dos links
+  saiu._ As capturas de tela continuam sendo do produto em português. Todo o texto mora em `lib/landing/textos.ts`
   (neutro: página, campo da lista e aviso de cookies leem dali), e a ação da lista passou
   a devolver **código de erro** (`ErroDaLista`), não frase — o servidor não sabe em que
   língua a pessoa lê. "Aluno" é *client* em inglês e *alumno* em espanhol. O `lang` vai
   no contêiner da página, para o leitor de tela pronunciar certo; o `<html>` continua
   `pt-BR`.
+- **[2026-10-05, pedido do Otávio]** **O idioma é escolha do visitante, guardada num
+  cookie, e a tradução vem em três etapas** (escolha do Otávio). **Etapa 1, feita:**
+  landing, entrar, acesso, cadastro, recuperar e nova senha, o convite inteiro (as duas
+  etapas, os avisos de link vencido e o "Tudo pronto") e termos e política. **Etapa 2:**
+  o app do aluno, com a opção no Perfil. **Etapa 3:** o painel, com a opção em
+  Configurações. **A opção de idioma só aparece numa área depois que ela estiver
+  traduzida** — seletor que troca a sigla e deixa a tela em português é controle
+  mentindo. Até lá app e painel falam português qualquer que seja o cookie.
+  **Como funciona:** `?lang=` vale para a página e o `proxy.ts` grava `reps_idioma` (um
+  ano) — **também na requisição em curso**, senão o layout leria o cookie antigo e a
+  moldura sairia num idioma e o formulário em outro. `idiomaAtual()` decide: parâmetro,
+  cookie, português. O seletor (`SeletorDeIdioma`) é feito de `<a>`, **não de `<Link>`**:
+  numa navegação suave o layout não redesenha, e a moldura ficaria no idioma velho. Ele
+  leva junto o resto da URL (`?proximo=` do login, `?para=` da landing).
+  **Os textos são dado, não função** (`lib/i18n/autenticacao.ts`, `lib/i18n/convite.ts`):
+  o dicionário atravessa do servidor para o formulário cliente, e função não atravessa;
+  frase com nome usa `{nome}` e `preencher`. **Os esquemas zod são montados por chamada**
+  (`esquemas(idioma)`, `camposObrigatoriosDoAluno(idioma)`), porque a mensagem de erro é
+  do idioma de quem enviou, e `traduzErro` e as regras de senha recebem o idioma. O
+  convite perdeu o artigo antes do nome do personal ("os treinos *da* Augusto"): o
+  artigo afirma o gênero de alguém que a tela não conhece.
+  **O que continua em português:** os e-mails do Supabase (confirmação e recuperação de
+  senha) — o modelo é um só, configurado no painel do Supabase, e não sabe o idioma de
+  quem pediu.
+- **[2026-10-05, decisão do Otávio]** **Termos e política em inglês e espanhol são
+  tradução de referência; o que vale é o português.** A página traduzida diz isso
+  **antes da primeira seção**, com "Ler em português" — quem lê uma tradução jurídica
+  precisa saber antes de ler, não no rodapé. O aceite continua gravando a versão do texto
+  em português, e a tradução não tem versão própria. `lib/legal/en.ts` e `es.ts` seguem
+  `termos.ts` e `privacidade.ts` seção por seção, com as mesmas âncoras (`#cookies`,
+  `#contato-pelo-site`): **mudou o português, muda a tradução no mesmo commit.**
+  A seção "Cookies" passou a declarar o cookie de idioma, e **a versão não subiu**: é
+  cookie essencial (lembra uma preferência, não identifica ninguém), o mesmo caso da
+  barra do painel.
+- **[2026-10-05]** **Cadastro, recuperar e nova senha não tinham `h1`.** O título do
+  formulário era `h2`, e desde 02/10 a moldura não tem mais título — as três telas
+  ficavam sem nenhum. Achado ao conferir as telas traduzidas; o convite também ganhou
+  `<main>`, que não tinha.
 - **[2026-10-05, pedido do Otávio]** **O nome da aba é sempre "Reps Club".** Os títulos
   por página ("Treinos", "Alunos"…, 37 deles) saíram, em vez de ficarem declarados e
   mascarados por um modelo sem `%s`: título escrito que não aparece em lugar nenhum é

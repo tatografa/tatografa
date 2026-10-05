@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import type { Idioma } from "./idioma";
 import { telefoneOpcional } from "./telefone";
 
 /**
@@ -24,40 +25,96 @@ export const nomeDoAluno = z
   .min(2, "Informe seu nome.")
   .max(80, "O nome pode ter até 80 caracteres.");
 
-export const objetivoDoAluno = z.enum(
-  ["massa", "gordura", "condicionamento", "saude"],
-  { error: "Escolha um objetivo." },
-);
-
-export const nivelDoAluno = z.enum(
-  ["iniciante", "intermediario", "avancado"],
-  { error: "Escolha seu nível." },
-);
-
-export const nascimentoDoAluno = z
-  .string()
-  .min(1, "Informe sua data de nascimento.")
-  .refine((valor) => {
-    const data = new Date(valor);
-    if (Number.isNaN(data.getTime())) return false;
-    const anos = (Date.now() - data.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
-    return anos >= IDADE_MINIMA && anos <= IDADE_MAXIMA;
-  }, "Data de nascimento inválida.");
-
 /*
- * Os limites de peso e altura são os mesmos das constraints de `students`
- * (migration 0006). O banco é quem decide; isto existe para a mensagem sair em
- * português e no campo certo, antes de a requisição partir.
+ * As mensagens dos cinco campos do onboarding, nos três idiomas: o convite é
+ * traduzido (etapa 1, 05/10) e estes campos aparecem na etapa 2 dele. O perfil
+ * do aluno (`/app/perfil`) usa as mesmas regras em português até a etapa 2 da
+ * tradução — por isso as constantes abaixo continuam existindo.
  */
-export const pesoDoAluno = z.coerce
-  .number({ error: "Informe seu peso." })
-  .gt(0, "Informe seu peso.")
-  .lt(500, "Peso inválido.");
+const MENSAGENS: Record<
+  Idioma,
+  {
+    objetivo: string;
+    nivel: string;
+    nascimentoVazio: string;
+    nascimentoInvalido: string;
+    pesoVazio: string;
+    pesoInvalido: string;
+    alturaVazia: string;
+    alturaInvalida: string;
+  }
+> = {
+  pt: {
+    objetivo: "Escolha um objetivo.",
+    nivel: "Escolha seu nível.",
+    nascimentoVazio: "Informe sua data de nascimento.",
+    nascimentoInvalido: "Data de nascimento inválida.",
+    pesoVazio: "Informe seu peso.",
+    pesoInvalido: "Peso inválido.",
+    alturaVazia: "Informe sua altura.",
+    alturaInvalida: "Altura inválida.",
+  },
+  en: {
+    objetivo: "Choose a goal.",
+    nivel: "Choose your level.",
+    nascimentoVazio: "Enter your date of birth.",
+    nascimentoInvalido: "Invalid date of birth.",
+    pesoVazio: "Enter your weight.",
+    pesoInvalido: "Invalid weight.",
+    alturaVazia: "Enter your height.",
+    alturaInvalida: "Invalid height.",
+  },
+  es: {
+    objetivo: "Elige un objetivo.",
+    nivel: "Elige tu nivel.",
+    nascimentoVazio: "Escribe tu fecha de nacimiento.",
+    nascimentoInvalido: "Fecha de nacimiento no válida.",
+    pesoVazio: "Escribe tu peso.",
+    pesoInvalido: "Peso no válido.",
+    alturaVazia: "Escribe tu altura.",
+    alturaInvalida: "Altura no válida.",
+  },
+};
 
-export const alturaDoAluno = z.coerce
-  .number({ error: "Informe sua altura." })
-  .gt(0, "Informe sua altura.")
-  .lt(300, "Altura inválida.");
+/** Os cinco campos obrigatórios do aluno, com as mensagens no idioma pedido. */
+export function camposObrigatoriosDoAluno(idioma: Idioma = "pt") {
+  const m = MENSAGENS[idioma];
+  return {
+    objetivo: z.enum(["massa", "gordura", "condicionamento", "saude"], {
+      error: m.objetivo,
+    }),
+    nivel: z.enum(["iniciante", "intermediario", "avancado"], { error: m.nivel }),
+    nascimento: z
+      .string()
+      .min(1, m.nascimentoVazio)
+      .refine((valor) => {
+        const data = new Date(valor);
+        if (Number.isNaN(data.getTime())) return false;
+        const anos = (Date.now() - data.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+        return anos >= IDADE_MINIMA && anos <= IDADE_MAXIMA;
+      }, m.nascimentoInvalido),
+    /*
+     * Os limites de peso e altura são os mesmos das constraints de `students`
+     * (migration 0006). O banco é quem decide; isto existe para a mensagem sair
+     * na língua da tela e no campo certo, antes de a requisição partir.
+     */
+    peso: z.coerce
+      .number({ error: m.pesoVazio })
+      .gt(0, m.pesoVazio)
+      .lt(500, m.pesoInvalido),
+    altura: z.coerce
+      .number({ error: m.alturaVazia })
+      .gt(0, m.alturaVazia)
+      .lt(300, m.alturaInvalida),
+  };
+}
+
+const EM_PORTUGUES = camposObrigatoriosDoAluno("pt");
+export const objetivoDoAluno = EM_PORTUGUES.objetivo;
+export const nivelDoAluno = EM_PORTUGUES.nivel;
+export const nascimentoDoAluno = EM_PORTUGUES.nascimento;
+export const pesoDoAluno = EM_PORTUGUES.peso;
+export const alturaDoAluno = EM_PORTUGUES.altura;
 
 /**
  * As 27 unidades da federação, que são também o `check` da coluna.

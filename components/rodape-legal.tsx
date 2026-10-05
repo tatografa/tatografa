@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { TEXTOS_DA_AUTENTICACAO } from "@/lib/i18n/autenticacao";
 import { VERSAO_DOS_DOCUMENTOS } from "@/lib/legal/documentos";
 import { cn } from "@/lib/utils";
 
@@ -9,7 +10,13 @@ import { cn } from "@/lib/utils";
  * Existe porque o onboarding pedia aceite de documento que não se podia ler, e
  * porque quem quer reler depois não deveria ter de procurar.
  */
-export function RodapeLegal({ className }: { className?: string }) {
+export function RodapeLegal({
+  className,
+  textos = TEXTOS_DA_AUTENTICACAO.pt.rodapeLegal,
+}: {
+  className?: string;
+  textos?: { termos: string; privacidade: string; versao: string };
+}) {
   return (
     <footer
       className={cn(
@@ -18,12 +25,14 @@ export function RodapeLegal({ className }: { className?: string }) {
       )}
     >
       <Link href="/termos" className="transition hover:text-ink-2">
-        Termos de uso
+        {textos.termos}
       </Link>
       <Link href="/privacidade" className="transition hover:text-ink-2">
-        Privacidade
+        {textos.privacidade}
       </Link>
-      <span className="text-ink-5">Versão {VERSAO_DOS_DOCUMENTOS}</span>
+      <span className="text-ink-5">
+        {textos.versao} {VERSAO_DOS_DOCUMENTOS}
+      </span>
     </footer>
   );
 }

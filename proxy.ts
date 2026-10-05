@@ -1,5 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import {
+  COOKIE_DO_IDIOMA,
+  VALIDADE_DO_IDIOMA,
+  ehIdioma,
+} from "@/lib/domain/idioma";
 import { updateSession } from "@/lib/supabase/proxy";
 
 /**
@@ -16,6 +21,12 @@ import { updateSession } from "@/lib/supabase/proxy";
  * conta. A validade do token é checada na página.
  */
 export async function proxy(request: NextRequest) {
+  // O idioma pedido na URL entra também na requisição, e não só na resposta: o
+  // layout das telas de entrada não vê a URL, só o cookie — sem isto, a página
+  // que troca de idioma desenharia a moldura ainda na língua anterior.
+  const lang = request.nextUrl.searchParams.get("lang");
+  if (ehIdioma(lang)) request.cookies.set(COOKIE_DO_IDIOMA, lang);
+
   const { response, user } = await updateSession(request);
   const { pathname, search } = request.nextUrl;
 
@@ -38,6 +49,16 @@ export async function proxy(request: NextRequest) {
   const telasDeEntrada = ["/entrar", "/cadastro", "/acesso"];
   if (user && telasDeEntrada.includes(pathname)) {
     return NextResponse.redirect(new URL("/painel", request.url));
+  }
+
+  // `?lang=` na URL vira o idioma desta pessoa daqui em diante (lib/domain/idioma.ts).
+  // Grava a cada `?lang=`, que só aparece quando alguém escolhe pelo seletor.
+  if (ehIdioma(lang)) {
+    response.cookies.set(COOKIE_DO_IDIOMA, lang, {
+      path: "/",
+      maxAge: VALIDADE_DO_IDIOMA,
+      sameSite: "lax",
+    });
   }
 
   return response;

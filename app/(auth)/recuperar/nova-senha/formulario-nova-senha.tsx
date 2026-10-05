@@ -5,25 +5,31 @@ import { useActionState } from "react";
 import { Button, Input } from "@/components/ui";
 
 import { definirNovaSenha, type EstadoAuth } from "../../actions";
-import { DICA_DA_SENHA } from "@/lib/domain/senha";
+import type { TextosDaAutenticacao } from "@/lib/i18n/autenticacao";
 
 const INICIAL: EstadoAuth = {};
 
-export function FormularioNovaSenha() {
+export function FormularioNovaSenha({
+  textos: t,
+  dicaDaSenha,
+}: {
+  textos: TextosDaAutenticacao["novaSenha"];
+  dicaDaSenha: string;
+}) {
   const [estado, acao, enviando] = useActionState(definirNovaSenha, INICIAL);
 
   return (
     <form action={acao} noValidate className="space-y-7">
       <header className="space-y-2">
-        <h2 className="text-[25px] font-extrabold tracking-[-0.02em] text-ink">
-          Criar nova senha
-        </h2>
-        <p className="text-[14px] font-medium text-ink-3">{DICA_DA_SENHA}</p>
+        <h1 className="text-[25px] font-extrabold tracking-[-0.02em] text-ink">
+          {t.titulo}
+        </h1>
+        <p className="text-[14px] font-medium text-ink-3">{dicaDaSenha}</p>
       </header>
 
       <div className="space-y-4">
         <Input
-          label="Nova senha"
+          label={t.nova}
           name="senha"
           type="password"
           autoComplete="new-password"
@@ -34,7 +40,7 @@ export function FormularioNovaSenha() {
         />
 
         <Input
-          label="Repita a senha"
+          label={t.repita}
           name="confirmacao"
           type="password"
           autoComplete="new-password"
@@ -53,7 +59,7 @@ export function FormularioNovaSenha() {
         )}
 
         <Button type="submit" block disabled={enviando}>
-          {enviando ? "Salvando…" : "Salvar e entrar"}
+          {enviando ? t.salvando : t.botao}
         </Button>
       </div>
     </form>

@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 
+import { TEXTOS_DA_AUTENTICACAO } from "@/lib/i18n/autenticacao";
+import { idiomaAtual } from "@/lib/i18n/idioma-atual";
+
 import { FormularioLogin } from "../entrar/formulario-login";
 
 export const metadata: Metadata = {
   description: "Entre no app com o seu e-mail e a sua senha.",
-};
-
-const AVISOS: Record<string, string> = {
-  "sem-perfil": "Sua conta não está ligada a nenhum personal. Peça um convite.",
 };
 
 /**
@@ -25,13 +24,17 @@ const AVISOS: Record<string, string> = {
 export default async function AcessoPage({
   searchParams,
 }: PageProps<"/acesso">) {
-  const { proximo, erro } = await searchParams;
+  const { proximo, erro, lang } = await searchParams;
+  const t = TEXTOS_DA_AUTENTICACAO[
+    await idiomaAtual(typeof lang === "string" ? lang : undefined)
+  ];
 
   return (
     <FormularioLogin
       para="aluno"
       proximo={typeof proximo === "string" ? proximo : undefined}
-      aviso={typeof erro === "string" ? AVISOS[erro] : undefined}
+      aviso={erro === "sem-perfil" ? t.avisos.semPerfilAluno : undefined}
+      textos={t.login}
     />
   );
 }

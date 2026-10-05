@@ -6,12 +6,21 @@ import { useActionState, useState } from "react";
 import { Button, Input } from "@/components/ui";
 
 import { cadastrar, type EstadoAuth } from "../actions";
-import { DICA_DA_SENHA, SENHA_MINIMA } from "@/lib/domain/senha";
+import { SENHA_MINIMA } from "@/lib/domain/senha";
+import type { TextosDaAutenticacao } from "@/lib/i18n/autenticacao";
 import { AceiteDosTermos } from "@/components/aceite-dos-termos";
 
 const INICIAL: EstadoAuth = {};
 
-export function FormularioCadastro() {
+export function FormularioCadastro({
+  textos: t,
+  aceite,
+  dicaDaSenha,
+}: {
+  textos: TextosDaAutenticacao["cadastro"];
+  aceite: TextosDaAutenticacao["aceite"];
+  dicaDaSenha: string;
+}) {
   const [estado, acao, enviando] = useActionState(cadastrar, INICIAL);
   // Controlado para a marcação sobreviver a um erro do servidor: o React reseta
   // o formulário depois da ação, e ter que remarcar o aceite por causa de um
@@ -24,17 +33,17 @@ export function FormularioCadastro() {
         <div className="mx-auto flex size-13 items-center justify-center rounded-[15px] bg-brand-soft text-[22px] font-bold text-brand">
           ✓
         </div>
-        <h2 className="text-[24px] font-extrabold tracking-[-0.02em] text-ink">
-          Confirme seu e-mail
-        </h2>
+        <h1 className="text-[24px] font-extrabold tracking-[-0.02em] text-ink">
+          {t.confirmeTitulo}
+        </h1>
         <p className="text-[14px] font-medium leading-[1.6] text-ink-3">
-          Enviamos um link para{" "}
-          <strong className="text-ink">{estado.campos?.email}</strong>. Abra o
-          link e sua conta estará pronta.
+          {t.confirmeAntes}{" "}
+          <strong className="text-ink">{estado.campos?.email}</strong>
+          {t.confirmeDepois}
         </p>
         <Link href="/entrar" className="block">
           <Button variant="secondary" block>
-            Voltar ao login
+            {t.voltarAoLogin}
           </Button>
         </Link>
       </div>
@@ -44,43 +53,41 @@ export function FormularioCadastro() {
   return (
     <form action={acao} noValidate className="space-y-7">
       <header className="space-y-2">
-        <h2 className="text-[25px] font-extrabold tracking-[-0.02em] text-ink">
-          Criar conta de personal
-        </h2>
-        <p className="text-[14px] font-medium text-ink-3">
-          Leva menos de um minuto. Depois é só convidar seus alunos.
-        </p>
+        <h1 className="text-[25px] font-extrabold tracking-[-0.02em] text-ink">
+          {t.titulo}
+        </h1>
+        <p className="text-[14px] font-medium text-ink-3">{t.apoio}</p>
       </header>
 
       <div className="space-y-4">
         <Input
-          label="Nome"
+          label={t.nome}
           name="nome"
           autoComplete="name"
-          placeholder="Como seus alunos te chamam"
+          placeholder={t.nomePlaceholder}
           defaultValue={estado.campos?.nome}
           error={estado.errosPorCampo?.nome}
           required
         />
 
         <Input
-          label="E-mail"
+          label={t.email}
           name="email"
           type="email"
           autoComplete="email"
-          placeholder="voce@assessoria.com"
+          placeholder={t.emailPlaceholder}
           defaultValue={estado.campos?.email}
           error={estado.errosPorCampo?.email}
           required
         />
 
         <Input
-          label="Senha"
+          label={t.senha}
           name="senha"
           type="password"
           autoComplete="new-password"
           placeholder="••••••••"
-          hint={DICA_DA_SENHA}
+          hint={dicaDaSenha}
           error={estado.errosPorCampo?.senha}
           minLength={SENHA_MINIMA}
           required
@@ -89,6 +96,7 @@ export function FormularioCadastro() {
         <AceiteDosTermos
           marcado={aceitouTermos}
           aoMarcar={setAceitouTermos}
+          textos={aceite}
           erro={estado.errosPorCampo?.termos}
         />
 
@@ -102,17 +110,17 @@ export function FormularioCadastro() {
         )}
 
         <Button type="submit" block disabled={enviando}>
-          {enviando ? "Criando…" : "Criar conta"}
+          {enviando ? t.criando : t.botao}
         </Button>
       </div>
 
       <p className="text-center text-[13.5px] font-medium text-ink-3">
-        Já tem conta?{" "}
+        {t.jaTemConta}{" "}
         <Link
           href="/entrar"
           className="font-semibold text-brand transition hover:text-brand-hover"
         >
-          Entrar
+          {t.entrar}
         </Link>
       </p>
     </form>

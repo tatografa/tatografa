@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  TEXTOS_DA_AUTENTICACAO,
+  type TextosDaAutenticacao,
+} from "@/lib/i18n/autenticacao";
+
 /**
  * O checkbox de aceite dos documentos — o mesmo nos dois cadastros.
  *
@@ -17,10 +22,13 @@ export function AceiteDosTermos({
   marcado,
   aoMarcar,
   erro,
+  textos = TEXTOS_DA_AUTENTICACAO.pt.aceite,
 }: {
   marcado: boolean;
   aoMarcar: (valor: boolean) => void;
   erro?: string;
+  /** A frase no idioma da tela; a forma é a mesma nos três. */
+  textos?: TextosDaAutenticacao["aceite"];
 }) {
   return (
     <div className="space-y-1.5">
@@ -33,10 +41,10 @@ export function AceiteDosTermos({
           className="mt-0.5 size-4 shrink-0 accent-brand"
         />
         <span className="text-[12.5px] leading-[1.5] text-ink-3">
-          Aceito os{" "}
-          <LinkLegal href="/termos">termos de uso</LinkLegal> e a{" "}
-          <LinkLegal href="/privacidade">política de privacidade</LinkLegal> do
-          Reps Club.
+          {textos.antes}{" "}
+          <LinkLegal href="/termos">{textos.termos}</LinkLegal> {textos.e}{" "}
+          <LinkLegal href="/privacidade">{textos.privacidade}</LinkLegal>
+          {textos.depois}
         </span>
       </label>
       {erro && <p className="text-[12.5px] font-semibold text-danger">{erro}</p>}

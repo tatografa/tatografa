@@ -1,6 +1,11 @@
 import { PaginaDeDocumento } from "@/components/pagina-de-documento";
-import { PRIVACIDADE } from "@/lib/legal/privacidade";
+import { idiomaAtual } from "@/lib/i18n/idioma-atual";
 
-export default function PrivacidadePage() {
-  return <PaginaDeDocumento documento={PRIVACIDADE} />;
+export default async function PrivacidadePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}) {
+  const { lang } = await searchParams;
+  return <PaginaDeDocumento slug="privacidade" idioma={await idiomaAtual(lang)} />;
 }

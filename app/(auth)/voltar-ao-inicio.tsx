@@ -14,17 +14,17 @@ import { usePathname } from "next/navigation";
  * chega ali veio de um link do e-mail, já com a sessão aberta para trocar a
  * senha, e "voltar para a landing" no meio disso é sair sem terminar.
  */
-export function VoltarAoInicio() {
+export function VoltarAoInicio({ rotulo }: { rotulo: string }) {
   const caminho = usePathname();
   if (caminho.startsWith("/recuperar/nova-senha")) return null;
 
   return (
     <Link
       href={caminho === "/acesso" ? "/?para=alunos" : "/"}
-      className="mb-8 inline-flex items-center gap-1.5 text-[13px] font-semibold text-ink-3 transition hover:text-ink"
+      className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-ink-3 transition hover:text-ink"
     >
       <ArrowLeft size={15} aria-hidden />
-      Voltar
+      {rotulo}
     </Link>
   );
 }

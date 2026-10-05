@@ -1,21 +1,27 @@
-import { FormularioLogin } from "./formulario-login";
+import { TEXTOS_DA_AUTENTICACAO } from "@/lib/i18n/autenticacao";
+import { idiomaAtual } from "@/lib/i18n/idioma-atual";
 
-const AVISOS: Record<string, string> = {
-  "sem-perfil":
-    "Sua conta existe, mas não está ligada a um perfil de personal. Fale com quem te cadastrou.",
-  "link-invalido": "Esse link expirou ou já foi usado. Peça outro.",
-  "sessao-encerrada": "Sua sessão expirou. Entre de novo.",
-};
+import { FormularioLogin } from "./formulario-login";
 
 export default async function EntrarPage({
   searchParams,
 }: PageProps<"/entrar">) {
-  const { proximo, erro } = await searchParams;
+  const { proximo, erro, lang } = await searchParams;
+  const t = TEXTOS_DA_AUTENTICACAO[
+    await idiomaAtual(typeof lang === "string" ? lang : undefined)
+  ];
+
+  const avisos: Record<string, string> = {
+    "sem-perfil": t.avisos.semPerfilPersonal,
+    "link-invalido": t.avisos.linkInvalido,
+    "sessao-encerrada": t.avisos.sessaoEncerrada,
+  };
 
   return (
     <FormularioLogin
       proximo={typeof proximo === "string" ? proximo : undefined}
-      aviso={typeof erro === "string" ? AVISOS[erro] : undefined}
+      aviso={typeof erro === "string" ? avisos[erro] : undefined}
+      textos={t.login}
     />
   );
 }

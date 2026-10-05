@@ -8,10 +8,10 @@ import type { ErroDaLista } from "@/lib/domain/lista-de-espera";
  * cookies (clientes) leem daqui. Texto espalhado em três componentes é como
  * uma frase muda em português e fica velha em inglês.
  *
- * **O que não se traduz, e o texto diz:** login, termos e política só existem
- * em português — os links para eles avisam "(em português)" nos outros dois
- * idiomas, para ninguém clicar achando que vai ler em inglês. As capturas de
- * tela também são do produto em português. "Aluno" vira "client" em inglês, a
+ * Login, cadastro, convite, termos e política também falam os três idiomas
+ * (etapa 1 da tradução). Termos e política em inglês e espanhol são
+ * **referência**: a própria página avisa que a versão que vale é a em
+ * português. As capturas de tela continuam sendo do produto em português. "Aluno" vira "client" em inglês, a
  * palavra de quem trabalha com personal, e "alumno" em espanhol.
  */
 export type TextosDaLanding = {
@@ -222,8 +222,8 @@ const en: TextosDaLanding = {
   },
   rodape: {
     demonstracao: "Demo",
-    termos: "Terms (in Portuguese)",
-    privacidade: "Privacy (in Portuguese)",
+    termos: "Terms",
+    privacidade: "Privacy",
     cookies: "Cookies",
   },
   lista: {
@@ -233,7 +233,7 @@ const en: TextosDaLanding = {
     sucessoAntes: "You're on the list. We'll write to",
     sucessoDepois: ".",
     apoio: "Just your email, and only to let you know.",
-    privacidade: "Privacy (in Portuguese)",
+    privacidade: "Privacy",
     erros: {
       vazio: "Enter your email.",
       longo: "That email is too long.",
@@ -246,7 +246,7 @@ const en: TextosDaLanding = {
     titulo: "Cookies",
     texto:
       "We use essential cookies to make the site work and keep you signed in. Usage-measurement cookies are only used if you accept — and we never use advertising cookies.",
-    saibaMais: "Learn more (in Portuguese)",
+    saibaMais: "Learn more",
     recusar: "Decline",
     aceitar: "Accept",
   },
@@ -319,8 +319,8 @@ const es: TextosDaLanding = {
   },
   rodape: {
     demonstracao: "Demostración",
-    termos: "Términos (en portugués)",
-    privacidade: "Privacidad (en portugués)",
+    termos: "Términos",
+    privacidade: "Privacidad",
     cookies: "Cookies",
   },
   lista: {
@@ -330,7 +330,7 @@ const es: TextosDaLanding = {
     sucessoAntes: "Ya estás en la lista. Te escribiremos a",
     sucessoDepois: ".",
     apoio: "Solo tu correo, y solo para avisarte.",
-    privacidade: "Privacidad (en portugués)",
+    privacidade: "Privacidad",
     erros: {
       vazio: "Escribe tu correo.",
       longo: "Ese correo es demasiado largo.",
@@ -343,7 +343,7 @@ const es: TextosDaLanding = {
     titulo: "Cookies",
     texto:
       "Usamos cookies esenciales para que el sitio funcione y para mantener tu sesión iniciada. Las cookies de medición de uso solo se activan si aceptas — y nunca usamos cookies de publicidad.",
-    saibaMais: "Más información (en portugués)",
+    saibaMais: "Más información",
     recusar: "Rechazar",
     aceitar: "Aceptar",
   },

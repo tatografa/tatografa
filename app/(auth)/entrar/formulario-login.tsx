@@ -5,6 +5,8 @@ import { useActionState } from "react";
 
 import { Button, Input } from "@/components/ui";
 
+import type { TextosDaAutenticacao } from "@/lib/i18n/autenticacao";
+
 import { entrar, type EstadoAuth } from "../actions";
 
 const INICIAL: EstadoAuth = {};
@@ -19,35 +21,23 @@ const INICIAL: EstadoAuth = {};
  * `requireTrainer()` manda o aluno ao app), então errar de porta não prende
  * ninguém.
  */
-const TEXTOS = {
-  personal: {
-    titulo: "Entrar com senha",
-    apoio: "Vale para personal e para aluno. Use o e-mail da sua conta.",
-    placeholder: "voce@assessoria.com",
-    botao: "Entrar no painel",
-    destino: undefined,
-  },
-  aluno: {
-    titulo: "Entrar",
-    apoio: "Use o e-mail e a senha que você criou quando aceitou o convite.",
-    placeholder: "voce@email.com",
-    botao: "Entrar no app",
-    destino: "/app",
-  },
-} as const;
+/** Para onde vai quem entra por esta porta, se a URL não disser outra coisa. */
+const DESTINO_PADRAO = { personal: undefined, aluno: "/app" } as const;
 
 export function FormularioLogin({
   para = "personal",
   proximo,
   aviso,
+  textos: t,
 }: {
-  para?: keyof typeof TEXTOS;
+  para?: "personal" | "aluno";
   proximo?: string;
   aviso?: string;
+  textos: TextosDaAutenticacao["login"];
 }) {
   const [estado, acao, enviando] = useActionState(entrar, INICIAL);
-  const textos = TEXTOS[para];
-  const destino = proximo ?? textos.destino;
+  const textos = t[para];
+  const destino = proximo ?? DESTINO_PADRAO[para];
 
   return (
     <form action={acao} noValidate className="space-y-7">
@@ -74,7 +64,7 @@ export function FormularioLogin({
         {destino && <input type="hidden" name="proximo" value={destino} />}
 
         <Input
-          label="E-mail"
+          label={t.email}
           name="email"
           type="email"
           autoComplete="email"
@@ -85,7 +75,7 @@ export function FormularioLogin({
         />
 
         <Input
-          label="Senha"
+          label={t.senha}
           name="senha"
           type="password"
           autoComplete="current-password"
@@ -97,7 +87,7 @@ export function FormularioLogin({
               href="/recuperar"
               className="text-[12.5px] font-semibold text-brand transition hover:text-brand-hover"
             >
-              Esqueci minha senha
+              {t.esqueci}
             </Link>
           }
         />
@@ -112,23 +102,23 @@ export function FormularioLogin({
         )}
 
         <Button type="submit" block disabled={enviando}>
-          {enviando ? "Entrando…" : textos.botao}
+          {enviando ? t.entrando : textos.botao}
         </Button>
       </div>
 
       {para === "aluno" ? (
         // O aluno não cria conta sozinho: ela nasce do convite do personal.
         <p className="text-center text-[13.5px] font-medium text-ink-3">
-          Ainda não tem conta? Peça o convite ao seu personal.
+          {t.alunoSemConta}
         </p>
       ) : (
         <p className="text-center text-[13.5px] font-medium text-ink-3">
-          Ainda não tem conta?{" "}
+          {t.semConta}{" "}
           <Link
             href="/cadastro"
             className="font-semibold text-brand transition hover:text-brand-hover"
           >
-            Criar conta de personal
+            {t.criarConta}
           </Link>
         </p>
       )}
