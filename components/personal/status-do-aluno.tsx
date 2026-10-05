@@ -7,7 +7,14 @@ import type { Enums } from "@/types/database";
  * não no vermelho do protótipo: arquivar é uma decisão do personal, não um
  * problema — o vermelho desta tabela é do "último treino", que é o alerta.
  */
-export function StatusDoAluno({ status }: { status: Enums<"student_status"> }) {
+export function StatusDoAluno({
+  status,
+  rotulo,
+}: {
+  status: Enums<"student_status">;
+  /** O rótulo no idioma do painel; sem ele, o português de `lib/rotulos`. */
+  rotulo?: string;
+}) {
   const tom =
     status === "ativo"
       ? "bg-success-soft text-success"
@@ -22,7 +29,7 @@ export function StatusDoAluno({ status }: { status: Enums<"student_status"> }) {
       )}
     >
       <span aria-hidden className="size-1.5 rounded-full bg-current" />
-      {STATUS_DO_ALUNO[status]}
+      {rotulo ?? STATUS_DO_ALUNO[status]}
     </span>
   );
 }

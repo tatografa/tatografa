@@ -30,7 +30,10 @@ import {
 } from "@/lib/domain/carteira";
 import { iniciaisDe } from "@/lib/domain/nome";
 import type { AlunoNaTabela } from "@/lib/queries/painel";
-import { PERFIL_BIOLOGICO } from "@/lib/rotulos";
+import { plural, preencher } from "@/lib/i18n/texto";
+import type { TextosDoPainel } from "@/lib/i18n/painel";
+
+import { usePainel } from "./idioma-do-painel";
 import { cn } from "@/lib/utils";
 
 /**
@@ -85,6 +88,24 @@ export function TabelaDeAlunos({
   // pessoas. As outras duas colunas ele pede clicando.
   const [ordem, setOrdem] = useState<Ordem>({ campo: "nome", crescente: true });
   const idDoPainel = useId();
+  const { t } = usePainel();
+  const a = t.alunos;
+  // Os rótulos dos filtros saem do idioma do painel pela chave de cada opção; a
+  // lista e a ordem continuam sendo as de `lib/domain/carteira.ts`.
+  const rotuloDoFiltro = (valor: string): string =>
+    ({
+      todos: a.opcoes.todos,
+      ativo: t.rotulos.status.ativo,
+      inativo: t.rotulos.status.inativo,
+      convidado: t.rotulos.status.convidado,
+      com: a.opcoes.comPrograma,
+      sem: a.opcoes.semPrograma,
+      hoje: a.opcoes.treinouHoje,
+      alerta: preencher(a.opcoes.diasMais, { n: diasParaAlerta }),
+      nunca: a.opcoes.nuncaTreinou,
+    })[valor] ?? valor;
+  const traduzir = <V extends string>(opcoes: { valor: V; rotulo: string }[]) =>
+    opcoes.map((o) => ({ ...o, rotulo: rotuloDoFiltro(o.valor) }));
 
   const lista = useMemo(
     () => ordenarAlunos(filtrarAlunos(alunos, filtros, diasParaAlerta), ordem),
@@ -119,7 +140,7 @@ export function TabelaDeAlunos({
   // Carteira vazia não ganha números, busca nem filtro: um campo de busca em
   // cima de "nenhum aluno ainda" oferece reduzir uma lista que não existe, e no
   // primeiro acesso do personal é a primeira coisa que ele vê.
-  if (!alunos.length) return <Vazio filtrando={false} />;
+  if (!alunos.length) return <Vazio filtrando={false} t={t} />;
 
   return (
     <div className="space-y-4">
@@ -137,12 +158,12 @@ export function TabelaDeAlunos({
       <div className="flex gap-3">
         <label className="relative flex min-w-0 flex-1 items-center">
           <Search size={16} aria-hidden className="pointer-events-none absolute left-4 text-ink-5" />
-          <span className="sr-only">Buscar aluno por nome ou e-mail</span>
+          <span className="sr-only">{a.busca}</span>
           <input
             type="search"
             value={filtros.busca}
             onChange={(e) => mudar("busca", e.target.value)}
-            placeholder="Buscar por nome ou e-mail…"
+            placeholder={a.buscaExemplo}
             className="h-11 w-full rounded-[10px] border border-border bg-surface pr-3.5 pl-10 text-[14px] text-ink transition placeholder:text-ink-5 focus:border-ink focus:outline-none"
           />
         </label>
@@ -157,11 +178,11 @@ export function TabelaDeAlunos({
           )}
         >
           <SlidersHorizontal size={15} aria-hidden />
-          Filtros
+          {a.filtros}
           {ligados > 0 ? (
             <span className="rounded-full bg-brand px-1.5 text-[11px] leading-[18px] text-white tabular-nums">
               {ligados}
-              <span className="sr-only"> ligados</span>
+              <span className="sr-only">{a.ligados}</span>
             </span>
           ) : null}
         </button>
@@ -170,37 +191,37 @@ export function TabelaDeAlunos({
       {abertos ? (
         <section
           id={idDoPainel}
-          aria-label="Filtros avançados"
+          aria-label={a.avancados}
           className="rounded-[12px] border border-border bg-surface px-5 py-4"
         >
           <div className="mb-3 flex items-center justify-between gap-3">
-            <h2 className="text-[14px] font-medium text-ink">Filtros avançados</h2>
+            <h2 className="text-[14px] font-medium text-ink">{a.avancados}</h2>
             {ligados > 0 ? (
               <button
                 type="button"
                 onClick={() => setFiltros((atual) => ({ ...SEM_FILTRO, busca: atual.busca }))}
                 className="text-[13px] font-semibold text-brand transition hover:text-brand-hover"
               >
-                Limpar filtros
+                {a.limpar}
               </button>
             ) : null}
           </div>
           <div className="grid gap-x-8 gap-y-4 @min-[760px]:grid-cols-2 @min-[1060px]:grid-cols-3">
             <GrupoDeChips
-              titulo="Status"
-              opcoes={opcoesDeStatus}
+              titulo={a.status}
+              opcoes={traduzir(opcoesDeStatus)}
               valor={filtros.status}
               aoEscolher={(v) => mudar("status", v)}
             />
             <GrupoDeChips
-              titulo="Programa"
-              opcoes={FILTROS_DE_PROGRAMA}
+              titulo={a.programa}
+              opcoes={traduzir(FILTROS_DE_PROGRAMA)}
               valor={filtros.programa}
               aoEscolher={(v) => mudar("programa", v)}
             />
             <GrupoDeChips
-              titulo="Tempo sem treino"
-              opcoes={filtrosDeTempo(diasParaAlerta)}
+              titulo={a.tempo}
+              opcoes={traduzir(filtrosDeTempo(diasParaAlerta))}
               valor={filtros.tempo}
               aoEscolher={(v) => mudar("tempo", v)}
             />
@@ -209,7 +230,7 @@ export function TabelaDeAlunos({
       ) : null}
 
       {lista.length === 0 ? (
-        <Vazio filtrando={filtrando} />
+        <Vazio filtrando={filtrando} t={t} />
       ) : (
         <div className="overflow-hidden rounded-[12px] border border-border bg-surface">
           <div className="overflow-x-auto">
@@ -217,16 +238,16 @@ export function TabelaDeAlunos({
               <thead>
                 <tr className="border-b border-border">
                   <Coluna ordem={ordem} campo="nome" aoOrdenar={ordenarPor}>
-                    Aluno
+                    {a.colunas.aluno}
                   </Coluna>
-                  <Coluna>Programa</Coluna>
-                  <Coluna>Perfil biológico</Coluna>
-                  <Coluna>Status</Coluna>
+                  <Coluna>{a.colunas.programa}</Coluna>
+                  <Coluna>{a.colunas.perfil}</Coluna>
+                  <Coluna>{a.colunas.status}</Coluna>
                   <Coluna ordem={ordem} campo="ultima" aoOrdenar={ordenarPor}>
-                    Último treino
+                    {a.colunas.ultimo}
                   </Coluna>
                   <Coluna ordem={ordem} campo="aderencia" aoOrdenar={ordenarPor}>
-                    Aderência
+                    {a.colunas.aderencia}
                   </Coluna>
                 </tr>
               </thead>
@@ -237,6 +258,7 @@ export function TabelaDeAlunos({
                     aluno={aluno}
                     ehVoce={aluno.id === idDoPersonal}
                     parado={precisaDeAtencao(aluno, diasParaAlerta)}
+                    t={t}
                   />
                 ))}
               </tbody>
@@ -244,10 +266,8 @@ export function TabelaDeAlunos({
           </div>
           <p className="border-t border-border-soft px-5 py-3.5 text-[13px] text-ink-4" aria-live="polite">
             {filtrando
-              ? `Mostrando ${lista.length} de ${alunos.length} ${alunos.length === 1 ? "aluno" : "alunos"}`
-              : alunos.length === 1
-                ? "1 aluno"
-                : `${alunos.length} alunos`}
+              ? preencher(a.mostrando, { n: lista.length, total: plural(alunos.length, t.comum.alunos) })
+              : plural(alunos.length, t.comum.alunos)}
           </p>
         </div>
       )}
@@ -303,12 +323,19 @@ function Linha({
   aluno,
   ehVoce,
   parado,
+  t,
 }: {
   aluno: AlunoNaTabela;
   ehVoce: boolean;
   /** Passou do limiar: o "último treino" vai em vermelho, com o triângulo. */
   parado: boolean;
+  t: TextosDoPainel;
 }) {
+  const a = t.alunos;
+  // "Hoje" / "Há 3 dias": o número já vem contado pelo servidor, no fuso do
+  // produto; aqui só se conjuga a frase.
+  const desde = (dias: number) =>
+    dias <= 0 ? a.hoje : dias === 1 ? a.ontem : preencher(a.ha, { n: dias });
   return (
     <tr className="group relative border-b border-border-soft last:border-0 transition hover:bg-canvas">
       <Celula>
@@ -329,7 +356,7 @@ function Linha({
               </Link>
               {ehVoce ? (
                 <span className="shrink-0 rounded-full bg-ink px-1.5 py-px text-[10px] font-bold text-white">
-                  Você
+                  {t.comum.voce}
                 </span>
               ) : null}
             </span>
@@ -343,36 +370,39 @@ function Linha({
           <>
             <span className="block max-w-[210px] truncate text-ink">{aluno.programa.name}</span>
             <span className="block text-[12px] text-ink-4">
-              Semana {aluno.semana_do_programa} de {aluno.programa.total_weeks}
+              {preencher(t.comum.semana, {
+                semana: aluno.semana_do_programa ?? 1,
+                total: aluno.programa.total_weeks,
+              })}
             </span>
           </>
         ) : (
-          <span className="text-ink-5">Sem programa</span>
+          <span className="text-ink-5">{a.semPrograma}</span>
         )}
       </Celula>
 
       <Celula>
         {aluno.biological_profile ? (
-          PERFIL_BIOLOGICO[aluno.biological_profile]
+          t.rotulos.perfilBiologico[aluno.biological_profile]
         ) : (
-          <span className="text-ink-5">Não informado</span>
+          <span className="text-ink-5">{t.comum.naoInformado}</span>
         )}
       </Celula>
 
       <Celula>
-        <StatusDoAluno status={aluno.status} />
+        <StatusDoAluno status={aluno.status} rotulo={t.rotulos.status[aluno.status]} />
       </Celula>
 
       <Celula>
         {aluno.dias_sem_treinar === null ? (
           // Quem nunca treinou não é alerta: ele não parou, ele não começou
           // (mesma regra do indicador).
-          <span className="text-ink-5">Nunca treinou</span>
+          <span className="text-ink-5">{a.nuncaTreinou}</span>
         ) : parado ? (
           <span className="inline-flex items-center gap-1.5 font-medium text-brand">
             <AlertTriangle size={13} aria-hidden />
             {desde(aluno.dias_sem_treinar)}
-            <span className="sr-only">, passou do seu limite</span>
+            <span className="sr-only">{a.passouDoLimite}</span>
           </span>
         ) : (
           desde(aluno.dias_sem_treinar)
@@ -389,7 +419,7 @@ function Linha({
           {comoPorcentagem(aluno.aderencia)}
         </span>
         <span className="block text-[12px] text-ink-4">
-          {aluno.aderencia === null ? "sem o que medir" : "nesta semana"}
+          {aluno.aderencia === null ? a.semOQueMedir : a.nestaSemana}
         </span>
       </Celula>
     </tr>
@@ -454,30 +484,16 @@ function Celula({ children }: { children: React.ReactNode }) {
  * uma busca sem resultado e pede só que ele desfaça o filtro. Um texto só
  * para os dois mandaria convidar aluno quem já tem trinta.
  */
-function Vazio({ filtrando }: { filtrando: boolean }) {
+function Vazio({ filtrando, t }: { filtrando: boolean; t: TextosDoPainel }) {
+  const v = t.alunos.vazio;
   return (
     <div className="rounded-[12px] border border-border bg-surface px-5 py-11 text-center">
       <p className="text-[14px] font-semibold text-ink">
-        {filtrando ? "Nenhum aluno com esses filtros" : "Nenhum aluno ainda"}
+        {filtrando ? v.filtrandoTitulo : v.titulo}
       </p>
       <p className="mt-1.5 text-[13px] leading-relaxed text-ink-4">
-        {filtrando
-          ? "Tente outro nome, ou use “Limpar filtros”."
-          : "Use “Convidar aluno” aqui em cima: você gera um link e manda pelo WhatsApp."}
+        {filtrando ? v.filtrando : v.texto}
       </p>
     </div>
   );
-}
-
-/**
- * "Hoje" / "Há 3 dias" — a coluna de último treino.
- *
- * Recebe o número já contado pelo servidor, e não a data: a conta de dia de
- * calendário é do fuso do produto, e aqui é o navegador. Só a conjugação é
- * desta camada.
- */
-function desde(dias: number): string {
-  if (dias <= 0) return "Hoje";
-  if (dias === 1) return "Ontem";
-  return `Há ${dias} dias`;
 }

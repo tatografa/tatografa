@@ -1,6 +1,9 @@
 import { NumeroDoTopo } from "@/components/personal/numero-do-topo";
 import type { IndicadoresDaCarteira } from "@/lib/domain/carteira";
 import { DIAS_DE_ENTRADA } from "@/lib/domain/carteira";
+import { plural, preencher } from "@/lib/i18n/texto";
+
+import { usePainel } from "./idioma-do-painel";
 
 /**
  * Os quatro números do topo de `/painel/alunos` (doc 06 §3).
@@ -30,25 +33,27 @@ export function IndicadoresDaCarteiraNoTopo({
 }) {
   const { total, novosNoMes, ativos, fatiaDeAtivos, inativos, precisamDeAtencao } =
     indicadores;
+  const n = usePainel().t.alunos.numeros;
+  const dias = { dias: DIAS_DE_ENTRADA };
 
   return (
     <section
-      aria-label="Resumo da carteira"
+      aria-label={n.rotulo}
       className="grid grid-cols-2 gap-3.5 @min-[760px]:grid-cols-4"
     >
       <NumeroDoTopo
-        titulo="Total de alunos"
+        titulo={n.total}
         valor={String(total)}
         apoio={
           novosNoMes === 0
-            ? `nenhum novo em ${DIAS_DE_ENTRADA} dias`
-            : `${novosNoMes} ${novosNoMes === 1 ? "novo" : "novos"} em ${DIAS_DE_ENTRADA} dias`
+            ? preencher(n.nenhumNovo, dias)
+            : preencher(plural(novosNoMes, n.novos), dias)
         }
       />
       <NumeroDoTopo
-        titulo="Ativos"
+        titulo={n.ativos}
         valor={String(ativos)}
-        apoio={fatiaDeAtivos === null ? "sem base para medir" : `${fatiaDeAtivos}% da carteira`}
+        apoio={fatiaDeAtivos === null ? n.semBase : preencher(n.daCarteira, { n: fatiaDeAtivos })}
       />
       {/*
         "Precisam de atenção" usa o limiar que o personal configurou em
@@ -60,17 +65,17 @@ export function IndicadoresDaCarteiraNoTopo({
         link, porque o que ele faz é ligar e desligar.
       */}
       <NumeroDoTopo
-        titulo="Precisam de atenção"
+        titulo={n.atencao}
         valor={String(precisamDeAtencao)}
-        apoio={`sem treinar há ${diasParaAlerta}+ dias`}
+        apoio={preencher(n.atencaoApoio, { n: diasParaAlerta })}
         destaque={precisamDeAtencao > 0}
         aoClicar={precisamDeAtencao > 0 || filtrandoAtencao ? aoFiltrarAtencao : undefined}
         ativo={filtrandoAtencao}
       />
       <NumeroDoTopo
-        titulo="Inativos"
+        titulo={n.inativos}
         valor={String(inativos)}
-        apoio={inativos === 0 ? "ninguém arquivado" : "arquivados por você"}
+        apoio={inativos === 0 ? n.ninguemArquivado : n.arquivados}
       />
     </section>
   );

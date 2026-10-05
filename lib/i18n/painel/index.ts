@@ -1,8 +1,10 @@
 import type { Idioma } from "@/lib/domain/idioma";
 import { COMUM } from "@/lib/i18n/app/comum";
 
+import { ALUNOS } from "./alunos";
 import { COMUM_DO_PAINEL } from "./comum";
 import { DASHBOARD } from "./dashboard";
+import { FICHA } from "./ficha";
 import { ROTULOS } from "./rotulos";
 
 /**
@@ -17,6 +19,8 @@ function textos(idioma: Idioma) {
     comum: COMUM_DO_PAINEL[idioma],
     rotulos: ROTULOS[idioma],
     dashboard: DASHBOARD[idioma],
+    alunos: ALUNOS[idioma],
+    ficha: FICHA[idioma],
     /** O portão de re-aceite é o mesmo componente do app; o texto também. */
     portao: COMUM[idioma].portao,
   };

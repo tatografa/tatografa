@@ -12,11 +12,35 @@
 import { formatarNumero } from "./historico";
 import {
   dataCurta,
-  formatarCarga,
-  textoDaSerie,
   type ExercicioDoProgresso,
   type SessaoDoExercicio,
 } from "./progresso";
+
+/**
+ * Como a planilha escreve data, número e "Série N". O padrão é o português de
+ * sempre; o painel traduzido passa o do idioma dele (etapa 3), e as contas —
+ * que série é a maior, que barra vai onde — continuam sendo uma só.
+ */
+export type FormatoDaPlanilha = {
+  data: (iso: string) => string;
+  numero: (valor: number) => string;
+  serie: (numero: number) => string;
+};
+
+const EM_PORTUGUES: FormatoDaPlanilha = {
+  data: dataCurta,
+  numero: formatarNumero,
+  serie: (numero) => `Série ${numero}`,
+};
+
+function textoDaSerieCom(
+  serie: { carga: number | null; reps: number | null },
+  f: FormatoDaPlanilha,
+): string {
+  if (serie.carga === null) return serie.reps === null ? "—" : `${serie.reps} reps`;
+  const carga = `${f.numero(serie.carga)} kg`;
+  return serie.reps === null ? carga : `${carga} × ${serie.reps}`;
+}
 
 /**
  * A chave de um exercício entre as duas origens (catálogo e próprio do
@@ -37,9 +61,12 @@ export type GrupoDoHistorico = {
 };
 
 /** O maior valor de uma lista de séries: carga, ou reps quando não há carga. */
-function maiorDe(series: { carga: number | null; reps: number | null }[]): string {
+function maiorDe(
+  series: { carga: number | null; reps: number | null }[],
+  f: FormatoDaPlanilha = EM_PORTUGUES,
+): string {
   const cargas = series.map((s) => s.carga).filter((c): c is number => c !== null);
-  if (cargas.length) return formatarCarga(Math.max(...cargas));
+  if (cargas.length) return `${f.numero(Math.max(...cargas))} kg`;
   const reps = series.map((s) => s.reps ?? 0);
   const maior = Math.max(0, ...reps);
   return maior > 0 ? `${maior} reps` : "—";
@@ -49,11 +76,14 @@ function maiorDe(series: { carga: number | null; reps: number | null }[]): strin
  * "Por data": uma sessão por bloco, da mais recente para a mais antiga, com as
  * séries daquele dia.
  */
-export function historicoPorData(sessoes: SessaoDoExercicio[]): GrupoDoHistorico[] {
+export function historicoPorData(
+  sessoes: SessaoDoExercicio[],
+  f: FormatoDaPlanilha = EM_PORTUGUES,
+): GrupoDoHistorico[] {
   return sessoes.map((sessao) => ({
-    titulo: dataCurta(sessao.concluidaEm),
-    maior: maiorDe(sessao.series),
-    itens: sessao.series.map((s) => ({ rotulo: `Série ${s.set_number}`, valor: textoDaSerie(s) })),
+    titulo: f.data(sessao.concluidaEm),
+    maior: maiorDe(sessao.series, f),
+    itens: sessao.series.map((s) => ({ rotulo: f.serie(s.set_number), valor: textoDaSerieCom(s, f) })),
   }));
 }
 
@@ -61,19 +91,22 @@ export function historicoPorData(sessoes: SessaoDoExercicio[]): GrupoDoHistorico
  * "Por série": a série 1 de cada dia, depois a série 2… — é como o personal
  * vê se a última série cai mais que as outras de uma semana para a outra.
  */
-export function historicoPorSerie(sessoes: SessaoDoExercicio[]): GrupoDoHistorico[] {
+export function historicoPorSerie(
+  sessoes: SessaoDoExercicio[],
+  f: FormatoDaPlanilha = EM_PORTUGUES,
+): GrupoDoHistorico[] {
   const numeros = [...new Set(sessoes.flatMap((s) => s.series.map((x) => x.set_number)))].sort(
     (a, b) => a - b,
   );
   return numeros.map((numero) => {
     const dias = sessoes.flatMap((sessao) => {
       const serie = sessao.series.find((x) => x.set_number === numero);
-      return serie ? [{ data: dataCurta(sessao.concluidaEm), serie }] : [];
+      return serie ? [{ data: f.data(sessao.concluidaEm), serie }] : [];
     });
     return {
-      titulo: `Série ${numero}`,
-      maior: maiorDe(dias.map((d) => d.serie)),
-      itens: dias.map((d) => ({ rotulo: d.data, valor: textoDaSerie(d.serie) })),
+      titulo: f.serie(numero),
+      maior: maiorDe(dias.map((d) => d.serie), f),
+      itens: dias.map((d) => ({ rotulo: d.data, valor: textoDaSerieCom(d.serie, f) })),
     };
   });
 }
@@ -83,8 +116,11 @@ export function historicoPorSerie(sessoes: SessaoDoExercicio[]): GrupoDoHistoric
  * 02/09) — o mesmo número da tela de recordes do aluno. Peso corporal cai para
  * o maior número de repetições.
  */
-export function recordeDoExercicio(exercicio: ExercicioDoProgresso): string {
-  return maiorDe(exercicio.sessoes.flatMap((s) => s.series));
+export function recordeDoExercicio(
+  exercicio: ExercicioDoProgresso,
+  f: FormatoDaPlanilha = EM_PORTUGUES,
+): string {
+  return maiorDe(exercicio.sessoes.flatMap((s) => s.series), f);
 }
 
 export type MetricaDoGrafico = "carga" | "repeticoes" | "volume";
@@ -113,6 +149,7 @@ export type BarraDoGrafico = { data: string; valor: number; texto: string; unida
 export function barrasDoExercicio(
   sessoes: SessaoDoExercicio[],
   metrica: MetricaDoGrafico,
+  f: FormatoDaPlanilha = EM_PORTUGUES,
 ): BarraDoGrafico[] {
   return sessoes
     .slice(0, BARRAS_DO_GRAFICO)
@@ -134,9 +171,9 @@ export function barrasDoExercicio(
         unidade = "reps";
       }
       return {
-        data: dataCurta(sessao.concluidaEm),
+        data: f.data(sessao.concluidaEm),
         valor,
-        texto: `${formatarNumero(valor)} ${unidade}`,
+        texto: `${f.numero(valor)} ${unidade}`,
         unidade,
       };
     });

@@ -4,7 +4,6 @@ import { ChartLine, ChevronRight, Sheet } from "lucide-react";
 import Link from "next/link";
 import { useId, useState } from "react";
 
-import { formatarNumero } from "@/lib/domain/historico";
 import {
   METRICAS_DO_GRAFICO,
   barrasDoExercicio,
@@ -12,12 +11,22 @@ import {
   historicoPorData,
   historicoPorSerie,
   recordeDoExercicio,
+  type FormatoDaPlanilha,
   type MetricaDoGrafico,
 } from "@/lib/domain/planilha-do-aluno";
+import type { Formatos } from "@/lib/i18n/formatos";
+import { preencher } from "@/lib/i18n/texto";
 import type { ExercicioDaDivisao, TreinoDaDivisao } from "@/lib/queries/divisao";
 import type { Macrotreino } from "@/lib/queries/macrotreinos";
 import type { ExercicioComProgresso } from "@/lib/queries/progresso";
 import { cn } from "@/lib/utils";
+
+import { usePainel } from "./idioma-do-painel";
+
+/** O formato da planilha no idioma do painel. */
+function formatoDa(f: Formatos, serie: string): FormatoDaPlanilha {
+  return { data: f.dataCurta, numero: f.numero, serie: (n) => preencher(serie, { n }) };
+}
 
 /**
  * "Programa atual" do perfil do aluno, no desenho do protótipo: a planilha de
@@ -49,24 +58,26 @@ export function ProgramaAtual({
   const [aba, setAba] = useState<"planilha" | "grafico">("planilha");
   const historico = new Map(exercicios.map((e) => [e.chave, e]));
   const id = useId();
+  const { t } = usePainel();
+  const p = t.ficha.programa;
 
   return (
     <section className="min-w-0 overflow-hidden rounded-[12px] border border-border bg-surface">
       <header className="flex flex-wrap items-center justify-between gap-2.5 border-b border-border-soft px-[18px] py-4">
         <div className="min-w-0">
-          <h2 className="text-[14px] font-medium text-ink">Programa atual</h2>
+          <h2 className="text-[14px] font-medium text-ink">{p.titulo}</h2>
           {programa ? (
             <p className="mt-0.5 truncate text-[12px] text-ink-5">
-              {programa.name} · semana {semana} de {programa.total_weeks}
+              {preencher(p.semana, { nome: programa.name, semana: semana ?? 1, total: programa.total_weeks })}
             </p>
           ) : null}
         </div>
         {programa ? (
-          <div role="tablist" aria-label="Como ver o programa" className="flex rounded-[8px] bg-canvas p-0.5">
+          <div role="tablist" aria-label={p.comoVer} className="flex rounded-[8px] bg-canvas p-0.5">
             {(
               [
-                ["planilha", "Planilha", Sheet],
-                ["grafico", "Gráfico", ChartLine],
+                ["planilha", p.planilha, Sheet],
+                ["grafico", p.grafico, ChartLine],
               ] as const
             ).map(([valor, rotulo, Icone]) => (
               <button
@@ -92,19 +103,19 @@ export function ProgramaAtual({
 
       {!programa ? (
         <div className="px-[18px] py-8 text-center">
-          <p className="mb-3.5 text-[13px] font-medium text-ink-4">Nenhum programa de treino ativo</p>
+          <p className="mb-3.5 text-[13px] font-medium text-ink-4">{p.nenhum}</p>
           <Link
             href={`/painel/treinos?aluno=${alunoId}&novo=1`}
             className="inline-block rounded-[9px] bg-brand px-4 py-2 text-[12.5px] font-semibold text-white transition hover:bg-brand-hover"
           >
-            Montar programa
+            {p.montar}
           </Link>
         </div>
       ) : (
         <>
           <div role="tabpanel" id={`${id}-${aba}`} aria-labelledby={`${id}-aba-${aba}`}>
             {treinos.length === 0 ? (
-              <p className="px-[18px] py-4 text-[13px] text-ink-4">O programa ainda não tem treino.</p>
+              <p className="px-[18px] py-4 text-[13px] text-ink-4">{p.semTreino}</p>
             ) : aba === "planilha" ? (
               <Planilha treinos={treinos} historico={historico} />
             ) : (
@@ -116,7 +127,7 @@ export function ProgramaAtual({
               href={`/painel/treinos?aluno=${alunoId}&programa=${programa.id}`}
               className="text-[12.5px] font-semibold text-brand transition hover:text-brand-hover"
             >
-              Abrir a divisão de treino →
+              {p.abrir}
             </Link>
           </div>
         </>
@@ -138,11 +149,14 @@ function Planilha({ treinos, historico }: { treinos: TreinoDaDivisao[]; historic
   // histórico de um empurra o do outro para fora da coluna.
   const [aberto, setAberto] = useState<string | null>(null);
   const [modo, setModo] = useState<"data" | "serie">("data");
+  const { t } = usePainel();
+  const p = t.ficha.programa;
 
   return treinos.map((treino) => (
     <div key={treino.id} className="border-t border-border-soft px-[18px] py-3.5 first:border-0">
       <h3 className="mb-2 text-[13px] font-bold text-ink">
-        Treino {treino.label} <span className="text-[12px] font-medium text-ink-4">— {treino.name}</span>
+        {preencher(t.comum.treino, { label: treino.label })}{" "}
+        <span className="text-[12px] font-medium text-ink-4">— {treino.name}</span>
       </h3>
       {treino.exercicios.length ? (
         <>
@@ -150,9 +164,9 @@ function Planilha({ treinos, historico }: { treinos: TreinoDaDivisao[]; historic
             aria-hidden
             className="grid grid-cols-[minmax(0,1fr)_44px_72px] gap-2 pt-1 pb-1.5 text-[10.5px] font-medium tracking-[0.03em] text-ink-5 uppercase"
           >
-            <span>Exercício</span>
-            <span className="text-center">Séries</span>
-            <span className="text-center">Repetições</span>
+            <span>{p.exercicio}</span>
+            <span className="text-center">{p.series}</span>
+            <span className="text-center">{p.repeticoes}</span>
           </div>
           <ul>
             {treino.exercicios.map((e) => {
@@ -175,11 +189,11 @@ function Planilha({ treinos, historico }: { treinos: TreinoDaDivisao[]; historic
                     </span>
                     <span className="text-center font-medium tabular-nums">
                       {e.sets}
-                      <span className="sr-only"> séries</span>
+                      <span className="sr-only">{p.seriesSr}</span>
                     </span>
                     <span className="text-center font-medium tabular-nums">
                       {e.reps_target}
-                      <span className="sr-only"> repetições</span>
+                      <span className="sr-only">{p.repeticoesSr}</span>
                     </span>
                   </button>
                   {estaAberto ? (
@@ -196,7 +210,7 @@ function Planilha({ treinos, historico }: { treinos: TreinoDaDivisao[]; historic
           </ul>
         </>
       ) : (
-        <p className="py-1.5 text-[12.5px] text-ink-4 italic">Nenhum exercício neste treino.</p>
+        <p className="py-1.5 text-[12.5px] text-ink-4 italic">{p.nenhumExercicio}</p>
       )}
     </div>
   ));
@@ -213,35 +227,39 @@ function HistoricoDoExercicio({
   modo: "data" | "serie";
   aoMudarModo: (modo: "data" | "serie") => void;
 }) {
+  const { t, f } = usePainel();
+  const p = t.ficha.programa;
+  const formato = formatoDa(f, p.serieN);
   const proposto = [
     `${e.sets}x${e.reps_target}`,
     e.rir_target ? `RIR ${e.rir_target}` : null,
-    e.rest_seconds ? `${descanso(e.rest_seconds)} de descanso` : null,
+    e.rest_seconds ? preencher(p.descanso, { tempo: descanso(e.rest_seconds) }) : null,
   ]
     .filter(Boolean)
     .join(" · ");
   const grupos = historico
     ? modo === "data"
-      ? historicoPorData(historico.sessoes)
-      : historicoPorSerie(historico.sessoes)
+      ? historicoPorData(historico.sessoes, formato)
+      : historicoPorSerie(historico.sessoes, formato)
     : [];
 
   return (
     <div className="mb-2 ml-4 rounded-[8px] bg-canvas px-3 pt-2.5 pb-3.5">
       <p className="text-[12px] font-medium text-ink-4">
-        Proposto: <span className="font-semibold text-ink-2">{proposto}</span>
+        {p.proposto}
+        <span className="font-semibold text-ink-2">{proposto}</span>
       </p>
-      {e.technique ? <p className="mt-1 text-[12px] text-ink-4">Técnica: {e.technique}</p> : null}
+      {e.technique ? <p className="mt-1 text-[12px] text-ink-4">{preencher(p.tecnica, { tecnica: e.technique })}</p> : null}
       {e.notes ? <p className="mt-1 text-[12px] whitespace-pre-wrap text-ink-4">{e.notes}</p> : null}
 
       {historico && grupos.length ? (
         <>
           <div className="mt-2.5 flex items-center justify-between gap-2">
-            <div role="group" aria-label="Agrupar o histórico" className="flex gap-1.5">
+            <div role="group" aria-label={p.agrupar} className="flex gap-1.5">
               {(
                 [
-                  ["data", "Data"],
-                  ["serie", "Série"],
+                  ["data", p.data],
+                  ["serie", p.serie],
                 ] as const
               ).map(([valor, rotulo]) => (
                 <button
@@ -258,11 +276,13 @@ function HistoricoDoExercicio({
                 </button>
               ))}
             </div>
-            <p className="text-[11.5px] font-semibold text-brand">Recorde: {recordeDoExercicio(historico)}</p>
+            <p className="text-[11.5px] font-semibold text-brand">
+              {preencher(p.recorde, { valor: recordeDoExercicio(historico, formato) })}
+            </p>
           </div>
           <div
             role="region"
-            aria-label={`Histórico de ${e.exercicio.name}`}
+            aria-label={preencher(p.historicoDe, { nome: e.exercicio.name })}
             tabIndex={0}
             className="mt-2.5 flex max-h-[300px] flex-col gap-2.5 overflow-y-auto focus-visible:outline-2 focus-visible:outline-ink"
           >
@@ -270,7 +290,7 @@ function HistoricoDoExercicio({
               <div key={g.titulo} className="rounded-[8px] border border-border bg-surface px-3 py-2.5">
                 <p className="mb-1.5 flex items-center justify-between gap-2">
                   <span className="text-[12px] font-semibold text-ink">{g.titulo}</span>
-                  <span className="text-[11px] text-ink-4">maior: {g.maior}</span>
+                  <span className="text-[11px] text-ink-4">{preencher(p.maior, { valor: g.maior })}</span>
                 </p>
                 <ul>
                   {g.itens.map((item) => (
@@ -285,7 +305,7 @@ function HistoricoDoExercicio({
           </div>
         </>
       ) : (
-        <p className="mt-2 text-[12.5px] text-ink-4 italic">Nenhuma execução registrada ainda.</p>
+        <p className="mt-2 text-[12.5px] text-ink-4 italic">{p.nenhumaExecucao}</p>
       )}
     </div>
   );
@@ -298,12 +318,14 @@ function Grafico({ treinos, historico }: { treinos: TreinoDaDivisao[]; historico
   // O primeiro treino abre sozinho, como no protótipo: aba de gráfico que
   // abre vazia pede um clique para mostrar a primeira coisa.
   const [aberto, setAberto] = useState<string | null>(treinos[0]?.id ?? null);
+  const { t } = usePainel();
+  const p = t.ficha.programa;
 
   return (
     <>
       <div className="px-[18px] pt-3.5 pb-3">
-        <p className="mb-1.5 text-[11px] font-bold tracking-[0.05em] text-ink-5 uppercase">Métrica</p>
-        <div role="group" aria-label="Métrica do gráfico" className="flex flex-wrap gap-1.5">
+        <p className="mb-1.5 text-[11px] font-bold tracking-[0.05em] text-ink-5 uppercase">{p.metrica}</p>
+        <div role="group" aria-label={p.metricaDoGrafico} className="flex flex-wrap gap-1.5">
           {METRICAS_DO_GRAFICO.map((m) => (
             <button
               key={m.valor}
@@ -317,7 +339,7 @@ function Grafico({ treinos, historico }: { treinos: TreinoDaDivisao[]; historico
                   : "border-border text-ink-3 hover:text-ink",
               )}
             >
-              {m.rotulo}
+              {p.metricas[m.valor]}
             </button>
           ))}
         </div>
@@ -334,7 +356,8 @@ function Grafico({ treinos, historico }: { treinos: TreinoDaDivisao[]; historico
             >
               <ChevronRight size={11} aria-hidden className={cn("text-ink-5 transition", estaAberto && "rotate-90")} />
               <span className="text-[13px] font-bold text-ink">
-                Treino {treino.label} <span className="text-[12px] font-medium text-ink-4">— {treino.name}</span>
+                {preencher(t.comum.treino, { label: treino.label })}{" "}
+                <span className="text-[12px] font-medium text-ink-4">— {treino.name}</span>
               </span>
             </button>
             {estaAberto ? (
@@ -349,7 +372,7 @@ function Grafico({ treinos, historico }: { treinos: TreinoDaDivisao[]; historico
                     />
                   ))
                 ) : (
-                  <p className="text-[12.5px] text-ink-4 italic">Nenhum exercício neste treino.</p>
+                  <p className="text-[12.5px] text-ink-4 italic">{p.nenhumExercicio}</p>
                 )}
               </div>
             ) : null}
@@ -374,7 +397,11 @@ function BarrasDoExercicio({
   historico: ExercicioComProgresso | null;
   metrica: MetricaDoGrafico;
 }) {
-  const barras = historico ? barrasDoExercicio(historico.sessoes, metrica) : [];
+  const { t, f } = usePainel();
+  const p = t.ficha.programa;
+  const barras = historico
+    ? barrasDoExercicio(historico.sessoes, metrica, formatoDa(f, p.serieN))
+    : [];
   const L = 300;
   const A = 190;
   const base = 158;
@@ -382,7 +409,7 @@ function BarrasDoExercicio({
   const maior = Math.max(...barras.map((b) => b.valor), 0) || 1;
   const faixa = (L - 20) / Math.max(barras.length, 1);
   const largura = Math.min(faixa * 0.55, 34);
-  const rotulo = METRICAS_DO_GRAFICO.find((m) => m.valor === metrica)?.rotulo.toLowerCase();
+  const rotulo = p.metricas[metrica].toLowerCase();
 
   return (
     <div className="rounded-[10px] bg-canvas px-3.5 py-3">
@@ -390,13 +417,19 @@ function BarrasDoExercicio({
           e no peso corporal a "carga" são repetições. */}
       <p className="mb-2 flex items-baseline justify-between gap-2">
         <span className="text-[12.5px] font-semibold text-ink">{nome}</span>
-        {barras.length ? <span className="text-[11px] text-ink-4">em {barras[0].unidade}</span> : null}
+        {barras.length ? (
+          <span className="text-[11px] text-ink-4">{preencher(p.em, { unidade: barras[0].unidade })}</span>
+        ) : null}
       </p>
       {barras.length ? (
         <svg
           viewBox={`0 0 ${L} ${A}`}
           role="img"
-          aria-label={`${nome}, ${rotulo}: ${barras.map((b) => `${b.texto} em ${b.data}`).join("; ")}.`}
+          aria-label={preencher(p.barras, {
+            nome,
+            metrica: rotulo,
+            valores: barras.map((b) => preencher(p.barra, { texto: b.texto, data: b.data })).join("; "),
+          })}
           className="block h-auto w-full"
         >
           <line x1={10} y1={base} x2={L - 10} y2={base} className="stroke-border" strokeWidth={1} />
@@ -421,7 +454,7 @@ function BarrasDoExercicio({
                   textAnchor="middle"
                   className="fill-ink-2 text-[10px] font-bold"
                 >
-                  {formatarNumero(b.valor)}
+                  {f.numero(b.valor)}
                 </text>
                 <text
                   x={10 + i * faixa + faixa / 2}
@@ -436,7 +469,7 @@ function BarrasDoExercicio({
           })}
         </svg>
       ) : (
-        <p className="py-3 text-center text-[12px] text-ink-4 italic">Nenhuma execução registrada ainda</p>
+        <p className="py-3 text-center text-[12px] text-ink-4 italic">{p.nenhumaExecucao}</p>
       )}
     </div>
   );

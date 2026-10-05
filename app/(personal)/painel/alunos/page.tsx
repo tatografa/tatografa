@@ -3,6 +3,7 @@ import { TabelaDeAlunos } from "@/components/personal/tabela-de-alunos";
 import { requireTrainer } from "@/lib/auth/session";
 import { indicadoresDaCarteira } from "@/lib/domain/carteira";
 import { lerAlunosDaCarteira } from "@/lib/queries/painel";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
 import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 
 /**
@@ -22,7 +23,7 @@ import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
  */
 export default async function AlunosPage() {
   const { trainer } = await requireTrainer();
-  const alunos = await lerAlunosDaCarteira();
+  const [alunos, { t }] = await Promise.all([lerAlunosDaCarteira(), textosDoPainel()]);
 
   /*
    * Contado no servidor, como `dias_sem_treinar`: "novos em 30 dias" é dia de
@@ -39,8 +40,8 @@ export default async function AlunosPage() {
   return (
     <div className="@container">
       <CabecalhoDaPagina
-        titulo="Alunos"
-        subtitulo="Visualize e gerencie todos os alunos da sua consultoria"
+        titulo={t.alunos.titulo}
+        subtitulo={t.alunos.subtitulo}
         acoes={<ConvidarAluno />}
       />
 
