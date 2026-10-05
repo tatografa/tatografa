@@ -48,7 +48,7 @@ const TRADUCOES: Array<[RegExp, string]> = [
   */
   [
     /password should contain|weak.?password/i,
-    "Essa senha é fraca demais. Misture letras maiúsculas e minúsculas, números e símbolos.",
+    "Essa senha é fraca demais. Use letra minúscula, letra maiúscula, número e símbolo (como ! @ # $ %).",
   ],
   [/for security purposes|only request this after|rate limit/i, "Muitas tentativas seguidas. Espere um minuto e tente de novo."],
   [/new password should be different/i, "A nova senha precisa ser diferente da anterior."],

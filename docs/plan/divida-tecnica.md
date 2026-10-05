@@ -51,19 +51,15 @@ senha, não uma: o cadastro do aluno exigia 8 caracteres + letra + número, e o
 cadastro do personal **e a troca de senha** exigiam só o comprimento — dava para
 sair de uma senha forte para "12345678" pela tela de recuperação. Agora a regra
 é uma só (`lib/domain/senha.ts`), usada pelas três Server Actions e pelas três
-telas. **O POST direto continua aberto** e depende do que está escrito abaixo.
+telas. O POST direto foi fechado em 05/10, pela configuração descrita abaixo.
 
-**O que dá para fazer de graça, na mesma tela, e vale a pena:** subir a
-exigência de força da senha. Hoje o app pede 8 caracteres, uma letra e um
-número — mas **só no formulário**, em JavaScript. Quem manda um POST direto
-passa com o mínimo que o Supabase aceitar. Ajustar ali é a trava de verdade:
-
-- comprimento mínimo: **8** (o mesmo que a tela promete);
-- caracteres exigidos: letras minúsculas, maiúsculas e dígitos.
+**Resolvido em 05/10 (decisão do Otávio):** o painel do Supabase passou a exigir
+minúscula, maiúscula, número e símbolo, com mínimo de 8, e `lib/domain/senha.ts`
+cobra exatamente o mesmo — inclusive a mesma lista de símbolos. O POST direto
+deixou de passar com senha fraca. Se um dos dois lados mudar, o outro muda junto.
 
 Isso não substitui a checagem contra vazamento — uma senha pode ser forte e
-estar em toda base vazada do mundo —, mas fecha a distância entre o que a tela
-pede e o que o servidor aceita, que hoje está aberta.
+estar em toda base vazada do mundo —, e essa continua dependendo do plano Pro.
 
 **A decisão do Pro fica com o Otávio**, e ela não é só sobre senha: o item 3
 abaixo (projeto de produção separado) empurra para o mesmo lugar. Se for

@@ -502,6 +502,16 @@ Provar que funciona sem o Otávio ler código:
   `ChamadaDaMoldura` decide pelo endereço, porque o layout não sabe que página está
   dentro dele; sai pronto no HTML do servidor. `/entrar` e `/recuperar`, que servem os
   dois papéis, ficam com o texto do personal.
+- **[2026-10-05, decisão do Otávio]** **A senha exige minúscula, maiúscula, número e
+  símbolo, e é a mesma regra nos dois lados.** O painel do Supabase está em "Lowercase,
+  uppercase letters, digits and symbols", e `lib/domain/senha.ts` passou a cobrar o
+  mesmo — com a **lista de símbolos copiada da do Supabase**, não "tudo que não é letra
+  nem número": "é", "ç" e espaço não contam lá, e contar aqui faria a tela aprovar o que
+  o servidor recusa. As quatro telas que criam senha (cadastro do personal, convite do
+  aluno com a lista que acende, nova senha e trocar senha) leem dali, então mudou tudo de
+  uma vez. Isto também fecha a dívida de 17/09: a senha fraca não passa mais num POST
+  direto. **Mudou lá, muda aqui** — e o inverso. Quem já tem senha mais simples continua
+  entrando; a regra só vale ao criar ou trocar.
 - **[2026-10-02, do teste de campo]** **Os cinco botões do painel de macrociclos não
   faziam nada no caso comum** — Criar e ativar, Ativar (dois), Arquivar e Duplicar,
   desde o redesenho de 27/09. Todos passam por `FormularioSeguro`, que cancelava o envio,

@@ -16,14 +16,23 @@
  * (`"use server"`) e o medidor de força que o formulário desenha enquanto o
  * usuário digita (`"use client"`).
  *
- * **O que isto não resolve:** a mesma senha fraca continua passando num POST
- * direto à API do Supabase, que não conhece estas regras. Fechar aquilo é
- * configuração no painel do Supabase (Authentication → Sign In / Providers →
- * Email), registrada em `docs/plan/divida-tecnica.md` — e a proteção contra
- * senha vazada, que é outra coisa, exige o plano Pro.
+ * **E é a mesma regra do Supabase** (decisão do Otávio, 05/10): o painel está
+ * em "Lowercase, uppercase letters, digits and symbols", e por isso a senha
+ * fraca também não passa num POST direto à API. As duas precisam andar juntas:
+ * se a daqui for mais frouxa, a senha passa na tela e volta recusada pelo
+ * servidor; se for mais dura, a tela recusa o que o banco aceitaria. Mudou lá,
+ * muda aqui — e o inverso. A proteção contra senha vazada, que é outra coisa,
+ * exige o plano Pro.
  */
 
 export const SENHA_MINIMA = 8;
+
+/*
+ * Os símbolos que o Supabase aceita, copiados da lista dele. Não é "qualquer
+ * coisa que não seja letra nem número": "é", "ç" e o espaço não contam lá, e
+ * contar aqui faria a tela aprovar uma senha que o servidor recusa.
+ */
+const SIMBOLOS = "!@#$%^&*()_+-=[]{};'\\:\"|<>?,./`~";
 
 /** As exigências, na ordem em que a tela as lista. */
 export const REGRAS_DA_SENHA = [
@@ -33,14 +42,24 @@ export const REGRAS_DA_SENHA = [
     ok: (senha: string) => senha.length >= SENHA_MINIMA,
   },
   {
-    texto: "Pelo menos uma letra",
-    erro: "A senha precisa de pelo menos uma letra.",
-    ok: (senha: string) => /[a-zA-Z]/.test(senha),
+    texto: "Uma letra minúscula",
+    erro: "A senha precisa de pelo menos uma letra minúscula.",
+    ok: (senha: string) => /[a-z]/.test(senha),
   },
   {
-    texto: "Pelo menos um número",
+    texto: "Uma letra maiúscula",
+    erro: "A senha precisa de pelo menos uma letra maiúscula.",
+    ok: (senha: string) => /[A-Z]/.test(senha),
+  },
+  {
+    texto: "Um número",
     erro: "A senha precisa de pelo menos um número.",
     ok: (senha: string) => /[0-9]/.test(senha),
+  },
+  {
+    texto: "Um símbolo, como ! @ # $ %",
+    erro: "A senha precisa de pelo menos um símbolo, como ! @ # $ %.",
+    ok: (senha: string) => [...senha].some((c) => SIMBOLOS.includes(c)),
   },
 ] as const;
 
@@ -55,4 +74,4 @@ export function erroDaSenha(senha: string): string | null {
 }
 
 /** O texto de apoio do campo, para os formulários não escreverem cada um o seu. */
-export const DICA_DA_SENHA = `Mínimo de ${SENHA_MINIMA} caracteres, com uma letra e um número.`;
+export const DICA_DA_SENHA = `Mínimo de ${SENHA_MINIMA} caracteres, com letra minúscula, letra maiúscula, número e símbolo (como ! @ # $ %).`;
