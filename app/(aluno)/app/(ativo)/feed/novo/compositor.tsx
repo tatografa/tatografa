@@ -4,11 +4,11 @@ import { Camera, ImageOff, X } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 
+import { useIdioma } from "@/components/aluno/idioma-do-app";
 import { Badge, Button, EscolhaCards, Textarea } from "@/components/ui";
-import { FORA_DA_TURMA } from "@/lib/domain/turma";
 import { LIMITE_DA_LEGENDA } from "@/lib/domain/feed";
-import { formatarNumero } from "@/lib/domain/historico";
 import { prepararFoto } from "@/lib/imagem";
+import { plural, preencher } from "@/lib/i18n/texto";
 import type { TreinoDoPost } from "@/lib/queries/feed";
 
 import { publicarPost, type EstadoDaPublicacao } from "../actions";
@@ -52,6 +52,8 @@ export function Compositor({
   naTurma: boolean;
 }) {
   const [estado, acao, enviando] = useActionState(publicarPost, INICIAL);
+  const { t, f } = useIdioma();
+  const c = t.feed.compositor;
 
   const entrada = useRef<HTMLInputElement>(null);
   const [previa, setPrevia] = useState<string | null>(null);
@@ -98,7 +100,7 @@ export function Compositor({
       // uma mensagem menos útil que esta.
       if (entrada.current) entrada.current.value = "";
       mostrar(null);
-      setErroDaFoto("Não conseguimos ler essa imagem. Tente outra foto.");
+      setErroDaFoto(c.erroDaFoto);
     } finally {
       setPreparando(false);
     }
@@ -126,10 +128,8 @@ export function Compositor({
           <Badge tone="brand">{treino.rotulo}</Badge>
           <span className="text-[13.5px] font-bold text-ink">{treino.nome}</span>
           <span className="text-[12.5px] text-ink-4">
-            {treino.series} {treino.series === 1 ? "série" : "séries"}
-            {treino.volumeKg > 0
-              ? ` · ${formatarNumero(treino.volumeKg)} kg`
-              : ""}
+            {plural(treino.series, t.comum.series)}
+            {treino.volumeKg > 0 ? ` · ${f.carga(treino.volumeKg)}` : ""}
           </span>
         </div>
       ) : null}
@@ -151,7 +151,7 @@ export function Compositor({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={previa}
-              alt="Prévia da foto escolhida"
+              alt={c.previa}
               className="aspect-square w-full bg-canvas-sunken object-cover"
             />
             <button
@@ -160,7 +160,7 @@ export function Compositor({
               className="absolute top-2.5 right-2.5 flex size-9 items-center justify-center rounded-full bg-ink/70 text-white backdrop-blur transition hover:bg-ink"
             >
               <X size={17} aria-hidden />
-              <span className="sr-only">Remover a foto</span>
+              <span className="sr-only">{c.removerFoto}</span>
             </button>
           </div>
         ) : (
@@ -169,16 +169,16 @@ export function Compositor({
             className="flex aspect-square w-full cursor-pointer flex-col items-center justify-center gap-2.5 rounded-card-lg border-[1.5px] border-dashed border-border bg-surface text-ink-4 transition hover:border-border-strong hover:text-ink-3 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand"
           >
             <Camera size={26} aria-hidden />
-            <span className="text-[14px] font-bold">Tirar ou escolher uma foto</span>
+            <span className="text-[14px] font-bold">{c.escolherFoto}</span>
             <span className="max-w-[240px] text-center text-[12.5px] leading-relaxed">
-              Opcional — dá para publicar só com texto.
+              {c.opcional}
             </span>
           </label>
         )}
 
         {preparando ? (
           <p role="status" className="text-[12.5px] font-semibold text-ink-4">
-            Preparando a foto…
+            {c.preparando}
           </p>
         ) : null}
 
@@ -191,10 +191,10 @@ export function Compositor({
       </div>
 
       <Textarea
-        label="Legenda"
+        label={c.legenda}
         name="legenda"
         rows={3}
-        placeholder="Como foi o treino?"
+        placeholder={c.legendaExemplo}
         value={legenda}
         maxLength={LIMITE_DA_LEGENDA}
         onChange={(e) => setLegenda(e.target.value)}
@@ -202,7 +202,7 @@ export function Compositor({
         hint={
           restam > 60
             ? undefined
-            : `${restam} ${restam === 1 ? "caractere restante" : "caracteres restantes"}`
+            : plural(restam, c.restantes)
         }
       />
 
@@ -213,7 +213,7 @@ export function Compositor({
         sem querer para um grupo.
       */}
       <EscolhaCards
-        label="Quem pode ver"
+        label={c.quemVe}
         name="alcance"
         colunas={1}
         valor={alcance}
@@ -222,16 +222,20 @@ export function Compositor({
         opcoes={
           naTurma
             ? [
-                { valor: "personal", rotulo: `Só ${nomeDoPersonal}`, icone: "🔒" },
-                { valor: "publico", rotulo: `${nomeDoPersonal} e a turma`, icone: "👥" },
+                { valor: "personal", rotulo: preencher(c.so, { nome: nomeDoPersonal }), icone: "🔒" },
+                {
+                  valor: "publico",
+                  rotulo: preencher(c.eATurma, { nome: nomeDoPersonal }),
+                  icone: "👥",
+                },
               ]
-            : [{ valor: "personal", rotulo: `Só ${nomeDoPersonal}`, icone: "🔒" }]
+            : [{ valor: "personal", rotulo: preencher(c.so, { nome: nomeDoPersonal }), icone: "🔒" }]
         }
       />
 
       {!naTurma && (
         <p className="rounded-card bg-canvas-sunken px-3.5 py-3 text-[12.5px] leading-relaxed text-ink-3">
-          {FORA_DA_TURMA.compositor(nomeDoPersonal)}
+          {preencher(t.feed.foraDaTurma.compositor, { nome: nomeDoPersonal })}
         </p>
       )}
 
@@ -247,10 +251,10 @@ export function Compositor({
           size="lg"
           disabled={enviando || preparando || (!temFoto && !legenda.trim())}
         >
-          {enviando ? "Publicando…" : "Publicar"}
+          {enviando ? c.publicando : t.feed.publicar}
         </Button>
         <Link href="/app/feed" className="text-[13.5px] font-semibold text-ink-4 transition hover:text-ink-2">
-          Cancelar
+          {t.comum.cancelar}
         </Link>
       </div>
     </form>

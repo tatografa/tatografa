@@ -11,6 +11,7 @@ import { recordesDaSessao, type SerieRecemFeita } from "@/lib/domain/recordes";
 import { seriesDaSessao, ultimaSessaoConcluida } from "@/lib/queries/execucao";
 import { chaveDoExercicio } from "@/lib/queries/exercicios";
 import { recordesAntesDaSessao } from "@/lib/queries/recordes";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
 import { lerTreino, type ExercicioPrescrito } from "@/lib/queries/treinos";
 
 /**
@@ -39,11 +40,12 @@ export default async function FimDoTreino(
     exercise_source: e.exercicio.source,
   }));
 
-  const [series, recordeAnterior] = await Promise.all([
+  const [series, recordeAnterior, { idioma }] = await Promise.all([
     seriesDaSessao(sessao.id),
     // "Antes desta sessão": incluir a sessão que acabou faria a marca nova ser
     // o próprio teto a superar, e nenhum recorde apareceria nunca.
     recordesAntesDaSessao(student.id, referencias, sessao.id),
+    textosDoApp(),
   ]);
 
   return (
@@ -54,6 +56,7 @@ export default async function FimDoTreino(
       series={series}
       recordes={recordesDaTela(treino.exercicios, series, recordeAnterior)}
       sessaoId={sessao.id}
+      idioma={idioma}
     />
   );
 }

@@ -58,6 +58,8 @@ export const COLUNA_DA_FOTO = {
 /* -------------------------------------------------------- comparação ----- */
 
 export type Comparacao = {
+  /** "peso", "gordura" ou a região — o que a tela traduz. */
+  chave?: "peso" | "gordura" | Regiao;
   rotulo: string;
   unidade: string;
   anterior: number | null;

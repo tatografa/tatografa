@@ -13,6 +13,7 @@ import {
   type Regiao,
   type Slot,
 } from "@/lib/domain/reavaliacao";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
 import { createClient } from "@/lib/supabase/server";
 
 export type CampoDaReavaliacao = "peso" | "gordura" | "observacao" | Regiao | "fotos";
@@ -60,7 +61,16 @@ export async function enviarReavaliacao(
   formData: FormData,
 ): Promise<EstadoDaReavaliacao> {
   const id = String(formData.get("id") ?? "");
-  if (!pareceUuid(id)) return { erro: "Reavaliação inválida." };
+  const m = (await textosDoApp()).t.perfil.reavaliacao.acoes;
+  if (!pareceUuid(id)) return { erro: m.invalida };
+
+  // As mensagens do esquema são as do português; a tela recebe a do idioma do
+  // app, escolhida pelo campo — cada campo só tem um jeito de estar errado.
+  const mensagemDo: Record<"peso" | "gordura" | "observacao", string> = {
+    peso: m.peso,
+    gordura: m.gordura,
+    observacao: m.observacaoLonga,
+  };
 
   const errosPorCampo: EstadoDaReavaliacao["errosPorCampo"] = {};
 
@@ -72,8 +82,8 @@ export async function enviarReavaliacao(
 
   if (!analise.success) {
     for (const problema of analise.error.issues) {
-      const campo = problema.path[0] as CampoDaReavaliacao | undefined;
-      if (campo && !errosPorCampo[campo]) errosPorCampo[campo] = problema.message;
+      const campo = problema.path[0] as "peso" | "gordura" | "observacao" | undefined;
+      if (campo && !errosPorCampo[campo]) errosPorCampo[campo] = mensagemDo[campo];
     }
   }
 
@@ -82,7 +92,7 @@ export async function enviarReavaliacao(
     const bruto = String(formData.get(regiao) ?? "");
     const resultado = medidaDaRegiao.safeParse(bruto);
     if (!resultado.success) {
-      errosPorCampo[regiao] = resultado.error.issues[0]?.message ?? "Medida inválida.";
+      errosPorCampo[regiao] = m.medida;
       continue;
     }
     if (resultado.data !== null) medidas[regiao] = resultado.data;
@@ -94,11 +104,11 @@ export async function enviarReavaliacao(
     if (!(arquivo instanceof File) || arquivo.size === 0) continue;
 
     if (!EXTENSAO_POR_TIPO[arquivo.type]) {
-      errosPorCampo.fotos = "As fotos precisam ser JPG, PNG ou WEBP.";
+      errosPorCampo.fotos = m.tipoDasFotos;
       continue;
     }
     if (arquivo.size > LIMITE_DE_BYTES) {
-      errosPorCampo.fotos = "Uma das fotos passa de 5 MB. Tire outra.";
+      errosPorCampo.fotos = m.tamanhoDasFotos;
       continue;
     }
     fotos[slot] = arquivo;
@@ -116,9 +126,7 @@ export async function enviarReavaliacao(
     Object.keys(fotos).length === 0;
 
   if (vazia) {
-    return {
-      erro: "Preencha ao menos uma medida ou envie uma foto antes de enviar.",
-    };
+    return { erro: m.vazia };
   }
 
   const { student } = await requireStudent();
@@ -146,7 +154,7 @@ export async function enviarReavaliacao(
 
     if (error) {
       if (subidos.length) await supabase.storage.from("reavaliacoes").remove(subidos);
-      return { erro: "Não conseguimos enviar as fotos agora. Tente de novo." };
+      return { erro: m.falhaFotos };
     }
 
     caminhos[slot] = caminho;
@@ -176,7 +184,7 @@ export async function enviarReavaliacao(
 
   if (error) {
     if (subidos.length) await supabase.storage.from("reavaliacoes").remove(subidos);
-    return { erro: "Não conseguimos enviar agora. Tente de novo." };
+    return { erro: m.falhaEnviar };
   }
 
   /*
@@ -225,7 +233,8 @@ export async function apagarFotosDaReavaliacao(
   formData: FormData,
 ): Promise<EstadoDoApagamento> {
   const id = String(formData.get("id") ?? "");
-  if (!pareceUuid(id)) return { erro: "Reavaliação inválida." };
+  const m = (await textosDoApp()).t.perfil.reavaliacao.acoes;
+  if (!pareceUuid(id)) return { erro: m.invalida };
 
   const { student } = await requireStudent();
   const supabase = await createClient();
@@ -237,7 +246,7 @@ export async function apagarFotosDaReavaliacao(
     .eq("student_id", student.id)
     .maybeSingle();
 
-  if (erroDaLeitura || !antes) return { erro: "Reavaliação não encontrada." };
+  if (erroDaLeitura || !antes) return { erro: m.naoEncontrada };
 
   const { error, count } = await supabase
     .from("assessments")
@@ -248,10 +257,10 @@ export async function apagarFotosDaReavaliacao(
     .eq("id", id)
     .eq("student_id", student.id);
 
-  if (error) return { erro: "Não conseguimos apagar as fotos agora. Tente de novo." };
+  if (error) return { erro: m.falhaApagar };
 
   // Update barrado pelo RLS não levanta erro: afeta zero linhas em silêncio.
-  if (count === 0) return { erro: "Reavaliação não encontrada." };
+  if (count === 0) return { erro: m.naoEncontrada };
 
   const caminhos = [
     antes.photo_front_path,

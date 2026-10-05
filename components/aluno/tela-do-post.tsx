@@ -2,7 +2,10 @@ import { Lock } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui";
-import { formatarNumero } from "@/lib/domain/historico";
+import type { Idioma } from "@/lib/domain/idioma";
+import { TEXTOS_DO_APP } from "@/lib/i18n/app";
+import { formatos } from "@/lib/i18n/formatos";
+import { plural, preencher } from "@/lib/i18n/texto";
 import type { PostDetalhado } from "@/lib/queries/feed";
 
 import { HoraLocal } from "./hora-local";
@@ -20,7 +23,9 @@ export function TelaDoPost({
   acoes,
   formulario,
   exclusao,
+  idioma,
 }: {
+  idioma: Idioma;
   post: PostDetalhado;
   idDoPersonal: string;
   /** O botão de curtir. */
@@ -31,12 +36,15 @@ export function TelaDoPost({
   exclusao?: React.ReactNode;
 }) {
   const autorEPersonal = post.autor.id === idDoPersonal;
+  const t = TEXTOS_DO_APP[idioma];
+  const fd = t.feed;
+  const f = formatos(idioma);
 
   return (
     <div className="space-y-5">
       <header className="space-y-1.5">
         <Link href="/app/feed" className="eyebrow text-ink-4 transition hover:text-ink-2">
-          ← Feed
+          {fd.post.voltar}
         </Link>
       </header>
 
@@ -51,10 +59,10 @@ export function TelaDoPost({
 
           <div className="min-w-0 flex-1">
             <h1 className="flex items-center gap-1.5 text-[14px] font-bold text-ink">
-              <span className="truncate">{post.meu ? "Você" : post.autor.nome}</span>
+              <span className="truncate">{post.meu ? t.comum.voce : post.autor.nome}</span>
               {autorEPersonal ? (
                 <Badge tone="brand-solido" className="shrink-0">
-                  Personal
+                  {t.comum.personalSelo}
                 </Badge>
               ) : null}
             </h1>
@@ -69,7 +77,7 @@ export function TelaDoPost({
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={post.fotoUrl}
-            alt={post.legenda ?? `Foto do treino de ${post.meu ? "você" : post.autor.nome}`}
+            alt={post.legenda ?? (post.meu ? fd.fotoDeVoce : preencher(fd.fotoDe, { nome: post.autor.nome }))}
             className="aspect-square w-full bg-canvas-sunken object-cover"
           />
         ) : null}
@@ -85,11 +93,8 @@ export function TelaDoPost({
               <Badge tone="brand">{post.treino.rotulo}</Badge>
               <span className="font-bold text-ink-2">{post.treino.nome}</span>
               <span>
-                {post.treino.series}{" "}
-                {post.treino.series === 1 ? "série" : "séries"}
-                {post.treino.volumeKg > 0
-                  ? ` · ${formatarNumero(post.treino.volumeKg)} kg`
-                  : ""}
+                {plural(post.treino.series, t.comum.series)}
+                {post.treino.volumeKg > 0 ? ` · ${f.carga(post.treino.volumeKg)}` : ""}
               </span>
             </p>
           ) : null}
@@ -101,7 +106,7 @@ export function TelaDoPost({
           {post.meu && post.visibilidade === "personal" ? (
             <p className="flex items-center gap-1.5 text-[12px] font-medium text-ink-4">
               <Lock aria-hidden size={11} />
-              Só o seu personal vê este post
+              {fd.soPersonalVePost}
             </p>
           ) : null}
 
@@ -114,7 +119,7 @@ export function TelaDoPost({
 
       <section className="space-y-3">
         <h2 className="eyebrow text-ink-4">
-          {post.comentarios === 1 ? "1 comentário" : `${post.comentarios} comentários`}
+          {plural(post.comentarios, fd.nComentarios)}
         </h2>
 
         {post.listaDeComentarios.length ? (
@@ -133,11 +138,11 @@ export function TelaDoPost({
                 <div className="min-w-0 flex-1">
                   <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[12.5px] font-bold text-ink">
                     <span className="truncate">
-                      {comentario.meu ? "Você" : comentario.autorNome}
+                      {comentario.meu ? t.comum.voce : comentario.autorNome}
                     </span>
                     {comentario.doPersonal ? (
                       <Badge tone="brand-solido" className="shrink-0">
-                        Personal
+                        {t.comum.personalSelo}
                       </Badge>
                     ) : null}
                     <span className="font-mono text-[10.5px] font-medium tracking-[0.04em] text-ink-5 uppercase">
@@ -154,7 +159,7 @@ export function TelaDoPost({
           </ul>
         ) : (
           <p className="rounded-card border border-border-soft bg-surface px-3.5 py-3 text-[13px] text-ink-3">
-            Ninguém comentou ainda.
+            {fd.post.ninguemComentou}
           </p>
         )}
 

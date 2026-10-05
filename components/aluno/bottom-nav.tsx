@@ -6,8 +6,11 @@ import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
+import { useIdioma } from "./idioma-do-app";
+
 type Aba = {
-  rotulo: string;
+  /** A chave do rótulo no dicionário — e o que identifica a aba ativa. */
+  rotulo: "treinar" | "progresso" | "feed" | "perfil";
   href?: string;
   Icone: typeof Dumbbell;
   /**
@@ -36,10 +39,10 @@ type Aba = {
  * de entrada já logado. Achado do primeiro teste de campo.
  */
 const ABAS: Aba[] = [
-  { rotulo: "Treinar", href: "/app", Icone: Dumbbell },
-  { rotulo: "Progresso", href: "/app/progresso", Icone: TrendingUp, sePausa: true },
-  { rotulo: "Feed", href: "/app/feed", Icone: Users, sePausa: true },
-  { rotulo: "Perfil", href: "/app/perfil", Icone: User },
+  { rotulo: "treinar", href: "/app", Icone: Dumbbell },
+  { rotulo: "progresso", href: "/app/progresso", Icone: TrendingUp, sePausa: true },
+  { rotulo: "feed", href: "/app/feed", Icone: Users, sePausa: true },
+  { rotulo: "perfil", href: "/app/perfil", Icone: User },
 ];
 
 /**
@@ -66,10 +69,11 @@ function abaAtiva(caminho: string): string | null {
 export function BottomNav({ naTurma = true }: { naTurma?: boolean }) {
   const caminho = usePathname();
   const ativaAgora = abaAtiva(caminho);
+  const { t } = useIdioma();
 
   return (
     <nav
-      aria-label="Navegação principal"
+      aria-label={t.comum.nav.rotulo}
       className={cn(
         "fixed inset-x-0 bottom-0 z-20 border-t border-border-soft bg-surface",
         // A barra é fixa na janela, mas o app tem largura máxima: sem o
@@ -86,7 +90,7 @@ export function BottomNav({ naTurma = true }: { naTurma?: boolean }) {
             <>
               <Icone size={16} aria-hidden />
               <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.06em]">
-                {rotulo}
+                {t.comum.nav[rotulo]}
               </span>
             </>
           );
@@ -111,7 +115,7 @@ export function BottomNav({ naTurma = true }: { naTurma?: boolean }) {
                   // Dois motivos diferentes para o mesmo cinza: "em breve" é
                   // promessa, "pausado" é estado. Um título só faria a aba
                   // desativada mentir num dos dois casos.
-                  title={pausada ? "Seu acesso está pausado" : "Disponível em breve"}
+                  title={pausada ? t.comum.nav.pausada : t.comum.nav.emBreve}
                   className="flex h-16 flex-col items-center justify-center gap-1 text-ink-5 opacity-45"
                 >
                   {conteudo}

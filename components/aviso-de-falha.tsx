@@ -26,11 +26,16 @@ export function AvisoDeFalha({
   texto,
   digest,
   aoTentarDeNovo,
+  rotuloDoBotao = "Tentar de novo",
+  rotuloDoCodigo = "código",
 }: {
   titulo: string;
   texto: string;
   digest?: string;
   aoTentarDeNovo: () => void;
+  /** O app do aluno passa no idioma dele; o painel ainda é só português. */
+  rotuloDoBotao?: string;
+  rotuloDoCodigo?: string;
 }) {
   return (
     <div className="mx-auto flex max-w-[420px] flex-col items-center px-1 py-10 text-center">
@@ -48,14 +53,14 @@ export function AvisoDeFalha({
 
       <Button className="mt-5" onClick={aoTentarDeNovo}>
         <RotateCw size={15} aria-hidden />
-        Tentar de novo
+        {rotuloDoBotao}
       </Button>
 
       {/* O digest é o que liga a tela ao log do servidor. Aparece pequeno, para
           o usuário poder copiar quando pedir ajuda — não para ele entender. */}
       {digest ? (
         <p className="mt-5 font-mono text-[10px] tracking-[0.06em] text-ink-5 uppercase">
-          código {digest}
+          {rotuloDoCodigo} {digest}
         </p>
       ) : null}
     </div>

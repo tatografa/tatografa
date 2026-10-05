@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, CloudOff, History, Pencil, X } from "lucide-react";
 
+import { useIdioma } from "@/components/aluno/idioma-do-app";
 import { Stepper } from "@/components/aluno/stepper";
 import { TimerDeDescanso } from "@/components/aluno/timer-de-descanso";
 import {
@@ -20,8 +21,9 @@ import {
   seriesQueFaltam,
   type SerieDaExecucao,
 } from "@/lib/domain/execucao";
-import { textoDaUltimaVez, type UltimaVez } from "@/lib/domain/recordes";
-import { rirEmPalavras } from "@/lib/domain/prescricao";
+import type { UltimaVez } from "@/lib/domain/recordes";
+import { rirNoIdioma, textoDaUltimaVezNoIdioma } from "@/lib/i18n/app/frases";
+import { preencher } from "@/lib/i18n/texto";
 
 import { ComoFazer } from "./como-fazer";
 import { MenuDaExecucao } from "./menu-da-execucao";
@@ -114,6 +116,8 @@ function ExecucaoMontada({
   armazenamento,
 }: ExecucaoProps & { armazenamento: boolean }) {
   const router = useRouter();
+  const { t } = useIdioma();
+  const te = t.execucao.tela;
   const fila = useFilaDeSeries(sessao.id, seriesIniciais, armazenamento);
   const { series } = fila;
 
@@ -191,9 +195,7 @@ function ExecucaoMontada({
       // sem as séries ainda a caminho.
       const vazia = await fila.esvaziar();
       if (!vazia) {
-        setAvisoDeEnvio(
-          "Ainda há séries para enviar. Assim que a internet voltar, toque de novo.",
-        );
+        setAvisoDeEnvio(te.aindaHaSeries);
         return;
       }
 
@@ -213,9 +215,7 @@ function ExecucaoMontada({
       if (!fila.descartar()) {
         const tardias = await fila.esvaziar();
         if (!tardias || !fila.descartar()) {
-          setAvisoDeEnvio(
-            "A última série ainda não foi enviada. Toque em concluir de novo quando a internet voltar.",
-          );
+          setAvisoDeEnvio(te.ultimaNaoEnviada);
           return;
         }
       }
@@ -223,11 +223,11 @@ function ExecucaoMontada({
       apagarTela(sessao.id);
       router.replace(`/app/executar/${treino.id}/fim`);
     } catch {
-      setAvisoDeEnvio("Não deu para concluir agora. Tente de novo.");
+      setAvisoDeEnvio(te.naoDeu);
     } finally {
       setConcluindo(false);
     }
-  }, [fila, router, sessao.id, treino.id]);
+  }, [fila, router, sessao.id, treino.id, te]);
 
   if (!exercicio) return null;
 
@@ -265,8 +265,11 @@ function ExecucaoMontada({
             {exercicio.exercicio.name}
           </h1>
           <p className="mt-1 text-[13px] text-dark-muted">
-            {exercicio.sets} séries · {exercicio.reps_target} reps ·{" "}
-            {exercicio.rest_seconds}s descanso
+            {preencher(te.prescricao, {
+              sets: exercicio.sets,
+              reps: exercicio.reps_target,
+              rest: exercicio.rest_seconds,
+            })}
           </p>
 
           <UltimaVezDoExercicio ultima={referencia[exercicio.id]} />
@@ -277,7 +280,7 @@ function ExecucaoMontada({
               quem prescreve, e o aluno lê isto entre uma série e outra. */}
           {exercicio.rir_target ? (
             <p className="mt-2.5 inline-block rounded-[8px] border border-dark-border px-2.5 py-1.5 text-[11px] font-medium text-dark-muted">
-              {rirEmPalavras(exercicio.rir_target)}{" "}
+              {rirNoIdioma(exercicio.rir_target, t.execucao.rir)}{" "}
               <span className="font-mono">(RIR {exercicio.rir_target})</span>
             </p>
           ) : null}
@@ -417,7 +420,7 @@ function ExecucaoMontada({
             disabled={exercicioConcluido(exercicio, series) || concluindo}
             className="h-[52px] flex-1 rounded-[13px] border-[1.5px] border-dark-border-2 text-[14px] font-bold text-dark-text-2 transition disabled:opacity-30 active:scale-[0.99]"
           >
-            Pular exercício
+            {te.pular}
           </button>
 
           {podeConcluir ? (
@@ -427,7 +430,7 @@ function ExecucaoMontada({
               disabled={concluindo}
               className="h-[52px] flex-[1.3] rounded-[13px] bg-brand text-[14px] font-bold text-white shadow-cta transition disabled:opacity-60 active:scale-[0.99]"
             >
-              {concluindo ? "Concluindo…" : "Concluir treino"}
+              {concluindo ? te.concluindo : te.concluir}
             </button>
           ) : (
             <button
@@ -439,7 +442,7 @@ function ExecucaoMontada({
               }}
               className="h-[52px] flex-[1.3] rounded-[13px] bg-dark-elev text-[14px] font-bold text-dark-text transition active:scale-[0.99]"
             >
-              Próximo exercício →
+              {te.proximo}
             </button>
           )}
         </div>
@@ -457,14 +460,15 @@ function ExecucaoMontada({
  * traço.
  */
 function UltimaVezDoExercicio({ ultima }: { ultima: UltimaVez | undefined }) {
+  const { t, f } = useIdioma();
   if (!ultima) return null;
-  const texto = textoDaUltimaVez(ultima);
+  const texto = textoDaUltimaVezNoIdioma(ultima, f);
   if (!texto) return null;
 
   return (
     <p className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-dark-surface px-3 py-1.5 text-[12px] font-semibold text-dark-text-2">
       <History aria-hidden size={13} className="text-dark-muted" />
-      <span className="text-dark-muted">Última vez:</span> {texto}
+      <span className="text-dark-muted">{t.execucao.tela.ultimaVez}</span> {texto}
     </p>
   );
 }
@@ -487,13 +491,14 @@ function Cabecalho({
   /** O ⋮ do doc 05 §5. Recebido pronto: o cabeçalho não sabe o que ele faz. */
   menu: React.ReactNode;
 }) {
+  const { t } = useIdioma();
   return (
     <header className="border-b border-dark-border bg-dark-bg px-5 pt-[calc(12px+env(safe-area-inset-top))] pb-3">
       <div className="mx-auto max-w-[440px]">
         <div className="flex items-center justify-between gap-3">
           <Link
             href={`/app/treinos/${treino.id}`}
-            aria-label="Sair da execução"
+            aria-label={t.execucao.tela.sair}
             className="-ml-2 flex size-11 items-center justify-center text-dark-text-2"
           >
             <ArrowLeft aria-hidden size={20} />
@@ -501,7 +506,7 @@ function Cabecalho({
 
           <div className="min-w-0 text-center">
             <p className="eyebrow text-[12px] text-dark-text">
-              Treino {treino.label}
+              {preencher(t.comum.treino, { label: treino.label })}
             </p>
             <p className="mt-0.5 truncate font-mono text-[10px] font-medium tracking-[0.08em] text-dark-muted uppercase">
               {treino.name}
@@ -522,7 +527,7 @@ function Cabecalho({
 
         <div
           role="progressbar"
-          aria-label="Exercícios concluídos"
+          aria-label={t.execucao.tela.progresso}
           aria-valuemin={0}
           aria-valuemax={treino.exercicios.length}
           aria-valuenow={Math.round(fracao * treino.exercicios.length)}
@@ -536,7 +541,10 @@ function Cabecalho({
 
         <div className="mt-2 flex items-baseline justify-between font-mono text-[10px] tracking-[0.08em] text-dark-muted uppercase">
           <span>
-            Exercício {indice + 1} de {treino.exercicios.length}
+            {preencher(t.execucao.tela.exercicioDe, {
+              n: indice + 1,
+              total: treino.exercicios.length,
+            })}
           </span>
           <Cronometro inicioEm={inicioEm} />
         </div>
@@ -553,6 +561,7 @@ function Cabecalho({
  * descobrir depois que sumiu.
  */
 function SeriesPendentes({ quantidade }: { quantidade: number }) {
+  const { t } = useIdioma();
   if (!quantidade) {
     // Espaço reservado para o cabeçalho não pular quando o aviso aparece.
     return <span aria-hidden className="size-11 shrink-0" />;
@@ -570,7 +579,7 @@ function SeriesPendentes({ quantidade }: { quantidade: number }) {
         coisa pendente de envio — e é justamente esse aviso que torna aceitável
         a fila viver no aparelho.
       */}
-      {quantidade} a enviar
+      {preencher(t.execucao.tela.aEnviar, { n: quantidade })}
     </p>
   );
 }
@@ -624,6 +633,8 @@ function SerieAtiva({
   aoCancelar: () => void;
 }) {
   const bodyweight = exercicio.exercicio.is_bodyweight;
+  const { t } = useIdioma();
+  const te = t.execucao.tela;
 
   return (
     <div
@@ -644,11 +655,11 @@ function SerieAtiva({
         // stepper daria um número que não existe, e `volumeDaSessao` ignora
         // carga nula de propósito.
         <p className="text-center text-[13px] font-semibold text-dark-text-2">
-          peso corporal
+          {te.pesoCorporal}
         </p>
       ) : (
         <Stepper
-          rotulo="carga"
+          rotulo={te.carga}
           unidade="kg"
           valor={valores.carga}
           passo={PASSO_DE_CARGA}
@@ -659,7 +670,7 @@ function SerieAtiva({
       )}
 
       <Stepper
-        rotulo="repetições"
+        rotulo={te.repeticoes}
         valor={valores.reps}
         passo={1}
         minimo={LIMITES_DA_EXECUCAO.repsMin}
@@ -672,7 +683,7 @@ function SerieAtiva({
           <button
             type="button"
             onClick={aoCancelar}
-            aria-label={`Cancelar correção da série ${numero}`}
+            aria-label={preencher(te.cancelarCorrecao, { n: numero })}
             className="flex size-9 items-center justify-center rounded-full text-dark-muted"
           >
             <X aria-hidden size={16} />
@@ -683,7 +694,7 @@ function SerieAtiva({
           disabled={desabilitado}
           onClick={() => aoConfirmar(valores)}
           aria-label={
-            correcao ? `Salvar correção da série ${numero}` : `Confirmar série ${numero}`
+            preencher(correcao ? te.salvarCorrecao : te.confirmar, { n: numero })
           }
           className="flex size-11 items-center justify-center rounded-full bg-brand text-white shadow-brand transition active:scale-95 disabled:pointer-events-none disabled:opacity-40"
         >
@@ -705,6 +716,8 @@ function SerieRegistrada({
   bodyweight: boolean;
   aoCorrigir: () => void;
 }) {
+  const { t, f } = useIdioma();
+  const te = t.execucao.tela;
   // Série sem registro e que não é a ativa: ainda vai chegar a vez dela.
   if (!serie) {
     return (
@@ -727,10 +740,10 @@ function SerieRegistrada({
   }
 
   const carga = serie.skipped
-    ? "pulada"
+    ? te.pulada
     : bodyweight || serie.load_kg === null
-      ? "peso corporal"
-      : `${formatarCarga(serie.load_kg)} kg`;
+      ? te.pesoCorporal
+      : `${f.decimal(serie.load_kg)} kg`;
 
   return (
     /*
@@ -742,7 +755,10 @@ function SerieRegistrada({
     <button
       type="button"
       onClick={aoCorrigir}
-      aria-label={`Corrigir série ${numero}: ${carga}${serie.reps === null ? "" : `, ${serie.reps} repetições`}`}
+      aria-label={
+        preencher(te.corrigir, { n: numero, carga }) +
+        (serie.reps === null ? "" : preencher(te.corrigirReps, { reps: serie.reps }))
+      }
       className={cn(
         "grid w-full grid-cols-[26px_1fr_1fr_40px] items-center gap-2 rounded-card bg-dark-surface px-3 py-3 text-left",
         "opacity-50 transition active:opacity-80",
@@ -832,11 +848,6 @@ function padraoPara(
   return { carga: 0, reps: alvo };
 }
 
-function formatarCarga(valor: number): string {
-  return Number.isInteger(valor)
-    ? String(valor)
-    : String(valor).replace(".", ",");
-}
 
 function lerTela(sessionId: string): TelaGravada | null {
   // O inicializador de estado também roda no servidor, onde não há janela.

@@ -11,10 +11,13 @@ import { cn } from "@/lib/utils";
 export function VideoDoExercicio({
   url,
   nome,
+  titulo = "Vídeo: {nome}",
   className,
 }: {
   url: string | null;
   nome: string;
+  /** "Vídeo: {nome}" no idioma de quem vê; o painel ainda é só português. */
+  titulo?: string;
   className?: string;
 }) {
   const embed = url ? enderecoDeEmbed(url) : null;
@@ -29,7 +32,7 @@ export function VideoDoExercicio({
       {embed ? (
         <iframe
           src={embed}
-          title={`Vídeo: ${nome}`}
+          title={titulo.replace("{nome}", nome)}
           className="size-full border-0"
           loading="lazy"
           allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

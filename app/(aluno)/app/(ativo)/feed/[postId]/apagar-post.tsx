@@ -3,6 +3,7 @@
 import { Trash2 } from "lucide-react";
 import { useActionState, useState } from "react";
 
+import { useIdioma } from "@/components/aluno/idioma-do-app";
 import { Button, Dialog } from "@/components/ui";
 
 import { apagarPost, type EstadoDaExclusao } from "../actions";
@@ -20,6 +21,7 @@ const INICIAL: EstadoDaExclusao = {};
 export function ApagarPost({ postId, temFoto }: { postId: string; temFoto: boolean }) {
   const [estado, acao, enviando] = useActionState(apagarPost, INICIAL);
   const [aberto, setAberto] = useState(false);
+  const { t } = useIdioma();
 
   return (
     <>
@@ -29,17 +31,15 @@ export function ApagarPost({ postId, temFoto }: { postId: string; temFoto: boole
         className="flex h-11 items-center gap-1.5 rounded-pill px-3 text-[13px] font-semibold text-ink-4 transition hover:bg-canvas-sunken hover:text-danger"
       >
         <Trash2 size={15} aria-hidden />
-        Apagar
+        {t.comum.apagar}
       </button>
 
       <Dialog
         aberto={aberto}
         aoFechar={() => setAberto(false)}
-        titulo="Apagar este post?"
+        titulo={t.feed.post.apagarTitulo}
         descricao={
-          temFoto
-            ? "A foto sai do Reps Club e os comentários somem junto, inclusive os do seu personal. Não dá para desfazer."
-            : "Os comentários somem junto, inclusive os do seu personal. Não dá para desfazer."
+          temFoto ? t.feed.post.apagarComFoto : t.feed.post.apagarSemFoto
         }
       >
         <form action={acao} className="space-y-4">
@@ -56,10 +56,10 @@ export function ApagarPost({ postId, temFoto }: { postId: string; temFoto: boole
 
           <div className="flex gap-2.5">
             <Button type="button" variant="secondary" block onClick={() => setAberto(false)}>
-              Manter
+              {t.comum.manter}
             </Button>
             <Button type="submit" variant="danger" block disabled={enviando}>
-              {enviando ? "Apagando…" : "Apagar"}
+              {enviando ? t.comum.apagando : t.comum.apagar}
             </Button>
           </div>
         </form>

@@ -1,4 +1,7 @@
+import type { Idioma } from "@/lib/domain/idioma";
 import { semanaAtual } from "@/lib/domain/treino";
+import { TEXTOS_DO_APP } from "@/lib/i18n/app";
+import { preencher } from "@/lib/i18n/texto";
 
 export type CardMacrotreinoProps = {
   nome: string;
@@ -6,6 +9,7 @@ export type CardMacrotreinoProps = {
   /** `mesocycles.started_at`, como vem do banco. */
   inicio: string;
   nomeDoPersonal: string;
+  idioma: Idioma;
 };
 
 /**
@@ -19,18 +23,20 @@ export function CardMacrotreino({
   totalDeSemanas,
   inicio,
   nomeDoPersonal,
+  idioma,
 }: CardMacrotreinoProps) {
+  const t = TEXTOS_DO_APP[idioma].treinos.macrotreino;
   const semana = semanaAtual(inicio, totalDeSemanas);
   const progresso = Math.round((semana / totalDeSemanas) * 100);
 
   return (
     <section className="rounded-card-lg bg-dark-bg px-4.5 py-4">
-      <p className="eyebrow text-dark-muted">Macrotreino ativo</p>
+      <p className="eyebrow text-dark-muted">{t.ativo}</p>
       <h2 className="mt-2 text-[19px] font-extrabold tracking-[-0.01em] text-dark-text">
         {nome}
       </h2>
       <p className="mt-1 text-[12px] text-dark-muted">
-        Semana {semana} de {totalDeSemanas} · {nomeDoPersonal}
+        {preencher(t.semana, { semana, total: totalDeSemanas })} · {nomeDoPersonal}
       </p>
 
       <div
@@ -39,7 +45,7 @@ export function CardMacrotreino({
         aria-valuemin={1}
         aria-valuemax={totalDeSemanas}
         aria-valuenow={semana}
-        aria-label={`Semana ${semana} de ${totalDeSemanas}`}
+        aria-label={preencher(t.semana, { semana, total: totalDeSemanas })}
       >
         <div className="h-full bg-brand" style={{ width: `${progresso}%` }} />
       </div>

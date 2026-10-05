@@ -3,10 +3,11 @@
 import { Pencil } from "lucide-react";
 import { useActionState, useState } from "react";
 
+import { useIdioma } from "@/components/aluno/idioma-do-app";
 import { Button, Input, Select } from "@/components/ui";
+import { langDe } from "@/lib/domain/idioma";
 import { UFS } from "@/lib/domain/perfil";
 import { formatarTelefone } from "@/lib/domain/telefone";
-import { NIVEL, OBJETIVO, PERFIL_BIOLOGICO } from "@/lib/rotulos";
 import type { Tables } from "@/types/database";
 
 import { salvarPerfil, type EstadoDoPerfil } from "./actions";
@@ -31,6 +32,11 @@ type Aluno = Pick<
 export function FormularioDePerfil({ aluno }: { aluno: Aluno }) {
   const [estado, acao, enviando] = useActionState(salvarPerfil, INICIAL);
   const [editando, setEditando] = useState(false);
+  const { idioma, t, f } = useIdioma();
+  const p = t.perfil.perfil;
+  const c = p.campos;
+  const { objetivo: OBJETIVO, nivel: NIVEL, perfilBiologico: PERFIL_BIOLOGICO } = t.perfil.rotulos;
+  const nada = t.comum.naoInformado;
 
   // Fecha quando a ação confirma. Ajuste durante a renderização, não em efeito:
   // é o padrão que o projeto usa desde o onboarding do aluno.
@@ -42,46 +48,40 @@ export function FormularioDePerfil({ aluno }: { aluno: Aluno }) {
 
   if (!editando) {
     const linhas = [
-      { rotulo: "Nome", valor: aluno.name },
-      { rotulo: "E-mail", valor: aluno.email },
+      { rotulo: c.nome, valor: aluno.name },
+      { rotulo: c.email, valor: aluno.email },
       {
-        rotulo: "Nascimento",
-        valor: aluno.birth_date ? porExtenso(aluno.birth_date) : "Não informado",
+        rotulo: c.nascimento,
+        valor: aluno.birth_date ? porExtenso(aluno.birth_date, langDe(idioma)) : nada,
       },
-      { rotulo: "Objetivo", valor: aluno.goal ? OBJETIVO[aluno.goal] : "Não informado" },
+      { rotulo: c.objetivo, valor: aluno.goal ? OBJETIVO[aluno.goal] : nada },
       {
-        rotulo: "Nível",
-        valor: aluno.experience_level ? NIVEL[aluno.experience_level] : "Não informado",
-      },
-      {
-        rotulo: "Peso",
-        valor: aluno.weight_kg ? `${Number(aluno.weight_kg)} kg` : "Não informado",
+        rotulo: c.nivel,
+        valor: aluno.experience_level ? NIVEL[aluno.experience_level] : nada,
       },
       {
-        rotulo: "Altura",
-        valor: aluno.height_cm ? `${aluno.height_cm} cm` : "Não informado",
+        rotulo: c.peso,
+        valor: aluno.weight_kg ? f.carga(Number(aluno.weight_kg)) : nada,
       },
       {
-        rotulo: "Meta de peso",
-        valor: aluno.weight_goal_kg
-          ? `${Number(aluno.weight_goal_kg)} kg`
-          : "Não informado",
+        rotulo: c.altura,
+        valor: aluno.height_cm ? `${aluno.height_cm} cm` : nada,
       },
       {
-        rotulo: "Telefone",
-        valor: aluno.phone ? formatarTelefone(aluno.phone) : "Não informado",
+        rotulo: c.metaDePeso,
+        valor: aluno.weight_goal_kg ? f.carga(Number(aluno.weight_goal_kg)) : nada,
       },
       {
-        rotulo: "Cidade",
-        valor: aluno.city
-          ? [aluno.city, aluno.state].filter(Boolean).join(" · ")
-          : "Não informado",
+        rotulo: c.telefone,
+        valor: aluno.phone ? formatarTelefone(aluno.phone) : nada,
       },
       {
-        rotulo: "Perfil biológico",
-        valor: aluno.biological_profile
-          ? PERFIL_BIOLOGICO[aluno.biological_profile]
-          : "Não informado",
+        rotulo: c.cidade,
+        valor: aluno.city ? [aluno.city, aluno.state].filter(Boolean).join(" · ") : nada,
+      },
+      {
+        rotulo: c.perfilBiologico,
+        valor: aluno.biological_profile ? PERFIL_BIOLOGICO[aluno.biological_profile] : nada,
       },
     ];
 
@@ -103,7 +103,7 @@ export function FormularioDePerfil({ aluno }: { aluno: Aluno }) {
 
         <Button variant="secondary" block onClick={() => setEditando(true)}>
           <Pencil size={15} aria-hidden />
-          Editar meus dados
+          {p.editar}
         </Button>
       </div>
     );
@@ -112,14 +112,14 @@ export function FormularioDePerfil({ aluno }: { aluno: Aluno }) {
   return (
     <form action={acao} noValidate className="space-y-4">
       <Input
-        label="Nome"
+        label={c.nome}
         name="nome"
         defaultValue={aluno.name}
         error={estado.errosPorCampo?.nome}
       />
 
       <Input
-        label="Data de nascimento"
+        label={c.dataDeNascimento}
         name="nascimento"
         type="date"
         defaultValue={aluno.birth_date ?? ""}
@@ -127,7 +127,7 @@ export function FormularioDePerfil({ aluno }: { aluno: Aluno }) {
       />
 
       <Select
-        label="Objetivo"
+        label={c.objetivo}
         name="objetivo"
         defaultValue={aluno.goal ?? "massa"}
         error={estado.errosPorCampo?.objetivo}
@@ -140,7 +140,7 @@ export function FormularioDePerfil({ aluno }: { aluno: Aluno }) {
       </Select>
 
       <Select
-        label="Nível"
+        label={c.nivel}
         name="nivel"
         defaultValue={aluno.experience_level ?? "iniciante"}
         error={estado.errosPorCampo?.nivel}
@@ -154,7 +154,7 @@ export function FormularioDePerfil({ aluno }: { aluno: Aluno }) {
 
       <div className="grid grid-cols-2 gap-3">
         <Input
-          label="Peso (kg)"
+          label={c.pesoKg}
           name="peso"
           type="number"
           inputMode="decimal"
@@ -163,7 +163,7 @@ export function FormularioDePerfil({ aluno }: { aluno: Aluno }) {
           error={estado.errosPorCampo?.peso}
         />
         <Input
-          label="Altura (cm)"
+          label={c.alturaCm}
           name="altura"
           type="number"
           inputMode="numeric"
@@ -174,7 +174,7 @@ export function FormularioDePerfil({ aluno }: { aluno: Aluno }) {
 
       <div className="grid grid-cols-2 gap-3">
         <Input
-          label="Meta de peso (kg)"
+          label={c.metaDePesoKg}
           name="metaDePeso"
           type="number"
           inputMode="decimal"
@@ -185,7 +185,7 @@ export function FormularioDePerfil({ aluno }: { aluno: Aluno }) {
           error={estado.errosPorCampo?.metaDePeso}
         />
         <Input
-          label="Telefone"
+          label={c.telefone}
           name="telefone"
           type="tel"
           inputMode="tel"
@@ -197,13 +197,13 @@ export function FormularioDePerfil({ aluno }: { aluno: Aluno }) {
 
       <div className="grid grid-cols-[1fr_88px] gap-3">
         <Input
-          label="Cidade"
+          label={c.cidade}
           name="cidade"
           defaultValue={aluno.city ?? ""}
           error={estado.errosPorCampo?.cidade}
         />
         <Select
-          label="UF"
+          label={c.uf}
           name="uf"
           defaultValue={aluno.state ?? ""}
           error={estado.errosPorCampo?.uf}
@@ -225,12 +225,12 @@ export function FormularioDePerfil({ aluno }: { aluno: Aluno }) {
       */}
       <div className="space-y-2">
         <Select
-          label="Perfil biológico (opcional)"
+          label={c.perfilBiologicoOpcional}
           name="perfilBiologico"
           defaultValue={aluno.biological_profile ?? ""}
           error={estado.errosPorCampo?.perfilBiologico}
         >
-          <option value="">Prefiro não informar</option>
+          <option value="">{p.prefiroNao}</option>
           {Object.entries(PERFIL_BIOLOGICO).map(([valor, rotulo]) => (
             <option key={valor} value={valor}>
               {rotulo}
@@ -238,9 +238,7 @@ export function FormularioDePerfil({ aluno }: { aluno: Aluno }) {
           ))}
         </Select>
         <p className="text-[12px] leading-relaxed text-ink-4">
-          Isso é informação de saúde. Só você e o seu personal veem, e a resposta
-          do corpo ao treino muda com ela — por isso perguntamos. Deixar em
-          branco é uma resposta, e nada no app deixa de funcionar.
+          {p.saude}
         </p>
       </div>
 
@@ -250,8 +248,7 @@ export function FormularioDePerfil({ aluno }: { aluno: Aluno }) {
         aqui é mais honesto que mostrar um campo desabilitado sem explicação.
       */}
       <p className="rounded-card bg-canvas-sunken px-3.5 py-3 text-[12.5px] leading-relaxed text-ink-3">
-        Seu e-mail é o endereço com que você entra, e não muda por aqui. Para
-        trocá-lo, fale com o seu personal.
+        {p.emailNaoMuda}
       </p>
 
       {estado.erro ? (
@@ -267,10 +264,10 @@ export function FormularioDePerfil({ aluno }: { aluno: Aluno }) {
           block
           onClick={() => setEditando(false)}
         >
-          Cancelar
+          {t.comum.cancelar}
         </Button>
         <Button type="submit" block disabled={enviando}>
-          {enviando ? "Salvando…" : "Salvar"}
+          {enviando ? t.comum.salvando : t.comum.salvar}
         </Button>
       </div>
     </form>
@@ -282,8 +279,8 @@ export function FormularioDePerfil({ aluno }: { aluno: Aluno }) {
  * então formatar com fuso a jogaria um dia para trás em metade do planeta. O
  * `T12:00` ancora a data no meio do dia, longe das duas bordas.
  */
-function porExtenso(data: string): string {
-  return new Intl.DateTimeFormat("pt-BR", {
+function porExtenso(data: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "long",
     year: "numeric",

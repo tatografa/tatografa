@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { Camera, Check, Medal } from "lucide-react";
 
-import { duracaoCurta, formatarNumero } from "@/lib/domain/historico";
-import { textoDoRecorde, type RecordeBatido } from "@/lib/domain/recordes";
+import type { Idioma } from "@/lib/domain/idioma";
+import type { RecordeBatido } from "@/lib/domain/recordes";
+import { TEXTOS_DO_APP } from "@/lib/i18n/app";
+import { formatos } from "@/lib/i18n/formatos";
+import { plural, preencher } from "@/lib/i18n/texto";
 import { volumeDaSessao, type SerieRegistrada } from "@/lib/domain/treino";
 
 /** Um recorde batido, já com o nome do exercício resolvido para a tela. */
@@ -27,6 +30,7 @@ export interface ResumoDoTreinoProps {
    * é outro momento, e muito pior.
    */
   sessaoId?: string;
+  idioma: Idioma;
 }
 
 /**
@@ -45,7 +49,11 @@ export function ResumoDoTreino({
   series,
   recordes = [],
   sessaoId,
+  idioma,
 }: ResumoDoTreinoProps) {
+  const t = TEXTOS_DO_APP[idioma];
+  const fim = t.execucao.fim;
+  const f = formatos(idioma);
   const realizadas = series.filter((s) => !s.skipped);
   const volume = volumeDaSessao(series);
 
@@ -58,33 +66,31 @@ export function ResumoDoTreino({
           </span>
 
           <h1 className="mt-5 text-[30px] leading-tight font-extrabold tracking-[-0.02em] text-dark-text">
-            Treino concluído
+            {fim.titulo}
           </h1>
           <p className="mt-1.5 text-[14px] text-dark-muted">
-            Treino {label} · {nome}
+            {preencher(t.comum.treinoComNome, { label, nome })}
           </p>
 
           <section
-            aria-label="Resumo do treino"
+            aria-label={fim.resumo}
             className="mt-7 flex items-center rounded-card-lg border border-dark-border bg-dark-surface py-5"
           >
-            <Metrica valor={duracaoCurta(duracaoSegundos)} rotulo="Duração" />
+            <Metrica valor={f.duracao(duracaoSegundos)} rotulo={fim.duracao} />
             <Divisoria />
-            <Metrica valor={String(realizadas.length)} rotulo="Séries" />
+            <Metrica valor={String(realizadas.length)} rotulo={fim.series} />
             <Divisoria />
-            <Metrica valor={`${formatarNumero(volume)} kg`} rotulo="Volume" />
+            <Metrica valor={f.carga(volume)} rotulo={fim.volume} />
           </section>
 
           {recordes.length > 0 ? (
             <section
-              aria-label={
-                recordes.length === 1 ? "Recorde pessoal" : "Recordes pessoais"
-              }
+              aria-label={plural(recordes.length, fim.recorde)}
               className="mt-4 rounded-card-lg border border-brand-on-dark bg-brand-tint p-4"
             >
               <p className="eyebrow flex items-center gap-1.5 text-[10px] text-brand-on-dark">
                 <Medal aria-hidden size={14} />
-                {recordes.length === 1 ? "Recorde pessoal" : "Recordes pessoais"}
+                {plural(recordes.length, fim.recorde)}
               </p>
 
               <ul className="mt-3 space-y-2.5">
@@ -94,7 +100,7 @@ export function ResumoDoTreino({
                       {recorde.nome}
                     </p>
                     <p className="text-[13px] font-semibold text-dark-text-2 tabular-nums">
-                      {textoDoRecorde(recorde)}
+                      {f.carga(recorde.anterior)} → {f.carga(recorde.nova)}
                       {recorde.reps === null ? null : (
                         <span className="text-dark-muted"> · {recorde.reps} reps</span>
                       )}
@@ -107,8 +113,7 @@ export function ResumoDoTreino({
 
           {volume === 0 && realizadas.length > 0 ? (
             <p className="mt-3 text-[12px] leading-relaxed text-dark-muted">
-              Exercício de peso corporal não entra no volume — somar repetições
-              a quilos daria um número sem significado.
+              {fim.semVolume}
             </p>
           ) : null}
         </div>
@@ -126,13 +131,13 @@ export function ResumoDoTreino({
                 className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[13px] bg-brand text-[16px] font-bold text-white shadow-cta transition active:scale-[0.99]"
               >
                 <Camera aria-hidden size={19} />
-                Tirar foto do treino
+                {fim.foto}
               </Link>
               <Link
                 href="/app"
                 className="flex h-[52px] w-full items-center justify-center rounded-[13px] border-[1.5px] border-dark-border-2 text-[15px] font-bold text-dark-text transition active:scale-[0.99]"
               >
-                Concluir sem foto
+                {fim.semFoto}
               </Link>
             </>
           ) : (
@@ -140,7 +145,7 @@ export function ResumoDoTreino({
               href="/app"
               className="flex h-[52px] w-full items-center justify-center rounded-[13px] bg-brand text-[16px] font-bold text-white shadow-cta transition active:scale-[0.99]"
             >
-              Concluir
+              {fim.concluir}
             </Link>
           )}
 
@@ -153,7 +158,7 @@ export function ResumoDoTreino({
             href="/app/historico"
             className="block text-center text-[13px] font-semibold text-dark-muted transition hover:text-dark-text"
           >
-            Ver histórico
+            {fim.verHistorico}
           </Link>
         </div>
       </div>

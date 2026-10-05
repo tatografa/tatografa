@@ -1,8 +1,10 @@
 import { Carregando, Esqueleto } from "@/components/esqueleto";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
 
-export default function CarregandoHistorico() {
+export default async function CarregandoHistorico() {
+  const { t } = await textosDoApp();
   return (
-    <Carregando rotulo="Carregando seu histórico">
+    <Carregando rotulo={t.comum.carregando.historico}>
       <div className="space-y-4">
         <div className="space-y-2">
           <Esqueleto className="h-[13px] w-20" />

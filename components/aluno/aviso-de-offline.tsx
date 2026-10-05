@@ -3,6 +3,8 @@
 import { CloudOff } from "lucide-react";
 import { useOffline } from "next/offline";
 
+import { useIdioma } from "./idioma-do-app";
+
 /**
  * Barra de "sem conexão" no app do aluno.
  *
@@ -15,6 +17,7 @@ import { useOffline } from "next/offline";
  */
 export function AvisoDeOffline() {
   const offline = useOffline();
+  const { t } = useIdioma();
 
   if (!offline) return null;
 
@@ -25,7 +28,7 @@ export function AvisoDeOffline() {
       style={{ paddingTop: "calc(0.5rem + env(safe-area-inset-top))" }}
     >
       <CloudOff aria-hidden size={14} />
-      Sem conexão. Pode treinar: as séries vão quando o sinal voltar.
+      {t.comum.offline}
     </p>
   );
 }

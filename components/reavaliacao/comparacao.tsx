@@ -1,13 +1,15 @@
 import { ArrowRight } from "lucide-react";
 
 import { Card } from "@/components/ui";
+import type { Idioma } from "@/lib/domain/idioma";
 import {
-  ROTULO_DO_SLOT,
   SLOTS,
-  formatarMedida,
   formatarVariacao,
   type Comparacao as Linha,
 } from "@/lib/domain/reavaliacao";
+import { TEXTOS_DO_APP } from "@/lib/i18n/app";
+import { formatos } from "@/lib/i18n/formatos";
+import { preencher } from "@/lib/i18n/texto";
 import type { Reavaliacao } from "@/lib/queries/reavaliacao";
 
 /**
@@ -26,11 +28,23 @@ export function Comparacao({
   atual,
   anterior,
   linhas,
+  idioma = "pt",
 }: {
   atual: Reavaliacao;
   anterior: Reavaliacao | null;
   linhas: Linha[];
+  /** O app passa o idioma do aluno; o painel ainda é só português (etapa 3). */
+  idioma?: Idioma;
 }) {
+  const r = TEXTOS_DO_APP[idioma].perfil.reavaliacao;
+  const c = r.comparacao;
+  const f = formatos(idioma);
+  const rotuloDa = (l: Linha) =>
+    !l.chave ? l.rotulo : l.chave === "peso" || l.chave === "gordura" ? r.medidas[l.chave] : r.regioes[l.chave];
+  const valor = (n: number | null, unidade: string) =>
+    n === null ? "—" : `${f.numero(n)} ${unidade}`;
+  // O sinal tipográfico e o "0" de `formatarVariacao`, com o separador do idioma.
+  const variacao = (n: number) => formatarVariacao(n).replace(/[\d.,]+/, f.numero(Math.abs(n)));
   const comDado = linhas.filter((l) => l.atual !== null || l.anterior !== null);
   const fotosAtuais = SLOTS.filter((s) => atual.fotos[s]);
 
@@ -40,24 +54,24 @@ export function Comparacao({
         <Card size="lg" className="space-y-0 p-0">
           <table className="w-full">
             <caption className="sr-only">
-              Medidas {anterior ? "comparadas com a reavaliação anterior" : "desta reavaliação"}
+              {anterior ? c.comparadas : c.desta}
             </caption>
             <thead>
               <tr className="border-b border-border-soft">
                 <th scope="col" className="px-4.5 py-3 text-left eyebrow text-ink-4">
-                  Medida
+                  {c.medida}
                 </th>
                 {anterior && (
                   <th scope="col" className="px-2 py-3 text-right eyebrow text-ink-4">
-                    Antes
+                    {c.antes}
                   </th>
                 )}
                 <th scope="col" className="px-2 py-3 text-right eyebrow text-ink-4">
-                  Agora
+                  {c.agora}
                 </th>
                 {anterior && (
                   <th scope="col" className="px-4.5 py-3 text-right eyebrow text-ink-4">
-                    Variação
+                    {c.variacao}
                   </th>
                 )}
               </tr>
@@ -69,7 +83,7 @@ export function Comparacao({
                     scope="row"
                     className="px-4.5 py-3 text-left text-[13.5px] font-semibold text-ink"
                   >
-                    {l.rotulo}
+                    {rotuloDa(l)}
                   </th>
                   {anterior && (
                     <td className="px-2 py-3 text-right font-mono text-[13px] text-ink-4">
@@ -81,7 +95,7 @@ export function Comparacao({
                   </td>
                   {anterior && (
                     <td className="px-4.5 py-3 text-right font-mono text-[13px] text-ink-2">
-                      {l.variacao === null ? "—" : formatarVariacao(l.variacao)}
+                      {l.variacao === null ? "—" : variacao(l.variacao)}
                     </td>
                   )}
                 </tr>
@@ -93,7 +107,7 @@ export function Comparacao({
 
       {atual.observacao && (
         <Card size="lg" className="space-y-2">
-          <p className="eyebrow text-ink-4">Observação do aluno</p>
+          <p className="eyebrow text-ink-4">{c.observacao}</p>
           <p className="whitespace-pre-line text-[13.5px] leading-[1.6] text-ink-2">
             {atual.observacao}
           </p>
@@ -102,12 +116,12 @@ export function Comparacao({
 
       {fotosAtuais.length > 0 && (
         <section className="space-y-3">
-          <p className="eyebrow text-ink-4">Fotos</p>
+          <p className="eyebrow text-ink-4">{c.fotos}</p>
           <ul className="grid gap-4 sm:grid-cols-3">
             {fotosAtuais.map((slot) => (
               <li key={slot} className="space-y-2">
                 <p className="text-[12.5px] font-semibold text-ink-2">
-                  {ROTULO_DO_SLOT[slot]}
+                  {r.slots[slot]}
                 </p>
                 {/*
                   Antes e depois lado a lado, e só quando existem os dois: uma
@@ -118,8 +132,8 @@ export function Comparacao({
                     <>
                       <Foto
                         src={anterior.fotos[slot]}
-                        alt={`${ROTULO_DO_SLOT[slot]}, na reavaliação anterior`}
-                        legenda={anterior.rotuloDoEnvio ?? "Antes"}
+                        alt={preencher(c.naAnterior, { slot: r.slots[slot] })}
+                        legenda={anterior.rotuloDoEnvio ?? c.antes}
                       />
                       <ArrowRight
                         size={14}
@@ -130,8 +144,8 @@ export function Comparacao({
                   )}
                   <Foto
                     src={atual.fotos[slot]}
-                    alt={`${ROTULO_DO_SLOT[slot]}, nesta reavaliação`}
-                    legenda={atual.rotuloDoEnvio ?? "Agora"}
+                    alt={preencher(c.nesta, { slot: r.slots[slot] })}
+                    legenda={atual.rotuloDoEnvio ?? c.agora}
                   />
                 </div>
               </li>
@@ -171,6 +185,3 @@ function Foto({
   );
 }
 
-function valor(n: number | null, unidade: string): string {
-  return n === null ? "—" : `${formatarMedida(n)} ${unidade}`;
-}

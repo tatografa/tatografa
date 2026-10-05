@@ -9,6 +9,7 @@ import {
   LIMITES_DA_EXECUCAO,
   LIMITE_DA_OBSERVACAO_DO_TREINO,
 } from "@/lib/domain/execucao";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
 import { contarSeries } from "@/lib/queries/execucao";
 import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -49,8 +50,14 @@ export type ResultadoDaGravacao =
       permanente: boolean;
     };
 
-const ERRO_GENERICO =
-  "Não deu para salvar agora. As séries ficam guardadas e serão enviadas.";
+/**
+ * As mensagens no idioma do app. Função e não constante: o idioma é da
+ * requisição (o cookie), e um módulo `"use server"` só exporta função
+ * assíncrona — uma constante exportada aqui zeraria as ações do arquivo.
+ */
+async function mensagens() {
+  return (await textosDoApp()).t.execucao.acoes;
+}
 
 const esquemaSerie = z.object({
   // É `workout_exercises.id`, nunca o id do catálogo (handoff, item 1).
@@ -99,7 +106,7 @@ export async function registrarSeries(
 
   const validado = esquemaGravacao.safeParse(entrada);
   if (!validado.success)
-    return { ok: false, erro: "Série inválida.", permanente: true };
+    return { ok: false, erro: (await mensagens()).serieInvalida, permanente: true };
 
   const { sessionId, series } = validado.data;
   const supabase = await createClient();
@@ -107,7 +114,7 @@ export async function registrarSeries(
   const sessao = await sessaoDoAluno(supabase, student.id, sessionId);
   // Sessão que não é do aluno (ou não existe) é temporária de propósito: um
   // erro de leitura não pode fazer a fila jogar fora o treino inteiro.
-  if (!sessao) return { ok: false, erro: ERRO_GENERICO, permanente: false };
+  if (!sessao) return { ok: false, erro: (await mensagens()).generico, permanente: false };
 
   // O RLS de `session_sets` confere de quem é a sessão, mas não de quem é a
   // linha da prescrição: sem esta conferência o aluno poderia gravar série
@@ -140,7 +147,7 @@ export async function registrarSeries(
 
   // Erro de rede ou do banco é temporário por padrão: a fila continua
   // guardando a série e tenta de novo.
-  if (error) return { ok: false, erro: ERRO_GENERICO, permanente: false };
+  if (error) return { ok: false, erro: (await mensagens()).generico, permanente: false };
   return { ok: true, recusadas };
 }
 
@@ -160,7 +167,7 @@ export async function concluirTreino(entrada: {
 
   const validado = esquemaConclusao.safeParse(entrada);
   if (!validado.success)
-    return { ok: false, erro: "Sessão inválida.", permanente: true };
+    return { ok: false, erro: (await mensagens()).sessaoInvalida, permanente: true };
 
   const supabase = await createClient();
   const sessao = await sessaoEmAndamento(
@@ -180,7 +187,7 @@ export async function concluirTreino(entrada: {
     .eq("student_id", student.id)
     .is("finished_at", null);
 
-  if (error) return { ok: false, erro: ERRO_GENERICO, permanente: false };
+  if (error) return { ok: false, erro: (await mensagens()).generico, permanente: false };
 
   revalidatePath("/app");
   revalidatePath("/app/treinos");
@@ -401,7 +408,10 @@ export async function salvarObservacaoDoTreino(entrada: {
   if (!validado.success) {
     return {
       ok: false,
-      erro: validado.error.issues[0]?.message ?? "Observação inválida.",
+      erro:
+        validado.error.issues[0]?.code === "too_big"
+          ? (await mensagens()).observacaoLonga
+          : (await mensagens()).observacaoInvalida,
       permanente: true,
     };
   }
@@ -413,7 +423,7 @@ export async function salvarObservacaoDoTreino(entrada: {
     .eq("id", validado.data.sessionId)
     .eq("student_id", student.id);
 
-  if (error) return { ok: false, erro: ERRO_GENERICO, permanente: false };
+  if (error) return { ok: false, erro: (await mensagens()).generico, permanente: false };
 
   // O histórico do aluno e a ficha que o personal lê mostram a observação.
   revalidatePath("/app/historico");

@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { requireStudent } from "@/lib/auth/session";
 import { estaNaTurma } from "@/lib/domain/turma";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
 import { resumoDaSessaoConcluida } from "@/lib/queries/feed";
 
 import { Compositor } from "./compositor";
@@ -18,6 +19,7 @@ export default async function NovoPost({
 }: PageProps<"/app/feed/novo">) {
   const { sessao } = await searchParams;
   const { student, personal } = await requireStudent();
+  const { t } = await textosDoApp();
 
   /*
    * `?sessao=` é texto que o aluno pode editar. A sessão é conferida aqui — é
@@ -33,10 +35,10 @@ export default async function NovoPost({
     <div className="space-y-5">
       <header className="space-y-1.5">
         <Link href="/app/feed" className="eyebrow text-ink-4 transition hover:text-ink-2">
-          ← Feed
+          {t.feed.post.voltar}
         </Link>
         <h1 className="text-[21px] font-extrabold tracking-[-0.02em] text-ink">
-          Publicar treino
+          {t.feed.compositor.titulo}
         </h1>
       </header>
 

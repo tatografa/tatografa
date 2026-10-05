@@ -1,5 +1,8 @@
 
 import { HoraLocal } from "@/components/aluno/hora-local";
+import type { Idioma } from "@/lib/domain/idioma";
+import { TEXTOS_DO_APP } from "@/lib/i18n/app";
+import { plural, preencher } from "@/lib/i18n/texto";
 import type { SessaoAberta } from "@/lib/queries/execucao";
 import type { TreinoCompleto } from "@/lib/queries/treinos";
 
@@ -14,16 +17,21 @@ import { LinkDeVoltar } from "@/components/aluno/link-de-voltar";
  */
 
 /** Confirmação antes de abrir a sessão. */
-export function TelaComecar({ treino }: { treino: TreinoCompleto }) {
+export function TelaComecar({ treino, idioma }: { treino: TreinoCompleto; idioma: Idioma }) {
+  const t = TEXTOS_DO_APP[idioma];
   return (
     <Moldura
-      eyebrow={`Treino ${treino.label}`}
+      eyebrow={preencher(t.comum.treino, { label: treino.label })}
       titulo={treino.name}
       voltarPara={`/app/treinos/${treino.id}`}
+      voltar={t.execucao.inicio.voltar}
     >
       <p className="text-[14px] leading-relaxed text-dark-text-2">
-        {treino.exercicios.length} exercícios · {treino.total_series} séries ·
-        ~{treino.duracao_min}min
+        {preencher(t.execucao.inicio.resumo, {
+          exercicios: plural(treino.exercicios.length, t.comum.exercicios),
+          series: plural(treino.total_series, t.comum.series),
+          min: treino.duracao_min,
+        })}
       </p>
 
       <form action={iniciarTreino} className="mt-6">
@@ -32,7 +40,7 @@ export function TelaComecar({ treino }: { treino: TreinoCompleto }) {
           type="submit"
           className="h-[52px] w-full rounded-[13px] bg-brand text-[16px] font-bold text-white shadow-cta transition active:scale-[0.99]"
         >
-          Começar treino
+          {t.execucao.inicio.comecar}
         </button>
       </form>
     </Moldura>
@@ -50,19 +58,23 @@ export function TelaComecar({ treino }: { treino: TreinoCompleto }) {
 export function TelaSessaoPendente({
   treino,
   pendente,
+  idioma,
 }: {
   treino: TreinoCompleto;
   pendente: SessaoAberta;
+  idioma: Idioma;
 }) {
+  const t = TEXTOS_DO_APP[idioma];
   const nomePendente = pendente.treino
-    ? `Treino ${pendente.treino.label} · ${pendente.treino.name}`
-    : "Um treino";
+    ? preencher(t.comum.treinoComNome, { label: pendente.treino.label, nome: pendente.treino.name })
+    : t.comum.umTreino;
 
   return (
     <Moldura
-      eyebrow="Treino em andamento"
+      eyebrow={t.execucao.inicio.emAndamento}
       titulo={nomePendente}
       voltarPara={`/app/treinos/${treino.id}`}
+      voltar={t.execucao.inicio.voltar}
     >
       {/*
         A decisão sobre encerrar mora no cliente porque depende do que este
@@ -78,7 +90,7 @@ export function TelaSessaoPendente({
       />
 
       <p className="mt-3 text-[13px] text-dark-muted">
-        Começou às <HoraLocal iso={pendente.started_at} />.
+        {t.execucao.inicio.comecouAs}<HoraLocal iso={pendente.started_at} />.
       </p>
     </Moldura>
   );
@@ -88,18 +100,20 @@ function Moldura({
   eyebrow,
   titulo,
   voltarPara,
+  voltar,
   children,
 }: {
   eyebrow: string;
   titulo: string;
   voltarPara: string;
+  voltar: string;
   children: React.ReactNode;
 }) {
   return (
     <div className="fixed inset-0 z-40 overflow-y-auto bg-dark-bg text-dark-text">
       <div className="mx-auto max-w-[440px] px-5 pt-[calc(20px+env(safe-area-inset-top))] pb-10">
         <LinkDeVoltar href={voltarPara} tom="escuro">
-          ← Voltar
+          {voltar}
         </LinkDeVoltar>
 
         <p className="eyebrow mt-6 text-[10px] text-brand-on-dark">{eyebrow}</p>

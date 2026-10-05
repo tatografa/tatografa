@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { TelaDetalheDoTreino } from "@/components/aluno/tela-detalhe-do-treino";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
 import { lerTreino } from "@/lib/queries/treinos";
 
 export default async function DetalheDoTreino(
@@ -14,5 +15,6 @@ export default async function DetalheDoTreino(
   // id existe.
   if (!treino) notFound();
 
-  return <TelaDetalheDoTreino treino={treino} />;
+  const { idioma } = await textosDoApp();
+  return <TelaDetalheDoTreino treino={treino} idioma={idioma} />;
 }

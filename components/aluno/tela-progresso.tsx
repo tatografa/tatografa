@@ -6,19 +6,19 @@ import { useState } from "react";
 
 import { classesDeBotao } from "@/components/ui";
 import {
-  dataCurta,
   linhaDoGrafico,
   LIMITE_DE_SESSOES,
   recortarIntervalo,
-  textoDaSerie,
-  ultimoRegistro,
   type Intervalo,
   type SessaoDoExercicio,
 } from "@/lib/domain/progresso";
+import { textoDaSerieNoIdioma, ultimoRegistroNoIdioma } from "@/lib/i18n/app/frases";
+import { plural, preencher } from "@/lib/i18n/texto";
 import type { ExercicioComProgresso } from "@/lib/queries/progresso";
 import { cn } from "@/lib/utils";
 
 import { FiltroDeIntervalo, GraficoDeCarga } from "./grafico-de-carga";
+import { useIdioma } from "./idioma-do-app";
 
 /** Quantas sessões o acordeão aberto mostra (doc 05). */
 const SESSOES_NA_PLANILHA = 3;
@@ -41,6 +41,8 @@ export function TelaProgresso({
 }) {
   const [modo, setModo] = useState<Modo>("planilha");
   const [aberto, setAberto] = useState<string | null>(null);
+  const { t } = useIdioma();
+  const p = t.historico.progresso;
 
   if (!exercicios.length) return <SemHistorico />;
 
@@ -50,24 +52,22 @@ export function TelaProgresso({
     <div className="space-y-4">
       <header>
         <h1 className="text-[21px] font-extrabold tracking-[-0.02em] text-ink">
-          Progresso
+          {p.titulo}
         </h1>
         <p className="mt-0.5 text-[13px] text-ink-4">
-          {exercicios.length === 1
-            ? "1 exercício com histórico"
-            : `${exercicios.length} exercícios com histórico`}
+          {plural(exercicios.length, p.comHistorico)}
         </p>
       </header>
 
       <div
         role="tablist"
-        aria-label="Como ver o progresso"
+        aria-label={p.comoVer}
         className="flex gap-1 rounded-input bg-canvas-sunken p-1"
       >
         <Aba
           ativa={modo === "planilha"}
           Icone={Table2}
-          rotulo="Planilha"
+          rotulo={p.planilha}
           aoEscolher={() => {
             setModo("planilha");
             setAberto(null);
@@ -76,7 +76,7 @@ export function TelaProgresso({
         <Aba
           ativa={modo === "grafico"}
           Icone={LineChart}
-          rotulo="Gráfico"
+          rotulo={p.grafico}
           aoEscolher={() => setModo("grafico")}
         />
       </div>
@@ -133,6 +133,8 @@ function Aba({
  * número que o aluno veio ver.
  */
 function Planilha({ exercicios }: { exercicios: ExercicioComProgresso[] }) {
+  const { t, f } = useIdioma();
+  const p = t.historico.progresso;
   return (
     <ul className="space-y-2">
       {exercicios.map((exercicio) => {
@@ -146,14 +148,12 @@ function Planilha({ exercicios }: { exercicios: ExercicioComProgresso[] }) {
                     {exercicio.nome}
                   </span>
                   <span className="mt-0.5 block text-[12px] text-ink-4">
-                    {exercicio.sessoes.length === 1
-                      ? "1 treino"
-                      : `${exercicio.sessoes.length} treinos`}
+                    {plural(exercicio.sessoes.length, p.treinos)}
                   </span>
                 </span>
                 <span className="flex shrink-0 items-center gap-2">
                   <span className="text-[14px] font-bold text-ink tabular-nums">
-                    {ultimoRegistro(exercicio)}
+                    {ultimoRegistroNoIdioma(exercicio, f)}
                   </span>
                   <ChevronDown
                     aria-hidden
@@ -170,8 +170,7 @@ function Planilha({ exercicios }: { exercicios: ExercicioComProgresso[] }) {
 
                 {exercicio.sessoes.length > SESSOES_NA_PLANILHA ? (
                   <p className="text-[12px] text-ink-5">
-                    As {SESSOES_NA_PLANILHA} mais recentes. O resto está no
-                    gráfico.
+                    {preencher(p.maisRecentes, { n: SESSOES_NA_PLANILHA })}
                   </p>
                 ) : null}
 
@@ -186,17 +185,20 @@ function Planilha({ exercicios }: { exercicios: ExercicioComProgresso[] }) {
 }
 
 function SessaoNaPlanilha({ sessao }: { sessao: SessaoDoExercicio }) {
+  const { t, f } = useIdioma();
   return (
     <div>
-      <p className="eyebrow text-ink-4">{dataCurta(sessao.concluidaEm)}</p>
+      <p className="eyebrow text-ink-4">{f.dataCurta(sessao.concluidaEm)}</p>
       <ul className="mt-1.5 space-y-1">
         {sessao.series.map((serie) => (
           <li
             key={serie.set_number}
             className="flex items-baseline justify-between text-[13px] tabular-nums"
           >
-            <span className="text-ink-4">Série {serie.set_number}</span>
-            <span className="font-semibold text-ink">{textoDaSerie(serie)}</span>
+            <span className="text-ink-4">
+              {preencher(t.historico.progresso.serie, { n: serie.set_number })}
+            </span>
+            <span className="font-semibold text-ink">{textoDaSerieNoIdioma(serie, f)}</span>
           </li>
         ))}
       </ul>
@@ -213,6 +215,7 @@ function ListaDeGraficos({
   exercicios: ExercicioComProgresso[];
   aoAbrir: (chave: string) => void;
 }) {
+  const { t, f } = useIdioma();
   return (
     <ul className="space-y-2">
       {exercicios.map((exercicio) => (
@@ -227,10 +230,8 @@ function ListaDeGraficos({
                 {exercicio.nome}
               </span>
               <span className="mt-0.5 block text-[12px] text-ink-4">
-                {ultimoRegistro(exercicio)} ·{" "}
-                {exercicio.sessoes.length === 1
-                  ? "1 treino"
-                  : `${exercicio.sessoes.length} treinos`}
+                {ultimoRegistroNoIdioma(exercicio, f)} ·{" "}
+                {plural(exercicio.sessoes.length, t.historico.progresso.treinos)}
               </span>
             </span>
             <Previa sessoes={exercicio.sessoes} />
@@ -290,6 +291,7 @@ function Detalhe({
    * inteira troca o filtro sabendo que os pontos ficam mais apertados.
    */
   const [intervalo, setIntervalo] = useState<Intervalo>(6);
+  const { t } = useIdioma();
   const recorte = recortarIntervalo(exercicio.sessoes, intervalo);
 
   return (
@@ -304,7 +306,7 @@ function Detalhe({
           onClick={aoVoltar}
           className="eyebrow -mt-2 inline-flex min-h-11 items-center text-ink-4 transition hover:text-ink-2"
         >
-          ← Exercícios
+          {t.historico.progresso.exercicios}
         </button>
         <h2 className="mt-2 text-[18px] font-extrabold tracking-[-0.02em] text-ink">
           {exercicio.nome}
@@ -322,10 +324,11 @@ function Detalhe({
 
 /** Corte silencioso faria o aluno achar que perdeu treino. */
 function AvisoDeTeto({ sessoes }: { sessoes: SessaoDoExercicio[] }) {
+  const { t } = useIdioma();
   if (sessoes.length < LIMITE_DE_SESSOES) return null;
   return (
     <p className="text-[12px] leading-relaxed text-ink-5">
-      Mostrando os {LIMITE_DE_SESSOES} treinos mais recentes deste exercício.
+      {preencher(t.historico.progresso.teto, { n: LIMITE_DE_SESSOES })}
     </p>
   );
 }
@@ -333,27 +336,28 @@ function AvisoDeTeto({ sessoes }: { sessoes: SessaoDoExercicio[] }) {
 // ----------------------------------------------------------- sem dado ------
 
 function SemHistorico() {
+  const { t } = useIdioma();
+  const p = t.historico.progresso;
   return (
     <div className="space-y-4">
       <header>
         <h1 className="text-[21px] font-extrabold tracking-[-0.02em] text-ink">
-          Progresso
+          {p.titulo}
         </h1>
       </header>
 
       <section className="rounded-card-lg border border-border-soft bg-surface p-5 text-center">
         <p className="text-[15px] font-bold text-ink">
-          Sua evolução começa no primeiro treino
+          {p.vazioTitulo}
         </p>
         <p className="mt-1.5 text-[13px] leading-relaxed text-ink-3">
-          Depois de dois treinos do mesmo exercício já dá para ver a linha subir
-          — ou não, e aí você sabe o que ajustar.
+          {p.vazioTexto}
         </p>
         <Link
           href="/app/treinos"
           className={classesDeBotao({ block: true, className: "mt-4" })}
         >
-          Ver meus treinos
+          {p.verTreinos}
         </Link>
       </section>
     </div>

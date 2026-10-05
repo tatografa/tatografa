@@ -3,6 +3,9 @@ import Link from "next/link";
 
 import { CardDoPersonal } from "@/components/aluno/card-do-personal";
 import type { Personal } from "@/lib/auth/session";
+import type { TextosComuns } from "@/lib/i18n/app/comum";
+import { preencher } from "@/lib/i18n/texto";
+import { primeiroNome } from "@/lib/domain/nome";
 
 /**
  * O que o aluno inativo vê no lugar do app (decisão do Otávio, 26/09).
@@ -22,7 +25,16 @@ import type { Personal } from "@/lib/auth/session";
  * ser. É também o que mantém a política de privacidade verdadeira: ela promete
  * que o perfil e o histórico estão no app.
  */
-export function AcessoPausado({ personal }: { personal: Personal }) {
+export function AcessoPausado({
+  personal,
+  t,
+  rotuloDoPersonal,
+}: {
+  personal: Personal;
+  t: TextosComuns["pausado"];
+  rotuloDoPersonal: string;
+}) {
+  const nome = primeiroNome(personal.name);
   return (
     <div className="space-y-5 py-6">
       <header className="space-y-3 text-center">
@@ -33,13 +45,12 @@ export function AcessoPausado({ personal }: { personal: Personal }) {
           <Lock size={20} />
         </span>
         <h1 className="text-[21px] font-extrabold leading-tight tracking-[-0.02em] text-ink">
-          Seu acesso está pausado
+          {t.titulo}
         </h1>
         <p className="text-[13.5px] leading-relaxed text-ink-3">
-          Enquanto isso você não consegue abrir treinos, registrar séries nem ver
-          o feed da turma. <strong className="font-semibold text-ink-2">Nada
-          foi apagado:</strong> seu histórico e seus recordes continuam aqui,
-          esperando você voltar.
+          {t.textoAntes}{" "}
+          <strong className="font-semibold text-ink-2">{t.nadaApagado}</strong>{" "}
+          {t.textoDepois}
         </p>
       </header>
 
@@ -50,8 +61,8 @@ export function AcessoPausado({ personal }: { personal: Personal }) {
         formato.
       */}
       <section className="space-y-2">
-        <h2 className="eyebrow text-ink-4">Fale com quem te treina</h2>
-        <CardDoPersonal nome={personal.name} telefone={personal.phone} />
+        <h2 className="eyebrow text-ink-4">{t.fale}</h2>
+        <CardDoPersonal nome={personal.name} telefone={personal.phone} rotulo={rotuloDoPersonal} />
         {/*
           Sem número cadastrado o card perde o botão — e nesta tela, cujo
           assunto inteiro é "fale com ele", isso viraria beco sem saída. A
@@ -60,27 +71,25 @@ export function AcessoPausado({ personal }: { personal: Personal }) {
           não o único canal. Achado no screenshot dos dois estados lado a lado.
         */}
         <p className="text-[12px] leading-relaxed text-ink-4">
-          É {personal.name.split(" ")[0]} quem reativa o seu acesso.
-          {personal.phone
-            ? null
-            : " Ele ainda não cadastrou um WhatsApp aqui — procure-o pelo canal de sempre."}
+          {preencher(t.quemReativa, { nome })}
+          {personal.phone ? null : preencher(t.semWhatsApp, { nome })}
         </p>
       </section>
 
       <section className="space-y-2">
-        <h2 className="eyebrow text-ink-4">O que continua aberto</h2>
+        <h2 className="eyebrow text-ink-4">{t.continuaAberto}</h2>
         <ul className="space-y-2">
           <Porta
             href="/app/historico"
             Icone={History}
-            titulo="Seu histórico"
-            apoio="Cada treino que você fez, série por série."
+            titulo={t.historico}
+            apoio={t.historicoApoio}
           />
           <Porta
             href="/app/perfil"
             Icone={User}
-            titulo="Seu perfil"
-            apoio="Seus dados, e você pode corrigi-los quando quiser."
+            titulo={t.perfil}
+            apoio={t.perfilApoio}
           />
         </ul>
       </section>

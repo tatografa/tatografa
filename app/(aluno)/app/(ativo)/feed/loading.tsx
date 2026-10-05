@@ -1,4 +1,5 @@
 import { Carregando, Esqueleto } from "@/components/esqueleto";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
 
 /**
  * A primeira abertura do feed busca posts, contagens e uma URL assinada por
@@ -8,9 +9,10 @@ import { Carregando, Esqueleto } from "@/components/esqueleto";
  * A troca de aba **não** passa por aqui: ela é uma transição do cliente, e o
  * esqueleto de dentro da `TelaFeed` preserva o cabeçalho e as abas na tela.
  */
-export default function CarregandoFeed() {
+export default async function CarregandoFeed() {
+  const { t } = await textosDoApp();
   return (
-    <Carregando rotulo="Carregando o feed">
+    <Carregando rotulo={t.comum.carregando.feed}>
       <div className="space-y-4">
         <div className="space-y-3">
           <Esqueleto className="h-[26px] w-24" />

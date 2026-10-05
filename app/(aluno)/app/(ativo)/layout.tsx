@@ -1,6 +1,7 @@
 import { AcessoPausado } from "@/components/aluno/acesso-pausado";
 import { requireStudent } from "@/lib/auth/session";
 import { estaNaTurma } from "@/lib/domain/turma";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
 
 /**
  * O portão do aluno inativo (decisão do Otávio, 26/09): **sem acesso ao app
@@ -30,7 +31,14 @@ export default async function LayoutDoAlunoAtivo({
   const { student, personal } = await requireStudent();
 
   if (!estaNaTurma(student.status)) {
-    return <AcessoPausado personal={personal} />;
+    const { t } = await textosDoApp();
+    return (
+      <AcessoPausado
+        personal={personal}
+        t={t.comum.pausado}
+        rotuloDoPersonal={t.comum.cardDoPersonal.seuPersonal}
+      />
+    );
   }
 
   return <>{children}</>;

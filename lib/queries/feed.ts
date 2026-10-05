@@ -1,10 +1,9 @@
 import "server-only";
 
-import {
-  contarFeitas,
-  rotuloDoDia,
-  type SerieDoHistorico,
-} from "@/lib/domain/historico";
+import { contarFeitas, type SerieDoHistorico } from "@/lib/domain/historico";
+import type { Idioma } from "@/lib/domain/idioma";
+import { FEED } from "@/lib/i18n/app/feed";
+import { formatos } from "@/lib/i18n/formatos";
 import { pareceUuid } from "@/lib/domain/id";
 import { volumeDaSessao } from "@/lib/domain/treino";
 import { iniciaisDe } from "@/lib/domain/nome";
@@ -74,8 +73,11 @@ export type PostDoFeed = {
 export async function lerFeed(
   alunoId: string,
   aba: AbaDoFeed,
+  /** O idioma do app: o rótulo do dia ("Hoje", "Today") sai pronto daqui. */
+  idioma: Idioma = "pt",
 ): Promise<PostDoFeed[]> {
   const supabase = await createClient();
+  const f = formatos(idioma);
 
   let consulta = supabase
     .from("posts")
@@ -144,7 +146,7 @@ export async function lerFeed(
   const curti = new Set((minhasCurtidas.data ?? []).map((l) => l.post_id));
 
   return posts.map((p) => {
-    const nome = nomePor.get(p.student_id) ?? "Aluno";
+    const nome = nomePor.get(p.student_id) ?? FEED[idioma].aluno;
     return {
       id: p.id,
       autor: { id: p.student_id, nome, iniciais: iniciaisDe(nome) },
@@ -153,7 +155,7 @@ export async function lerFeed(
       fotoUrl: p.photo_path ? (urlPor.get(p.photo_path) ?? null) : null,
       visibilidade: p.visibility,
       criadoEm: p.created_at,
-      rotuloDoDia: rotuloDoDia(p.created_at),
+      rotuloDoDia: f.dia(p.created_at),
       curtidas: totalCurtidas.get(p.id) ?? 0,
       curtiPor: curti.has(p.id),
       comentarios: totalComentarios.get(p.id) ?? 0,
@@ -195,8 +197,10 @@ export async function lerPost(
   alunoId: string,
   postId: string,
   personal: { id: string; nome: string },
+  idioma: Idioma = "pt",
 ): Promise<PostDetalhado | null> {
   if (!pareceUuid(postId)) return null;
+  const f = formatos(idioma);
 
   const supabase = await createClient();
 
@@ -247,7 +251,7 @@ export async function lerPost(
     [personal.id, personal.nome],
   ]);
 
-  const nomeDoAutor = nomePor.get(post.student_id) ?? "Aluno";
+  const nomeDoAutor = nomePor.get(post.student_id) ?? FEED[idioma].aluno;
 
   return {
     id: post.id,
@@ -261,7 +265,7 @@ export async function lerPost(
     fotoUrl: url.data?.signedUrl ?? null,
     visibilidade: post.visibility,
     criadoEm: post.created_at,
-    rotuloDoDia: rotuloDoDia(post.created_at),
+    rotuloDoDia: f.dia(post.created_at),
     curtidas: curtidas.data?.length ?? 0,
     curtiPor: minhaCurtida.data !== null,
     comentarios: comentarios.data?.length ?? 0,
@@ -269,7 +273,7 @@ export async function lerPost(
       ? ((await resumosDasSessoes([post.session_id])).get(post.session_id) ?? null)
       : null,
     listaDeComentarios: (comentarios.data ?? []).map((c) => {
-      const nome = nomePor.get(c.author_id) ?? "Alguém da turma";
+      const nome = nomePor.get(c.author_id) ?? FEED[idioma].alguemDaTurma;
       return {
         id: c.id,
         autorNome: nome,
@@ -278,7 +282,7 @@ export async function lerPost(
         meu: c.author_id === alunoId,
         texto: c.body,
         criadoEm: c.created_at,
-        rotuloDoDia: rotuloDoDia(c.created_at),
+        rotuloDoDia: f.dia(c.created_at),
       };
     }),
   };

@@ -1,10 +1,6 @@
 import { TelaHome } from "@/components/aluno/tela-home";
 import { requireStudent } from "@/lib/auth/session";
-import {
-  duracaoEmTexto,
-  horaDaSessaoNaAgenda,
-  rotuloDoDiaDaAgenda,
-} from "@/lib/domain/agenda";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
 import { lerAgendaDoAluno, lerIndicadoresDoAluno } from "@/lib/queries/aluno";
 import { sessaoAbertaDoAluno } from "@/lib/queries/execucao";
 import { proximaSessaoDoAluno } from "@/lib/queries/agenda";
@@ -21,12 +17,14 @@ export default async function HomeDoAluno() {
     sessaoAberta,
     reavaliacaoAberta,
     proxima,
+    { idioma, f },
   ] = await Promise.all([
     lerAgendaDoAluno(student.id),
     lerIndicadoresDoAluno(student.id),
     sessaoAbertaDoAluno(student.id),
     temReavaliacaoAberta(student.id),
     proximaSessaoDoAluno(student.id),
+    textosDoApp(),
   ]);
 
   return (
@@ -43,11 +41,12 @@ export default async function HomeDoAluno() {
         proxima && {
           // Formatado no servidor, no fuso do produto: no cliente a data ficaria
           // vazia até a hidratação e dependeria do relógio do aparelho.
-          rotuloDoDia: rotuloDoDiaDaAgenda(proxima.dia),
-          hora: horaDaSessaoNaAgenda(proxima.inicio),
-          duracao: duracaoEmTexto(proxima.duracaoMin),
+          rotuloDoDia: f.diaDaAgenda(proxima.dia),
+          hora: f.horaDaAgenda(proxima.inicio),
+          duracao: f.duracaoEmMinutos(proxima.duracaoMin),
         }
       }
+      idioma={idioma}
     />
   );
 }

@@ -1,5 +1,6 @@
 import { requireStudent } from "@/lib/auth/session";
 import { estaNaTurma } from "@/lib/domain/turma";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
 import { lerFeed, type AbaDoFeed } from "@/lib/queries/feed";
 
 import { FeedNavegavel } from "./feed-navegavel";
@@ -16,7 +17,8 @@ export default async function FeedPage({ searchParams }: PageProps<"/app/feed">)
   const escolhida: AbaDoFeed = aba === "personal" ? "personal" : "publico";
 
   const { student, personal } = await requireStudent();
-  const posts = await lerFeed(student.id, escolhida);
+  const { idioma } = await textosDoApp();
+  const posts = await lerFeed(student.id, escolhida, idioma);
 
   return (
     <FeedNavegavel

@@ -1,6 +1,8 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
+import type { TextosComuns } from "@/lib/i18n/app/comum";
+
 /**
  * A faixa que aparece no topo do app do aluno **só para o personal treinando
  * como aluno de si mesmo**.
@@ -14,18 +16,18 @@ import Link from "next/link";
  * tipografia; num celular, sem esta frase, "por que meu painel sumiu" é uma
  * pergunta honesta.
  */
-export function BarraDeVoltaAoPainel() {
+export function BarraDeVoltaAoPainel({ t }: { t: TextosComuns["barraDoPainel"] }) {
   return (
     <div className="mb-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-card border border-brand-soft bg-brand-soft px-3.5 py-2.5">
       <p className="text-[12.5px] font-semibold text-brand">
-        Você está treinando como aluno
+        {t.texto}
       </p>
       <Link
         href="/painel"
         className="flex items-center gap-1 text-[12.5px] font-bold text-brand underline underline-offset-2 transition hover:text-brand-hover"
       >
         <ArrowLeft size={13} aria-hidden />
-        Voltar ao painel
+        {t.voltar}
       </Link>
     </div>
   );

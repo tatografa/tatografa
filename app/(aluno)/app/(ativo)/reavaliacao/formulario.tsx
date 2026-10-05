@@ -3,17 +3,13 @@
 import { Camera, Lock, X } from "lucide-react";
 import { useActionState, useEffect, useRef, useState } from "react";
 
+import { useIdioma } from "@/components/aluno/idioma-do-app";
 import { Button, Card, Input, Textarea } from "@/components/ui";
-import {
-  LIMITE_DA_OBSERVACAO,
-  ONDE_MEDIR,
-  REGIOES,
-  ROTULO_DA_REGIAO,
-  ROTULO_DO_SLOT,
-  SLOTS,
-  formatarMedida,
-  type Slot,
-} from "@/lib/domain/reavaliacao";
+import { langDe } from "@/lib/domain/idioma";
+import { LIMITE_DA_OBSERVACAO, REGIOES, SLOTS, type Slot } from "@/lib/domain/reavaliacao";
+import type { Formatos } from "@/lib/i18n/formatos";
+import type { TextosDoPerfil } from "@/lib/i18n/app/perfil";
+import { preencher } from "@/lib/i18n/texto";
 import { prepararFoto } from "@/lib/imagem";
 import type { Reavaliacao } from "@/lib/queries/reavaliacao";
 
@@ -43,6 +39,12 @@ export function Formulario({
   const [estado, acao, enviando] = useActionState(enviarReavaliacao, INICIAL);
   const erros = estado.errosPorCampo ?? {};
   const [observacao, setObservacao] = useState("");
+  const { idioma, t, f } = useIdioma();
+  const r = t.perfil.reavaliacao;
+  // O exemplo do campo no separador decimal do idioma: "0,0" ou "0.0".
+  const zero = (0).toLocaleString(langDe(idioma), { minimumFractionDigits: 1 });
+  const dica = (valor: number | null | undefined, unidade: string) =>
+    dicaNoIdioma(valor, unidade, r, f);
 
   return (
     <form action={acao} noValidate className="space-y-6">
@@ -50,24 +52,24 @@ export function Formulario({
 
       <section className="space-y-3">
         <h2 className="text-[15px] font-extrabold tracking-[-0.01em] text-ink">
-          Peso e gordura
+          {r.pesoEGordura}
         </h2>
         <div className="grid grid-cols-2 gap-3">
           <Input
             name="peso"
-            label="Peso (kg)"
+            label={t.perfil.perfil.campos.pesoKg}
             type="text"
             inputMode="decimal"
-            placeholder="0,0"
+            placeholder={zero}
             error={erros.peso}
             hint={dica(anterior?.peso, "kg")}
           />
           <Input
             name="gordura"
-            label="Gordura (%)"
+            label={r.gorduraPct}
             type="text"
             inputMode="decimal"
-            placeholder="0,0"
+            placeholder={zero}
             error={erros.gordura}
             hint={dica(anterior?.gordura, "%")}
           />
@@ -76,19 +78,19 @@ export function Formulario({
 
       <section className="space-y-3">
         <h2 className="text-[15px] font-extrabold tracking-[-0.01em] text-ink">
-          Medidas (cm)
+          {r.medidasCm}
         </h2>
         <div className="space-y-3">
           {REGIOES.map((regiao) => (
             <Input
               key={regiao}
               name={regiao}
-              label={ROTULO_DA_REGIAO[regiao]}
+              label={r.regioes[regiao]}
               type="text"
               inputMode="decimal"
-              placeholder="0,0"
+              placeholder={zero}
               error={erros[regiao]}
-              hint={comOndeMedir(ONDE_MEDIR[regiao], anterior?.medidas[regiao])}
+              hint={comOndeMedir(r.ondeMedir[regiao], dica(anterior?.medidas[regiao], "cm"))}
             />
           ))}
         </div>
@@ -97,11 +99,11 @@ export function Formulario({
       <section className="space-y-3">
         <div className="space-y-1">
           <h2 className="text-[15px] font-extrabold tracking-[-0.01em] text-ink">
-            Fotos
+            {r.fotos}
           </h2>
           <p className="flex items-start gap-1.5 text-[12px] leading-[1.5] text-ink-4">
             <Lock size={13} className="mt-0.5 shrink-0" aria-hidden />
-            Só você e seu personal veem estas fotos. Elas não vão para o feed.
+            {r.soVoces}
           </p>
         </div>
 
@@ -121,13 +123,13 @@ export function Formulario({
       <section className="space-y-3">
         <Textarea
           name="observacao"
-          label="Como você está se sentindo?"
+          label={r.comoSeSente}
           rows={4}
           maxLength={LIMITE_DA_OBSERVACAO}
           value={observacao}
           onChange={(e) => setObservacao(e.target.value)}
           error={erros.observacao}
-          hint="Opcional. Dores, sono, disposição, o que mudou na rotina."
+          hint={r.comoSeSenteDica}
         />
       </section>
 
@@ -139,11 +141,10 @@ export function Formulario({
 
       <Card className="space-y-3">
         <p className="text-[12.5px] leading-[1.5] text-ink-4">
-          Depois de enviar, a reavaliação não muda mais — é ela que seu personal
-          vai comparar com a próxima. Confira os números antes.
+          {r.depoisDeEnviar}
         </p>
         <Button type="submit" block disabled={enviando}>
-          {enviando ? "Enviando…" : "Enviar reavaliação"}
+          {enviando ? t.comum.enviando : r.enviar}
         </Button>
       </Card>
     </form>
@@ -164,6 +165,9 @@ function CampoDeFoto({ slot }: { slot: Slot }) {
   const [previa, setPrevia] = useState<string | null>(null);
   const [preparando, setPreparando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+  const { t } = useIdioma();
+  const r = t.perfil.reavaliacao;
+  const rotulo = r.slots[slot];
 
   useEffect(() => {
     if (!previa) return;
@@ -200,7 +204,7 @@ function CampoDeFoto({ slot }: { slot: Slot }) {
       // recusaria com uma mensagem menos útil que esta.
       if (entrada.current) entrada.current.value = "";
       mostrar(null);
-      setErro("Não conseguimos ler essa imagem.");
+      setErro(r.naoLeu);
     } finally {
       setPreparando(false);
     }
@@ -232,14 +236,14 @@ function CampoDeFoto({ slot }: { slot: Slot }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={previa}
-            alt={`Prévia da foto ${ROTULO_DO_SLOT[slot].toLowerCase()}`}
+            alt={preencher(r.previa, { slot: rotulo.toLowerCase() })}
             className="aspect-[3/4] w-full rounded-card border border-border-soft object-cover"
           />
           <button
             type="button"
             onClick={tirar}
             className="absolute right-1.5 top-1.5 grid size-7 place-items-center rounded-pill bg-ink/70 text-white"
-            aria-label={`Remover a foto ${ROTULO_DO_SLOT[slot].toLowerCase()}`}
+            aria-label={preencher(r.remover, { slot: rotulo.toLowerCase() })}
           >
             <X size={14} aria-hidden />
           </button>
@@ -252,7 +256,7 @@ function CampoDeFoto({ slot }: { slot: Slot }) {
           <span className="space-y-1">
             <Camera size={18} className="mx-auto text-ink-4" aria-hidden />
             <span className="block text-[11.5px] font-semibold text-ink-3">
-              {preparando ? "Preparando…" : ROTULO_DO_SLOT[slot]}
+              {preparando ? r.preparando : rotulo}
             </span>
           </span>
         </label>
@@ -268,9 +272,14 @@ function CampoDeFoto({ slot }: { slot: Slot }) {
 }
 
 /** "Na última: 82,4 kg". Nulo quando não houve anterior — e aí a dica some. */
-function dica(valor: number | null | undefined, unidade: string): string | undefined {
+function dicaNoIdioma(
+  valor: number | null | undefined,
+  unidade: string,
+  r: TextosDoPerfil["reavaliacao"],
+  f: Formatos,
+): string | undefined {
   if (valor === null || valor === undefined) return undefined;
-  return `Na última: ${formatarMedida(valor)} ${unidade}`;
+  return preencher(r.naUltima, { valor: `${f.numero(valor)} ${unidade}` });
 }
 
 /**
@@ -281,7 +290,6 @@ function dica(valor: number | null | undefined, unidade: string): string | undef
  * compara nada; sem o valor anterior, ninguém percebe que digitou 8 onde queria
  * 80. Na primeira reavaliação só existe a primeira.
  */
-function comOndeMedir(onde: string, anteriorCm: number | undefined): string {
-  const ultima = dica(anteriorCm, "cm");
+function comOndeMedir(onde: string, ultima: string | undefined): string {
   return ultima ? `${onde} · ${ultima.toLowerCase()}` : onde;
 }

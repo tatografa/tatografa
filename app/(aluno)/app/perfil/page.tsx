@@ -3,8 +3,11 @@ import { ChevronRight } from "lucide-react";
 
 import { BotaoSair } from "@/components/botao-sair";
 import { CardDoPersonal } from "@/components/aluno/card-do-personal";
+import { EscolhaDeIdioma } from "@/components/aluno/escolha-de-idioma";
 import { Card } from "@/components/ui";
 import { requireStudent } from "@/lib/auth/session";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
+import { preencher } from "@/lib/i18n/texto";
 
 import { FormularioDePerfil } from "./formulario-de-perfil";
 
@@ -24,7 +27,11 @@ import { FormularioDePerfil } from "./formulario-de-perfil";
  * dele que o personal parte para montar o treino.
  */
 export default async function PerfilDoAluno() {
-  const { student, personal } = await requireStudent();
+  const [{ student, personal }, { idioma, t }] = await Promise.all([
+    requireStudent(),
+    textosDoApp(),
+  ]);
+  const p = t.perfil.perfil;
 
   return (
     <div className="space-y-4">
@@ -40,7 +47,7 @@ export default async function PerfilDoAluno() {
             {student.name}
           </h1>
           <p className="truncate text-[13px] text-ink-4">
-            Treina com {personal.name}
+            {preencher(p.treinaCom, { nome: personal.name })}
           </p>
         </div>
       </header>
@@ -63,6 +70,7 @@ export default async function PerfilDoAluno() {
       <CardDoPersonal
         nome={personal.name}
         telefone={personal.phone}
+        rotulo={t.comum.cardDoPersonal.seuPersonal}
       />
 
       {/*
@@ -77,21 +85,36 @@ export default async function PerfilDoAluno() {
       >
         <span className="min-w-0">
           <span className="block text-[13.5px] font-semibold text-ink">
-            Reavaliação
+            {p.reavaliacao}
           </span>
           <span className="block text-[11.5px] text-ink-4">
-            Medidas, fotos e a comparação com a anterior
+            {p.reavaliacaoApoio}
           </span>
         </span>
         <ChevronRight size={16} className="shrink-0 text-ink-5" aria-hidden />
       </Link>
 
+      {/*
+        O idioma do app (etapa 2 da tradução, pedido do Otávio): mora aqui, e
+        não num seletor no topo de cada tela, porque é configuração — se escolhe
+        uma vez. Fica antes do "Sair" porque é o último ajuste da conta, e o
+        sair é o fim da tela.
+      */}
+      <Card className="space-y-1">
+        <h2 className="text-[13.5px] font-semibold text-ink">{p.idioma}</h2>
+        <p className="text-[11.5px] text-ink-4">{p.idiomaApoio}</p>
+        <EscolhaDeIdioma idioma={idioma} rotulo={p.idioma} caminho="/app/perfil" />
+      </Card>
+
       <Card className="space-y-3">
-        <p className="text-[13px] leading-[1.6] text-ink-3">
-          Saindo, o treino e o histórico continuam guardados. Para voltar, use o
-          e-mail e a senha que você criou.
-        </p>
-        <BotaoSair variant="danger" size="md" block />
+        <p className="text-[13px] leading-[1.6] text-ink-3">{p.sairTexto}</p>
+        <BotaoSair
+          variant="danger"
+          size="md"
+          block
+          rotulo={t.comum.sair.rotulo}
+          rotuloSaindo={t.comum.sair.saindo}
+        />
       </Card>
     </div>
   );

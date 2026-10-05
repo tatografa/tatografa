@@ -5,12 +5,12 @@ import Link from "next/link";
 
 import { Carregando, Esqueleto } from "@/components/esqueleto";
 import { Badge } from "@/components/ui";
-import { formatarNumero } from "@/lib/domain/historico";
-import { FORA_DA_TURMA } from "@/lib/domain/turma";
+import { plural, preencher } from "@/lib/i18n/texto";
 import type { AbaDoFeed, PostDoFeed } from "@/lib/queries/feed";
 import { cn } from "@/lib/utils";
 
 import { HoraLocal } from "./hora-local";
+import { useIdioma } from "./idioma-do-app";
 
 /**
  * O feed do aluno (doc 05, tela 9), sem nenhum acesso a banco — as props
@@ -54,12 +54,14 @@ export function TelaFeed({
    */
   carregando?: boolean;
 }) {
+  const { t } = useIdioma();
+  const fd = t.feed;
   return (
     <div className="space-y-4">
       <header className="space-y-3">
         <div className="flex items-center justify-between gap-3">
           <h1 className="text-[21px] font-extrabold tracking-[-0.02em] text-ink">
-            Feed
+            {fd.titulo}
           </h1>
           {/*
             Publicar mora no cabeçalho e não numa barra flutuante: a barra de
@@ -71,30 +73,30 @@ export function TelaFeed({
             className="flex h-10 items-center gap-1.5 rounded-pill bg-brand px-3.5 text-[13px] font-bold text-white shadow-cta transition hover:bg-brand-hover"
           >
             <Plus size={15} aria-hidden />
-            Publicar
+            {fd.publicar}
           </Link>
         </div>
 
         <div
           role="tablist"
-          aria-label="O que mostrar no feed"
+          aria-label={fd.oQueMostrar}
           className="flex gap-1 rounded-[11px] bg-canvas-sunken p-[3px]"
         >
           <Aba
             ativa={aba === "publico"}
-            rotulo="Da turma"
+            rotulo={fd.daTurma}
             aoEscolher={() => aoTrocarAba("publico")}
           />
           <Aba
             ativa={aba === "personal"}
-            rotulo="Com meu personal"
+            rotulo={fd.comPersonal}
             aoEscolher={() => aoTrocarAba("personal")}
           />
         </div>
       </header>
 
       {carregando ? (
-        <Carregando rotulo="Carregando os posts">
+        <Carregando rotulo={t.comum.carregando.posts}>
           <div className="space-y-3">
             {[0, 1].map((i) => (
               <Esqueleto key={i} className="h-[300px] w-full rounded-card-lg" />
@@ -149,6 +151,8 @@ function CardDePost({
   idDoPersonal: string;
 }) {
   const doPersonal = post.autor.id === idDoPersonal;
+  const { t, f } = useIdioma();
+  const fd = t.feed;
 
   return (
     <Link
@@ -166,12 +170,12 @@ function CardDePost({
         <div className="min-w-0 flex-1">
           <p className="flex items-center gap-1.5 text-[13px] font-bold text-ink">
             <span className="truncate">
-              {post.meu ? "Você" : post.autor.nome}
+              {post.meu ? t.comum.voce : post.autor.nome}
             </span>
             {/* O selo não encolhe: é ele que muda como se lê o post. */}
             {doPersonal ? (
               <Badge tone="brand-solido" className="shrink-0">
-                Personal
+                {t.comum.personalSelo}
               </Badge>
             ) : null}
           </p>
@@ -183,7 +187,7 @@ function CardDePost({
           {post.meu && post.visibilidade === "personal" ? (
             <span className="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-ink-4">
               <Lock aria-hidden size={10} />
-              Só o seu personal vê
+              {fd.soPersonalVe}
             </span>
           ) : null}
         </div>
@@ -205,7 +209,7 @@ function CardDePost({
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={post.fotoUrl}
-          alt={post.legenda ?? `Foto do treino de ${post.meu ? "você" : post.autor.nome}`}
+          alt={post.legenda ?? (post.meu ? fd.fotoDeVoce : preencher(fd.fotoDe, { nome: post.autor.nome }))}
           className="aspect-square w-full bg-canvas-sunken object-cover"
           loading="lazy"
         />
@@ -222,11 +226,8 @@ function CardDePost({
             <Badge tone="brand">{post.treino.rotulo}</Badge>
             <span className="font-bold text-ink-2">{post.treino.nome}</span>
             <span>
-              {post.treino.series}{" "}
-              {post.treino.series === 1 ? "série" : "séries"}
-              {post.treino.volumeKg > 0
-                ? ` · ${formatarNumero(post.treino.volumeKg)} kg`
-                : ""}
+              {plural(post.treino.series, t.comum.series)}
+              {post.treino.volumeKg > 0 ? ` · ${f.carga(post.treino.volumeKg)}` : ""}
             </span>
           </p>
         ) : null}
@@ -244,14 +245,14 @@ function CardDePost({
             />
             {post.curtidas}
             <span className="sr-only">
-              {post.curtidas === 1 ? "curtida" : "curtidas"}
+              {post.curtidas === 1 ? fd.curtidas.um : fd.curtidas.outros}
             </span>
           </span>
           <span className="flex items-center gap-1.5 text-[12.5px] font-semibold">
             <MessageCircle aria-hidden size={15} />
             {post.comentarios}
             <span className="sr-only">
-              {post.comentarios === 1 ? "comentário" : "comentários"}
+              {post.comentarios === 1 ? fd.comentarios.um : fd.comentarios.outros}
             </span>
           </span>
         </div>
@@ -285,6 +286,10 @@ function Vazio({
   naTurma: boolean;
 }) {
   const foraDaTurma = !naTurma && aba === "publico";
+  const { t } = useIdioma();
+  const v = t.feed.vazio;
+  const fora = t.feed.foraDaTurma;
+  const nome = { nome: nomeDoPersonal };
   return (
     <section className="rounded-card-lg border border-border-soft bg-surface p-5 text-center">
       <span
@@ -294,20 +299,16 @@ function Vazio({
         <Users size={19} />
       </span>
       <p className="mt-3.5 text-[15px] font-bold text-ink">
-        {foraDaTurma
-          ? "A turma não aparece mais"
-          : aba === "publico"
-            ? "Ninguém postou ainda"
-            : "Nada por aqui ainda"}
+        {foraDaTurma ? v.foraTitulo : aba === "publico" ? v.turmaTitulo : v.personalTitulo}
       </p>
       <p className="mt-1.5 text-[13px] leading-relaxed text-ink-3">
         {foraDaTurma
-          ? FORA_DA_TURMA.feed(nomeDoPersonal)
+          ? preencher(fora.feed, nome)
           : aba === "publico"
-            ? `Quando alguém que treina com ${nomeDoPersonal} compartilhar um treino, aparece aqui.`
+            ? preencher(v.turma, nome)
             : naTurma
-              ? `Ao terminar um treino você pode registrar uma foto. Ela fica visível só para ${nomeDoPersonal}, a não ser que você escolha mostrar para a turma.`
-              : FORA_DA_TURMA.abaDoPersonal(nomeDoPersonal)}
+              ? preencher(v.personal, nome)
+              : preencher(fora.abaDoPersonal, nome)}
       </p>
     </section>
   );

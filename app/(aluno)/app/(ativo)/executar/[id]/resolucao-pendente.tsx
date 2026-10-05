@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CloudOff } from "lucide-react";
 
+import { useIdioma } from "@/components/aluno/idioma-do-app";
+import { plural, preencher } from "@/lib/i18n/texto";
 import { useMontado } from "@/lib/usar-montado";
 
 import { encerrarPendenteEComecar, registrarSeries } from "../actions";
@@ -49,6 +51,8 @@ function Resolucao({
   armazenamento,
 }: ResolucaoPendenteProps & { armazenamento: boolean }) {
   const router = useRouter();
+  const { t } = useIdioma();
+  const p = t.execucao.pendente;
   const [guardadas, setGuardadas] = useState(() =>
     armazenamento ? seriesGuardadasDe(sessaoId) : [],
   );
@@ -94,9 +98,7 @@ function Resolucao({
   return (
     <>
       <p className="text-[14px] leading-relaxed text-dark-text-2">
-        {total > 0
-          ? `${total} ${total === 1 ? "série registrada" : "séries registradas"}.`
-          : "Ainda não tem nenhuma série registrada."}
+        {total > 0 ? plural(total, p.registradas) : p.nenhuma}
       </p>
 
       <div className="mt-6 space-y-2.5">
@@ -104,7 +106,7 @@ function Resolucao({
           href={`/app/executar/${sessaoWorkoutId}`}
           className="flex h-[52px] w-full items-center justify-center rounded-[13px] bg-brand text-[16px] font-bold text-white shadow-cta transition active:scale-[0.99]"
         >
-          Retomar esse treino
+          {p.retomar}
         </Link>
 
         {guardadas.length ? (
@@ -122,20 +124,16 @@ function Resolucao({
               type="submit"
               className="h-[52px] w-full rounded-[13px] border-[1.5px] border-dark-border-2 text-[15px] font-bold text-dark-text-2 transition active:scale-[0.99]"
             >
-              {seriesNoServidor > 0
-                ? `Encerrar e começar o Treino ${treinoLabel}`
-                : `Descartar e começar o Treino ${treinoLabel}`}
+              {preencher(seriesNoServidor > 0 ? p.encerrarEComecar : p.descartarEComecar, {
+                label: treinoLabel,
+              })}
             </button>
           </form>
         )}
       </div>
 
       <p className="mt-4 text-[12px] leading-relaxed text-dark-muted">
-        {guardadas.length
-          ? "Nada é encerrado enquanto houver série guardada neste aparelho."
-          : seriesNoServidor > 0
-            ? "Encerrar salva o que já foi feito no histórico. Nenhuma série é apagada."
-            : "Sem nenhuma série registrada, não há o que guardar."}
+        {guardadas.length ? p.nadaEncerrado : seriesNoServidor > 0 ? p.encerrarSalva : p.semNada}
       </p>
     </>
   );
@@ -157,6 +155,8 @@ function SeriesGuardadas({
   falhou: boolean;
   aoTentarDeNovo: () => void;
 }) {
+  const { t } = useIdioma();
+  const p = t.execucao.pendente;
   return (
     <div
       role="status"
@@ -164,15 +164,10 @@ function SeriesGuardadas({
     >
       <p className="flex items-center gap-2 text-[13px] font-bold text-dark-text">
         <CloudOff aria-hidden size={15} />
-        {quantidade}{" "}
-        {quantidade === 1
-          ? "série guardada neste aparelho"
-          : "séries guardadas neste aparelho"}
+        {plural(quantidade, p.guardadas)}
       </p>
       <p className="mt-1.5 text-[12.5px] leading-relaxed text-dark-muted">
-        {enviando
-          ? "Enviando para o servidor…"
-          : "Elas ainda não chegaram ao servidor. Este treino não pode ser encerrado antes disso."}
+        {enviando ? p.enviandoServidor : p.naoChegaram}
       </p>
 
       {falhou ? (
@@ -181,7 +176,7 @@ function SeriesGuardadas({
           onClick={aoTentarDeNovo}
           className="mt-3 h-11 w-full rounded-button border-[1.5px] border-dark-border-2 text-[14px] font-bold text-dark-text-2 transition active:scale-[0.99]"
         >
-          Tentar enviar de novo
+          {p.tentarDeNovo}
         </button>
       ) : null}
     </div>

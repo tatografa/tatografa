@@ -1,4 +1,5 @@
 import { AvisoDeOffline } from "@/components/aluno/aviso-de-offline";
+import { ProvedorDoIdioma } from "@/components/aluno/idioma-do-app";
 import { BarraDeVoltaAoPainel } from "@/components/aluno/barra-de-volta-ao-painel";
 import { BottomNav } from "@/components/aluno/bottom-nav";
 import { PortaoDeAceite } from "@/components/portao-de-aceite";
@@ -10,7 +11,10 @@ import {
   O_QUE_NAO_MUDA,
   VERSAO_DOS_DOCUMENTOS,
 } from "@/lib/legal/documentos";
+import { langDe } from "@/lib/domain/idioma";
 import { estaNaTurma } from "@/lib/domain/turma";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
+import { oQueMudouNoIdioma } from "@/lib/legal/por-idioma";
 import { aceiteEstaEmDia } from "@/lib/queries/aceite";
 
 /**
@@ -34,6 +38,14 @@ export default async function AlunoLayout({
   const tambemEPersonal = student.id === personal.id;
 
   /*
+   * O idioma do app (etapa 2 da tradução, 05/10) vem do cookie, que o seletor
+   * do perfil grava. O provedor envolve tudo — inclusive o portão e as telas de
+   * erro, que são desenhadas dentro deste layout — e o `lang` vai no contêiner
+   * para o leitor de tela pronunciar no idioma certo.
+   */
+  const { idioma, t } = await textosDoApp();
+
+  /*
    * O portão de re-aceite mora aqui, no layout, pelo mesmo motivo que a
    * autorização mora: é o único lugar por onde toda tela do aluno passa. Num
    * componente de página ele seria contornável por uma URL digitada.
@@ -43,20 +55,23 @@ export default async function AlunoLayout({
    * aceitar.
    */
   if (!(await aceiteEstaEmDia(student.id))) {
+    const traducao = oQueMudouNoIdioma(idioma);
     return (
-      <div className="min-h-dvh bg-canvas">
+      <div lang={langDe(idioma)} className="min-h-dvh bg-canvas">
         <PortaoDeAceite
           versao={VERSAO_DOS_DOCUMENTOS}
-          oQueMudou={O_QUE_MUDOU.aluno}
-          oQueNaoMuda={O_QUE_NAO_MUDA.aluno}
+          oQueMudou={traducao?.oQueMudou ?? O_QUE_MUDOU.aluno}
+          oQueNaoMuda={traducao?.oQueNaoMuda ?? O_QUE_NAO_MUDA.aluno}
           aoAceitar={aceitarAtualizacao}
+          textos={t.comum.portao}
         />
       </div>
     );
   }
 
   return (
-    <div className="min-h-dvh bg-canvas">
+    <ProvedorDoIdioma idioma={idioma} textos={t}>
+    <div lang={langDe(idioma)} className="min-h-dvh bg-canvas">
       <AvisoDeOffline />
       {/*
        * O padding de baixo reserva a altura da bottom nav (64px) mais a área
@@ -64,11 +79,12 @@ export default async function AlunoLayout({
        * iPhone com faixa inferior.
        */}
       <div className="mx-auto min-h-dvh max-w-[440px] bg-canvas px-5 pt-4 pb-[calc(64px+env(safe-area-inset-bottom)+16px)]">
-        {tambemEPersonal ? <BarraDeVoltaAoPainel /> : null}
+        {tambemEPersonal ? <BarraDeVoltaAoPainel t={t.comum.barraDoPainel} /> : null}
         {children}
       </div>
 
       <BottomNav naTurma={estaNaTurma(student.status)} />
     </div>
+    </ProvedorDoIdioma>
   );
 }

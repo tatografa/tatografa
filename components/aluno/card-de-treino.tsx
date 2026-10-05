@@ -1,6 +1,9 @@
 import Link from "next/link";
 
 import { Badge } from "@/components/ui";
+import type { Idioma } from "@/lib/domain/idioma";
+import { TEXTOS_DO_APP } from "@/lib/i18n/app";
+import { plural, preencher } from "@/lib/i18n/texto";
 import type { TreinoDaAgenda } from "@/lib/queries/aluno";
 import { cn } from "@/lib/utils";
 
@@ -8,6 +11,7 @@ export type CardDeTreinoProps = {
   treino: TreinoDaAgenda;
   /** Marca o treino que a home sugere: borda da marca e selo "Sugerido". */
   sugerido?: boolean;
+  idioma: Idioma;
 };
 
 /**
@@ -16,7 +20,8 @@ export type CardDeTreinoProps = {
  * O estado "concluído" do doc depende de histórico de sessão e é M2 — no M1
  * um treino é neutro ou sugerido, e nada mais.
  */
-export function CardDeTreino({ treino, sugerido = false }: CardDeTreinoProps) {
+export function CardDeTreino({ treino, sugerido = false, idioma }: CardDeTreinoProps) {
+  const t = TEXTOS_DO_APP[idioma];
   return (
     <Link
       href={`/app/treinos/${treino.id}`}
@@ -28,19 +33,19 @@ export function CardDeTreino({ treino, sugerido = false }: CardDeTreinoProps) {
     >
       <div className="min-w-0 flex-1">
         <p className="truncate text-[15px] font-bold text-ink">
-          Treino {treino.label} · {treino.name}
+          {preencher(t.comum.treinoComNome, { label: treino.label, nome: treino.name })}
         </p>
         <p className="mt-0.5 text-[12px] text-ink-4">
-          {contagem(treino.total_exercicios)} · ~{treino.duracao_min}min
+          {contagem(treino.total_exercicios, idioma)} · ~{treino.duracao_min}min
         </p>
       </div>
 
-      {sugerido ? <Badge tone="brand-solido">Sugerido</Badge> : null}
+      {sugerido ? <Badge tone="brand-solido">{t.treinos.lista.sugerido}</Badge> : null}
     </Link>
   );
 }
 
-/** "1 exercício" / "6 exercícios" — plural em português, não "1 exercícios". */
-export function contagem(total: number): string {
-  return total === 1 ? "1 exercício" : `${total} exercícios`;
+/** "1 exercício" / "6 exercícios" — "1 exercícios" não, em nenhum dos três idiomas. */
+export function contagem(total: number, idioma: Idioma = "pt"): string {
+  return plural(total, TEXTOS_DO_APP[idioma].comum.exercicios);
 }

@@ -3,7 +3,10 @@
 import { Minus, Plus } from "lucide-react";
 
 import { ajustar } from "@/lib/domain/execucao";
+import { preencher } from "@/lib/i18n/texto";
 import { cn } from "@/lib/utils";
+
+import { useIdioma } from "./idioma-do-app";
 
 export interface StepperProps {
   /** Lido por leitor de tela e usado nos `aria-label` dos dois botões. */
@@ -36,10 +39,12 @@ export function Stepper({
   unidade,
   aoMudar,
 }: StepperProps) {
+  const { t, f } = useIdioma();
+  const formatar = f.decimal;
   return (
     <div className="flex items-center justify-center">
       <BotaoDePasso
-        rotulo={`Diminuir ${rotulo}`}
+        rotulo={preencher(t.execucao.stepper.diminuir, { rotulo })}
         desabilitado={valor <= minimo}
         aoTocar={() => aoMudar(ajustar(valor, -passo, minimo, maximo))}
       >
@@ -59,7 +64,7 @@ export function Stepper({
       </p>
 
       <BotaoDePasso
-        rotulo={`Aumentar ${rotulo}`}
+        rotulo={preencher(t.execucao.stepper.aumentar, { rotulo })}
         desabilitado={valor >= maximo}
         aoTocar={() => aoMudar(ajustar(valor, passo, minimo, maximo))}
       >
@@ -101,11 +106,4 @@ function BotaoDePasso({
       </span>
     </button>
   );
-}
-
-/** 60 vira "60"; 62,5 vira "62,5". Vírgula porque a interface é em português. */
-function formatar(valor: number): string {
-  return Number.isInteger(valor)
-    ? String(valor)
-    : String(valor).replace(".", ",");
 }

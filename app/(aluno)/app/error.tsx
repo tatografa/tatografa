@@ -1,12 +1,11 @@
 "use client";
 
 import { AvisoDeFalha } from "@/components/aviso-de-falha";
+import { useIdioma } from "@/components/aluno/idioma-do-app";
 
 /**
- * Falha de leitura dentro do app do aluno.
- *
- * Fica em `/app` e não na raiz porque aqui a bottom nav continua montada: o
- * aluno perde a tela, não o app. Ele consegue ir para outra aba sem recarregar.
+ * Falha dentro do app do aluno. Fica dentro do layout do aluno, então o idioma
+ * escolhido no perfil chega até aqui pelo provedor.
  */
 export default function ErroDoApp({
   error,
@@ -15,10 +14,13 @@ export default function ErroDoApp({
   error: Error & { digest?: string };
   retry: () => void;
 }) {
+  const { t } = useIdioma();
   return (
     <AvisoDeFalha
-      titulo="Não deu para carregar"
-      texto="Alguma coisa falhou do nosso lado. Seus treinos e seu histórico continuam guardados — é só tentar de novo."
+      titulo={t.comum.erro.titulo}
+      texto={t.comum.erro.texto}
+      rotuloDoBotao={t.comum.erro.tentar}
+      rotuloDoCodigo={t.comum.erro.codigo}
       digest={error.digest}
       aoTentarDeNovo={retry}
     />

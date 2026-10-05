@@ -9,7 +9,8 @@
  * não recebe a URL da página. Sem nenhum dos dois, português.
  *
  * Traduzido até aqui: landing, telas de entrada, convite do aluno, termos e
- * política. Painel e app ainda são só português (etapas 2 e 3).
+ * política (etapa 1) e o app do aluno, com a escolha no perfil (etapa 2). O
+ * painel ainda é só português (etapa 3).
  */
 
 export type Idioma = "pt" | "en" | "es";

@@ -188,16 +188,6 @@ const es: TextosDoConvite = {
 
 export const TEXTOS_DO_CONVITE: Record<Idioma, TextosDoConvite> = { pt, en, es };
 
-/**
- * Troca `{chave}` pelo valor. Para frase com nome em negrito, a tela parte o
- * texto em volta do marcador em vez de usar isto (`partesEmVolta`).
- */
-export function preencher(frase: string, valores: Record<string, string | number>): string {
-  return frase.replace(/\{(\w+)\}/g, (_, chave: string) => String(valores[chave] ?? ""));
-}
-
-/** "Antes {personal} depois" → ["Antes ", "depois"], para pôr o nome em `<strong>`. */
-export function partesEmVolta(frase: string, marcador: string): [string, string] {
-  const [antes, depois = ""] = frase.split(`{${marcador}}`);
-  return [antes, depois];
-}
+// As ferramentas moram em `texto.ts` desde a etapa 2; ficam exportadas daqui
+// para quem já as importava do convite.
+export { partesEmVolta, preencher } from "./texto";

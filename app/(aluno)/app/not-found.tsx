@@ -1,11 +1,14 @@
 import { NaoEncontrado } from "@/components/nao-encontrado";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
 
-export default function NaoEncontradoNoApp() {
+export default async function NaoEncontradoNoApp() {
+  const { t } = await textosDoApp();
   return (
     <NaoEncontrado
-      texto="Ou ela não existe, ou não é do seu cadastro. Se o seu personal acabou de montar um treino, ele aparece na lista."
+      titulo={t.comum.naoEncontrado.titulo}
+      texto={t.comum.naoEncontrado.texto}
       destino="/app"
-      rotuloDoDestino="Ir para o início"
+      rotuloDoDestino={t.comum.naoEncontrado.destino}
     />
   );
 }

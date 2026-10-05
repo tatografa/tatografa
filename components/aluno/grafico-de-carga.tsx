@@ -3,16 +3,16 @@
 import { useId, useState } from "react";
 
 import {
-  dataCurta,
   INTERVALOS,
   type Intervalo,
-  formatarCarga,
   linhaDoGrafico,
-  tendenciaEmPalavras,
-  textoDaSerie,
   type SessaoDoExercicio,
 } from "@/lib/domain/progresso";
+import { tendenciaNoIdioma, textoDaSerieNoIdioma } from "@/lib/i18n/app/frases";
+import { preencher } from "@/lib/i18n/texto";
 import { cn } from "@/lib/utils";
+
+import { useIdioma } from "./idioma-do-app";
 
 /**
  * Coordenadas internas do SVG. O desenho escala com a largura da tela; estes
@@ -44,14 +44,15 @@ export function GraficoDeCarga({
 }) {
   const idDoTitulo = useId();
   const [aberta, setAberta] = useState<string | null>(null);
+  const { t, f } = useIdioma();
+  const p = t.historico.progresso;
 
   const linha = linhaDoGrafico(sessoes, LARGURA, ALTURA);
 
   if (!linha) {
     return (
       <p className="rounded-card bg-canvas-sunken p-4 text-[13px] leading-relaxed text-ink-3">
-        Este exercício é de peso corporal: não há carga para desenhar. As
-        repetições de cada série estão na planilha.
+        {p.semCarga}
       </p>
     );
   }
@@ -66,8 +67,12 @@ export function GraficoDeCarga({
           de uma linha do tempo se leem como o primeiro e o último treino — e o
           mínimo quase nunca é o da esquerda. */}
       <div className="flex items-baseline justify-between font-mono text-[10px] tracking-[0.06em] text-ink-5">
-        <span>mín {formatarCarga(minimo)}</span>
-        <span>máx {formatarCarga(maximo)}</span>
+        <span>
+          {p.min} {f.carga(minimo)}
+        </span>
+        <span>
+          {p.max} {f.carga(maximo)}
+        </span>
       </div>
 
       <div className="relative">
@@ -80,7 +85,7 @@ export function GraficoDeCarga({
           role="img"
           aria-labelledby={idDoTitulo}
         >
-          <title id={idDoTitulo}>{tendenciaEmPalavras(nome, sessoes)}</title>
+          <title id={idDoTitulo}>{tendenciaNoIdioma(nome, sessoes, p, f)}</title>
 
           <path
             d={caminho}
@@ -129,7 +134,7 @@ export function GraficoDeCarga({
               )}
             >
               <span className="sr-only">
-                {dataCurta(ponto.sessao.concluidaEm)}: {formatarCarga(ponto.carga)}
+                {f.dataCurta(ponto.sessao.concluidaEm)}: {f.carga(ponto.carga)}
               </span>
             </button>
           ))}
@@ -140,14 +145,13 @@ export function GraficoDeCarga({
 
       {selecionada ? (
         <section
-          aria-label={`Séries de ${dataCurta(selecionada.sessao.concluidaEm)}`}
+          aria-label={preencher(p.seriesDe, { data: f.dataCurta(selecionada.sessao.concluidaEm) })}
           className="rounded-card border border-border-soft bg-surface p-3.5"
         >
           {/* Sem o utilitário `eyebrow` aqui: ele deixa tudo em caixa alta e
               "57,5 KG" não é como se escreve quilo. */}
           <p className="font-mono text-[11px] font-semibold tracking-[0.06em] text-ink-4">
-            {dataCurta(selecionada.sessao.concluidaEm)} ·{" "}
-            {formatarCarga(selecionada.carga)}
+            {f.dataCurta(selecionada.sessao.concluidaEm)} · {f.carga(selecionada.carga)}
           </p>
           <ul className="mt-2.5 space-y-1">
             {selecionada.sessao.series.map((serie) => (
@@ -155,10 +159,8 @@ export function GraficoDeCarga({
                 key={serie.set_number}
                 className="flex items-baseline justify-between text-[13px] tabular-nums"
               >
-                <span className="text-ink-4">Série {serie.set_number}</span>
-                <span className="font-semibold text-ink">
-                  {textoDaSerie(serie)}
-                </span>
+                <span className="text-ink-4">{preencher(p.serie, { n: serie.set_number })}</span>
+                <span className="font-semibold text-ink">{textoDaSerieNoIdioma(serie, f)}</span>
               </li>
             ))}
           </ul>
@@ -167,7 +169,7 @@ export function GraficoDeCarga({
         // "Escolha", não "toque": o mesmo gráfico aparece na ficha do aluno no
         // painel (M2-06), onde o personal está no computador com o mouse.
         <p className="text-center text-[12px] text-ink-5">
-          Escolha um ponto para ver as séries daquele dia.
+          {p.escolha}
         </p>
       )}
     </div>
@@ -183,6 +185,7 @@ export function GraficoDeCarga({
  * baixo, ao tocar.
  */
 function Datas({ pontos }: { pontos: { x: number; sessao: SessaoDoExercicio }[] }) {
+  const { f } = useIdioma();
   if (!pontos.length) return null;
 
   const passo = Math.max(1, Math.ceil((pontos.length - 1) / 3));
@@ -195,7 +198,7 @@ function Datas({ pontos }: { pontos: { x: number; sessao: SessaoDoExercicio }[] 
         .sort((a, b) => a - b)
         .map((indice) => (
           <span key={pontos[indice].sessao.sessaoId}>
-            {dataCurta(pontos[indice].sessao.concluidaEm)}
+            {f.dataCurta(pontos[indice].sessao.concluidaEm)}
           </span>
         ))}
     </div>
@@ -218,10 +221,12 @@ export function FiltroDeIntervalo({
   valor: Intervalo;
   aoEscolher: (intervalo: Intervalo) => void;
 }) {
+  const { t } = useIdioma();
+  const p = t.historico.progresso;
   return (
     <div
       role="group"
-      aria-label="Intervalo do gráfico"
+      aria-label={p.intervalo}
       className="flex gap-1 rounded-input bg-canvas-sunken p-1"
     >
       {INTERVALOS.map((opcao) => (
@@ -237,7 +242,7 @@ export function FiltroDeIntervalo({
               : "text-ink-4 hover:text-ink-2",
           )}
         >
-          {opcao.rotulo}
+          {opcao.sessoes === null ? p.total : preencher(p.sessoes, { n: opcao.sessoes })}
         </button>
       ))}
     </div>

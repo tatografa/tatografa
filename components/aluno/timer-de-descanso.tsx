@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { ACRESCIMO_DE_DESCANSO, segundosRestantes } from "@/lib/domain/execucao";
 import { comoRelogio } from "@/lib/domain/treino";
 
+import { useIdioma } from "./idioma-do-app";
+
 export interface TimerDeDescansoProps {
   /** Instante em que o descanso termina, em ms de época. */
   fimEm: number;
@@ -30,6 +32,8 @@ export function TimerDeDescanso({
   aoAcrescentar,
 }: TimerDeDescansoProps) {
   const [agora, setAgora] = useState(() => Date.now());
+  const { t } = useIdioma();
+  const d = t.execucao.descanso;
 
   useEffect(() => {
     const marcar = () => setAgora(Date.now());
@@ -48,13 +52,13 @@ export function TimerDeDescanso({
 
   return (
     <section
-      aria-label="Descanso"
+      aria-label={d.rotulo}
       className="border-t border-dark-border bg-dark-surface-2 px-5 pt-4 pb-[calc(16px+env(safe-area-inset-bottom))]"
     >
       <div className="mx-auto flex max-w-[440px] items-center gap-4">
         <div className="min-w-0 flex-1">
           <p className="eyebrow text-[9px] text-dark-muted">
-            {acabou ? "Descanso terminado" : "Descanso"}
+            {acabou ? d.terminado : d.rotulo}
           </p>
           {/*
             `aria-live="off"`: o número muda a cada segundo e um leitor de tela
@@ -82,7 +86,7 @@ export function TimerDeDescanso({
           onClick={aoPular}
           className="h-11 shrink-0 rounded-button bg-dark-elev px-4 text-[13px] font-bold text-dark-text transition active:scale-[0.98]"
         >
-          {acabou ? "Fechar" : "Pular"}
+          {acabou ? d.fechar : d.pular}
         </button>
       </div>
     </section>

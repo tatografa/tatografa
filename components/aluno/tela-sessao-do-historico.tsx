@@ -1,12 +1,9 @@
 
-import {
-  cargaDaSerie,
-  dataPorExtenso,
-  duracaoCurta,
-  formatarNumero,
-  horaDaSessao,
-  type LinhaDeSerie,
-} from "@/lib/domain/historico";
+import type { LinhaDeSerie } from "@/lib/domain/historico";
+import type { Idioma } from "@/lib/domain/idioma";
+import { TEXTOS_DO_APP, type TextosDoApp } from "@/lib/i18n/app";
+import { formatos, type Formatos } from "@/lib/i18n/formatos";
+import { preencher } from "@/lib/i18n/texto";
 import type { ExercicioDoHistorico, SessaoDetalhada } from "@/lib/queries/historico";
 import { LinkDeVoltar } from "@/components/aluno/link-de-voltar";
 
@@ -18,7 +15,8 @@ import { LinkDeVoltar } from "@/components/aluno/link-de-voltar";
  */
 export function TelaSessaoDoHistorico({
   sessao,
-  voltarPara = { href: "/app/historico", rotulo: "Histórico" },
+  voltarPara,
+  idioma = "pt",
 }: {
   sessao: SessaoDetalhada;
   /**
@@ -27,30 +25,34 @@ export function TelaSessaoDoHistorico({
    * duas telas — o resto, incluindo os três estados da série, é o mesmo.
    */
   voltarPara?: { href: string; rotulo: string };
+  /** O app passa o idioma do aluno; o painel ainda é só português (etapa 3). */
+  idioma?: Idioma;
 }) {
+  const t = TEXTOS_DO_APP[idioma];
+  const s = t.historico.sessao;
+  const f = formatos(idioma);
+  const voltar = voltarPara ?? { href: "/app/historico", rotulo: t.historico.historico.titulo };
   return (
     <div className="space-y-4">
       <header>
-        <LinkDeVoltar href={voltarPara.href}>
-          ← {voltarPara.rotulo}
-        </LinkDeVoltar>
+        <LinkDeVoltar href={voltar.href}>← {voltar.rotulo}</LinkDeVoltar>
         <h1 className="mt-2 text-[20px] font-extrabold tracking-[-0.02em] text-ink">
           {sessao.treino
-            ? `Treino ${sessao.treino.label} · ${sessao.treino.name}`
-            : "Treino removido"}
+            ? preencher(t.comum.treinoComNome, { label: sessao.treino.label, nome: sessao.treino.name })
+            : t.comum.treinoRemovido}
         </h1>
         <p className="mt-0.5 text-[12px] text-ink-4 first-letter:uppercase">
-          {dataPorExtenso(sessao.finished_at)} · {horaDaSessao(sessao.finished_at)}
+          {f.dataPorExtenso(sessao.finished_at)} · {f.hora(sessao.finished_at)}
         </p>
       </header>
 
       <section
-        aria-label="Resumo da sessão"
+        aria-label={s.resumo}
         className="flex items-center rounded-card border border-border-soft bg-surface py-3"
       >
         {/* `duration_seconds` é a duração real, gravada no fechamento com o
             relógio do servidor — não se recalcula a partir das séries. */}
-        <Metrica valor={duracaoCurta(sessao.duration_seconds)} rotulo="Duração" />
+        <Metrica valor={f.duracao(sessao.duration_seconds)} rotulo={s.duracao} />
         <Divisoria />
         <Metrica
           valor={
@@ -58,16 +60,15 @@ export function TelaSessaoDoHistorico({
               ? `${sessao.series_feitas}/${sessao.series_prescritas}`
               : String(sessao.series_feitas)
           }
-          rotulo="Séries"
+          rotulo={s.series}
         />
         <Divisoria />
-        <Metrica valor={`${formatarNumero(sessao.volume_kg)} kg`} rotulo="Volume" />
+        <Metrica valor={f.carga(sessao.volume_kg)} rotulo={s.volume} />
       </section>
 
       {sessao.volume_kg === 0 && sessao.series_feitas > 0 ? (
         <p className="text-[12px] leading-relaxed text-ink-4">
-          Exercício de peso corporal não entra no volume — somar repetições a
-          quilos daria um número sem significado.
+          {s.semVolume}
         </p>
       ) : null}
 
@@ -83,7 +84,7 @@ export function TelaSessaoDoHistorico({
       */}
       {sessao.notes ? (
         <section className="rounded-card border border-border-soft bg-canvas-sunken px-4 py-3.5">
-          <h2 className="eyebrow text-[9px] text-ink-4">Observação do treino</h2>
+          <h2 className="eyebrow text-[9px] text-ink-4">{s.observacao}</h2>
           <p className="mt-1.5 text-[14px] leading-[1.6] whitespace-pre-wrap text-ink-2">
             {sessao.notes}
           </p>
@@ -94,20 +95,28 @@ export function TelaSessaoDoHistorico({
         <ol className="space-y-2.5">
           {sessao.exercicios.map((exercicio) => (
             <li key={exercicio.id}>
-              <BlocoDoExercicio exercicio={exercicio} />
+              <BlocoDoExercicio exercicio={exercicio} t={t} f={f} />
             </li>
           ))}
         </ol>
       ) : (
         <p className="rounded-card border border-border-soft bg-surface p-4 text-[13px] text-ink-3">
-          Esta sessão não tem séries registradas.
+          {s.semSeries}
         </p>
       )}
     </div>
   );
 }
 
-function BlocoDoExercicio({ exercicio }: { exercicio: ExercicioDoHistorico }) {
+function BlocoDoExercicio({
+  exercicio,
+  t,
+  f,
+}: {
+  exercicio: ExercicioDoHistorico;
+  t: TextosDoApp;
+  f: Formatos;
+}) {
   return (
     <div className="rounded-card border border-border-soft bg-surface px-3.5 py-3">
       <div className="flex items-baseline justify-between gap-3">
@@ -121,14 +130,17 @@ function BlocoDoExercicio({ exercicio }: { exercicio: ExercicioDoHistorico }) {
 
       {exercicio.reps_target ? (
         <p className="mt-0.5 text-[11px] text-ink-4">
-          Prescrito: {exercicio.sets_prescritos} × {exercicio.reps_target}
+          {preencher(t.historico.sessao.prescrito, {
+            sets: exercicio.sets_prescritos,
+            reps: exercicio.reps_target,
+          })}
         </p>
       ) : null}
 
       <ul className="mt-2.5 space-y-1">
         {exercicio.series.map((serie) => (
           <li key={serie.set_number}>
-            <LinhaDaSerie serie={serie} pesoCorporal={exercicio.is_bodyweight} />
+            <LinhaDaSerie serie={serie} pesoCorporal={exercicio.is_bodyweight} t={t} f={f} />
           </li>
         ))}
       </ul>
@@ -144,9 +156,13 @@ function BlocoDoExercicio({ exercicio }: { exercicio: ExercicioDoHistorico }) {
 function LinhaDaSerie({
   serie,
   pesoCorporal,
+  t,
+  f,
 }: {
   serie: LinhaDeSerie;
   pesoCorporal: boolean;
+  t: TextosDoApp;
+  f: Formatos;
 }) {
   return (
     <div className="grid grid-cols-[22px_1fr] items-center gap-3 rounded-[10px] bg-canvas-sunken px-2.5 py-1.5">
@@ -157,14 +173,14 @@ function LinhaDaSerie({
       </span>
       {serie.estado === "feita" ? (
         <span className="text-[13px] font-semibold text-ink">
-          {cargaDaSerie(serie.load_kg, pesoCorporal)}
+          {pesoCorporal || serie.load_kg === null ? t.comum.pesoCorporal : f.carga(serie.load_kg)}
           {serie.reps !== null ? (
             <span className="text-ink-3"> × {serie.reps} reps</span>
           ) : null}
         </span>
       ) : (
         <span className="text-[13px] text-ink-4">
-          {serie.estado === "pulada" ? "Série pulada" : "Não registrada"}
+          {serie.estado === "pulada" ? t.historico.sessao.pulada : t.historico.sessao.naoRegistrada}
         </span>
       )}
     </div>

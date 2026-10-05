@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireStudent } from "@/lib/auth/session";
 import { seriesDaSessao, sessaoAbertaDoAluno } from "@/lib/queries/execucao";
 import { referenciaDoTreino } from "@/lib/queries/recordes";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
 import { lerTreino } from "@/lib/queries/treinos";
 
 import { Execucao } from "./execucao";
@@ -34,12 +35,15 @@ export default async function ExecutarTreino(
   // travaria o aluno até alguém descartá-la.
   if (!treino.exercicios.length) notFound();
 
-  const aberta = await sessaoAbertaDoAluno(student.id);
+  const [aberta, { idioma }] = await Promise.all([
+    sessaoAbertaDoAluno(student.id),
+    textosDoApp(),
+  ]);
 
-  if (!aberta) return <TelaComecar treino={treino} />;
+  if (!aberta) return <TelaComecar treino={treino} idioma={idioma} />;
 
   if (aberta.workout_id !== treino.id) {
-    return <TelaSessaoPendente treino={treino} pendente={aberta} />;
+    return <TelaSessaoPendente treino={treino} pendente={aberta} idioma={idioma} />;
   }
 
   // As duas leituras não dependem uma da outra: a referência histórica não

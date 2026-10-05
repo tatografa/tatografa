@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 
 import { requireStudent } from "@/lib/auth/session";
-import { esquemaDoPerfil, type CampoDoPerfil } from "@/lib/domain/perfil";
+import { esquemaDoPerfilNoIdioma, type CampoDoPerfil } from "@/lib/domain/perfil";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
 import { createClient } from "@/lib/supabase/server";
 
 export type EstadoDoPerfil = {
@@ -54,7 +55,8 @@ export async function salvarPerfil(
     metaDePeso: String(formData.get("metaDePeso") ?? ""),
   };
 
-  const analise = esquemaDoPerfil.safeParse(bruto);
+  const { idioma, t } = await textosDoApp();
+  const analise = esquemaDoPerfilNoIdioma(idioma, t.perfil.perfil.validacao).safeParse(bruto);
   if (!analise.success) {
     const errosPorCampo: EstadoDoPerfil["errosPorCampo"] = {};
     for (const problema of analise.error.issues) {
@@ -93,7 +95,7 @@ export async function salvarPerfil(
     .eq("id", student.id);
 
   if (error) {
-    return { erro: "Não conseguimos salvar agora. Tente de novo." };
+    return { erro: t.perfil.perfil.falha };
   }
 
   // `"layout"` e não a página solta: o nome do aluno aparece no cabeçalho da

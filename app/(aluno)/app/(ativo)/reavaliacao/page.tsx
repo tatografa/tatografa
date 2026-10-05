@@ -10,6 +10,8 @@ import { comparar, lerReavaliacoesDoAluno } from "@/lib/queries/reavaliacao";
 import { BotaoApagarFotos } from "./botao-apagar-fotos";
 import { Formulario } from "./formulario";
 import { primeiroNome } from "@/lib/domain/nome";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
+import { preencher } from "@/lib/i18n/texto";
 
 /**
  * A reavaliação do aluno (doc 05 §12).
@@ -27,23 +29,32 @@ import { primeiroNome } from "@/lib/domain/nome";
 export default async function ReavaliacaoDoAluno({
   searchParams,
 }: PageProps<"/app/reavaliacao">) {
-  const [{ enviada }, { student, personal }] = await Promise.all([
+  const [{ enviada }, { student, personal }, { idioma, t, f }] = await Promise.all([
     searchParams,
     requireStudent(),
+    textosDoApp(),
   ]);
+  const rv = t.perfil.reavaliacao;
+  const nome = primeiroNome(personal.name);
 
-  const { aberta, enviadas } = await lerReavaliacoesDoAluno(student.id, {
-    comFotos: true,
+  const lidas = await lerReavaliacoesDoAluno(student.id, { comFotos: true });
+  // Os rótulos de data vêm da consulta em português; aqui saem no idioma do app.
+  const noIdioma = <T extends { liberadaEm: string; enviadaEm: string | null }>(x: T) => ({
+    ...x,
+    rotuloDaLiberacao: f.dia(x.liberadaEm),
+    rotuloDoEnvio: x.enviadaEm ? f.dia(x.enviadaEm) : null,
   });
+  const aberta = lidas.aberta ? noIdioma(lidas.aberta) : null;
+  const enviadas = lidas.enviadas.map(noIdioma);
 
   const ultima = enviadas[0] ?? null;
 
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <LinkDeVoltar href="/app/perfil">← Perfil</LinkDeVoltar>
+        <LinkDeVoltar href="/app/perfil">{rv.voltar}</LinkDeVoltar>
         <h1 className="text-[21px] font-extrabold tracking-[-0.02em] text-ink">
-          Reavaliação
+          {rv.titulo}
         </h1>
       </div>
 
@@ -51,7 +62,7 @@ export default async function ReavaliacaoDoAluno({
         <Card className="flex items-start gap-2.5 border-success/30 bg-success-soft">
           <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-success" aria-hidden />
           <p className="text-[13px] leading-[1.5] text-success-dark">
-            Reavaliação enviada. {primeiroNome(personal.name)} já consegue ver.
+            {preencher(rv.enviada, { nome })}
           </p>
         </Card>
       )}
@@ -59,19 +70,16 @@ export default async function ReavaliacaoDoAluno({
       {aberta ? (
         <>
           <p className="text-[13px] leading-[1.55] text-ink-3">
-            {primeiroNome(personal.name)} liberou uma reavaliação{" "}
-            {aberta.rotuloDaLiberacao.toLowerCase()}. Meça com calma — o que você
-            preencher aqui vira a comparação do próximo ciclo.
+            {preencher(rv.liberou, { nome, dia: f.diaNaFrase(aberta.liberadaEm) })}
           </p>
           <Formulario reavaliacao={aberta} anterior={ultima} />
         </>
       ) : (
         <Card size="lg" className="space-y-2 text-center">
           <Ruler size={20} className="mx-auto text-ink-4" aria-hidden />
-          <p className="text-[14px] font-bold text-ink">Nada para preencher agora</p>
+          <p className="text-[14px] font-bold text-ink">{rv.nadaAgora}</p>
           <p className="mx-auto max-w-xs text-[12.5px] leading-[1.5] text-ink-4">
-            {primeiroNome(personal.name)} avisa por aqui quando for hora da
-            próxima. O formulário aparece nesta tela.
+            {preencher(rv.avisaPorAqui, { nome })}
           </p>
         </Card>
       )}
@@ -79,7 +87,7 @@ export default async function ReavaliacaoDoAluno({
       {enviadas.length > 0 && (
         <section className="space-y-4 border-t border-border-soft pt-5">
           <h2 className="text-[15px] font-extrabold tracking-[-0.01em] text-ink">
-            Suas reavaliações
+            {rv.suas}
           </h2>
 
           {enviadas.map((r, i) => {
@@ -92,7 +100,7 @@ export default async function ReavaliacaoDoAluno({
                   {r.rotuloDoEnvio}
                   {anterior && (
                     <span className="ml-1.5 font-medium text-ink-4">
-                      vs. {anterior.rotuloDoEnvio}
+                      {preencher(rv.vs, { data: anterior.rotuloDoEnvio ?? "" })}
                     </span>
                   )}
                 </h3>
@@ -100,6 +108,7 @@ export default async function ReavaliacaoDoAluno({
                   atual={r}
                   anterior={anterior}
                   linhas={comparar(r, anterior)}
+                  idioma={idioma}
                 />
                 {/*
                   O botão só aparece quando ainda há foto. É a única coisa que

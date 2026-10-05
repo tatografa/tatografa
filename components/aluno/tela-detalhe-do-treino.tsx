@@ -3,30 +3,39 @@ import { iniciarTreino } from "@/app/(aluno)/app/(ativo)/executar/actions";
 import { classesDeBotao } from "@/components/ui";
 import type { ExercicioPrescrito, TreinoCompleto } from "@/lib/queries/treinos";
 import { LinkDeVoltar } from "@/components/aluno/link-de-voltar";
+import type { Idioma } from "@/lib/domain/idioma";
+import { TEXTOS_DO_APP, type TextosDoApp } from "@/lib/i18n/app";
+import { preencher } from "@/lib/i18n/texto";
 
 /** Detalhe do treino (doc 05, tela 4). Recebe o treino pronto, sem banco. */
-export function TelaDetalheDoTreino({ treino }: { treino: TreinoCompleto }) {
+export function TelaDetalheDoTreino({
+  treino,
+  idioma,
+}: {
+  treino: TreinoCompleto;
+  idioma: Idioma;
+}) {
+  const t = TEXTOS_DO_APP[idioma];
+  const d = t.treinos.detalhe;
   return (
     <div className="space-y-4">
       <header>
-        <LinkDeVoltar href="/app/treinos">
-          ← Treinos
-        </LinkDeVoltar>
+        <LinkDeVoltar href="/app/treinos">{d.voltar}</LinkDeVoltar>
         <h1 className="mt-2 text-[20px] font-extrabold tracking-[-0.02em] text-ink">
-          Treino {treino.label}
+          {preencher(t.comum.treino, { label: treino.label })}
         </h1>
         <p className="mt-0.5 text-[12px] text-ink-4">{treino.name}</p>
       </header>
 
       <section
-        aria-label="Resumo do treino"
+        aria-label={d.resumo}
         className="flex items-center rounded-card border border-border-soft bg-surface py-3"
       >
-        <Metrica valor={String(treino.exercicios.length)} rotulo="Exercícios" />
+        <Metrica valor={String(treino.exercicios.length)} rotulo={d.exercicios} />
         <Divisoria />
-        <Metrica valor={`~${treino.duracao_min}min`} rotulo="Duração" />
+        <Metrica valor={`~${treino.duracao_min}min`} rotulo={d.duracao} />
         <Divisoria />
-        <Metrica valor={String(treino.total_series)} rotulo="Séries" />
+        <Metrica valor={String(treino.total_series)} rotulo={d.series} />
       </section>
 
       {treino.notes ? (
@@ -38,7 +47,7 @@ export function TelaDetalheDoTreino({ treino }: { treino: TreinoCompleto }) {
       <ol className="space-y-2.5">
         {treino.exercicios.map((exercicio) => (
           <li key={exercicio.id}>
-            <LinhaDoExercicio exercicio={exercicio} />
+            <LinhaDoExercicio exercicio={exercicio} t={t} />
           </li>
         ))}
       </ol>
@@ -56,19 +65,19 @@ export function TelaDetalheDoTreino({ treino }: { treino: TreinoCompleto }) {
             type="submit"
             className={classesDeBotao({ size: "lg", block: true })}
           >
-            Começar treino
+            {d.comecar}
           </button>
         </form>
       ) : (
         <p className="text-center text-[13px] text-ink-3">
-          Este treino ainda não tem exercícios.
+          {d.semExercicios}
         </p>
       )}
     </div>
   );
 }
 
-function LinhaDoExercicio({ exercicio }: { exercicio: ExercicioPrescrito }) {
+function LinhaDoExercicio({ exercicio, t }: { exercicio: ExercicioPrescrito; t: TextosDoApp }) {
   return (
     <div className="grid grid-cols-[22px_1fr_auto] items-center gap-3 rounded-card bg-surface px-3.5 py-3">
       {/*
@@ -87,7 +96,7 @@ function LinhaDoExercicio({ exercicio }: { exercicio: ExercicioPrescrito }) {
         <p className="mt-0.5 text-[11px] text-ink-4">
           {exercicio.sets} × {exercicio.reps_target}
           {exercicio.rir_target ? ` · RIR ${exercicio.rir_target}` : ""} ·{" "}
-          {exercicio.rest_seconds}s descanso
+          {preencher(t.treinos.detalhe.descanso, { s: exercicio.rest_seconds })}
         </p>
       </div>
 

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { TelaSessaoDoHistorico } from "@/components/aluno/tela-sessao-do-historico";
 import { requireStudent } from "@/lib/auth/session";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
 import { lerSessaoDoHistorico } from "@/lib/queries/historico";
 
 /**
@@ -20,5 +21,6 @@ export default async function SessaoDoHistorico(
   const sessao = await lerSessaoDoHistorico(student.id, sessaoId);
   if (!sessao) notFound();
 
-  return <TelaSessaoDoHistorico sessao={sessao} />;
+  const { idioma } = await textosDoApp();
+  return <TelaSessaoDoHistorico sessao={sessao} idioma={idioma} />;
 }

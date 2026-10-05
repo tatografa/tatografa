@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import type { Idioma } from "./idioma";
-import { telefoneOpcional } from "./telefone";
+import { telefoneOpcional, telefoneOpcionalCom } from "./telefone";
 
 /**
  * As regras dos campos do perfil do aluno, num lugar só.
@@ -164,6 +164,44 @@ export const metaDePesoDoAluno = z
     z.coerce.number({ error: "Meta inválida." }).gt(0, "Meta inválida.").lt(500, "Meta inválida.").nullable(),
   )
   .default(null);
+
+/** As mensagens do perfil que não estão em `camposObrigatoriosDoAluno`. */
+export type MensagensDoPerfil = {
+  nome: string;
+  nomeLongo: string;
+  cidadeLonga: string;
+  uf: string;
+  opcao: string;
+  meta: string;
+  telefone: string;
+};
+
+/**
+ * O mesmo esquema de `esquemaDoPerfil`, com as mensagens no idioma do app
+ * (etapa 2 da tradução). As regras são as mesmas — só o texto do erro muda —,
+ * e é por isso que o esquema em português continua sendo este, montado igual.
+ */
+export function esquemaDoPerfilNoIdioma(idioma: Idioma, m: MensagensDoPerfil) {
+  const vazio = (v: unknown) => (typeof v === "string" && v.trim() === "" ? null : v);
+  return z.object({
+    nome: z.string().trim().min(2, m.nome).max(80, m.nomeLongo),
+    ...camposObrigatoriosDoAluno(idioma),
+    telefone: telefoneOpcionalCom(m.telefone),
+    cidade: z
+      .preprocess(vazio, z.string().trim().min(1).max(80, m.cidadeLonga).nullable())
+      .default(null),
+    uf: z.preprocess(vazio, z.enum(UFS, { error: m.uf }).nullable()).default(null),
+    perfilBiologico: z
+      .preprocess(
+        vazio,
+        z.enum(["natural", "reposicao", "hormonizado"], { error: m.opcao }).nullable(),
+      )
+      .default(null),
+    metaDePeso: z
+      .preprocess(vazio, z.coerce.number({ error: m.meta }).gt(0, m.meta).lt(500, m.meta).nullable())
+      .default(null),
+  });
+}
 
 /** Os campos que o aluno edita depois — sem senha, sem termos, sem e-mail. */
 export const esquemaDoPerfil = z.object({

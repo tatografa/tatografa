@@ -2,6 +2,8 @@
 
 import { useMontado } from "@/lib/usar-montado";
 
+import { useIdioma } from "./idioma-do-app";
+
 /**
  * A hora de um instante no fuso **do aparelho do aluno**.
  *
@@ -24,10 +26,13 @@ export function HoraLocal({
   className?: string;
 }) {
   const montado = useMontado();
+  const { idioma } = useIdioma();
   if (!montado) return null;
 
   const data = new Date(iso);
-  const hora = `${String(data.getHours()).padStart(2, "0")}h${String(data.getMinutes()).padStart(2, "0")}`;
+  // "18h20" é jeito brasileiro de escrever hora; em inglês e espanhol, "18:20".
+  const separador = idioma === "pt" ? "h" : ":";
+  const hora = `${String(data.getHours()).padStart(2, "0")}${separador}${String(data.getMinutes()).padStart(2, "0")}`;
 
   return (
     <>

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { TelaDoPost } from "@/components/aluno/tela-do-post";
 import { requireStudent } from "@/lib/auth/session";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
 import { lerPost } from "@/lib/queries/feed";
 
 import { ApagarPost } from "./apagar-post";
@@ -14,10 +15,13 @@ export default async function PostDoFeedPage(
   const { postId } = await props.params;
   const { student, personal } = await requireStudent();
 
-  const post = await lerPost(student.id, postId, {
-    id: personal.id,
-    nome: personal.name,
-  });
+  const { idioma } = await textosDoApp();
+  const post = await lerPost(
+    student.id,
+    postId,
+    { id: personal.id, nome: personal.name },
+    idioma,
+  );
 
   // Post de fora da turma, id inexistente e id malformado caem todos aqui: são
   // a mesma coisa para quem está olhando, e separá-los contaria a um estranho
@@ -26,6 +30,7 @@ export default async function PostDoFeedPage(
 
   return (
     <TelaDoPost
+      idioma={idioma}
       post={post}
       idDoPersonal={personal.id}
       acoes={

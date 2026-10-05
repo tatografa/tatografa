@@ -21,6 +21,7 @@ export function BotaoSair({
   size = "sm",
   block = false,
   rotulo = "Sair",
+  rotuloSaindo = "Saindo…",
   apenasIcone = false,
 }: {
   variant?: "secondary" | "danger";
@@ -29,6 +30,8 @@ export function BotaoSair({
   block?: boolean;
   /** "Sair da conta" onde o botão mora longe do nome de quem está logado. */
   rotulo?: string;
+  /** "Saindo…" no idioma de quem sai; o painel ainda é só português. */
+  rotuloSaindo?: string;
   /**
    * Só o ícone, para o pé da barra lateral do painel: ao lado do nome de quem
    * está logado, a palavra "Sair" repete o que o ícone já diz, e na barra
@@ -44,7 +47,7 @@ export function BotaoSair({
         type="button"
         disabled={saindo}
         onClick={() => iniciarTransicao(() => sair())}
-        aria-label={saindo ? "Saindo…" : rotulo}
+        aria-label={saindo ? rotuloSaindo : rotulo}
         title={rotulo}
         className="flex size-9 shrink-0 items-center justify-center rounded-[9px] text-ink-4 transition hover:bg-surface hover:text-brand disabled:opacity-60"
       >
@@ -61,7 +64,7 @@ export function BotaoSair({
       disabled={saindo}
       onClick={() => iniciarTransicao(() => sair())}
     >
-      {saindo ? "Saindo…" : rotulo}
+      {saindo ? rotuloSaindo : rotulo}
     </Button>
   );
 }

@@ -1,6 +1,6 @@
 import type { Idioma } from "@/lib/domain/idioma";
 
-import type { Documento } from "./documentos";
+import { VERSAO_DOS_DOCUMENTOS, type Documento } from "./documentos";
 import { PRIVACIDADE_EN, TERMOS_EN } from "./en";
 import { PRIVACIDADE_ES, TERMOS_ES } from "./es";
 import { PRIVACIDADE } from "./privacidade";
@@ -57,3 +57,39 @@ export const MOLDURA_DO_DOCUMENTO: Record<Idioma, MolduraDoDocumento> = {
     },
   },
 };
+
+/**
+ * O que o portão de re-aceite do **app do aluno** diz em inglês e espanhol.
+ *
+ * Mesma regra dos documentos: é tradução de referência do texto de
+ * `O_QUE_MUDOU.aluno` e `O_QUE_NAO_MUDA.aluno`, e o aceite grava a versão em
+ * português. **Quem sobe a versão escreve as três frases** — sem a tradução
+ * nova, o portão cairia no português, que é melhor que mostrar a frase da
+ * versão anterior como se fosse desta.
+ */
+export const O_QUE_MUDOU_TRADUZIDO: Record<
+  Idioma,
+  { versao: string; oQueMudou: string; oQueNaoMuda: string } | null
+> = {
+  pt: null,
+  en: {
+    versao: "2026-09-18",
+    oQueMudou:
+      "Your profile got four optional fields: phone, city, a weight goal and whether you use any hormone therapy. All four start blank and stay blank if you don't want to fill them in — nothing in the app stops working. Hormone therapy information is health data: it belongs to you and your trainer only, you're the one who writes it, and you can go back to “not provided” whenever you want. The privacy policy explains each one.",
+    oQueNaoMuda:
+      "Your workout, your history and your records stay exactly as they were. To keep using the app, confirm that you've read the new text.",
+  },
+  es: {
+    versao: "2026-09-18",
+    oQueMudou:
+      "Tu perfil tiene cuatro campos opcionales nuevos: teléfono, ciudad, una meta de peso y si usas alguna terapia hormonal. Los cuatro empiezan en blanco y siguen en blanco si no quieres completarlos — nada en la app deja de funcionar. La información sobre terapia hormonal es un dato de salud: es solo tuya y de tu entrenador, quien la escribe eres tú, y puedes volver a “no informado” cuando quieras. La política de privacidad explica cada uno.",
+    oQueNaoMuda:
+      "Tu entrenamiento, tu historial y tus récords siguen exactamente como estaban. Para seguir usando la app, confirma que leíste el texto nuevo.",
+  },
+};
+
+/** A tradução do portão, se for da versão vigente; senão, nulo (cai no português). */
+export function oQueMudouNoIdioma(idioma: Idioma) {
+  const traducao = O_QUE_MUDOU_TRADUZIDO[idioma];
+  return traducao && traducao.versao === VERSAO_DOS_DOCUMENTOS ? traducao : null;
+}

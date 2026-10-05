@@ -3,9 +3,11 @@
 import { Check, EllipsisVertical, Flag, History, Pencil } from "lucide-react";
 import { useState } from "react";
 
+import { useIdioma } from "@/components/aluno/idioma-do-app";
 import { BottomSheet } from "@/components/ui";
 import { LIMITE_DA_OBSERVACAO_DO_TREINO } from "@/lib/domain/execucao";
-import { textoDaUltimaVez, type UltimaVez } from "@/lib/domain/recordes";
+import type { UltimaVez } from "@/lib/domain/recordes";
+import { textoDaUltimaVezNoIdioma } from "@/lib/i18n/app/frases";
 
 import { salvarObservacaoDoTreino } from "../actions";
 
@@ -51,13 +53,15 @@ export function MenuDaExecucao({
   podeEncerrar: boolean;
 }) {
   const [aberto, setAberto] = useState<Aberto>(null);
+  const { t } = useIdioma();
+  const m = t.execucao.menu;
 
   return (
     <>
       <button
         type="button"
         onClick={() => setAberto("menu")}
-        aria-label="Mais opções do treino"
+        aria-label={m.mais}
         className="-mr-2 flex size-11 items-center justify-center text-dark-text-2 transition active:scale-95"
       >
         <EllipsisVertical aria-hidden size={20} />
@@ -66,16 +70,14 @@ export function MenuDaExecucao({
       <BottomSheet
         aberto={aberto === "menu"}
         aoFechar={() => setAberto(null)}
-        titulo="Treino"
+        titulo={m.titulo}
       >
         <ul className="space-y-1">
           <li>
             <ItemDoMenu
               icone={<Pencil aria-hidden size={17} />}
               rotulo={
-                observacaoInicial
-                  ? "Editar observação do treino"
-                  : "Anotar algo sobre o treino"
+                observacaoInicial ? m.editarObservacao : m.anotar
               }
               detalhe={observacaoInicial ?? undefined}
               onClick={() => setAberto("observacao")}
@@ -84,7 +86,7 @@ export function MenuDaExecucao({
           <li>
             <ItemDoMenu
               icone={<History aria-hidden size={17} />}
-              rotulo="Última vez neste exercício"
+              rotulo={m.ultimaVez}
               detalhe={exercicio.nome}
               onClick={() => setAberto("historico")}
             />
@@ -93,8 +95,8 @@ export function MenuDaExecucao({
             <li>
               <ItemDoMenu
                 icone={<Flag aria-hidden size={17} />}
-                rotulo={encerrando ? "Encerrando…" : "Encerrar treino agora"}
-                detalhe="Salva o que você já fez e fecha a sessão."
+                rotulo={encerrando ? m.encerrando : m.encerrar}
+                detalhe={m.encerrarApoio}
                 onClick={aoEncerrar}
                 desabilitado={encerrando}
               />
@@ -167,6 +169,7 @@ function Historico({ ultima }: { ultima: UltimaVez | undefined }) {
   // A guarda é em `ultima`, e não no tamanho da lista, porque `textoDaUltimaVez`
   // abaixo exige o objeto: checar só `series.length` deixaria o TypeScript sem
   // como saber que ele existe.
+  const { t, f } = useIdioma();
   const series = ultima
     ? Object.entries(ultima.porSerie).sort((a, b) => Number(a[0]) - Number(b[0]))
     : [];
@@ -174,8 +177,7 @@ function Historico({ ultima }: { ultima: UltimaVez | undefined }) {
   if (!ultima || !series.length) {
     return (
       <p className="px-3 pb-2 text-[14px] leading-[1.6] text-dark-muted">
-        Primeira vez que você faz este exercício. Depois de hoje, a carga da
-        última vez aparece aqui.
+        {t.execucao.menu.primeiraVez}
       </p>
     );
   }
@@ -183,7 +185,7 @@ function Historico({ ultima }: { ultima: UltimaVez | undefined }) {
   return (
     <div className="pb-1">
       <p className="px-3 text-[13px] text-dark-muted">
-        {textoDaUltimaVez(ultima)}
+        {textoDaUltimaVezNoIdioma(ultima, f)}
       </p>
       <ul className="mt-2.5 space-y-1">
         {series.map(([numero, serie]) => (
@@ -196,8 +198,8 @@ function Historico({ ultima }: { ultima: UltimaVez | undefined }) {
             </span>
             <span className="text-[14.5px] font-semibold text-dark-text tabular-nums">
               {serie.carga === null || serie.carga === 0
-                ? "Peso corporal"
-                : `${serie.carga} kg`}
+                ? t.comum.pesoCorporal
+                : f.carga(serie.carga)}
               {serie.reps !== null && (
                 <span className="font-normal text-dark-text-2">
                   {" "}
@@ -229,6 +231,8 @@ function Observacao({
   sessionId: string;
   inicial: string | null;
 }) {
+  const { t } = useIdioma();
+  const m = t.execucao.menu;
   const [texto, setTexto] = useState(inicial ?? "");
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -248,10 +252,9 @@ function Observacao({
   const restam = LIMITE_DA_OBSERVACAO_DO_TREINO - texto.length;
 
   return (
-    <BottomSheet aberto={aberto} aoFechar={aoFechar} titulo="Observação do treino">
+    <BottomSheet aberto={aberto} aoFechar={aoFechar} titulo={m.observacaoTitulo}>
       <p className="mb-2.5 text-[13px] leading-[1.5] text-dark-muted">
-        O que o número não conta: dor, sono ruim, máquina ocupada. Seu personal
-        lê isso junto do treino.
+        {m.observacaoApoio}
       </p>
 
       <textarea
@@ -259,8 +262,8 @@ function Observacao({
         onChange={(e) => setTexto(e.target.value)}
         maxLength={LIMITE_DA_OBSERVACAO_DO_TREINO}
         rows={4}
-        aria-label="Observação sobre este treino"
-        placeholder="Ombro direito doeu, fui leve no supino."
+        aria-label={m.observacaoRotulo}
+        placeholder={m.observacaoExemplo}
         className="w-full rounded-[13px] border-[1.5px] border-dark-border-2 bg-dark-bg px-3.5 py-3 text-[15px] text-dark-text placeholder:text-dark-muted focus:border-brand-on-dark focus:outline-none"
       />
 
@@ -283,7 +286,7 @@ function Observacao({
           disabled={salvando}
           className="h-[50px] flex-1 rounded-[13px] border-[1.5px] border-dark-border-2 text-[14px] font-bold text-dark-text-2 disabled:opacity-50"
         >
-          Cancelar
+          {t.comum.cancelar}
         </button>
         <button
           type="button"
@@ -292,7 +295,7 @@ function Observacao({
           className="flex h-[50px] flex-[1.3] items-center justify-center gap-1.5 rounded-[13px] bg-brand-on-dark text-[14px] font-bold text-white disabled:opacity-60"
         >
           <Check aria-hidden size={16} />
-          {salvando ? "Salvando…" : "Salvar"}
+          {salvando ? t.comum.salvando : t.comum.salvar}
         </button>
       </div>
     </BottomSheet>

@@ -520,7 +520,8 @@ Provar que funciona sem o Otávio ler código:
   o app do aluno, com a opção no Perfil. **Etapa 3:** o painel, com a opção em
   Configurações. **A opção de idioma só aparece numa área depois que ela estiver
   traduzida** — seletor que troca a sigla e deixa a tela em português é controle
-  mentindo. Até lá app e painel falam português qualquer que seja o cookie.
+  mentindo. _A etapa 2 entrou no mesmo dia (abaixo); o painel continua em
+  português qualquer que seja o cookie._
   **Como funciona:** `?lang=` vale para a página e o `proxy.ts` grava `reps_idioma` (um
   ano) — **também na requisição em curso**, senão o layout leria o cookie antigo e a
   moldura sairia num idioma e o formulário em outro. `idiomaAtual()` decide: parâmetro,
@@ -537,6 +538,37 @@ Provar que funciona sem o Otávio ler código:
   **O que continua em português:** os e-mails do Supabase (confirmação e recuperação de
   senha) — o modelo é um só, configurado no painel do Supabase, e não sabe o idioma de
   quem pediu.
+- **[2026-10-05, pedido do Otávio]** **Etapa 2: o app do aluno fala os três idiomas, e a
+  escolha mora no Perfil** ("Idioma do app", três linhas com o nome de cada idioma escrito
+  nele mesmo, link com recarga inteira — o mesmo `?lang=` → cookie da etapa 1). O cookie é
+  um só: quem escolheu inglês na landing já abre o app em inglês. **O dicionário é um
+  arquivo por área** (`lib/i18n/app/`: comum, treinos, execução, histórico, feed, perfil),
+  com as três línguas de cada frase lado a lado. **Duas vias, uma regra:** componente de
+  servidor recebe `idioma` por prop e lê `TEXTOS_DO_APP[idioma]`; componente cliente lê
+  `useIdioma()`, de um `ProvedorDoIdioma` no layout do aluno que recebe **só o dicionário
+  do idioma escolhido** — importar os três num componente cliente poria as três línguas no
+  JavaScript de quem abre o app na academia. Pelo mesmo motivo as frases montadas
+  (`rirNoIdioma`, `tendenciaNoIdioma`…) moram em `lib/i18n/app/frases.ts`, fora do
+  dicionário. Server Action lê o idioma do cookie (`textosDoApp()`, `cache()` por
+  requisição) e devolve a mensagem nele; esquema zod com mensagem é montado na hora.
+  **Data, hora e número passam por `formatos(idioma)`** (`lib/i18n/formatos.ts`): em
+  português cada formato **é** a função que já existia (o painel usa as mesmas), nos
+  outros o `Intl`, sempre no fuso do produto. Hora é "18h20" em português e "18:20" nos
+  outros. **O que não se traduz:** o que o personal escreveu (nome do treino, técnica,
+  observação) e o nome dos exercícios do catálogo — o app não reescreve a prescrição de
+  ninguém. **Componentes que o painel divide com o app** (`TelaSessaoDoHistorico`,
+  `Comparacao`, `PortaoDeAceite`, `AvisoDeFalha`, `NaoEncontrado`, `BotaoSair`,
+  `VideoDoExercicio`) recebem idioma ou rótulo **opcional, com português de padrão**: o
+  painel não mudou. O portão de re-aceite do aluno ganhou o "o que mudou" em inglês e
+  espanhol (`O_QUE_MUDOU_TRADUZIDO`), que **só vale para a versão em que foi escrito**:
+  subiu a versão sem traduzir, o portão cai no português em vez de mostrar a frase velha.
+- **[2026-10-05]** **Três coisas que a tradução achou no caminho.** *A saudação da home
+  usava a hora do servidor* — UTC na Vercel —, e às 21h de Brasília dizia "Bom dia" a quem
+  chegava para o treino da noite; agora é a hora do fuso do produto. *A tela de acesso
+  pausado dizia "Ele ainda não cadastrou um WhatsApp"*, e a de apagar fotos "é com eles que
+  ele acompanha": o artigo afirmava o gênero do personal; as frases foram reescritas sem
+  ele. *`FORA_DA_TURMA`* saiu de `lib/domain/turma.ts` para o dicionário do feed, com o
+  comentário que explica as três frases.
 - **[2026-10-05, decisão do Otávio]** **Termos e política em inglês e espanhol são
   tradução de referência; o que vale é o português.** A página traduzida diz isso
   **antes da primeira seção**, com "Ler em português" — quem lê uma tradução jurídica

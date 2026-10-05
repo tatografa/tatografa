@@ -3,6 +3,7 @@
 import { Heart } from "lucide-react";
 import { useState, useTransition } from "react";
 
+import { useIdioma } from "@/components/aluno/idioma-do-app";
 import { cn } from "@/lib/utils";
 
 import { alternarCurtida } from "../actions";
@@ -27,6 +28,7 @@ export function BotaoDeCurtir({
   const [curtido, setCurtido] = useState(curtiPor);
   const [total, setTotal] = useState(curtidas);
   const [, iniciar] = useTransition();
+  const { t } = useIdioma();
 
   // O servidor é quem manda quando a página revalida: se a contagem que chegou
   // discorda da que está na tela, a de fora ganha.
@@ -64,8 +66,8 @@ export function BotaoDeCurtir({
       <Heart size={16} aria-hidden className={cn(curtido && "fill-brand")} />
       {total}
       <span className="sr-only">
-        {curtido ? "Descurtir" : "Curtir"} · {total}{" "}
-        {total === 1 ? "curtida" : "curtidas"}
+        {curtido ? t.feed.post.descurtir : t.feed.post.curtir} · {total}{" "}
+        {total === 1 ? t.feed.curtidas.um : t.feed.curtidas.outros}
       </span>
     </button>
   );

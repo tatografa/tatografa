@@ -8,6 +8,7 @@ import { Logo } from "@/components/logo";
 import { Button, Card } from "@/components/ui";
 
 import type { EstadoDoAceite } from "@/app/(aluno)/acoes-de-aceite";
+import { COMUM, type TextosComuns } from "@/lib/i18n/app/comum";
 
 const INICIAL: EstadoDoAceite = {};
 
@@ -34,6 +35,7 @@ export function PortaoDeAceite({
   oQueMudou,
   oQueNaoMuda,
   aoAceitar,
+  textos = COMUM.pt.portao,
 }: {
   versao: string;
   oQueMudou: string;
@@ -46,6 +48,8 @@ export function PortaoDeAceite({
   aoAceitar: (
     anterior: EstadoDoAceite,
   ) => Promise<EstadoDoAceite>;
+  /** O texto da moldura. O painel ainda é só português (etapa 3). */
+  textos?: TextosComuns["portao"];
 }) {
   const [estado, acao, enviando] = useActionState(aoAceitar, INICIAL);
 
@@ -65,7 +69,7 @@ export function PortaoDeAceite({
           </span>
 
           <h1 className="text-[19px] font-extrabold tracking-[-0.02em] text-ink">
-            Atualizamos a política de privacidade
+            {textos.titulo}
           </h1>
           <p className="text-[13.5px] leading-relaxed text-ink-2">{oQueMudou}</p>
           <p className="text-[13px] leading-relaxed text-ink-3">{oQueNaoMuda}</p>
@@ -76,13 +80,13 @@ export function PortaoDeAceite({
             href="/privacidade"
             className="text-brand underline underline-offset-2 hover:text-brand-hover"
           >
-            Ler a política de privacidade
+            {textos.lerPolitica}
           </Link>
           <Link
             href="/termos"
             className="text-brand underline underline-offset-2 hover:text-brand-hover"
           >
-            Ler os termos de uso
+            {textos.lerTermos}
           </Link>
         </div>
 
@@ -97,11 +101,11 @@ export function PortaoDeAceite({
           ) : null}
 
           <Button type="submit" size="lg" block disabled={enviando}>
-            {enviando ? "Registrando…" : "Li e aceito"}
+            {enviando ? textos.registrando : textos.aceitar}
           </Button>
 
           <p className="text-center font-mono text-[10px] tracking-[0.06em] text-ink-5 uppercase">
-            Versão {versao}
+            {textos.versao} {versao}
           </p>
         </form>
       </Card>

@@ -3,6 +3,7 @@
 import { Send } from "lucide-react";
 import { useActionState, useRef } from "react";
 
+import { useIdioma } from "@/components/aluno/idioma-do-app";
 import { Button, Textarea } from "@/components/ui";
 
 import { comentar, type EstadoDoComentario } from "../actions";
@@ -20,6 +21,7 @@ const INICIAL: EstadoDoComentario = {};
 export function FormularioDeComentario({ postId }: { postId: string }) {
   const [estado, acao, enviando] = useActionState(comentar, INICIAL);
   const formulario = useRef<HTMLFormElement>(null);
+  const { t } = useIdioma();
 
   return (
     <form ref={formulario} action={acao} noValidate className="space-y-2.5">
@@ -27,17 +29,17 @@ export function FormularioDeComentario({ postId }: { postId: string }) {
 
       <Textarea
         key={estado.texto ?? "vazio"}
-        label="Comentar"
+        label={t.feed.post.comentar}
         name="texto"
         rows={2}
-        placeholder="Escreva um comentário"
+        placeholder={t.feed.post.comentarExemplo}
         defaultValue={estado.texto}
         error={estado.erro}
       />
 
       <Button type="submit" size="md" disabled={enviando}>
         <Send size={15} aria-hidden />
-        {enviando ? "Enviando…" : "Comentar"}
+        {enviando ? t.comum.enviando : t.feed.post.comentar}
       </Button>
     </form>
   );

@@ -19,9 +19,12 @@ import { linkDoWhatsApp } from "@/lib/domain/telefone";
 export function CardDoPersonal({
   nome,
   telefone,
+  rotulo,
 }: {
   nome: string;
   telefone: string | null;
+  /** "Seu personal trainer", no idioma do app. */
+  rotulo: string;
 }) {
   const zap = linkDoWhatsApp(telefone);
 
@@ -36,7 +39,7 @@ export function CardDoPersonal({
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-[13px] font-bold text-ink">{nome}</p>
-        <p className="text-[11px] text-ink-4">Seu personal trainer</p>
+        <p className="text-[11px] text-ink-4">{rotulo}</p>
       </div>
 
       {zap && (

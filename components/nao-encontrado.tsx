@@ -14,10 +14,12 @@ export function NaoEncontrado({
   texto,
   destino,
   rotuloDoDestino,
+  titulo = "Não encontramos esta página",
 }: {
   texto: string;
   destino: string;
   rotuloDoDestino: string;
+  titulo?: string;
 }) {
   return (
     <div className="mx-auto flex max-w-[420px] flex-col items-center px-1 py-10 text-center">
@@ -25,7 +27,7 @@ export function NaoEncontrado({
         404
       </p>
       <h1 className="mt-3 text-[19px] font-extrabold tracking-[-0.02em] text-ink">
-        Não encontramos esta página
+        {titulo}
       </h1>
       <p className="mt-1.5 text-[14px] leading-relaxed text-ink-3">{texto}</p>
       <Link href={destino} className={classesDeBotao({ className: "mt-5" })}>

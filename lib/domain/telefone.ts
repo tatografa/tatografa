@@ -65,20 +65,26 @@ export function formatarTelefone(bruto: string | null): string {
  * dar o dele vira uma ficha sem botão de WhatsApp. O que não se aceita é um
  * número que não dá em lugar nenhum.
  */
-export const telefoneOpcional = z
-  .string()
-  .trim()
-  .transform((v) => (v === "" ? null : v))
-  .refine(
-    (v) => v === null || paraWhatsApp(v) !== null,
-    "Informe um número com DDD, como (11) 99999-9999.",
-  )
-  // Guardado só com dígitos, e **sem o 55 do Brasil**. Dois motivos: o mesmo
-  // número digitado com e sem código do país vira a mesma linha no banco, e a
-  // leitura consegue formatar como "(11) 99999-9999" — com treze dígitos ela
-  // desiste e o personal vê um bloco de números nas próprias configurações
-  // para sempre. O 55 volta em `paraWhatsApp`, que é quem monta o link.
-  .transform((v) => (v === null ? null : semCodigoDoBrasil(digitos(v))));
+export const telefoneOpcional = telefoneOpcionalCom(
+  "Informe um número com DDD, como (11) 99999-9999.",
+);
+
+/** A mesma regra com a mensagem em outro idioma (o perfil do aluno, etapa 2). */
+export function telefoneOpcionalCom(mensagem: string) {
+  return (
+    z
+      .string()
+      .trim()
+      .transform((v) => (v === "" ? null : v))
+      .refine((v) => v === null || paraWhatsApp(v) !== null, mensagem)
+      // Guardado só com dígitos, e **sem o 55 do Brasil**. Dois motivos: o mesmo
+      // número digitado com e sem código do país vira a mesma linha no banco, e a
+      // leitura consegue formatar como "(11) 99999-9999" — com treze dígitos ela
+      // desiste e o personal vê um bloco de números nas próprias configurações
+      // para sempre. O 55 volta em `paraWhatsApp`, que é quem monta o link.
+      .transform((v) => (v === null ? null : semCodigoDoBrasil(digitos(v))))
+  );
+}
 
 /**
  * Tira o 55 da frente quando o que sobra é um número brasileiro inteiro.

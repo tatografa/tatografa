@@ -3,6 +3,7 @@
 import { PlayCircle } from "lucide-react";
 import { useState } from "react";
 
+import { useIdioma } from "@/components/aluno/idioma-do-app";
 import { BottomSheet } from "@/components/ui";
 import { VideoDoExercicio } from "@/components/video-do-exercicio";
 import type { ExercicioDisponivel } from "@/lib/queries/exercicios";
@@ -18,6 +19,8 @@ import type { ExercicioDisponivel } from "@/lib/queries/exercicios";
  */
 export function ComoFazer({ exercicio }: { exercicio: ExercicioDisponivel }) {
   const [aberto, setAberto] = useState(false);
+  const { t } = useIdioma();
+  const c = t.execucao.comoFazer;
   const temConteudo = Boolean(exercicio.video_url || exercicio.description || exercicio.safety_notes);
   if (!temConteudo) return null;
 
@@ -28,18 +31,23 @@ export function ComoFazer({ exercicio }: { exercicio: ExercicioDisponivel }) {
         onClick={() => setAberto(true)}
         className="mt-2.5 inline-flex min-h-9 items-center gap-1.5 rounded-[8px] border border-dark-border px-2.5 text-[12px] font-semibold text-dark-text-2 transition hover:border-dark-border-2 hover:text-dark-text"
       >
-        <PlayCircle size={14} aria-hidden /> Como fazer
+        <PlayCircle size={14} aria-hidden /> {c.botao}
       </button>
 
       <BottomSheet aberto={aberto} aoFechar={() => setAberto(false)} titulo={exercicio.name}>
         <div className="space-y-4">
           {exercicio.video_url ? (
-            <VideoDoExercicio url={exercicio.video_url} nome={exercicio.name} className="rounded-[12px]" />
+            <VideoDoExercicio
+              url={exercicio.video_url}
+              nome={exercicio.name}
+              titulo={t.comum.video}
+              className="rounded-[12px]"
+            />
           ) : null}
           {exercicio.description ? (
             <section>
               <h3 className="mb-1.5 text-[11px] font-semibold tracking-[0.06em] text-dark-muted uppercase">
-                Execução
+                {c.execucao}
               </h3>
               <p className="text-[14px] leading-relaxed whitespace-pre-line text-dark-text-2">
                 {exercicio.description}
@@ -49,7 +57,7 @@ export function ComoFazer({ exercicio }: { exercicio: ExercicioDisponivel }) {
           {exercicio.safety_notes ? (
             <section>
               <h3 className="mb-1.5 text-[11px] font-semibold tracking-[0.06em] text-dark-muted uppercase">
-                Segurança
+                {c.seguranca}
               </h3>
               <p className="text-[14px] leading-relaxed whitespace-pre-line text-dark-text-2">
                 {exercicio.safety_notes}

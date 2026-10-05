@@ -9,6 +9,9 @@ import {
   type SerieDaExecucao,
 } from "@/lib/domain/execucao";
 
+import { useIdioma } from "@/components/aluno/idioma-do-app";
+import { plural } from "@/lib/i18n/texto";
+
 import { registrarSeries } from "../actions";
 
 /**
@@ -122,6 +125,7 @@ export function useFilaDeSeries(
   const [enviando, setEnviando] = useState(false);
   const [falhas, setFalhas] = useState(0);
   const [aviso, setAviso] = useState<string | null>(null);
+  const recusadasTexto = useIdioma().t.execucao.tela.recusadas;
   // Continua de onde a fila gravada parou: reiniciar em 0 faria o `seq` de uma
   // série nova empatar com o de uma antiga ainda na fila.
   const proximoSeq = useRef(
@@ -216,11 +220,7 @@ export function useFilaDeSeries(
       });
 
       if (recusadas.size) {
-        setAviso(
-          recusadas.size === 1
-            ? "1 série não pôde ser salva: o exercício saiu do treino."
-            : `${recusadas.size} séries não puderam ser salvas: o exercício saiu do treino.`,
-        );
+        setAviso(plural(recusadas.size, recusadasTexto));
       }
       setFalhas(0);
       return true;
@@ -231,7 +231,7 @@ export function useFilaDeSeries(
     } finally {
       setEnviando(false);
     }
-  }, [aplicar, sessionId]);
+  }, [aplicar, sessionId, recusadasTexto]);
 
   /**
    * Esvazia a fila de verdade: envia em rodadas enquanto houver item novo.

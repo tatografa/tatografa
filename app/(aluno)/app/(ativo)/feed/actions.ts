@@ -14,6 +14,8 @@ import {
   gravarComentario,
   gravarCurtida,
 } from "@/lib/feed/escrita";
+import { textosDoApp } from "@/lib/i18n/app/servidor";
+import { preencher } from "@/lib/i18n/texto";
 import { resumoDaSessaoConcluida } from "@/lib/queries/feed";
 import { createClient } from "@/lib/supabase/server";
 
@@ -39,15 +41,23 @@ const EXTENSAO_POR_TIPO: Record<string, string> = {
 /** O mesmo teto do bucket. Repetido pelo mesmo motivo dos tipos. */
 const LIMITE_DE_BYTES = 5 * 1024 * 1024;
 
-const esquema = z.object({
-  legenda: z
-    .string()
-    .trim()
-    .max(LIMITE_DA_LEGENDA, `A legenda pode ter até ${LIMITE_DA_LEGENDA} caracteres.`),
-  alcance: z.enum(["personal", "publico"], {
-    error: "Escolha quem pode ver este post.",
-  }),
-});
+/**
+ * As mensagens no idioma do app — por isso o esquema é montado na hora: o
+ * idioma é o da requisição (o cookie), não o do módulo.
+ */
+async function mensagens() {
+  return (await textosDoApp()).t.feed.acoes;
+}
+
+function esquemaDoPost(m: Awaited<ReturnType<typeof mensagens>>) {
+  return z.object({
+    legenda: z
+      .string()
+      .trim()
+      .max(LIMITE_DA_LEGENDA, preencher(m.legendaLonga, { n: LIMITE_DA_LEGENDA })),
+    alcance: z.enum(["personal", "publico"], { error: m.alcance }),
+  });
+}
 
 /**
  * Publica um post do aluno: foto, legenda e alcance.
@@ -71,7 +81,8 @@ export async function publicarPost(
     alcance: String(formData.get("alcance") ?? ""),
   };
 
-  const analise = esquema.safeParse(bruto);
+  const m = await mensagens();
+  const analise = esquemaDoPost(m).safeParse(bruto);
   if (!analise.success) {
     const errosPorCampo: EstadoDaPublicacao["errosPorCampo"] = {};
     for (const problema of analise.error.issues) {
@@ -87,7 +98,7 @@ export async function publicarPost(
 
   if (!temFoto && !legenda) {
     return {
-      errosPorCampo: { legenda: "Escreva algo ou escolha uma foto." },
+      errosPorCampo: { legenda: m.vazio },
       campos: bruto,
     };
   }
@@ -95,13 +106,13 @@ export async function publicarPost(
   if (temFoto) {
     if (!EXTENSAO_POR_TIPO[foto.type]) {
       return {
-        errosPorCampo: { foto: "A foto precisa ser JPG, PNG ou WEBP." },
+        errosPorCampo: { foto: m.tipoDaFoto },
         campos: bruto,
       };
     }
     if (foto.size > LIMITE_DE_BYTES) {
       return {
-        errosPorCampo: { foto: "A foto passa de 5 MB. Tire outra ou escolha uma menor." },
+        errosPorCampo: { foto: m.tamanhoDaFoto },
         campos: bruto,
       };
     }
@@ -135,7 +146,7 @@ export async function publicarPost(
       });
 
     if (erroDoUpload) {
-      return { erro: "Não conseguimos enviar a foto agora. Tente de novo.", campos: bruto };
+      return { erro: m.falhaFoto, campos: bruto };
     }
   }
 
@@ -149,7 +160,7 @@ export async function publicarPost(
 
   if (error) {
     if (caminho) await supabase.storage.from("treinos").remove([caminho]);
-    return { erro: "Não conseguimos publicar agora. Tente de novo.", campos: bruto };
+    return { erro: m.falhaPublicar, campos: bruto };
   }
 
   revalidatePath("/app/feed");
@@ -179,16 +190,26 @@ export async function comentar(
     texto: String(formData.get("texto") ?? ""),
   };
 
+  const m = await mensagens();
   const analise = esquemaDeComentario.safeParse(bruto);
   if (!analise.success) {
-    return { erro: analise.error.issues[0]?.message, texto: bruto.texto };
+    // O esquema é o mesmo do painel (em português); aqui só a mensagem muda de
+    // idioma, decidida pelo campo e pelo tipo do problema.
+    const problema = analise.error.issues[0];
+    const erro =
+      problema?.path[0] === "postId"
+        ? m.postInvalido
+        : problema?.code === "too_big"
+          ? preencher(m.comentarioLongo, { n: LIMITE_DA_LEGENDA })
+          : m.comentarioVazio;
+    return { erro, texto: bruto.texto };
   }
 
   const { student } = await requireStudent();
   const ok = await gravarComentario(student.id, analise.data.postId, analise.data.texto);
 
   if (!ok) {
-    return { erro: "Não conseguimos enviar seu comentário agora.", texto: bruto.texto };
+    return { erro: m.falhaComentario, texto: bruto.texto };
   }
 
   revalidatePath(`/app/feed/${analise.data.postId}`);
@@ -235,7 +256,8 @@ export async function apagarPost(
   formData: FormData,
 ): Promise<EstadoDaExclusao> {
   const postId = String(formData.get("postId") ?? "");
-  if (!pareceUuid(postId)) return { erro: "Post inválido." };
+  const m = await mensagens();
+  if (!pareceUuid(postId)) return { erro: m.postInvalido };
 
   const { student } = await requireStudent();
   const supabase = await createClient();
@@ -249,7 +271,7 @@ export async function apagarPost(
     .eq("student_id", student.id)
     .maybeSingle();
 
-  if (!post) return { erro: "Este post não existe mais." };
+  if (!post) return { erro: m.postSumiu };
 
   // `delete` barrado pelo RLS não levanta erro: afeta zero linhas em silêncio.
   // Por isso o `select` de volta — é ele que prova que a linha saiu.
@@ -260,7 +282,7 @@ export async function apagarPost(
     .select("id");
 
   if (error || !apagados?.length) {
-    return { erro: "Não conseguimos apagar agora. Tente de novo." };
+    return { erro: m.falhaApagar };
   }
 
   if (post.photo_path) {

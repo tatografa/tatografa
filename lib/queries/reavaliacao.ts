@@ -234,11 +234,12 @@ export async function lerReavaliacoesDeUmAluno(
  */
 export function comparar(atual: Reavaliacao, anterior: Reavaliacao | null): Comparacao[] {
   return [
-    compara("Peso", "kg", anterior?.peso, atual.peso),
-    compara("Gordura", "%", anterior?.gordura, atual.gordura),
-    ...REGIOES.map((r) =>
-      compara(ROTULO_DA_REGIAO[r], "cm", anterior?.medidas[r], atual.medidas[r]),
-    ),
+    { ...compara("Peso", "kg", anterior?.peso, atual.peso), chave: "peso" },
+    { ...compara("Gordura", "%", anterior?.gordura, atual.gordura), chave: "gordura" },
+    ...REGIOES.map((r) => ({
+      ...compara(ROTULO_DA_REGIAO[r], "cm", anterior?.medidas[r], atual.medidas[r]),
+      chave: r,
+    })),
   ];
 }
 
