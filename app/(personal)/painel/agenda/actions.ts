@@ -5,6 +5,8 @@ import { z } from "zod";
 
 import { requireTrainer } from "@/lib/auth/session";
 import { inicioDoDiaEmUtc } from "@/lib/domain/agenda";
+import type { TextosDoPainel } from "@/lib/i18n/painel";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
 import { createClient } from "@/lib/supabase/server";
 
 export type CampoDaSessao = "alunoId" | "dia" | "hora" | "duracao" | "observacao";
@@ -16,32 +18,37 @@ export type EstadoDoAgendamento = {
   sucesso?: boolean;
 };
 
+type Erros = TextosDoPainel["agenda"]["erros"];
+
+async function erros(): Promise<Erros> {
+  return (await textosDoPainel()).t.agenda.erros;
+}
+
 /*
  * A mesma faixa do `check` da migration 0027. Aqui a validação existe para a
- * mensagem sair em português; lá ela existe porque um POST direto não passa por
- * formulário nenhum.
+ * mensagem sair na língua de quem enviou — por isso o esquema é montado por
+ * chamada; lá ela existe porque um POST direto não passa por formulário nenhum.
  */
-const esquema = z.object({
-  alunoId: z.string().uuid("Escolha um aluno."),
-  dia: z
-    .string()
-    .trim()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Escolha o dia.")
-    .refine((v) => !Number.isNaN(Date.parse(v)), "Dia inválido."),
-  hora: z
-    .string()
-    .trim()
-    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Informe a hora, como 18:00."),
-  duracao: z.coerce
-    .number({ error: "Informe a duração." })
-    .int("Duração em minutos inteiros.")
-    .min(10, "No mínimo 10 minutos.")
-    .max(480, "No máximo 8 horas."),
-  observacao: z
-    .string()
-    .trim()
-    .max(500, "A observação pode ter até 500 caracteres."),
-});
+function esquema(e: Erros) {
+  return z.object({
+    alunoId: z.string().uuid(e.escolhaAluno),
+    dia: z
+      .string()
+      .trim()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, e.escolhaDia)
+      .refine((v) => !Number.isNaN(Date.parse(v)), e.diaInvalido),
+    hora: z
+      .string()
+      .trim()
+      .regex(/^([01]\d|2[0-3]):[0-5]\d$/, e.hora),
+    duracao: z.coerce
+      .number({ error: e.informeDuracao })
+      .int(e.duracaoInteira)
+      .min(10, e.duracaoMin)
+      .max(480, e.duracaoMax),
+    observacao: z.string().trim().max(500, e.observacaoLonga),
+  });
+}
 
 /**
  * Agenda uma sessão presencial.
@@ -68,7 +75,8 @@ export async function agendarSessao(
     observacao: String(dados.get("observacao") ?? ""),
   };
 
-  const analise = esquema.safeParse(bruto);
+  const e = await erros();
+  const analise = esquema(e).safeParse(bruto);
   if (!analise.success) {
     const errosPorCampo: EstadoDoAgendamento["errosPorCampo"] = {};
     for (const problema of analise.error.issues) {
@@ -90,7 +98,7 @@ export async function agendarSessao(
   });
 
   if (error) {
-    return { erro: "Não conseguimos agendar agora. Tente de novo.", campos: bruto };
+    return { erro: e.falhaAgendar, campos: bruto };
   }
 
   revalidatePath("/painel/agenda", "layout");
@@ -111,11 +119,12 @@ export async function marcarSessao(
   _anterior: EstadoDaMarcacao,
   dados: FormData,
 ): Promise<EstadoDaMarcacao> {
+  const e = await erros();
   const analise = z
     .object({
-      id: z.string().uuid("Sessão inválida."),
+      id: z.string().uuid(e.sessaoInvalida),
       situacao: z.enum(["agendada", "realizada", "faltou", "cancelada"], {
-        error: "Situação inválida.",
+        error: e.situacaoInvalida,
       }),
     })
     .safeParse({
@@ -136,10 +145,10 @@ export async function marcarSessao(
     .eq("id", analise.data.id)
     .eq("trainer_id", trainer.id);
 
-  if (error) return { erro: "Não conseguimos salvar agora. Tente de novo." };
+  if (error) return { erro: e.falhaSalvar };
 
   // Update barrado pelo RLS não levanta erro: afeta zero linhas em silêncio.
-  if (count === 0) return { erro: "Sessão não encontrada." };
+  if (count === 0) return { erro: e.sessaoNaoEncontrada };
 
   revalidatePath("/painel/agenda", "layout");
   revalidatePath("/painel/alunos", "layout");
@@ -162,7 +171,8 @@ export async function descartarSessao(
   dados: FormData,
 ): Promise<EstadoDoDescarte> {
   const id = String(dados.get("id") ?? "");
-  if (!z.string().uuid().safeParse(id).success) return { erro: "Sessão inválida." };
+  const e = await erros();
+  if (!z.string().uuid().safeParse(id).success) return { erro: e.sessaoInvalida };
 
   const { trainer } = await requireTrainer();
   const supabase = await createClient();
@@ -173,11 +183,9 @@ export async function descartarSessao(
     .eq("id", id)
     .eq("trainer_id", trainer.id);
 
-  if (error) return { erro: "Não conseguimos apagar agora. Tente de novo." };
+  if (error) return { erro: e.falhaApagar };
 
-  if (count === 0) {
-    return { erro: "Essa sessão já foi marcada e não pode ser apagada. Use “Cancelar”." };
-  }
+  if (count === 0) return { erro: e.jaMarcada };
 
   revalidatePath("/painel/agenda", "layout");
   revalidatePath("/painel/alunos", "layout");

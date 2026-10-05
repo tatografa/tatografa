@@ -4,13 +4,14 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { requireTrainer } from "@/lib/auth/session";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
 import { createClient } from "@/lib/supabase/server";
 
 export type EstadoDaLiberacao = { erro?: string; ok?: boolean };
 
-const esquema = z.object({
-  alunoId: z.string().uuid("Escolha um aluno."),
-});
+async function erros() {
+  return (await textosDoPainel()).t.agenda.erros;
+}
 
 /**
  * Libera uma reavaliação para um aluno.
@@ -28,7 +29,10 @@ export async function liberarReavaliacao(
   _anterior: EstadoDaLiberacao,
   formData: FormData,
 ): Promise<EstadoDaLiberacao> {
-  const analise = esquema.safeParse({ alunoId: String(formData.get("alunoId") ?? "") });
+  const e = await erros();
+  const analise = z
+    .object({ alunoId: z.string().uuid(e.escolhaAluno) })
+    .safeParse({ alunoId: String(formData.get("alunoId") ?? "") });
   if (!analise.success) {
     return { erro: analise.error.issues[0]?.message };
   }
@@ -46,9 +50,9 @@ export async function liberarReavaliacao(
     // existe uma esperando resposta. Não é falha do personal, é a tela dele
     // estando velha — a mensagem diz o que já é verdade em vez de "erro".
     if (error.code === "23505") {
-      return { erro: "Esse aluno já tem uma reavaliação esperando resposta." };
+      return { erro: e.jaTemAberta };
     }
-    return { erro: "Não conseguimos liberar agora. Tente de novo." };
+    return { erro: e.falhaLiberar };
   }
 
   revalidatePath("/painel/reavaliacoes", "layout");
@@ -71,8 +75,9 @@ export async function cancelarReavaliacao(
   formData: FormData,
 ): Promise<EstadoDoCancelamento> {
   const id = String(formData.get("id") ?? "");
+  const e = await erros();
   if (!z.string().uuid().safeParse(id).success) {
-    return { erro: "Reavaliação inválida." };
+    return { erro: e.reavaliacaoInvalida };
   }
 
   const { trainer } = await requireTrainer();
@@ -84,13 +89,13 @@ export async function cancelarReavaliacao(
     .eq("id", id)
     .eq("trainer_id", trainer.id);
 
-  if (error) return { erro: "Não conseguimos cancelar agora. Tente de novo." };
+  if (error) return { erro: e.falhaCancelar };
 
   // Delete barrado pelo RLS não levanta erro: afeta zero linhas em silêncio.
   // Sem esta conferência, a tela diria "cancelada" e a reavaliação continuaria
   // lá — que é exatamente o caso de o aluno ter respondido enquanto isso.
   if (count === 0) {
-    return { erro: "Essa reavaliação já foi respondida e não pode ser cancelada." };
+    return { erro: e.jaRespondida };
   }
 
   revalidatePath("/painel/reavaliacoes", "layout");

@@ -3,7 +3,9 @@
 import { Plus } from "lucide-react";
 import { useActionState, useState } from "react";
 
+import { usePainel } from "@/components/personal/idioma-do-painel";
 import { Button, Dialog, Select } from "@/components/ui";
+import { preencher } from "@/lib/i18n/texto";
 import type { AlunoDaLista } from "@/lib/queries/alunos";
 
 import {
@@ -33,6 +35,8 @@ export function NovaReavaliacao({
 }) {
   const [aberto, setAberto] = useState(false);
   const [estado, acao, enviando] = useActionState(liberarReavaliacao, LIBERACAO);
+  const { t } = usePainel();
+  const lb = t.agenda.liberar;
 
   /*
    * Fecha sozinho quando deu certo — **ajustando o estado no render**, não num
@@ -57,25 +61,25 @@ export function NovaReavaliacao({
   return (
     <>
       <Button size="sm" variant={variante} onClick={() => setAberto(true)}>
-        <Plus size={16} aria-hidden /> Liberar reavaliação
+        <Plus size={16} aria-hidden /> {lb.botao}
       </Button>
 
       <Dialog
         aberto={aberto}
         aoFechar={() => setAberto(false)}
-        titulo="Liberar reavaliação"
-        descricao="O aluno preenche as medidas e as fotos pelo app dele."
+        titulo={lb.botao}
+        descricao={lb.descricao}
       >
         <form action={acao} noValidate className="space-y-4">
           <Select
             name="alunoId"
-            label="Aluno"
+            label={t.agenda.nova.aluno}
             defaultValue=""
             error={estado.erro}
             required
           >
             <option value="" disabled>
-              Escolha um aluno
+              {t.agenda.nova.escolha}
             </option>
             {alunos.map((a) => (
               <option key={a.id} value={a.id}>
@@ -91,10 +95,10 @@ export function NovaReavaliacao({
               onClick={() => setAberto(false)}
               disabled={enviando}
             >
-              Cancelar
+              {t.comum.cancelar}
             </Button>
             <Button type="submit" disabled={enviando}>
-              {enviando ? "Liberando…" : "Liberar"}
+              {enviando ? lb.liberando : lb.liberar}
             </Button>
           </div>
         </form>
@@ -111,18 +115,20 @@ export function NovaReavaliacao({
 export function BotaoCancelar({ id, aluno }: { id: string; aluno: string }) {
   const [aberto, setAberto] = useState(false);
   const [estado, acao, enviando] = useActionState(cancelarReavaliacao, CANCELAMENTO);
+  const { t } = usePainel();
+  const lb = t.agenda.liberar;
 
   return (
     <>
       <Button size="sm" variant="secondary" onClick={() => setAberto(true)}>
-        Cancelar
+        {t.comum.cancelar}
       </Button>
 
       <Dialog
         aberto={aberto}
         aoFechar={() => setAberto(false)}
-        titulo="Cancelar a reavaliação?"
-        descricao={`${aluno} deixa de ver o formulário no app. Você pode liberar outra depois.`}
+        titulo={lb.cancelarTitulo}
+        descricao={preencher(lb.cancelarTexto, { nome: aluno })}
       >
         <form action={acao} noValidate className="space-y-4">
           <input type="hidden" name="id" value={id} />
@@ -140,10 +146,10 @@ export function BotaoCancelar({ id, aluno }: { id: string; aluno: string }) {
               onClick={() => setAberto(false)}
               disabled={enviando}
             >
-              Manter
+              {t.comum.manter}
             </Button>
             <Button type="submit" variant="danger" disabled={enviando}>
-              {enviando ? "Cancelando…" : "Cancelar reavaliação"}
+              {enviando ? lb.cancelando : lb.cancelar}
             </Button>
           </div>
         </form>

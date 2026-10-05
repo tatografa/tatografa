@@ -1,4 +1,9 @@
-import { duracaoEmTexto, horaDaSessaoNaAgenda, rotuloDoDiaDaAgenda } from "@/lib/domain/agenda";
+import {
+  duracaoEmTexto,
+  horaDaSessaoNaAgenda,
+  rotuloDaSemana,
+  rotuloDoDiaDaAgenda,
+} from "@/lib/domain/agenda";
 import { FUSO, diaLocal, diaLocalEmMs } from "@/lib/domain/fuso";
 import {
   dataPorExtenso,
@@ -170,6 +175,30 @@ export function formatos(idioma: Idioma) {
               month: "2-digit",
             }).format(new Date(diaLocalEmMs(dia))),
           ),
+    /**
+     * A semana da agenda: "14 a 20 de setembro" / "September 14 – 20" /
+     * "14–20 de septiembre". Fora do português é o `formatRange` do `Intl`, que
+     * já sabe juntar os dois meses quando a semana atravessa a virada.
+     */
+    semanaDaAgenda: (semana: { de: string; ate: string }) =>
+      pt
+        ? rotuloDaSemana(semana)
+        : new Intl.DateTimeFormat(locale, { timeZone: "UTC", day: "numeric", month: "long" }).formatRange(
+            new Date(diaLocalEmMs(semana.de)),
+            new Date(diaLocalEmMs(semana.ate)),
+          ),
+    /**
+     * Os sete dias da semana, de segunda a domingo, curtos e em maiúscula:
+     * "SEG"… / "MON"… / "LUN"…. Saem do `Intl` nos três idiomas — 01/01/2024
+     * foi uma segunda.
+     */
+    diasCurtosDaSemana: () =>
+      Array.from({ length: 7 }, (_, i) =>
+        new Intl.DateTimeFormat(locale, { timeZone: "UTC", weekday: "short" })
+          .format(new Date(Date.UTC(2024, 0, 1 + i)))
+          .replace(/\./g, "")
+          .toUpperCase(),
+      ),
     /** Um dia de calendário com ano: "01/09/26" / "09/01/26" (en). */
     diaComAno: (dia: string) =>
       new Intl.DateTimeFormat(locale, {

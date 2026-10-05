@@ -3,15 +3,10 @@
 import { CalendarPlus, Check, Trash2, UserX, X } from "lucide-react";
 import { useActionState, useState } from "react";
 
+import { usePainel } from "@/components/personal/idioma-do-painel";
 import { Button, Dialog, Input, Select, Textarea } from "@/components/ui";
-import {
-  DURACAO_PADRAO,
-  conflitos,
-  horaDaSessaoNaAgenda,
-  minutoDoDia,
-  rotuloDoDiaDaAgenda,
-  type Semana,
-} from "@/lib/domain/agenda";
+import { DURACAO_PADRAO, conflitos, minutoDoDia, type Semana } from "@/lib/domain/agenda";
+import { partesEmVolta, preencher } from "@/lib/i18n/texto";
 import type { AlunoDaLista } from "@/lib/queries/alunos";
 import type { SessaoAgendada } from "@/lib/queries/agenda";
 
@@ -55,6 +50,8 @@ export function NovaSessao({
   // botão que a pessoa acabou de clicar.
   const [aberto, setAberto] = useState(Boolean(alunoInicial));
   const [estado, acao, enviando] = useActionState(agendarSessao, AGENDAMENTO);
+  const { t } = usePainel();
+  const nv = t.agenda.nova;
 
   // O dia e a hora ficam no estado porque o aviso de conflito depende deles
   // enquanto o personal digita — esperar o envio para avisar seria avisar tarde.
@@ -71,30 +68,31 @@ export function NovaSessao({
   }
 
   const batem = calcularConflitos(dia, hora, duracao, sessoes);
+  const [antesDosNomes, depoisDosNomes] = partesEmVolta(nv.conflito, "nomes");
 
   if (alunos.length === 0) return null;
 
   return (
     <>
       <Button size="sm" onClick={() => setAberto(true)}>
-        <CalendarPlus size={16} aria-hidden /> Agendar sessão
+        <CalendarPlus size={16} aria-hidden /> {nv.botao}
       </Button>
 
       <Dialog
         aberto={aberto}
         aoFechar={() => setAberto(false)}
-        titulo="Marcar sessão presencial"
-        descricao="O aluno vê a próxima sessão na tela inicial do app dele."
+        titulo={nv.titulo}
+        descricao={nv.descricao}
       >
         <form action={acao} noValidate className="space-y-4">
           <Select
             name="alunoId"
-            label="Aluno"
+            label={nv.aluno}
             defaultValue={estado.campos?.alunoId ?? alunoInicial ?? ""}
             error={estado.errosPorCampo?.alunoId}
           >
             <option value="" disabled>
-              Escolha um aluno
+              {nv.escolha}
             </option>
             {alunos.map((a) => (
               <option key={a.id} value={a.id}>
@@ -106,7 +104,7 @@ export function NovaSessao({
           <div className="grid grid-cols-2 gap-3">
             <Input
               name="dia"
-              label="Dia"
+              label={nv.dia}
               type="date"
               value={dia}
               onChange={(e) => setDia(e.target.value)}
@@ -114,7 +112,7 @@ export function NovaSessao({
             />
             <Input
               name="hora"
-              label="Hora"
+              label={nv.hora}
               type="time"
               value={hora}
               onChange={(e) => setHora(e.target.value)}
@@ -124,7 +122,7 @@ export function NovaSessao({
 
           <Input
             name="duracao"
-            label="Duração (minutos)"
+            label={nv.duracao}
             type="number"
             inputMode="numeric"
             min={10}
@@ -133,27 +131,24 @@ export function NovaSessao({
             value={duracao}
             onChange={(e) => setDuracao(e.target.value)}
             error={estado.errosPorCampo?.duracao}
-            hint="O padrão é uma hora."
+            hint={nv.duracaoApoio}
           />
 
           {batem.length > 0 && (
             <p className="rounded-[9px] bg-warning-bg px-3 py-2.5 text-[12.5px] leading-[1.5] text-warning">
-              Você já tem{" "}
-              <strong>
-                {batem.map((s) => s.alunoNome).join(", ")}
-              </strong>{" "}
-              nesse horário. Dá para marcar assim mesmo — só confira se é
-              atendimento em dupla ou engano.
+              {antesDosNomes}
+              <strong>{batem.map((s) => s.alunoNome).join(", ")}</strong>
+              {depoisDosNomes}
             </p>
           )}
 
           <Textarea
             name="observacao"
-            label="Observação"
+            label={nv.observacao}
             rows={2}
             defaultValue={estado.campos?.observacao ?? ""}
             error={estado.errosPorCampo?.observacao}
-            hint="Opcional. Aparece na agenda, ao lado do nome."
+            hint={nv.observacaoApoio}
           />
 
           {estado.erro && (
@@ -169,10 +164,10 @@ export function NovaSessao({
               onClick={() => setAberto(false)}
               disabled={enviando}
             >
-              Cancelar
+              {t.comum.cancelar}
             </Button>
             <Button type="submit" disabled={enviando}>
-              {enviando ? "Marcando…" : "Marcar sessão"}
+              {enviando ? nv.marcando : nv.marcar}
             </Button>
           </div>
         </form>
@@ -190,6 +185,7 @@ export function NovaSessao({
  */
 export function MarcarSessao({ sessao }: { sessao: SessaoAgendada }) {
   const [estado, acao, enviando] = useActionState(marcarSessao, MARCACAO);
+  const m = usePainel().t.agenda.marcar;
 
   return (
     <div className="flex items-center gap-1.5">
@@ -204,21 +200,21 @@ export function MarcarSessao({ sessao }: { sessao: SessaoAgendada }) {
           <form action={acao}>
             <input type="hidden" name="id" value={sessao.id} />
             <input type="hidden" name="situacao" value="realizada" />
-            <BotaoDeMarcar rotulo="Veio" disabled={enviando}>
+            <BotaoDeMarcar rotulo={m.veio} disabled={enviando}>
               <Check size={14} aria-hidden />
             </BotaoDeMarcar>
           </form>
           <form action={acao}>
             <input type="hidden" name="id" value={sessao.id} />
             <input type="hidden" name="situacao" value="faltou" />
-            <BotaoDeMarcar rotulo="Faltou" disabled={enviando}>
+            <BotaoDeMarcar rotulo={m.faltou} disabled={enviando}>
               <UserX size={14} aria-hidden />
             </BotaoDeMarcar>
           </form>
           <form action={acao}>
             <input type="hidden" name="id" value={sessao.id} />
             <input type="hidden" name="situacao" value="cancelada" />
-            <BotaoDeMarcar rotulo="Cancelar" disabled={enviando}>
+            <BotaoDeMarcar rotulo={m.cancelar} disabled={enviando}>
               <X size={14} aria-hidden />
             </BotaoDeMarcar>
           </form>
@@ -235,7 +231,7 @@ export function MarcarSessao({ sessao }: { sessao: SessaoAgendada }) {
             disabled={enviando}
             className="min-h-11 text-[12px] font-semibold text-ink-4 transition hover:text-ink"
           >
-            Desfazer
+            {m.desfazer}
           </button>
         </form>
       )}
@@ -269,13 +265,15 @@ function BotaoDeMarcar({
 function DescartarSessao({ sessao }: { sessao: SessaoAgendada }) {
   const [aberto, setAberto] = useState(false);
   const [estado, acao, enviando] = useActionState(descartarSessao, DESCARTE);
+  const { t, f } = usePainel();
+  const m = t.agenda.marcar;
 
   return (
     <>
       <button
         type="button"
         onClick={() => setAberto(true)}
-        aria-label={`Apagar a sessão de ${sessao.alunoNome}`}
+        aria-label={preencher(m.apagarDe, { nome: sessao.alunoNome })}
         className="grid size-11 place-items-center text-ink-5 transition hover:text-danger"
       >
         <Trash2 size={14} aria-hidden />
@@ -284,8 +282,12 @@ function DescartarSessao({ sessao }: { sessao: SessaoAgendada }) {
       <Dialog
         aberto={aberto}
         aoFechar={() => setAberto(false)}
-        titulo="Apagar a sessão?"
-        descricao={`${sessao.alunoNome}, ${rotuloDoDiaDaAgenda(sessao.dia)} às ${horaDaSessaoNaAgenda(sessao.inicio)}. Some da agenda e do app do aluno, sem deixar registro. Para desmarcar mantendo o rastro, use “Cancelar”.`}
+        titulo={m.apagarTitulo}
+        descricao={preencher(m.apagarTexto, {
+          nome: sessao.alunoNome,
+          dia: f.diaDaAgenda(sessao.dia),
+          hora: f.horaDaAgenda(sessao.inicio),
+        })}
       >
         <form action={acao} noValidate className="space-y-4">
           <input type="hidden" name="id" value={sessao.id} />
@@ -303,10 +305,10 @@ function DescartarSessao({ sessao }: { sessao: SessaoAgendada }) {
               onClick={() => setAberto(false)}
               disabled={enviando}
             >
-              Manter
+              {t.comum.manter}
             </Button>
             <Button type="submit" variant="danger" disabled={enviando}>
-              {enviando ? "Apagando…" : "Apagar"}
+              {enviando ? t.comum.apagando : t.comum.apagar}
             </Button>
           </div>
         </form>

@@ -1,6 +1,7 @@
 import { requireTrainer } from "@/lib/auth/session";
 import { mesDe, semanaDe } from "@/lib/domain/agenda";
 import { diaLocal } from "@/lib/domain/fuso";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
 import {
   lerAgendaEntre,
   lerIndicadoresDaAgenda,
@@ -29,6 +30,7 @@ import { TelaAgenda } from "./tela-agenda";
 export default async function Agenda({ searchParams }: PageProps<"/painel/agenda">) {
   const { semana: pedida, mes: mesPedido, visao, aluno: alunoPedido } = await searchParams;
   const { trainer } = await requireTrainer();
+  const { idioma } = await textosDoPainel();
   const hoje = diaLocal(new Date().toISOString());
 
   const ehDia = typeof pedida === "string" && /^\d{4}-\d{2}-\d{2}$/.test(pedida);
@@ -63,6 +65,7 @@ export default async function Agenda({ searchParams }: PageProps<"/painel/agenda
 
   return (
     <TelaAgenda
+      idioma={idioma}
       visao={verMes ? "mes" : "semana"}
       semana={semana}
       mes={mes}

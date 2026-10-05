@@ -4,6 +4,8 @@ import { Comparacao } from "@/components/reavaliacao/comparacao";
 import { Card } from "@/components/ui";
 import { requireTrainer } from "@/lib/auth/session";
 import { pareceUuid } from "@/lib/domain/id";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
+import { preencher } from "@/lib/i18n/texto";
 import { lerAluno } from "@/lib/queries/alunos";
 import { comparar, lerReavaliacoesDeUmAluno } from "@/lib/queries/reavaliacao";
 import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
@@ -23,6 +25,8 @@ export default async function ReavaliacoesDoAluno({
   if (!pareceUuid(alunoId)) notFound();
 
   const { trainer } = await requireTrainer();
+  const { idioma, t, f } = await textosDoPainel();
+  const d = t.agenda.doAluno;
 
   const [aluno, todas] = await Promise.all([
     lerAluno(alunoId),
@@ -39,14 +43,14 @@ export default async function ReavaliacoesDoAluno({
     <div className="space-y-8">
       <CabecalhoDaPagina
         titulo={aluno.name}
-        subtitulo="Reavaliações respondidas e a comparação entre elas"
-        voltar={{ href: "/painel/agenda", rotulo: "Voltar para a agenda" }}
+        subtitulo={d.subtitulo}
+        voltar={{ href: "/painel/agenda", rotulo: d.voltar }}
       />
 
       {enviadas.length === 0 ? (
         <Card size="lg" className="text-center">
           <p className="text-[13px] text-ink-4">
-            Este aluno ainda não respondeu nenhuma reavaliação.
+            {d.nenhuma}
           </p>
         </Card>
       ) : (
@@ -58,14 +62,16 @@ export default async function ReavaliacoesDoAluno({
             return (
               <section key={r.id} className="space-y-3">
                 <h2 className="text-[16px] font-extrabold tracking-[-0.01em] text-ink">
-                  {r.rotuloDoEnvio}
-                  {anterior && (
+                  {/* "Hoje" no começo do título, "hoje" no meio da frase. */}
+                  {r.enviadaEm ? f.dia(r.enviadaEm) : null}
+                  {anterior?.enviadaEm ? (
                     <span className="ml-2 text-[12.5px] font-medium text-ink-4">
-                      comparada com {anterior.rotuloDoEnvio}
+                      {preencher(d.comparada, { dia: f.diaNaFrase(anterior.enviadaEm) })}
                     </span>
-                  )}
+                  ) : null}
                 </h2>
                 <Comparacao
+                  idioma={idioma}
                   atual={r}
                   anterior={anterior}
                   linhas={comparar(r, anterior)}

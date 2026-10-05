@@ -1,6 +1,7 @@
 import type { Idioma } from "@/lib/domain/idioma";
 import { COMUM } from "@/lib/i18n/app/comum";
 
+import { AGENDA } from "./agenda";
 import { ALUNOS } from "./alunos";
 import { COMUM_DO_PAINEL } from "./comum";
 import { DASHBOARD } from "./dashboard";
@@ -27,6 +28,7 @@ function textos(idioma: Idioma) {
     social: SOCIAL[idioma],
     treinos: TREINOS[idioma],
     exercicios: EXERCICIOS[idioma],
+    agenda: AGENDA[idioma],
     /** O portão de re-aceite é o mesmo componente do app; o texto também. */
     portao: COMUM[idioma].portao,
   };
