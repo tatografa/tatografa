@@ -1,4 +1,5 @@
 import { requireTrainer } from "@/lib/auth/session";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
 import { tenhoPerfilDeAluno } from "@/lib/queries/modo-aluno";
 
 import { CartaoDeModoAluno } from "./cartao-de-modo-aluno";
@@ -26,21 +27,19 @@ import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 export default async function Treinar() {
   const { trainer } = await requireTrainer();
   const jaSouAluno = await tenhoPerfilDeAluno(trainer.id);
+  const { t } = await textosDoPainel();
+  const tr = t.configuracoes.treinar;
 
   return (
     <div className="space-y-8">
       <CabecalhoDaPagina
-        titulo="Treinar como aluno"
-        subtitulo="Você também treina: monte o seu macrotreino e execute pelo app do aluno"
+        titulo={tr.titulo}
+        subtitulo={tr.subtitulo}
       />
       {/* A frase inteira, que o cabeçalho de uma linha só não comporta. */}
-      <p className="max-w-xl text-[13.5px] leading-relaxed text-ink-3">
-        Aqui você vira aluno de si mesmo: monta o próprio macrotreino no mesmo
-        editor, executa pelo app do aluno no celular e aparece no feed junto
-        com a sua turma.
-      </p>
+      <p className="max-w-xl text-[13.5px] leading-relaxed text-ink-3">{tr.explicacao}</p>
 
-      <CartaoDeModoAluno jaSouAluno={jaSouAluno} />
+      <CartaoDeModoAluno jaSouAluno={jaSouAluno} textos={tr} />
     </div>
   );
 }

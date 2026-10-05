@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { requireTrainer } from "@/lib/auth/session";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
+import { preencher } from "@/lib/i18n/texto";
 import { createClient } from "@/lib/supabase/server";
 
 export type EstadoDoModoAluno = { erro?: string };
@@ -38,18 +40,15 @@ export async function virarAlunoDeMimMesmo(
   });
 
   if (error) {
+    const tr = (await textosDoPainel()).t.configuracoes.treinar;
     // 23505 é a chave única. Em `id` significa que a linha já existe — dois
     // cliques no mesmo botão, e aí seguir para `/app` é exatamente o certo.
     // Em `email` é outra coisa: alguém já é aluno com este endereço, e aí o
     // personal precisa saber, porque a linha dele não foi criada.
     if (error.code === "23505" && error.message.includes("email")) {
-      return {
-        erro: `Já existe um aluno cadastrado com ${trainer.email}. Como o e-mail não se repete entre alunos, esse endereço precisa ser liberado antes.`,
-      };
+      return { erro: preencher(tr.emailEmUso, { email: trainer.email }) };
     }
-    if (error.code !== "23505") {
-      return { erro: "Não conseguimos abrir seu perfil de aluno agora. Tente de novo." };
-    }
+    if (error.code !== "23505") return { erro: tr.falha };
   }
 
   // `"layout"` e não a página solta: a linha nova muda **toda** a subárvore do

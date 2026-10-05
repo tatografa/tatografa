@@ -3,8 +3,10 @@
 import { useActionState, useState } from "react";
 import { Pencil } from "lucide-react";
 
+import { usePainel } from "@/components/personal/idioma-do-painel";
 import { Button, Input } from "@/components/ui";
 import { LIMITES_DO_ALERTA } from "@/lib/domain/atencao";
+import { plural, preencher } from "@/lib/i18n/texto";
 
 import {
   salvarConfiguracoes,
@@ -25,6 +27,8 @@ const INICIAL: EstadoDasConfiguracoes = {};
 export function AjusteDeAlerta({ dias }: { dias: number }) {
   const [estado, acao, enviando] = useActionState(salvarConfiguracoes, INICIAL);
   const [editando, setEditando] = useState(false);
+  const { t } = usePainel();
+  const a = t.configuracoes.alerta;
 
   // Fecha quando a ação confirma. Ajuste durante a renderização, não em efeito:
   // é o padrão que o projeto usa desde o onboarding do aluno.
@@ -39,16 +43,13 @@ export function AjusteDeAlerta({ dias }: { dias: number }) {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-[15px] font-bold text-ink">
-            {dias} {dias === 1 ? "dia" : "dias"}
+            {plural(dias, t.comum.dias)}
           </p>
-          <p className="mt-1 text-[13px] leading-[1.6] text-ink-3">
-            Passado esse tempo sem concluir treino, o aluno aparece em
-            &ldquo;precisam de atenção&rdquo; no painel.
-          </p>
+          <p className="mt-1 text-[13px] leading-[1.6] text-ink-3">{a.explicacao}</p>
         </div>
         <Button variant="secondary" size="sm" onClick={() => setEditando(true)}>
           <Pencil size={15} aria-hidden />
-          Editar
+          {t.comum.editar}
         </Button>
       </div>
     );
@@ -57,7 +58,7 @@ export function AjusteDeAlerta({ dias }: { dias: number }) {
   return (
     <form action={acao} noValidate className="space-y-4">
       <Input
-        label="Dias sem treinar até o alerta"
+        label={a.rotulo}
         name="dias"
         type="number"
         inputMode="numeric"
@@ -66,7 +67,7 @@ export function AjusteDeAlerta({ dias }: { dias: number }) {
         autoFocus
         defaultValue={estado.campos?.dias ?? String(dias)}
         error={estado.errosPorCampo?.dias}
-        hint={`Entre ${LIMITES_DO_ALERTA.minimo} e ${LIMITES_DO_ALERTA.maximo}. O padrão é 7.`}
+        hint={preencher(a.apoio, { min: LIMITES_DO_ALERTA.minimo, max: LIMITES_DO_ALERTA.maximo })}
       />
 
       {estado.erro && (
@@ -85,10 +86,10 @@ export function AjusteDeAlerta({ dias }: { dias: number }) {
           size="sm"
           onClick={() => setEditando(false)}
         >
-          Cancelar
+          {t.comum.cancelar}
         </Button>
         <Button type="submit" size="sm" disabled={enviando}>
-          {enviando ? "Salvando…" : "Salvar"}
+          {enviando ? t.comum.salvando : t.comum.salvar}
         </Button>
       </div>
     </form>

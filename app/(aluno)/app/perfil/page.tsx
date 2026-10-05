@@ -3,7 +3,7 @@ import { ChevronRight } from "lucide-react";
 
 import { BotaoSair } from "@/components/botao-sair";
 import { CardDoPersonal } from "@/components/aluno/card-do-personal";
-import { EscolhaDeIdioma } from "@/components/aluno/escolha-de-idioma";
+import { EscolhaDeIdioma } from "@/components/escolha-de-idioma";
 import { Card } from "@/components/ui";
 import { requireStudent } from "@/lib/auth/session";
 import { textosDoApp } from "@/lib/i18n/app/servidor";

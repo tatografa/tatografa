@@ -3,6 +3,7 @@
 import { Dumbbell } from "lucide-react";
 import { useActionState } from "react";
 
+import { usePainel } from "@/components/personal/idioma-do-painel";
 import { Button } from "@/components/ui";
 
 import { virarAlunoDeMimMesmo, type EstadoDoModoAluno } from "./actions";
@@ -18,12 +19,13 @@ const INICIAL: EstadoDoModoAluno = {};
  */
 export function EntrarNoModoAluno() {
   const [estado, acao, enviando] = useActionState(virarAlunoDeMimMesmo, INICIAL);
+  const tr = usePainel().t.configuracoes.treinar;
 
   return (
     <form action={acao} noValidate className="space-y-3">
       <Button type="submit" disabled={enviando}>
         <Dumbbell size={15} aria-hidden />
-        {enviando ? "Abrindo…" : "Criar meu perfil de aluno"}
+        {enviando ? tr.abrindo : tr.botao}
       </Button>
 
       {estado.erro ? (

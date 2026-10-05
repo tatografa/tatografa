@@ -1,13 +1,14 @@
 "use client";
 
-import { KeyRound, LogOut, Pencil, ShieldCheck } from "lucide-react";
+import { Globe, KeyRound, LogOut, Pencil, ShieldCheck } from "lucide-react";
 import { useActionState, useState } from "react";
 
 import { BotaoSair } from "@/components/botao-sair";
 import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
+import { usePainel } from "@/components/personal/idioma-do-painel";
 import { Button, Input } from "@/components/ui";
 import { iniciaisDe } from "@/lib/domain/nome";
-import { DICA_DA_SENHA } from "@/lib/domain/senha";
+import { dicaDaSenha } from "@/lib/domain/senha";
 import { formatarTelefone } from "@/lib/domain/telefone";
 
 import { salvarPerfil, trocarSenha, type EstadoDaSenha, type EstadoDoPerfil } from "./actions";
@@ -34,28 +35,32 @@ import { AjusteDeAlerta } from "./ajuste-de-alerta";
  * cartão do perfil — o estado é um só, e o cabeçalho é daqui.
  */
 export function TelaDeConfiguracoes({
+  idioma,
   nome,
   email,
   telefone,
   diasParaAlerta,
 }: {
+  /** O seletor de idioma, montado no servidor pela página. */
+  idioma: React.ReactNode;
   nome: string;
   email: string;
   telefone: string | null;
   diasParaAlerta: number;
 }) {
   const [editando, setEditando] = useState(false);
+  const c = usePainel().t.configuracoes;
 
   return (
     <>
       <CabecalhoDaPagina
-        titulo="Configurações"
-        subtitulo="Ajuste seu perfil, o alerta de inatividade e a segurança da conta"
+        titulo={c.titulo}
+        subtitulo={c.subtitulo}
         acoes={
           editando ? null : (
             <Button size="sm" onClick={() => setEditando(true)}>
               <Pencil size={14} aria-hidden />
-              Editar perfil
+              {c.editarPerfil}
             </Button>
           )
         }
@@ -71,11 +76,25 @@ export function TelaDeConfiguracoes({
         />
 
         <div className="grid items-start gap-4 @min-[820px]:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
-          <Cartao titulo="Alerta de inatividade">
-            <div className="p-5">
-              <AjusteDeAlerta dias={diasParaAlerta} />
-            </div>
-          </Cartao>
+          <div className="flex min-w-0 flex-col gap-4">
+            <Cartao titulo={c.alerta.titulo}>
+              <div className="p-5">
+                <AjusteDeAlerta dias={diasParaAlerta} />
+              </div>
+            </Cartao>
+            {/* A opção só existe depois que o painel inteiro foi traduzido
+                (etapa 3, 05/10): seletor que troca a sigla e deixa a tela em
+                português é controle mentindo. */}
+            <Cartao
+              titulo={c.idioma.titulo}
+              lateral={<Globe size={17} aria-hidden className="text-ink-4" />}
+            >
+              <div className="px-5 pt-3 pb-4">
+                <p className="mb-1 text-[12.5px] leading-relaxed text-ink-4">{c.idioma.apoio}</p>
+                {idioma}
+              </div>
+            </Cartao>
+          </div>
           <Seguranca />
         </div>
       </div>
@@ -119,6 +138,8 @@ function Perfil({
   aoFechar: () => void;
 }) {
   const [estado, acao, enviando] = useActionState(salvarPerfil, PERFIL_INICIAL);
+  const { t } = usePainel();
+  const p = t.configuracoes.perfil;
 
   // Fecha quando a ação confirma. Ajuste durante a renderização, não em efeito:
   // é o padrão que o projeto usa desde o onboarding do aluno.
@@ -129,7 +150,7 @@ function Perfil({
   }
 
   return (
-    <Cartao titulo="Perfil">
+    <Cartao titulo={p.titulo}>
       <div className="flex flex-col gap-6 p-5 @min-[640px]:flex-row @min-[640px]:items-start">
         <span
           aria-hidden
@@ -142,28 +163,28 @@ function Perfil({
           <form action={acao} noValidate className="min-w-0 flex-1 space-y-4">
             <div className="grid gap-4 @min-[640px]:grid-cols-2">
               <Input
-                label="Seu nome"
+                label={p.nome}
                 name="nome"
                 autoComplete="name"
                 autoFocus
                 defaultValue={estado.campos?.nome ?? nome}
                 error={estado.errosPorCampo?.nome}
-                hint="É como seus alunos veem você no app."
+                hint={p.nomeApoio}
               />
               <Input
-                label="WhatsApp"
+                label={p.whatsapp}
                 name="telefone"
                 type="tel"
                 inputMode="tel"
                 autoComplete="tel"
-                placeholder="(11) 99999-9999"
+                placeholder={p.whatsappExemplo}
                 defaultValue={estado.campos?.telefone ?? formatarTelefone(telefone)}
                 error={estado.errosPorCampo?.telefone}
-                hint="Com DDD. Em branco, o botão de WhatsApp some do app dos alunos."
+                hint={p.whatsappApoio}
               />
             </div>
             <dl>
-              <Campo rotulo="E-mail" valor={email} apoio="É o seu login, e por isso não se edita aqui." />
+              <Campo rotulo={p.email} valor={email} apoio={p.emailNaoEdita} />
             </dl>
 
             {estado.erro ? (
@@ -174,25 +195,21 @@ function Perfil({
 
             <div className="flex gap-2.5">
               <Button type="button" variant="secondary" size="sm" onClick={aoFechar}>
-                Cancelar
+                {t.comum.cancelar}
               </Button>
               <Button type="submit" size="sm" disabled={enviando}>
-                {enviando ? "Salvando…" : "Salvar"}
+                {enviando ? t.comum.salvando : t.comum.salvar}
               </Button>
             </div>
           </form>
         ) : (
           <dl className="grid min-w-0 flex-1 gap-x-8 gap-y-5 @min-[640px]:grid-cols-2">
-            <Campo rotulo="Seu nome" valor={nome} apoio="É como seus alunos veem você no app." />
-            <Campo rotulo="E-mail" valor={email} apoio="É o seu login." />
+            <Campo rotulo={p.nome} valor={nome} apoio={p.nomeApoio} />
+            <Campo rotulo={p.email} valor={email} apoio={p.emailLogin} />
             <Campo
-              rotulo="WhatsApp"
-              valor={telefone ? formatarTelefone(telefone) : "Não informado"}
-              apoio={
-                telefone
-                  ? "Seus alunos têm um botão que abre a conversa com você."
-                  : "Informe o número e seus alunos ganham um botão que abre a conversa com você."
-              }
+              rotulo={p.whatsapp}
+              valor={telefone ? formatarTelefone(telefone) : t.comum.naoInformado}
+              apoio={telefone ? p.comWhatsapp : p.semWhatsapp}
             />
           </dl>
         )}
@@ -222,6 +239,8 @@ function Seguranca() {
   // precisa montar o formulário limpo de novo — sem isso, o que ficou
   // digitado e o erro ao lado discordariam.
   const [tentativa, setTentativa] = useState(0);
+  const { idioma, t } = usePainel();
+  const s = t.configuracoes.seguranca;
 
   const [ultimoEstado, setUltimoEstado] = useState(estado);
   if (estado !== ultimoEstado) {
@@ -231,17 +250,17 @@ function Seguranca() {
   }
 
   return (
-    <Cartao titulo="Segurança" lateral={<ShieldCheck size={17} aria-hidden className="text-success" />}>
+    <Cartao titulo={s.titulo} lateral={<ShieldCheck size={17} aria-hidden className="text-success" />}>
       <div className="space-y-4 p-5">
         <div className="rounded-[12px] border border-border-soft bg-canvas p-4">
           <p className="flex items-center gap-2 text-[13.5px] font-semibold text-ink">
             <KeyRound size={15} aria-hidden />
-            Senha
+            {s.senha}
           </p>
           {trocando ? (
             <form key={tentativa} action={acao} noValidate className="mt-3 space-y-3">
               <Input
-                label="Senha atual"
+                label={s.atual}
                 name="atual"
                 type="password"
                 autoComplete="current-password"
@@ -249,15 +268,15 @@ function Seguranca() {
                 error={estado.errosPorCampo?.atual}
               />
               <Input
-                label="Senha nova"
+                label={s.nova}
                 name="nova"
                 type="password"
                 autoComplete="new-password"
                 error={estado.errosPorCampo?.nova}
-                hint={DICA_DA_SENHA}
+                hint={dicaDaSenha(idioma)}
               />
               <Input
-                label="Repita a senha nova"
+                label={s.repita}
                 name="confirmacao"
                 type="password"
                 autoComplete="new-password"
@@ -270,22 +289,20 @@ function Seguranca() {
               ) : null}
               <div className="flex gap-2.5">
                 <Button type="button" variant="secondary" size="sm" onClick={() => setTrocando(false)}>
-                  Cancelar
+                  {t.comum.cancelar}
                 </Button>
                 <Button type="submit" size="sm" disabled={enviando}>
-                  {enviando ? "Trocando…" : "Trocar senha"}
+                  {enviando ? s.trocando : s.trocar}
                 </Button>
               </div>
             </form>
           ) : (
             <>
               <p className="mt-1 text-[12.5px] leading-relaxed text-ink-4" role={estado.sucesso ? "status" : undefined}>
-                {estado.sucesso
-                  ? "Senha trocada. Use a nova no próximo login."
-                  : "Para trocar, pedimos a atual antes — quem achar o painel aberto não consegue tirar você da sua conta."}
+                {estado.sucesso ? s.trocada : s.pedimosAtual}
               </p>
               <Button size="sm" block className="mt-3" onClick={() => setTrocando(true)}>
-                Trocar senha
+                {s.trocar}
               </Button>
             </>
           )}
@@ -294,13 +311,11 @@ function Seguranca() {
         <div className="rounded-[12px] border border-border-soft bg-canvas p-4">
           <p className="flex items-center gap-2 text-[13.5px] font-semibold text-ink">
             <LogOut size={15} aria-hidden />
-            Sair da conta
+            {s.sair}
           </p>
-          <p className="mt-1 text-[12.5px] leading-relaxed text-ink-4">
-            Encerra a sessão neste navegador. Em computador que outras pessoas usam, saia ao terminar.
-          </p>
+          <p className="mt-1 text-[12.5px] leading-relaxed text-ink-4">{s.sairApoio}</p>
           <div className="mt-3">
-            <BotaoSair block rotulo="Sair da conta" />
+            <BotaoSair block rotulo={s.sair} rotuloSaindo={t.comum.nav.saindo} />
           </div>
         </div>
       </div>

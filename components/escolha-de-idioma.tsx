@@ -4,15 +4,17 @@ import { IDIOMAS, type Idioma } from "@/lib/domain/idioma";
 import { cn } from "@/lib/utils";
 
 /**
- * A opção de idioma do app, no perfil do aluno (pedido do Otávio, 05/10).
+ * A opção de idioma, no perfil do aluno e nas configurações do personal
+ * (pedido do Otávio, 05/10). Uma lista só para os dois lados: o cookie é um
+ * só, e duas cópias do seletor divergiriam no primeiro idioma novo.
  *
  * Três linhas com o nome de cada idioma escrito nele mesmo, e não as siglas do
  * seletor das telas de entrada: aqui é uma configuração que se visita uma vez,
  * e "English" é reconhecido por quem não lê "Inglês".
  *
  * **Link de verdade, com recarga inteira** (`<a>`): o `?lang=` grava o cookie
- * no `proxy.ts`, e o layout do aluno — que é quem entrega o dicionário ao app —
- * só desenha de novo numa navegação completa. Sem JavaScript também funciona.
+ * no `proxy.ts`, e o layout — que é quem entrega o dicionário à área — só
+ * desenha de novo numa navegação completa. Sem JavaScript também funciona.
  */
 export function EscolhaDeIdioma({
   idioma,

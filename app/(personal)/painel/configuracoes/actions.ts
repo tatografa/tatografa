@@ -6,8 +6,10 @@ import { z } from "zod";
 import { requireTrainer } from "@/lib/auth/session";
 import { LIMITES_DO_ALERTA } from "@/lib/domain/atencao";
 import { erroDaSenha } from "@/lib/domain/senha";
-import { telefoneOpcional } from "@/lib/domain/telefone";
+import { telefoneOpcionalCom } from "@/lib/domain/telefone";
 import { traduzErro } from "@/lib/auth/mensagens";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
+import { preencher } from "@/lib/i18n/texto";
 import { createClient } from "@/lib/supabase/server";
 
 export type EstadoDasConfiguracoes = {
@@ -17,24 +19,26 @@ export type EstadoDasConfiguracoes = {
   sucesso?: boolean;
 };
 
+/** O texto das três ações no idioma do painel; os esquemas são montados por chamada. */
+async function textos() {
+  const { idioma, t } = await textosDoPainel();
+  return { idioma, e: t.configuracoes.erros };
+}
+
 /*
  * A mesma faixa que o `check` da migration 0014 aplica. Aqui a validação existe
- * para dar mensagem em português; lá ela existe porque um POST direto não passa
- * por formulário nenhum.
+ * para dar a mensagem na língua de quem enviou; lá ela existe porque um POST
+ * direto não passa por formulário nenhum.
  */
-const esquema = z.object({
-  dias: z.coerce
-    .number({ error: "Informe um número de dias." })
-    .int("Use um número inteiro de dias.")
-    .min(
-      LIMITES_DO_ALERTA.minimo,
-      `O mínimo é ${LIMITES_DO_ALERTA.minimo} dia.`,
-    )
-    .max(
-      LIMITES_DO_ALERTA.maximo,
-      `O máximo é ${LIMITES_DO_ALERTA.maximo} dias.`,
-    ),
-});
+function esquema(e: Awaited<ReturnType<typeof textos>>["e"]) {
+  return z.object({
+    dias: z.coerce
+      .number({ error: e.informeDias })
+      .int(e.diasInteiro)
+      .min(LIMITES_DO_ALERTA.minimo, preencher(e.diasMin, { n: LIMITES_DO_ALERTA.minimo }))
+      .max(LIMITES_DO_ALERTA.maximo, preencher(e.diasMax, { n: LIMITES_DO_ALERTA.maximo })),
+  });
+}
 
 /**
  * Salva o limiar de inatividade do personal logado.
@@ -49,8 +53,9 @@ export async function salvarConfiguracoes(
 ): Promise<EstadoDasConfiguracoes> {
   const { trainer } = await requireTrainer();
 
+  const { e } = await textos();
   const bruto = { dias: String(dados.get("dias") ?? "") };
-  const analise = esquema.safeParse(bruto);
+  const analise = esquema(e).safeParse(bruto);
 
   if (!analise.success) {
     const { fieldErrors } = z.flattenError(analise.error);
@@ -67,7 +72,7 @@ export async function salvarConfiguracoes(
     .eq("id", trainer.id);
 
   if (error) {
-    return { campos: bruto, erro: "Não deu para salvar agora. Tente de novo." };
+    return { campos: bruto, erro: e.falhaSalvar };
   }
 
   // O painel mostra o limiar na linha de ajuste e o usa para montar os alertas.
@@ -84,14 +89,12 @@ export type EstadoDoPerfil = {
   sucesso?: boolean;
 };
 
-const esquemaDoPerfil = z.object({
-  nome: z
-    .string()
-    .trim()
-    .min(2, "Informe seu nome.")
-    .max(80, "Use no máximo 80 caracteres."),
-  telefone: telefoneOpcional,
-});
+function esquemaDoPerfil(e: Awaited<ReturnType<typeof textos>>["e"]) {
+  return z.object({
+    nome: z.string().trim().min(2, e.informeNome).max(80, e.nomeLongo),
+    telefone: telefoneOpcionalCom(e.telefone),
+  });
+}
 
 /**
  * Salva o nome e o WhatsApp do personal — o cartão "Perfil" da tela.
@@ -119,7 +122,8 @@ export async function salvarPerfil(
     nome: String(dados.get("nome") ?? ""),
     telefone: String(dados.get("telefone") ?? ""),
   };
-  const analise = esquemaDoPerfil.safeParse(bruto);
+  const { e } = await textos();
+  const analise = esquemaDoPerfil(e).safeParse(bruto);
 
   if (!analise.success) {
     const { fieldErrors } = z.flattenError(analise.error);
@@ -136,7 +140,7 @@ export async function salvarPerfil(
     .eq("id", trainer.id);
 
   if (error) {
-    return { campos: bruto, erro: "Não deu para salvar agora. Tente de novo." };
+    return { campos: bruto, erro: e.falhaSalvar };
   }
 
   // "layout" e não a página: o nome aparece na navegação e no avatar de todo o
@@ -154,14 +158,16 @@ export type EstadoDaSenha = {
   sucesso?: boolean;
 };
 
-const esquemaDaSenha = z.object({
-  atual: z.string().min(1, "Informe a senha que você usa hoje."),
-  nova: z.string().superRefine((valor, ctx) => {
-    const erro = erroDaSenha(valor);
-    if (erro) ctx.addIssue({ code: "custom", message: erro });
-  }),
-  confirmacao: z.string(),
-});
+function esquemaDaSenha({ idioma, e }: Awaited<ReturnType<typeof textos>>) {
+  return z.object({
+    atual: z.string().min(1, e.informeAtual),
+    nova: z.string().superRefine((valor, ctx) => {
+      const erro = erroDaSenha(valor, idioma);
+      if (erro) ctx.addIssue({ code: "custom", message: erro });
+    }),
+    confirmacao: z.string(),
+  });
+}
 
 /**
  * Troca a senha de quem está logado, **pedindo a atual antes**.
@@ -182,8 +188,10 @@ export async function trocarSenha(
   dados: FormData,
 ): Promise<EstadoDaSenha> {
   await requireTrainer();
+  const lingua = await textos();
+  const { idioma, e } = lingua;
 
-  const analise = esquemaDaSenha.safeParse({
+  const analise = esquemaDaSenha(lingua).safeParse({
     atual: String(dados.get("atual") ?? ""),
     nova: String(dados.get("nova") ?? ""),
     confirmacao: String(dados.get("confirmacao") ?? ""),
@@ -194,14 +202,14 @@ export async function trocarSenha(
     return { errosPorCampo: { atual: fieldErrors.atual?.[0], nova: fieldErrors.nova?.[0] } };
   }
   if (analise.data.nova !== analise.data.confirmacao) {
-    return { errosPorCampo: { confirmacao: "As duas senhas novas precisam ser iguais." } };
+    return { errosPorCampo: { confirmacao: e.diferentes } };
   }
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user?.email) return { erro: "Sua sessão terminou. Entre de novo para trocar a senha." };
+  if (!user?.email) return { erro: e.sessaoTerminou };
 
   const conferencia = await supabase.auth.signInWithPassword({
     email: user.email,
@@ -211,12 +219,12 @@ export async function trocarSenha(
     // "E-mail ou senha incorretos" seria estranho aqui: o e-mail não foi
     // digitado. Excesso de tentativas continua com a frase dele.
     return /invalid login credentials/i.test(conferencia.error.message)
-      ? { errosPorCampo: { atual: "Essa não é a sua senha atual." } }
-      : { erro: traduzErro(conferencia.error.message) };
+      ? { errosPorCampo: { atual: e.atualErrada } }
+      : { erro: traduzErro(conferencia.error.message, idioma) };
   }
 
   const { error } = await supabase.auth.updateUser({ password: analise.data.nova });
-  if (error) return { erro: traduzErro(error.message) };
+  if (error) return { erro: traduzErro(error.message, idioma) };
 
   return { sucesso: true };
 }
