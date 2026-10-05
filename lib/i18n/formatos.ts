@@ -140,21 +140,27 @@ export function formatos(idioma: Idioma) {
       }).format(new Date(diaLocalEmMs(diaDoCalendario))),
     /** "18h" / "18h30" em português; "18:00" / "18:30" nos outros. */
     horaDaAgenda: (iso: string) => (pt ? horaDaSessaoNaAgenda(iso) : hora(iso)),
-    /** Um mês ("2026-09") no eixo: "set" / "Sep". */
+    /**
+     * Um mês no eixo: "set" / "Sep". Aceita "2026-09" e a data inteira
+     * "2026-09-01" — o banco devolve o mês como `date` (`alunos_por_mes`), e
+     * montar "2026-09-01-01" dava data inválida, que o `Intl` recusa com erro e
+     * derrubava o dashboard em inglês e espanhol (05/10). O português nunca
+     * sentiu porque `rotuloDoMes` só lê os caracteres do mês.
+     */
     mesCurto: (mes: string) =>
       pt
         ? rotuloDoMes(mes)
         : semPontoFinal(
             new Intl.DateTimeFormat(locale, { timeZone: "UTC", month: "short" }).format(
-              new Date(diaLocalEmMs(`${mes}-01`)),
+              new Date(diaLocalEmMs(`${mes.slice(0, 7)}-01`)),
             ),
           ),
-    /** "setembro de 2026" / "September 2026". */
+    /** "setembro de 2026" / "September 2026". Aceita os mesmos dois formatos. */
     mesPorExtenso: (mes: string) =>
       pt
         ? rotuloDoMesPorExtenso(mes)
         : new Intl.DateTimeFormat(locale, { timeZone: "UTC", month: "long", year: "numeric" }).format(
-            new Date(diaLocalEmMs(`${mes}-01`)),
+            new Date(diaLocalEmMs(`${mes.slice(0, 7)}-01`)),
           ),
     /** Um dia de calendário curto: "09/09" / "09/09" (es) / "9/9" (en). */
     diaCurto: (dia: string) =>

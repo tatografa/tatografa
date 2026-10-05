@@ -585,6 +585,21 @@ Provar que funciona sem o Otávio ler código:
   exercícios do catálogo (dado do banco), o sufixo "(cópia)" que `duplicar_treino` põe no
   nome dentro do SQL, e o nome de reserva de linha órfã ("Exercício removido"), que
   nasce na consulta e quase nunca aparece.
+- **[2026-10-05, do teste de campo]** **O dashboard caía em inglês e espanhol** ("Couldn't
+  load this"). O banco devolve o mês do gráfico de crescimento como `date`
+  ("2026-09-01", `alunos_por_mes`), e `formatos().mesCurto` montava `${mes}-01` —
+  "2026-09-01-01", data inválida que o `Intl` recusa com `RangeError`. Em português
+  passava porque `rotuloDoMes` só lê os caracteres do mês; e a minha conferência usou
+  dado de teste no formato "2026-09", não no que o banco manda. Agora o formato aceita
+  os dois. **A lição:** dado de teste de rota descartável copia o formato **da
+  coluna do banco**, não o do tipo TypeScript — `PontoDoMes.mes` é `string` e as duas
+  formas cabem nela.
+- **[2026-10-05, pedido do Otávio]** **O bloco "Precisam de atenção" saiu do
+  dashboard.** A mesma fila continua em `/painel/alunos`, no ladrilho que liga o filtro
+  "N+ dias", e o limiar em Configurações agora diz isso. `lerResumoDaCarteira` deixou de
+  montar os alertas; `alunosQuePrecisamDeAtencao` fica em `lib/domain/atencao.ts`, sem
+  uso por ora. Revê as decisões de 16/09 e 18/09, que punham o bloco logo abaixo dos
+  números.
 - **[2026-10-05]** **`plural` e `preencher` não se encadeiam.** `plural` já troca `{n}`,
   e `preencher` apaga toda chave que não recebe — então `preencher(plural(n, frase),
   { dias })` devolvia "1 novo em  dias": o `{dias}` sumia no primeiro passo. Frase plural

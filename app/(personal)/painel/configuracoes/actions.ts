@@ -75,8 +75,9 @@ export async function salvarConfiguracoes(
     return { campos: bruto, erro: e.falhaSalvar };
   }
 
-  // O painel mostra o limiar na linha de ajuste e o usa para montar os alertas.
-  revalidatePath("/painel");
+  // A tela de Alunos usa o limiar no ladrilho "Precisam de atenção" e no
+  // filtro "N+ dias" (o bloco do dashboard saiu em 05/10).
+  revalidatePath("/painel/alunos");
   revalidatePath("/painel/configuracoes");
 
   return { sucesso: true };

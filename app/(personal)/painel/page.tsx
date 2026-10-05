@@ -2,11 +2,7 @@ import Link from "next/link";
 
 import { Send } from "lucide-react";
 
-import {
-  AlunosQuePrecisamDeAtencao,
-  AtividadeRecente,
-  Indicadores,
-} from "@/components/personal/blocos-do-painel";
+import { AtividadeRecente, Indicadores } from "@/components/personal/blocos-do-painel";
 import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 import {
   CartaoDoPainel,
@@ -33,11 +29,9 @@ import { ConvidarAluno } from "./convidar-aluno";
 export default async function PainelPage() {
   const { trainer } = await requireTrainer();
 
-  // O limiar sai da linha do personal, não de uma constante: é ajuste dele,
-  // editável em /painel/configuracoes.
-  const [{ alunos, alertas, indicadores, atividade }, convites, graficos, { idioma, t }] =
+  const [{ alunos, indicadores, atividade }, convites, graficos, { idioma, t }] =
     await Promise.all([
-      lerResumoDaCarteira(trainer.id, trainer.dias_para_alerta),
+      lerResumoDaCarteira(trainer.id),
       listarConvitesPendentes(),
       lerGraficosDoPainel(),
       textosDoPainel(),
@@ -69,18 +63,6 @@ export default async function PainelPage() {
           <div className="grid items-start gap-4 @min-[720px]:grid-cols-[minmax(0,1fr)_clamp(260px,32%,340px)]">
             <div className="min-w-0 space-y-4">
               <Indicadores indicadores={indicadores} idioma={idioma} />
-
-              {/*
-              Primeiro cartão depois dos números, e antes dos gráficos que o
-              protótipo põe aqui: o doc 06 chama este bloco de "a lista mais
-              útil da página — não a esconda embaixo". Sem ninguém parado ele
-              não desenha nada, e os gráficos sobem.
-            */}
-              <AlunosQuePrecisamDeAtencao
-                alertas={alertas}
-                diasParaAlerta={trainer.dias_para_alerta}
-                idioma={idioma}
-              />
 
               {convites.length > 0 && <ConvitesPendentes convites={convites} idioma={idioma} />}
 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, History } from "lucide-react";
+import { History } from "lucide-react";
 
 import {
   CartaoDoPainel,
@@ -12,10 +12,9 @@ import { comoPorcentagem } from "@/lib/domain/atencao";
 import type { Idioma } from "@/lib/domain/idioma";
 import { formatos } from "@/lib/i18n/formatos";
 import { TEXTOS_DO_PAINEL, type TextosDoPainel } from "@/lib/i18n/painel";
-import { plural, preencher } from "@/lib/i18n/texto";
+import { plural } from "@/lib/i18n/texto";
 import { iniciaisDe } from "@/lib/domain/nome";
 import type {
-  AlunoEmAlerta,
   IndicadoresDoPainel,
   SessaoRecente,
 } from "@/lib/queries/painel";
@@ -84,75 +83,13 @@ export function Indicadores({
 }
 
 /**
- * "Alunos que precisam de atenção" — o doc 06 chama de a lista mais útil da
- * página. No layout de duas colunas ela é o primeiro cartão depois dos
- * números: o protótipo põe os gráficos logo abaixo dos indicadores, e eles
- * continuam lá — só que **depois** de quem parou de treinar, que é a decisão de
- * hoje. Tendência é a camada seguinte.
- *
- * Lista vazia não desenha nada: um bloco de alerta vazio treina o olho a
- * ignorar o bloco de alerta.
- */
-export function AlunosQuePrecisamDeAtencao({
-  alertas,
-  diasParaAlerta,
-  idioma,
-}: {
-  alertas: AlunoEmAlerta[];
-  diasParaAlerta: number;
-  idioma: Idioma;
-}) {
-  if (!alertas.length) return null;
-  const a = TEXTOS_DO_PAINEL[idioma].dashboard.atencao;
-  const quando = (dias: number) =>
-    dias <= 0 ? a.hoje : dias === 1 ? a.ontem : preencher(a.ha, { n: dias });
-
-  return (
-    <CartaoDoPainel
-      titulo={preencher(a.titulo, { n: alertas.length })}
-      Icone={AlertTriangle}
-      tom="warning"
-      apoio={
-        <Link
-          href="/painel/configuracoes"
-          className="transition hover:text-ink-3"
-        >
-          {plural(diasParaAlerta, a.aviso)}
-        </Link>
-      }
-    >
-      <ul className={LINHAS_DO_CARTAO}>
-        {alertas.map((alerta) => (
-          <li key={alerta.id}>
-            <Link
-              href={`/painel/alunos/${alerta.id}`}
-              className={`flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 transition hover:bg-canvas ${LINHA_DO_CARTAO}`}
-            >
-              <p className="min-w-0 truncate text-[13px] font-medium text-ink">
-                {alerta.nome}
-              </p>
-              <p className="shrink-0 text-[12px] font-medium text-warning">
-                {alerta.motivo === "nunca-treinou"
-                  ? preencher(a.nuncaTreinou, { quando: quando(alerta.dias) })
-                  : preencher(a.treinou, { quando: quando(alerta.dias) })}
-              </p>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </CartaoDoPainel>
-  );
-}
-
-/**
  * "Treinos recentes" (doc 06 §2, "Atividade recente"): as últimas sessões
  * concluídas da carteira, no cartão da coluna da direita do protótipo.
  *
  * É a única tela do painel onde o personal vê a carteira inteira em ordem de
  * acontecimento, e não por aluno. Vale pela leitura de baixo: "ninguém treinou
  * hoje" é informação, e por isso o bloco **desenha o vazio** em vez de sumir —
- * ao contrário do bloco de alerta, que some. Alerta vazio é boa notícia e não
- * precisa de linha; atividade vazia é a pergunta que traz o personal aqui.
+ * atividade vazia é a pergunta que traz o personal aqui.
  *
  * Cada linha leva à sessão, não ao aluno: quem clica em "Carla · A · 16 séries"
  * quer ver aquelas séries. Para a ficha há a tabela de alunos.

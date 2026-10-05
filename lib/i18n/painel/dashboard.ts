@@ -29,15 +29,6 @@ const pt = {
     reavaliacoes: "Reavaliações",
     reavaliacoesApoio: "esperando resposta",
   },
-  atencao: {
-    titulo: "Precisam de atenção · {n}",
-    aviso: { um: "Aviso depois de 1 dia sem treinar · ajustar", outros: "Aviso depois de {n} dias sem treinar · ajustar" },
-    nuncaTreinou: "entrou {quando} e ainda não treinou",
-    treinou: "treinou {quando}",
-    hoje: "hoje",
-    ontem: "ontem",
-    ha: "há {n} dias",
-  },
   recentes: {
     titulo: "Treinos recentes",
     apoio: "Últimos treinos concluídos",
@@ -127,15 +118,6 @@ const en: TextosDoDashboard = {
     reavaliacoes: "Reassessments",
     reavaliacoesApoio: "awaiting an answer",
   },
-  atencao: {
-    titulo: "Need attention · {n}",
-    aviso: { um: "Alert after 1 day without training · adjust", outros: "Alert after {n} days without training · adjust" },
-    nuncaTreinou: "joined {quando} and hasn't trained yet",
-    treinou: "trained {quando}",
-    hoje: "today",
-    ontem: "yesterday",
-    ha: "{n} days ago",
-  },
   recentes: {
     titulo: "Recent workouts",
     apoio: "Latest completed workouts",
@@ -222,15 +204,6 @@ const es: TextosDoDashboard = {
     aderenciaApoio: "hechos sobre prescritos",
     reavaliacoes: "Reevaluaciones",
     reavaliacoesApoio: "esperando respuesta",
-  },
-  atencao: {
-    titulo: "Necesitan atención · {n}",
-    aviso: { um: "Aviso después de 1 día sin entrenar · ajustar", outros: "Aviso después de {n} días sin entrenar · ajustar" },
-    nuncaTreinou: "entró {quando} y todavía no entrenó",
-    treinou: "entrenó {quando}",
-    hoje: "hoy",
-    ontem: "ayer",
-    ha: "hace {n} días",
   },
   recentes: {
     titulo: "Entrenamientos recientes",

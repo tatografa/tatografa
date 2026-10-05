@@ -3,10 +3,8 @@ import "server-only";
 import {
   aderenciaDoAluno,
   aderenciaMedia,
-  alunosQuePrecisamDeAtencao,
   diasSemTreinar,
   semanaDoCalendario,
-  type Alerta,
 } from "@/lib/domain/atencao";
 import {
   desdeQuandoProgredir,
@@ -25,9 +23,6 @@ import { listarAlunos, type AlunoDaLista } from "./alunos";
 import { seriesDasSessoes, type SerieComSessao } from "./historico";
 import { listarProgramasPorAluno, type Macrotreino } from "./macrotreinos";
 import { contarReavaliacoesPendentes } from "./reavaliacao";
-
-/** Uma linha do bloco "precisam de atenção", já com o nome resolvido. */
-export type AlunoEmAlerta = Alerta & { nome: string };
 
 export type IndicadoresDoPainel = {
   alunosAtivos: number;
@@ -55,7 +50,6 @@ export type SessaoRecente = {
 
 export type ResumoDaCarteira = {
   alunos: AlunoDaLista[];
-  alertas: AlunoEmAlerta[];
   indicadores: IndicadoresDoPainel;
   atividade: SessaoRecente[];
 };
@@ -77,13 +71,10 @@ export const LIMITE_DA_ATIVIDADE = 8;
  * uma aderência menor do que a real, na tela que o personal usa para decidir
  * com quem falar.
  *
- * `diasParaAlerta` vem da linha do personal (`trainers.dias_para_alerta`) e
- * não daqui: é ajuste dele, não constante do produto.
+ * O bloco "Precisam de atenção" saiu do dashboard em 05/10 (pedido do Otávio):
+ * a mesma fila continua em `/painel/alunos`, no ladrilho que liga o filtro.
  */
-export async function lerResumoDaCarteira(
-  trainerId: string,
-  diasParaAlerta: number,
-): Promise<ResumoDaCarteira> {
+export async function lerResumoDaCarteira(trainerId: string): Promise<ResumoDaCarteira> {
   const semana = semanaDoCalendario();
 
   // Os alunos vêm antes do resto, e não junto, porque a atividade recente
@@ -97,17 +88,6 @@ export async function lerResumoDaCarteira(
     lerAtividadeRecente(alunos.map((aluno) => aluno.id)),
   ]);
 
-  const nomes = new Map(alunos.map((aluno) => [aluno.id, aluno.name]));
-
-  const alertas: AlunoEmAlerta[] = alunosQuePrecisamDeAtencao(
-    alunos,
-    diasParaAlerta,
-  ).map((alerta) => ({
-    ...alerta,
-    // A fk garante que o aluno existe; o `??` é só para o tipo.
-    nome: nomes.get(alerta.id) ?? "Aluno",
-  }));
-
   const treinosPrescritos = new Map(
     programas.map((p) => [p.aluno.id, p.ativo?.total_treinos ?? 0]),
   );
@@ -119,7 +99,6 @@ export async function lerResumoDaCarteira(
 
   return {
     alunos,
-    alertas,
     atividade,
     indicadores: {
       alunosAtivos: ativos.length,

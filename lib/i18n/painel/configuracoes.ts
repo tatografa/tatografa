@@ -30,7 +30,7 @@ const pt = {
   alerta: {
     titulo: "Alerta de inatividade",
     explicacao:
-      "Passado esse tempo sem concluir treino, o aluno aparece em “precisam de atenção” no painel.",
+      "Passado esse tempo sem concluir treino, o aluno aparece em “Precisam de atenção”, na tela de Alunos.",
     rotulo: "Dias sem treinar até o alerta",
     apoio: "Entre {min} e {max}. O padrão é 7.",
   },
@@ -110,7 +110,7 @@ const en: TextosDasConfiguracoes = {
   alerta: {
     titulo: "Inactivity alert",
     explicacao:
-      "After this long without finishing a workout, the client shows up under “need attention” on the dashboard.",
+      "After this long without finishing a workout, the client shows up under “Need attention”, on the Clients screen.",
     rotulo: "Days without training before the alert",
     apoio: "Between {min} and {max}. The default is 7.",
   },
@@ -188,7 +188,7 @@ const es: TextosDasConfiguracoes = {
   alerta: {
     titulo: "Alerta de inactividad",
     explicacao:
-      "Pasado ese tiempo sin terminar un entrenamiento, el alumno aparece en “necesitan atención” en el panel.",
+      "Pasado ese tiempo sin terminar un entrenamiento, el alumno aparece en “Necesitan atención”, en la pantalla de Alumnos.",
     rotulo: "Días sin entrenar hasta la alerta",
     apoio: "Entre {min} y {max}. Por defecto son 7.",
   },
