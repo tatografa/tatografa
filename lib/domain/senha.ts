@@ -39,7 +39,7 @@ const SIMBOLOS = "!@#$%^&*()_+-=[]{};'\\:\"|<>?,./`~";
 /**
  * As exigências, na ordem em que a tela as lista. A verificação é uma só; o
  * texto muda com o idioma das telas de entrada (etapa 1 da tradução, 05/10).
- * Português é o padrão porque o painel e o app ainda só falam português.
+ * Português é o padrão de quem não passa idioma.
  */
 const VERIFICACOES = [
   { chave: "tamanho", ok: (senha: string) => senha.length >= SENHA_MINIMA },
@@ -146,5 +146,3 @@ export function dicaDaSenha(idioma: Idioma = "pt"): string {
   return TEXTOS[idioma].dica;
 }
 
-/** A dica em português, para as telas que ainda só falam português. */
-export const DICA_DA_SENHA = dicaDaSenha("pt");

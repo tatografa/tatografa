@@ -8,9 +8,11 @@
  * cadastro, ao link de recuperação que chega por e-mail, e à Server Action, que
  * não recebe a URL da página. Sem nenhum dos dois, português.
  *
- * Traduzido até aqui: landing, telas de entrada, convite do aluno, termos e
- * política (etapa 1) e o app do aluno, com a escolha no perfil (etapa 2). O
- * painel ainda é só português (etapa 3).
+ * Traduzido em três etapas, todas em 05/10: landing, telas de entrada, convite
+ * do aluno, termos e política (etapa 1); o app do aluno, com a escolha no
+ * Perfil (etapa 2); e o painel do personal, com a escolha em Configurações
+ * (etapa 3). O que não se traduz é o que alguém escreveu — nome de treino,
+ * observação, nome de exercício — e os e-mails do Supabase.
  */
 
 export type Idioma = "pt" | "en" | "es";

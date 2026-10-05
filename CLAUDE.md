@@ -19,7 +19,8 @@ Dois produtos, um sistema, um projeto Next.js:
 | Aluno | Web mobile-first (PWA) | Celular, na academia, entre séries, internet ruim |
 | Personal | Web desktop | Computador, sentado, montando treinos |
 
-Interface inteira em **português do Brasil**.
+Interface em **português do Brasil**, que é o idioma de origem; inglês e espanhol desde
+05/10, escolhidos pelo usuário (cookie `reps_idioma`). Texto novo nasce nas três línguas.
 
 ## Git e ambientes
 
@@ -520,8 +521,8 @@ Provar que funciona sem o Otávio ler código:
   o app do aluno, com a opção no Perfil. **Etapa 3:** o painel, com a opção em
   Configurações. **A opção de idioma só aparece numa área depois que ela estiver
   traduzida** — seletor que troca a sigla e deixa a tela em português é controle
-  mentindo. _A etapa 2 entrou no mesmo dia (abaixo); o painel continua em
-  português qualquer que seja o cookie._
+  mentindo. _As etapas 2 e 3 entraram no mesmo dia (abaixo): hoje o produto inteiro
+  fala os três idiomas._
   **Como funciona:** `?lang=` vale para a página e o `proxy.ts` grava `reps_idioma` (um
   ano) — **também na requisição em curso**, senão o layout leria o cookie antigo e a
   moldura sairia num idioma e o formulário em outro. `idiomaAtual()` decide: parâmetro,
@@ -558,10 +559,45 @@ Provar que funciona sem o Otávio ler código:
   observação) e o nome dos exercícios do catálogo — o app não reescreve a prescrição de
   ninguém. **Componentes que o painel divide com o app** (`TelaSessaoDoHistorico`,
   `Comparacao`, `PortaoDeAceite`, `AvisoDeFalha`, `NaoEncontrado`, `BotaoSair`,
-  `VideoDoExercicio`) recebem idioma ou rótulo **opcional, com português de padrão**: o
-  painel não mudou. O portão de re-aceite do aluno ganhou o "o que mudou" em inglês e
+  `VideoDoExercicio`) recebem idioma ou rótulo **opcional, com português de padrão**; desde
+  a etapa 3 o painel passa o dele. O portão de re-aceite do aluno ganhou o "o que mudou" em inglês e
   espanhol (`O_QUE_MUDOU_TRADUZIDO`), que **só vale para a versão em que foi escrito**:
   subiu a versão sem traduzir, o portão cai no português em vez de mostrar a frase velha.
+- **[2026-10-05, pedido do Otávio]** **Etapa 3: o painel do personal fala os três
+  idiomas, e a escolha mora em Configurações** ("Idioma do painel", o mesmo
+  `EscolhaDeIdioma` do Perfil do aluno, que saiu de `components/aluno/` para
+  `components/`). O cookie continua um só: o personal que treina a si mesmo troca num lado
+  e o outro acompanha. **Mesmo desenho da etapa 2:** um arquivo por área em
+  `lib/i18n/painel/` (comum, rótulos do banco, dashboard, alunos, ficha, feed, treinos,
+  exercícios, agenda, configurações), `textosDoPainel()` no servidor (`cache()` por
+  requisição, devolve `idioma`, `t` e `f`), `usePainel()` no cliente, com
+  `ProvedorDoPainel` no layout recebendo **só o dicionário escolhido**. Consulta que
+  monta texto (feed do painel, anotações) recebe `idioma`, como as do app. **Os rótulos
+  dos enums** (grupo muscular, equipamento, objetivo, status, situação da sessão) moram
+  em `lib/i18n/painel/rotulos.ts`: em português são os de `lib/rotulos.ts`, e o objetivo
+  em inglês e espanhol é **o mesmo objeto** que o aluno escolheu no convite.
+  **Uma trava segurou o painel em português até a última tela** (`PAINEL_TRADUZIDO`,
+  já removida): cada parte foi publicada, e quem tinha o cookie em inglês veria um
+  painel metade em cada língua. **Formatos novos em `formatos(idioma)`:** a semana da
+  agenda (`formatRange`, que junta os dois meses na virada), os dias curtos da grade
+  (SEG/MON/LUN, do `Intl` nas três línguas) e o dia com ano do histórico de programas.
+  **O que continua em português:** o que o personal ou o aluno escreveu, o nome dos
+  exercícios do catálogo (dado do banco), o sufixo "(cópia)" que `duplicar_treino` põe no
+  nome dentro do SQL, e o nome de reserva de linha órfã ("Exercício removido"), que
+  nasce na consulta e quase nunca aparece.
+- **[2026-10-05]** **`plural` e `preencher` não se encadeiam.** `plural` já troca `{n}`,
+  e `preencher` apaga toda chave que não recebe — então `preencher(plural(n, frase),
+  { dias })` devolvia "1 novo em  dias": o `{dias}` sumia no primeiro passo. Frase plural
+  com outra chave usa **`forma`** (escolhe a forma sem preencher) e um `preencher` só com
+  todas as chaves. Entrou com a tradução da carteira e só apareceu no screenshot em
+  inglês ("1 new in days"); valia para o português também. Varri os dicionários: era o
+  único caso.
+- **[2026-10-05]** **Duas frases do painel afirmavam o gênero do aluno** e foram
+  reescritas na tradução: "volte aqui quando **ele** tiver entrado" (divisão de treino sem
+  aluno) e "**está inativo**… na ficha **dele**" (programa novo de aluno pausado — que
+  agora diz "o acesso de Carla está pausado", a palavra do resto do produto). E a
+  exclusão de treino dizia "e **as 1 série** registrada" quando havia uma: a frase era
+  montada aos pedaços, e virou duas frases inteiras.
 - **[2026-10-05]** **Três coisas que a tradução achou no caminho.** *A saudação da home
   usava a hora do servidor* — UTC na Vercel —, e às 21h de Brasília dizia "Bom dia" a quem
   chegava para o treino da noite; agora é a hora do fuso do produto. *A tela de acesso

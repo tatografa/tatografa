@@ -33,7 +33,7 @@ export function AvisoDeFalha({
   texto: string;
   digest?: string;
   aoTentarDeNovo: () => void;
-  /** O app do aluno passa no idioma dele; o painel ainda é só português. */
+  /** No idioma de quem vê: o app e o painel passam o deles. */
   rotuloDoBotao?: string;
   rotuloDoCodigo?: string;
 }) {

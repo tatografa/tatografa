@@ -16,7 +16,7 @@ export function VideoDoExercicio({
 }: {
   url: string | null;
   nome: string;
-  /** "Vídeo: {nome}" no idioma de quem vê; o painel ainda é só português. */
+  /** "Vídeo: {nome}" no idioma de quem vê. */
   titulo?: string;
   className?: string;
 }) {

@@ -1,4 +1,5 @@
 import type { Idioma } from "@/lib/domain/idioma";
+import { TEXTOS_DO_CONVITE } from "@/lib/i18n/convite";
 import {
   EQUIPAMENTO,
   GRUPO_MUSCULAR,
@@ -68,12 +69,8 @@ const en: RotulosDoBanco = {
     elastico: "Band",
     cardio: "Cardio",
   },
-  objetivo: {
-    massa: "Build muscle",
-    gordura: "Lose fat",
-    condicionamento: "Conditioning",
-    saude: "Health",
-  },
+  // O mesmo texto que o aluno escolheu no convite: uma cópia só.
+  objetivo: TEXTOS_DO_CONVITE.en.objetivos,
   objetivoDoPrograma: {
     hipertrofia: "Hypertrophy",
     forca: "Strength",
@@ -115,12 +112,7 @@ const es: RotulosDoBanco = {
     elastico: "Banda elástica",
     cardio: "Cardio",
   },
-  objetivo: {
-    massa: "Ganar masa muscular",
-    gordura: "Perder grasa",
-    condicionamento: "Acondicionamiento",
-    saude: "Salud",
-  },
+  objetivo: TEXTOS_DO_CONVITE.es.objetivos,
   objetivoDoPrograma: {
     hipertrofia: "Hipertrofia",
     forca: "Fuerza",

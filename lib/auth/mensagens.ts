@@ -149,8 +149,8 @@ const GENERICO: Frase = {
 };
 
 /**
- * O erro do Supabase na língua da tela. Português é o padrão: o painel e o app
- * ainda só falam português (etapas 2 e 3 da tradução).
+ * O erro do Supabase na língua da tela. Português é o padrão de quem não
+ * passa idioma.
  */
 export function traduzErro(
   mensagem: string | undefined | null,

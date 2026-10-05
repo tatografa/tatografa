@@ -30,7 +30,7 @@ export function BotaoSair({
   block?: boolean;
   /** "Sair da conta" onde o botão mora longe do nome de quem está logado. */
   rotulo?: string;
-  /** "Saindo…" no idioma de quem sai; o painel ainda é só português. */
+  /** "Saindo…" no idioma de quem sai. */
   rotuloSaindo?: string;
   /**
    * Só o ícone, para o pé da barra lateral do painel: ao lado do nome de quem

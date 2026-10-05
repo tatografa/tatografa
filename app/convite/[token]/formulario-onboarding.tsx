@@ -22,9 +22,9 @@ import { AceiteDosTermos } from "@/components/aceite-dos-termos";
 const INICIAL: EstadoOnboarding = {};
 
 /*
- * Os rótulos vêm do texto do convite, no idioma da tela. Em português são os
- * mesmos de `lib/rotulos.ts`, que o painel lê; quando o painel for traduzido
- * (etapa 3), os dois passam a sair do mesmo dicionário.
+ * Os rótulos vêm do texto do convite, no idioma da tela. O painel lê estes
+ * mesmos em inglês e espanhol (`lib/i18n/painel/rotulos.ts`); em português,
+ * os dois são os de `lib/rotulos.ts`.
  */
 const ICONES = { massa: "💪", gordura: "🔥", condicionamento: "🏃", saude: "❤️" } as const;
 

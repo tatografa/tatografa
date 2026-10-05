@@ -25,7 +25,7 @@ export function TelaSessaoDoHistorico({
    * duas telas — o resto, incluindo os três estados da série, é o mesmo.
    */
   voltarPara?: { href: string; rotulo: string };
-  /** O app passa o idioma do aluno; o painel ainda é só português (etapa 3). */
+  /** O idioma de quem lê: o do aluno no app, o do personal no painel. */
   idioma?: Idioma;
 }) {
   const t = TEXTOS_DO_APP[idioma];

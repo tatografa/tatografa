@@ -1,7 +1,7 @@
 import { NumeroDoTopo } from "@/components/personal/numero-do-topo";
 import type { IndicadoresDaCarteira } from "@/lib/domain/carteira";
 import { DIAS_DE_ENTRADA } from "@/lib/domain/carteira";
-import { plural, preencher } from "@/lib/i18n/texto";
+import { forma, preencher } from "@/lib/i18n/texto";
 
 import { usePainel } from "./idioma-do-painel";
 
@@ -47,7 +47,9 @@ export function IndicadoresDaCarteiraNoTopo({
         apoio={
           novosNoMes === 0
             ? preencher(n.nenhumNovo, dias)
-            : preencher(plural(novosNoMes, n.novos), dias)
+            : // `forma` e não `plural`: a frase tem `{dias}` além de `{n}`, e
+              // `plural` já preenche — apagaria o `{dias}` antes da vez dele.
+              preencher(forma(novosNoMes, n.novos), { ...dias, n: novosNoMes })
         }
       />
       <NumeroDoTopo

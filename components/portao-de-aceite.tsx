@@ -48,7 +48,7 @@ export function PortaoDeAceite({
   aoAceitar: (
     anterior: EstadoDoAceite,
   ) => Promise<EstadoDoAceite>;
-  /** O texto da moldura. O painel ainda é só português (etapa 3). */
+  /** O texto da moldura, no idioma do app ou do painel. */
   textos?: TextosComuns["portao"];
 }) {
   const [estado, acao, enviando] = useActionState(aoAceitar, INICIAL);
