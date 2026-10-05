@@ -134,6 +134,16 @@ export const PRIVACIDADE: Documento = {
       ],
     },
     {
+      titulo: "Cookies",
+      ancora: "cookies",
+      paragrafos: [
+        "**Usamos só cookies essenciais**, sem os quais o site não funciona: o que mantém você conectado depois de entrar, o que lembra se você deixou a barra lateral do painel recolhida e o que guarda a sua resposta ao aviso de cookies. Eles não pedem permissão, porque desligá-los desligaria o login.",
+        "**Cookies de medição de uso** — os que contam visitas e mostram como o site é usado — **só entram se você aceitar** no aviso da página inicial. Hoje o Reps Club não usa nenhum; se um dia usar, ele só carrega para quem aceitou. **Cookies de publicidade, nunca.**",
+        "Não é cookie, mas é parecido: durante o treino, o app do aluno guarda no próprio aparelho as séries que ainda não chegaram ao servidor e em que exercício você está, para o treino não se perder quando a internet da academia cai. Isso fica só no seu celular, e é apagado quando as séries são enviadas e o treino termina.",
+        "Para mudar a sua escolha, use o link **“Cookies”** no rodapé da página inicial: o aviso volta e você responde de novo.",
+      ],
+    },
+    {
       titulo: "Se você entrou na lista pelo site",
       ancora: "contato-pelo-site",
       paragrafos: [

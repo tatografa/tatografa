@@ -502,6 +502,19 @@ Provar que funciona sem o Otávio ler código:
   `ChamadaDaMoldura` decide pelo endereço, porque o layout não sabe que página está
   dentro dele; sai pronto no HTML do servidor. `/entrar` e `/recuperar`, que servem os
   dois papéis, ficam com o texto do personal.
+- **[2026-10-05, pedido do Otávio]** **A landing tem aviso de cookies com "Aceitar" e
+  "Recusar"** (`AvisoDeCookies`), e ele diz a verdade de hoje: **só há cookies
+  essenciais** (sessão do Supabase, barra do painel e a própria escolha). Os dois botões
+  têm o mesmo tamanho e peso — recusar não pode dar mais trabalho que aceitar —, o aviso
+  não é modal, e o link "Cookies" no rodapé apaga a escolha e o traz de volta: retirar o
+  consentimento tem de ser tão fácil quanto dar. A escolha mora no cookie `reps_cookies`
+  (um ano), lida por `consentimentoDe` em `lib/domain/cookies.ts`, que é neutro de
+  propósito. **Regra para o futuro: ferramenta de medição de uso só entra se carregar
+  atrás de `aceitouMedicao`**; sem escolha vale recusa. O aviso não sai no HTML do
+  servidor (`useSyncExternalStore` com "carregando" no servidor), senão quem já escolheu
+  o veria piscar a cada visita. A política ganhou a seção "Cookies" (âncora `#cookies`),
+  que declara também a fila de séries no aparelho, e **a versão não subiu**: nada novo é
+  coletado, só declarado o que já existia.
 - **[2026-10-05, decisão do Otávio]** **A senha exige minúscula, maiúscula, número e
   símbolo, e é a mesma regra nos dois lados.** O painel do Supabase está em "Lowercase,
   uppercase letters, digits and symbols", e `lib/domain/senha.ts` passou a cobrar o

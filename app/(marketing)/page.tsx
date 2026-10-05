@@ -4,6 +4,10 @@ import Link from "next/link";
 
 import { UserRound } from "lucide-react";
 
+import {
+  AvisoDeCookies,
+  PreferenciasDeCookies,
+} from "@/components/landing/aviso-de-cookies";
 import { EntrarNaLista } from "@/components/landing/entrar-na-lista";
 import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
@@ -187,10 +191,13 @@ export default async function LandingPage({
             </LinkDoRodape>
             <LinkDoRodape href="/termos">Termos</LinkDoRodape>
             <LinkDoRodape href="/privacidade">Privacidade</LinkDoRodape>
+            <PreferenciasDeCookies className="cursor-pointer text-[13px] font-medium text-dark-text-2 transition hover:text-dark-text" />
           </nav>
           <p className="text-[12.5px] text-dark-muted">© 2026 Reps Club</p>
         </div>
       </footer>
+
+      <AvisoDeCookies />
     </div>
   );
 }
