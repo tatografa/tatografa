@@ -69,12 +69,3 @@ export function volumeDaSemana(dias: ItemDaSoma[][]): { series: number; reps: nu
     { series: 0, reps: 0 },
   );
 }
-
-/** "Treino A · 3 exercícios" — o subtítulo do cartão, no lugar do dia fixo. */
-export function subtituloDoDia(label: string, exercicios: number): string {
-  const quantos =
-    exercicios === 0
-      ? "sem exercícios"
-      : `${exercicios} ${exercicios === 1 ? "exercício" : "exercícios"}`;
-  return `Treino ${label} · ${quantos}`;
-}

@@ -12,6 +12,9 @@ import {
   normalizarRir,
   repeticoesValidas,
 } from "@/lib/domain/prescricao";
+import type { TextosDoPainel } from "@/lib/i18n/painel";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
+import { preencher } from "@/lib/i18n/texto";
 import { lerTreinosDoPrograma, type TreinoDaDivisao } from "@/lib/queries/divisao";
 import {
   buscarExercicios,
@@ -41,61 +44,75 @@ export type ResultadoDoTreino =
       errosPorExercicio?: Record<number, ErroDeExercicio>;
     };
 
-const MENSAGEM_REPS = "Use um número (12) ou uma faixa (8-10).";
-const MENSAGEM_RIR = `Use um número (2) ou uma faixa (0-2), de ${LIMITES.rirMin} a ${LIMITES.rirMax}.`;
+type Erros = TextosDoPainel["treinos"]["erros"];
 
-const esquemaExercicio = z.object({
-  /** Presente só quando a linha já existe no banco. */
-  id: z.string().uuid().optional(),
-  exerciseId: z.string().uuid("Exercício inválido."),
-  source: z.enum(["catalog", "custom"], { error: "Origem do exercício inválida." }),
-  sets: z
-    .number({ error: "Informe as séries." })
-    .int("Séries em número inteiro.")
-    .min(LIMITES.seriesMin, `No mínimo ${LIMITES.seriesMin} série.`)
-    .max(LIMITES.seriesMax, `No máximo ${LIMITES.seriesMax} séries.`),
-  reps: z
-    .string({ error: "Informe as repetições." })
-    .trim()
-    .min(1, "Informe as repetições.")
-    .refine(repeticoesValidas, MENSAGEM_REPS)
-    // O banco guarda texto de propósito: "8-10" é prescrição, não número.
-    .transform((valor) => normalizarRepeticoes(valor) as string),
-  // Vazio é "não prescrito", e vira nulo; qualquer outra coisa precisa ser um
-  // RIR de verdade. O banco confere o formato de novo (0037).
-  rir: z
-    .string()
-    .trim()
-    .nullish()
-    .refine((valor) => !valor || normalizarRir(valor) !== null, MENSAGEM_RIR)
-    .transform((valor) => (valor ? normalizarRir(valor) : null)),
-  rest: z
-    .number({ error: "Informe o descanso." })
-    .int("Descanso em segundos inteiros.")
-    .min(LIMITES.descansoMin, "Descanso não pode ser negativo.")
-    .max(LIMITES.descansoMax, "Descanso longo demais."),
-  technique: z.string().trim().max(60, "Técnica muito longa.").nullish(),
-  notes: z.string().trim().max(280, "Observação muito longa.").nullish(),
-});
+/*
+ * Os esquemas são montados por chamada, e não uma vez no módulo: a mensagem de
+ * erro é do idioma de quem enviou (etapa 3 da tradução, 05/10).
+ */
+function esquemaExercicio(e: Erros) {
+  return z.object({
+    /** Presente só quando a linha já existe no banco. */
+    id: z.string().uuid().optional(),
+    exerciseId: z.string().uuid(e.exercicioInvalido),
+    source: z.enum(["catalog", "custom"], { error: e.origemInvalida }),
+    sets: z
+      .number({ error: e.informeSeries })
+      .int(e.seriesInteiro)
+      .min(LIMITES.seriesMin, preencher(e.seriesMin, { n: LIMITES.seriesMin }))
+      .max(LIMITES.seriesMax, preencher(e.seriesMax, { n: LIMITES.seriesMax })),
+    reps: z
+      .string({ error: e.informeReps })
+      .trim()
+      .min(1, e.informeReps)
+      .refine(repeticoesValidas, e.reps)
+      // O banco guarda texto de propósito: "8-10" é prescrição, não número.
+      .transform((valor) => normalizarRepeticoes(valor) as string),
+    // Vazio é "não prescrito", e vira nulo; qualquer outra coisa precisa ser um
+    // RIR de verdade. O banco confere o formato de novo (0037).
+    rir: z
+      .string()
+      .trim()
+      .nullish()
+      .refine(
+        (valor) => !valor || normalizarRir(valor) !== null,
+        preencher(e.rir, { min: LIMITES.rirMin, max: LIMITES.rirMax }),
+      )
+      .transform((valor) => (valor ? normalizarRir(valor) : null)),
+    rest: z
+      .number({ error: e.informeDescanso })
+      .int(e.descansoInteiro)
+      .min(LIMITES.descansoMin, e.descansoNegativo)
+      .max(LIMITES.descansoMax, e.descansoLongo),
+    technique: z.string().trim().max(60, e.tecnicaLonga).nullish(),
+    notes: z.string().trim().max(280, e.observacaoLonga).nullish(),
+  });
+}
 
-const esquemaTreino = z.object({
-  programaId: z.string().uuid("Programa inválido."),
-  treinoId: z.string().uuid().optional(),
-  label: z
-    .string()
-    .trim()
-    .min(1, "Treino sem letra.")
-    .max(4, "No máximo 4 caracteres.")
-    .transform((valor) => valor.toUpperCase()),
-  nome: z.string().trim().min(2, "Dê um nome ao treino.").max(80, "Nome muito longo."),
-  observacao: z.string().trim().max(500, "Observação muito longa.").nullish(),
-  exercicios: z
-    .array(esquemaExercicio)
-    .min(1, "Adicione pelo menos um exercício.")
-    .max(30, "No máximo 30 exercícios num treino."),
-});
+function esquemaTreino(e: Erros) {
+  return z.object({
+    programaId: z.string().uuid(e.programaInvalido),
+    treinoId: z.string().uuid().optional(),
+    label: z
+      .string()
+      .trim()
+      .min(1, e.semLetra)
+      .max(4, e.letraLonga)
+      .transform((valor) => valor.toUpperCase()),
+    nome: z.string().trim().min(2, e.nomeDoTreino).max(80, e.nomeLongo),
+    observacao: z.string().trim().max(500, e.observacaoLonga).nullish(),
+    exercicios: z
+      .array(esquemaExercicio(e))
+      .min(1, e.umExercicio)
+      .max(30, e.maxExercicios),
+  });
+}
 
-export type TreinoParaSalvar = z.input<typeof esquemaTreino>;
+export type TreinoParaSalvar = z.input<ReturnType<typeof esquemaTreino>>;
+
+async function erros(): Promise<Erros> {
+  return (await textosDoPainel()).t.treinos.erros;
+}
 
 /**
  * Busca do catálogo chamada pela tela (componente cliente).
@@ -124,8 +141,9 @@ export async function salvarTreinoDaDivisao(
 ): Promise<ResultadoDoTreino> {
   const { trainer } = await requireTrainer();
   const supabase = await createClient();
+  const e = await erros();
 
-  const analise = esquemaTreino.safeParse(entrada);
+  const analise = esquemaTreino(e).safeParse(entrada);
   if (!analise.success) return comErros(analise.error);
   const dados = analise.data;
 
@@ -145,7 +163,7 @@ export async function salvarTreinoDaDivisao(
     .eq("trainer_id", trainer.id)
     .maybeSingle();
 
-  if (!programa) return { ok: false, erro: "Esse programa não está mais disponível." };
+  if (!programa) return { ok: false, erro: e.programaSumiu };
 
   let treinoId = dados.treinoId ?? null;
 
@@ -159,14 +177,14 @@ export async function salvarTreinoDaDivisao(
       .eq("mesocycle_id", programa.id)
       .maybeSingle();
 
-    if (!existente) return { ok: false, erro: "Treino não encontrado. Recarregue a página." };
+    if (!existente) return { ok: false, erro: e.treinoNaoEncontrado };
 
     const { error } = await supabase
       .from("workouts")
       .update({ label: dados.label, name: dados.nome, notes: dados.observacao ?? null })
       .eq("id", treinoId);
 
-    if (error) return { ok: false, erro: "Não deu para salvar o treino. Tente de novo." };
+    if (error) return { ok: false, erro: e.falhaSalvarTreino };
   } else {
     const { data: ultimo } = await supabase
       .from("workouts")
@@ -191,19 +209,19 @@ export async function salvarTreinoDaDivisao(
       .single();
 
     if (error || !criado) {
-      return { ok: false, erro: "Não deu para criar o treino. Tente de novo." };
+      return { ok: false, erro: e.falhaCriarTreino };
     }
     treinoId = criado.id;
   }
 
-  const gravado = await gravarPrescricao(treinoId, dados.exercicios);
+  const gravado = await gravarPrescricao(treinoId, dados.exercicios, e);
   if (typeof gravado === "string") return { ok: false, erro: gravado };
 
   revalidatePath("/painel/treinos");
   return { ok: true, treinoId, label: dados.label, idsDosExercicios: gravado };
 }
 
-type ExercicioValidado = z.infer<typeof esquemaExercicio>;
+type ExercicioValidado = z.infer<ReturnType<typeof esquemaExercicio>>;
 
 /**
  * Grava a lista de exercícios do treino preservando as linhas que continuam.
@@ -218,6 +236,7 @@ type ExercicioValidado = z.infer<typeof esquemaExercicio>;
 async function gravarPrescricao(
   treinoId: string,
   exercicios: ExercicioValidado[],
+  e: Erros,
 ): Promise<string[] | string> {
   const supabase = await createClient();
 
@@ -226,7 +245,7 @@ async function gravarPrescricao(
     .select("id")
     .eq("workout_id", treinoId);
 
-  if (erroLeitura) return "Não deu para ler a prescrição atual. Tente de novo.";
+  if (erroLeitura) return e.falhaLerPrescricao;
 
   const idsAtuais = new Set((atuais ?? []).map((linha) => linha.id));
 
@@ -257,14 +276,14 @@ async function gravarPrescricao(
 
   // Grava antes de apagar: se o upsert falhar, o treino continua inteiro.
   const { error: erroUpsert } = await supabase.from("workout_exercises").upsert(linhas);
-  if (erroUpsert) return "Não deu para salvar os exercícios. Tente de novo.";
+  if (erroUpsert) return e.falhaExercicios;
 
   const mantidos = new Set(linhas.map((linha) => linha.id as string));
   const remover = [...idsAtuais].filter((id) => !mantidos.has(id));
 
   if (remover.length > 0) {
     const { error } = await supabase.from("workout_exercises").delete().in("id", remover);
-    if (error) return "Os exercícios foram salvos, mas não deu para remover os apagados.";
+    if (error) return e.falhaRemover;
   }
 
   return linhas.map((linha) => linha.id as string);
@@ -290,7 +309,7 @@ export async function excluirTreinoDaDivisao(
     .eq("id", treinoId);
 
   if (error || count === 0) {
-    return { ok: false, erro: "Não deu para excluir o treino. Recarregue a página." };
+    return { ok: false, erro: (await erros()).falhaExcluir };
   }
 
   revalidatePath("/painel/treinos");
@@ -309,7 +328,8 @@ export async function duplicarTreinoDaDivisao(
   const valido =
     z.string().uuid().safeParse(treinoId).success &&
     z.string().uuid().safeParse(programaId).success;
-  if (!valido) return { ok: false, erro: "Treino inválido." };
+  const e = await erros();
+  if (!valido) return { ok: false, erro: e.treinoInvalido };
 
   await requireTrainer();
   const supabase = await createClient();
@@ -319,11 +339,11 @@ export async function duplicarTreinoDaDivisao(
   });
 
   if (error || !novoId) {
-    return { ok: false, erro: "Não deu para duplicar o treino. Recarregue a página." };
+    return { ok: false, erro: e.falhaDuplicar };
   }
 
   const [treino] = await lerTreinosDoPrograma(programaId, novoId);
-  if (!treino) return { ok: false, erro: "A cópia foi criada, mas não deu para lê-la. Recarregue." };
+  if (!treino) return { ok: false, erro: e.copiaIlegivel };
 
   revalidatePath("/painel/treinos");
   return { ok: true, treino };

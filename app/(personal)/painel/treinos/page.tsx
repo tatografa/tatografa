@@ -3,6 +3,8 @@ import Link from "next/link";
 import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 import { Card, classesDeBotao } from "@/components/ui";
 import { diaLocal } from "@/lib/domain/fuso";
+import type { TextosDoPainel } from "@/lib/i18n/painel";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
 import { lerDivisaoDeTreino } from "@/lib/queries/divisao";
 
 import { DivisaoDeTreino } from "./divisao-de-treino";
@@ -23,15 +25,13 @@ export default async function TreinosPage({
 }) {
   const { aluno, programa, novo } = await searchParams;
   const divisao = await lerDivisaoDeTreino({ alunoId: aluno, programaId: programa });
+  const { t } = await textosDoPainel();
 
   if (!divisao.aluno) {
     return (
       <>
-        <CabecalhoDaPagina
-          titulo="Divisão de treino"
-          subtitulo="Monte o macrociclo de treinos dos seus alunos"
-        />
-        <SemAluno />
+        <CabecalhoDaPagina titulo={t.treinos.titulo} subtitulo={t.treinos.subtitulo} />
+        <SemAluno t={t.treinos.semAluno} />
       </>
     );
   }
@@ -48,20 +48,21 @@ export default async function TreinosPage({
   );
 }
 
-function SemAluno() {
+function SemAluno({
+  t,
+}: {
+  t: TextosDoPainel["treinos"]["semAluno"];
+}) {
   return (
     <Card size="lg" className="max-w-xl space-y-4">
       <div className="space-y-2">
         <h2 className="text-[18px] font-extrabold tracking-[-0.02em] text-ink">
-          Convide um aluno primeiro
+          {t.titulo}
         </h2>
-        <p className="text-[14px] leading-[1.6] text-ink-3">
-          Todo treino pertence a um aluno. Gere um convite no painel e volte aqui
-          quando ele tiver entrado.
-        </p>
+        <p className="text-[14px] leading-[1.6] text-ink-3">{t.texto}</p>
       </div>
       <Link href="/painel" className={classesDeBotao()}>
-        Convidar aluno
+        {t.botao}
       </Link>
     </Card>
   );

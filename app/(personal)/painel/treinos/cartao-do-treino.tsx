@@ -12,9 +12,10 @@ import {
   X,
 } from "lucide-react";
 
+import { usePainel } from "@/components/personal/idioma-do-painel";
 import { mover, LIMITES } from "@/lib/domain/prescricao";
-import { resumoDoDia, subtituloDoDia } from "@/lib/domain/divisao";
-import { GRUPO_MUSCULAR } from "@/lib/rotulos";
+import { resumoDoDia } from "@/lib/domain/divisao";
+import { plural, preencher } from "@/lib/i18n/texto";
 import { cn } from "@/lib/utils";
 
 import type { ErroDeExercicio, ResultadoDoTreino } from "./actions";
@@ -53,6 +54,8 @@ export function CartaoDoTreino({
   aoExcluir: () => void;
 }) {
   const idBase = useId();
+  const { t } = usePainel();
+  const c = t.treinos.cartao;
   const [abertos, setAbertos] = useState<Set<string>>(() => new Set());
   const [insights, setInsights] = useState(false);
 
@@ -109,19 +112,21 @@ export function CartaoDoTreino({
             id={`${idBase}-nome`}
             value={dia.nome}
             onChange={(e) => aoMudar((d) => ({ ...d, nome: e.target.value }))}
-            placeholder="Nome do treino"
-            aria-label={`Nome do treino ${dia.label}`}
+            placeholder={c.nome}
+            aria-label={preencher(c.nomeDe, { label: dia.label })}
             aria-invalid={erros?.errosPorCampo?.nome ? true : undefined}
             maxLength={80}
             className="w-full rounded-[6px] bg-transparent p-0 text-[16px] font-semibold tracking-[-0.01em] text-ink placeholder:text-ink-5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
           />
           <p className="mt-[3px] flex items-center gap-2 text-[12px] text-ink-4">
-            {subtituloDoDia(dia.label, dia.itens.length)}
+            {/* "Treino A · 3 exercícios" — no lugar do dia fixo do protótipo. */}
+            {preencher(t.comum.treino, { label: dia.label })} ·{" "}
+            {dia.itens.length ? plural(dia.itens.length, t.comum.exercicios) : c.semExercicios}
             {/* "Não salvo" diz o estado com palavra, não só com um ponto
                 colorido: cor sozinha não é sinal para todo mundo. */}
             {alterado ? (
               <span className="rounded-full bg-warning-bg px-1.5 py-px text-[11px] font-semibold text-warning">
-                Não salvo
+                {c.naoSalvo}
               </span>
             ) : null}
           </p>
@@ -133,7 +138,7 @@ export function CartaoDoTreino({
         </div>
 
         <MenuDoCartao
-          nome={dia.nome || `Treino ${dia.label}`}
+          nome={dia.nome || preencher(t.comum.treino, { label: dia.label })}
           podeDuplicar={Boolean(dia.id) && !alterado}
           ocupado={ocupado}
           aoDuplicar={aoDuplicar}
@@ -169,15 +174,15 @@ export function CartaoDoTreino({
           onClick={aoAdicionarExercicio}
           className="flex w-full items-center justify-center gap-[7px] rounded-[8px] border-[1.5px] border-dashed border-border py-2.5 text-[12.5px] font-semibold text-ink-3 transition hover:border-border-strong hover:bg-canvas hover:text-ink"
         >
-          <Plus size={15} aria-hidden /> Adicionar exercício
+          <Plus size={15} aria-hidden /> {c.adicionarExercicio}
         </button>
 
         <label className="block">
-          <span className="sr-only">Observação para o aluno</span>
+          <span className="sr-only">{c.observacao}</span>
           <textarea
             value={dia.observacao}
             onChange={(e) => aoMudar((d) => ({ ...d, observacao: e.target.value }))}
-            placeholder="Observação para o aluno (opcional). Aparece no topo do treino."
+            placeholder={c.observacaoExemplo}
             rows={2}
             maxLength={500}
             className={cn(CAMPO, "resize-none font-normal")}
@@ -199,7 +204,7 @@ export function CartaoDoTreino({
           aria-expanded={insights}
           className="flex w-full items-center justify-between px-4 py-[11px] text-[12px] font-medium tracking-[0.02em] text-ink-2 transition hover:text-ink"
         >
-          Volume do treino
+          {c.volume}
           <ChevronDown
             size={14}
             aria-hidden
@@ -210,9 +215,9 @@ export function CartaoDoTreino({
         {insights ? (
           <div className="space-y-3 px-4 pb-4">
             <dl className="grid grid-cols-3 gap-2">
-              <Numero rotulo="Exercícios" valor={resumo.exercicios} />
-              <Numero rotulo="Séries" valor={resumo.series} />
-              <Numero rotulo="Reps" valor={resumo.reps} dica="Faixas contam pelo meio: 8-12 vale 10." />
+              <Numero rotulo={c.exercicios} valor={resumo.exercicios} />
+              <Numero rotulo={c.series} valor={resumo.series} />
+              <Numero rotulo={c.reps} valor={resumo.reps} dica={c.dicaReps} />
             </dl>
 
             {/*
@@ -224,13 +229,13 @@ export function CartaoDoTreino({
             {resumo.porGrupo.length ? (
               <div>
                 <p className="mb-1.5 text-[12px] font-medium text-ink-5">
-                  Séries por grupo muscular
+                  {c.porGrupo}
                 </p>
                 <ul className="space-y-1.5">
                   {resumo.porGrupo.map((g) => (
                     <li key={g.grupo} className="flex items-center gap-2 text-[12px]">
                       <span className="w-[92px] shrink-0 truncate font-medium text-ink-2">
-                        {GRUPO_MUSCULAR[g.grupo as keyof typeof GRUPO_MUSCULAR] ?? g.grupo}
+                        {t.rotulos.grupo[g.grupo as keyof typeof t.rotulos.grupo] ?? g.grupo}
                       </span>
                       <span aria-hidden className="h-2 flex-1 overflow-hidden rounded-full bg-canvas-sunken">
                         <span
@@ -239,14 +244,14 @@ export function CartaoDoTreino({
                         />
                       </span>
                       <span className="w-14 shrink-0 text-right text-ink-4 tabular-nums">
-                        {g.series} {g.series === 1 ? "série" : "séries"}
+                        {plural(g.series, t.comum.series)}
                       </span>
                     </li>
                   ))}
                 </ul>
               </div>
             ) : (
-              <p className="text-[12px] text-ink-4">Sem exercícios ainda.</p>
+              <p className="text-[12px] text-ink-4">{c.semExerciciosAinda}</p>
             )}
           </div>
         ) : null}
@@ -292,6 +297,7 @@ function BlocoDoExercicio({
   aoRemover: () => void;
 }) {
   const idBase = useId();
+  const c = usePainel().t.treinos.cartao;
   const temErro = Boolean(erros && Object.keys(erros).length);
 
   return (
@@ -312,8 +318,8 @@ function BlocoDoExercicio({
           type="button"
           onClick={() => aoMover(indice - 1)}
           disabled={indice === 0}
-          aria-label={`Subir ${item.nome}`}
-          title="Subir"
+          aria-label={preencher(c.subirX, { nome: item.nome })}
+          title={c.subir}
           className={BOTAO_DE_ICONE}
         >
           <ChevronUp size={15} aria-hidden />
@@ -322,8 +328,8 @@ function BlocoDoExercicio({
           type="button"
           onClick={() => aoMover(indice + 1)}
           disabled={indice === total - 1}
-          aria-label={`Descer ${item.nome}`}
-          title="Descer"
+          aria-label={preencher(c.descerX, { nome: item.nome })}
+          title={c.descer}
           className={BOTAO_DE_ICONE}
         >
           <ChevronDown size={15} aria-hidden />
@@ -331,8 +337,8 @@ function BlocoDoExercicio({
         <button
           type="button"
           onClick={aoRemover}
-          aria-label={`Remover ${item.nome}`}
-          title="Remover"
+          aria-label={preencher(c.removerX, { nome: item.nome })}
+          title={c.remover}
           className={cn(BOTAO_DE_ICONE, "hover:text-danger")}
         >
           <X size={15} aria-hidden />
@@ -344,18 +350,22 @@ function BlocoDoExercicio({
         onClick={aoAlternar}
         aria-expanded={aberto}
         aria-controls={`${idBase}-campos`}
-        aria-label={`${item.nome}: ${item.sets || "?"} séries de ${item.reps || "?"} repetições${
-          item.rir ? `, RIR ${item.rir}` : ""
-        }. ${aberto ? "Fechar" : "Editar"} a prescrição.`}
+        aria-label={`${preencher(c.prescricao, {
+          nome: item.nome,
+          series: item.sets || "?",
+          reps: item.reps || "?",
+        })}${item.rir ? preencher(c.rir, { rir: item.rir }) : ""}. ${
+          aberto ? c.fecharPrescricao : c.editarPrescricao
+        }`}
         className="grid w-full grid-cols-3 transition hover:bg-canvas"
       >
-        <Resumo valor={item.sets || "—"} rotulo="Séries" />
-        <Resumo valor={item.reps || "—"} rotulo="Reps" divisoria />
+        <Resumo valor={item.sets || "—"} rotulo={c.series} />
+        <Resumo valor={item.reps || "—"} rotulo={c.reps} divisoria />
         <Resumo
           valor={item.rir || "—"}
           rotulo={
             <abbr
-              title="Repetições em reserva: quantas o aluno ainda faria ao fim da série"
+              title={c.rirTitulo}
               className="no-underline"
             >
               RIR
@@ -369,7 +379,7 @@ function BlocoDoExercicio({
         <div id={`${idBase}-campos`} className="space-y-2.5 border-t border-border-soft p-[13px]">
           <div className="grid grid-cols-4 gap-2">
             <CampoPequeno
-              rotulo="Séries"
+              rotulo={c.series}
               valor={item.sets}
               erro={erros?.sets}
               aoMudar={(v) => aoAlterar("sets", v)}
@@ -379,7 +389,7 @@ function BlocoDoExercicio({
               max={LIMITES.seriesMax}
             />
             <CampoPequeno
-              rotulo="Reps"
+              rotulo={c.reps}
               valor={item.reps}
               erro={erros?.reps}
               aoMudar={(v) => aoAlterar("reps", v)}
@@ -393,7 +403,7 @@ function BlocoDoExercicio({
               placeholder="0-2"
             />
             <CampoPequeno
-              rotulo="Desc. (s)"
+              rotulo={c.descanso}
               valor={item.rest}
               erro={erros?.descanso}
               aoMudar={(v) => aoAlterar("rest", v)}
@@ -417,26 +427,24 @@ function BlocoDoExercicio({
 
           <div className="grid grid-cols-2 gap-2">
             <CampoPequeno
-              rotulo="Técnica"
+              rotulo={c.tecnica}
               valor={item.technique}
               aoMudar={(v) => aoAlterar("technique", v)}
-              placeholder="Drop-set, bi-set…"
+              placeholder={c.tecnicaExemplo}
               maxLength={60}
             />
             <CampoPequeno
-              rotulo="Observação"
+              rotulo={c.observacaoCurta}
               valor={item.notes}
               aoMudar={(v) => aoAlterar("notes", v)}
-              placeholder="Cadência lenta"
+              placeholder={c.observacaoCurtaExemplo}
               maxLength={280}
             />
           </div>
 
           {item.seriesRegistradas > 0 ? (
             <p className="text-[11.5px] text-ink-4">
-              {item.seriesRegistradas}{" "}
-              {item.seriesRegistradas === 1 ? "série registrada" : "séries registradas"} pelo
-              aluno neste exercício.
+              {plural(item.seriesRegistradas, c.registradas)}
             </p>
           ) : null}
         </div>
@@ -511,6 +519,7 @@ function MenuDoCartao({
 }) {
   const [aberto, setAberto] = useState(false);
   const raiz = useRef<HTMLDivElement>(null);
+  const c = usePainel().t.treinos.cartao;
 
   // Fecha com clique fora e com Esc — um menu que só fecha escolhendo algo
   // prende o personal numa escolha que ele não quer fazer.
@@ -537,7 +546,7 @@ function MenuDoCartao({
         onClick={() => setAberto((v) => !v)}
         aria-expanded={aberto}
         aria-haspopup="menu"
-        aria-label={`Ações de ${nome}`}
+        aria-label={preencher(c.acoesDe, { nome })}
         disabled={ocupado}
         className={BOTAO_DE_ICONE}
       >
@@ -555,14 +564,14 @@ function MenuDoCartao({
             disabled={!podeDuplicar}
             // Duplicar copia o que está no banco. Com alteração por salvar, a
             // cópia sairia diferente do cartão que o personal está vendo.
-            title={podeDuplicar ? undefined : "Salve o treino antes de duplicar"}
+            title={podeDuplicar ? undefined : c.salveAntes}
             onClick={() => {
               setAberto(false);
               aoDuplicar();
             }}
             className="flex w-full items-center gap-[9px] px-[13px] py-2.5 text-left text-[12.5px] font-semibold text-ink-2 transition hover:bg-canvas disabled:text-ink-5 disabled:hover:bg-transparent"
           >
-            <Copy size={14} aria-hidden /> Duplicar treino
+            <Copy size={14} aria-hidden /> {c.duplicar}
           </button>
           <button
             type="button"
@@ -573,7 +582,7 @@ function MenuDoCartao({
             }}
             className="flex w-full items-center gap-[9px] px-[13px] py-2.5 text-left text-[12.5px] font-semibold text-danger transition hover:bg-danger-bg"
           >
-            <Trash2 size={14} aria-hidden /> Excluir treino
+            <Trash2 size={14} aria-hidden /> {c.excluir}
           </button>
         </div>
       ) : null}

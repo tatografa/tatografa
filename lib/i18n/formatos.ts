@@ -170,6 +170,14 @@ export function formatos(idioma: Idioma) {
               month: "2-digit",
             }).format(new Date(diaLocalEmMs(dia))),
           ),
+    /** Um dia de calendário com ano: "01/09/26" / "09/01/26" (en). */
+    diaComAno: (dia: string) =>
+      new Intl.DateTimeFormat(locale, {
+        timeZone: "UTC",
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+      }).format(new Date(diaLocalEmMs(dia))),
     /** "48min", "1h05", "—" — igual nos três idiomas. */
     duracao: duracaoCurta,
     /** "45min", "1h", "1h30" — igual nos três idiomas. */

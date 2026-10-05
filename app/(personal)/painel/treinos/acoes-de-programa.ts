@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireTrainer } from "@/lib/auth/session";
+import type { TextosDoPainel } from "@/lib/i18n/painel";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
 import { createClient } from "@/lib/supabase/server";
 
 export type CampoDoPrograma = "aluno" | "nome" | "semanas" | "inicio" | "objetivo";
@@ -15,26 +17,31 @@ export type EstadoDoPrograma = {
   errosPorCampo?: Partial<Record<CampoDoPrograma, string>>;
 };
 
-const esquema = z.object({
-  nome: z
-    .string()
-    .trim()
-    .min(2, "Dê um nome ao programa.")
-    .max(80, "Nome muito longo."),
-  semanas: z
-    .number({ error: "Informe a duração em semanas." })
-    .int("Semanas em número inteiro.")
-    .min(1, "No mínimo 1 semana.")
-    .max(52, "No máximo 52 semanas."),
-  // Dia de calendário, como a coluna `started_at`. Guardado como texto do
-  // começo ao fim: converter para `Date` e de volta empurraria a data um dia
-  // para trás no fuso do produto (`lib/domain/fuso.ts`).
-  inicio: z
-    .string()
-    .trim()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data de início.")
-    .refine((valor) => !Number.isNaN(Date.parse(valor)), "Data de início inválida."),
-});
+type Erros = TextosDoPainel["treinos"]["erros"];
+
+async function erros(): Promise<Erros> {
+  return (await textosDoPainel()).t.treinos.erros;
+}
+
+/* Montados por chamada: a mensagem de erro é do idioma de quem enviou. */
+function esquema(e: Erros) {
+  return z.object({
+    nome: z.string().trim().min(2, e.nomeDoPrograma).max(80, e.nomeLongo),
+    semanas: z
+      .number({ error: e.informeSemanas })
+      .int(e.semanasInteiro)
+      .min(1, e.semanasMin)
+      .max(52, e.semanasMax),
+    // Dia de calendário, como a coluna `started_at`. Guardado como texto do
+    // começo ao fim: converter para `Date` e de volta empurraria a data um dia
+    // para trás no fuso do produto (`lib/domain/fuso.ts`).
+    inicio: z
+      .string()
+      .trim()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, e.informeInicio)
+      .refine((valor) => !Number.isNaN(Date.parse(valor)), e.inicioInvalido),
+  });
+}
 
 const OBJETIVOS = [
   "hipertrofia",
@@ -46,18 +53,22 @@ const OBJETIVOS = [
 
 // Vazio é "não informado" e vira nulo (0037): não existe um sexto valor
 // "outro" para o banco guardar uma afirmação onde só há silêncio.
-const esquemaDoObjetivo = z
-  .union([z.enum(OBJETIVOS, { error: "Objetivo inválido." }), z.literal("")])
-  .transform((valor) => (valor === "" ? null : valor));
+function esquemaDoObjetivo(e: Erros) {
+  return z
+    .union([z.enum(OBJETIVOS, { error: e.objetivoInvalido }), z.literal("")])
+    .transform((valor) => (valor === "" ? null : valor));
+}
 
-const esquemaDeCriacao = esquema.extend({
-  alunoId: z.string().uuid("Escolha um aluno."),
-  objetivo: esquemaDoObjetivo,
-});
+function esquemaDeCriacao(e: Erros) {
+  return esquema(e).extend({
+    alunoId: z.string().uuid(e.escolhaAluno),
+    objetivo: esquemaDoObjetivo(e),
+  });
+}
 
-const esquemaDeEdicao = esquema.extend({
-  programaId: z.string().uuid("Programa inválido."),
-});
+function esquemaDeEdicao(e: Erros) {
+  return esquema(e).extend({ programaId: z.string().uuid(e.programaInvalido) });
+}
 
 /**
  * Cria um programa e o deixa ativo, arquivando o anterior do mesmo aluno.
@@ -75,8 +86,9 @@ export async function criarPrograma(
 ): Promise<EstadoDoPrograma> {
   const { trainer } = await requireTrainer();
   const supabase = await createClient();
+  const e = await erros();
 
-  const analise = esquemaDeCriacao.safeParse({
+  const analise = esquemaDeCriacao(e).safeParse({
     alunoId: texto(formData, "alunoId"),
     nome: texto(formData, "nome"),
     semanas: numero(formData, "semanas"),
@@ -96,7 +108,7 @@ export async function criarPrograma(
     .eq("trainer_id", trainer.id)
     .maybeSingle();
 
-  if (!aluno) return { errosPorCampo: { aluno: "Esse aluno não é seu." } };
+  if (!aluno) return { errosPorCampo: { aluno: e.alunoNaoSeu } };
 
   const { data: criado, error } = await supabase
     .from("mesocycles")
@@ -113,7 +125,7 @@ export async function criarPrograma(
     .single();
 
   if (error || !criado) {
-    return { erro: "Não deu para criar o programa. Tente de novo." };
+    return { erro: e.falhaCriarPrograma };
   }
 
   const { error: erroAtivacao } = await supabase.rpc("ativar_macrotreino", {
@@ -121,9 +133,7 @@ export async function criarPrograma(
   });
 
   if (erroAtivacao) {
-    return {
-      erro: "O programa foi criado, mas não deu para ativar. Ative ele no painel de macrociclos.",
-    };
+    return { erro: e.criadoSemAtivar };
   }
 
   revalidatePath("/painel/treinos");
@@ -143,8 +153,9 @@ export async function salvarPrograma(
 ): Promise<EstadoDoPrograma> {
   await requireTrainer();
   const supabase = await createClient();
+  const e = await erros();
 
-  const analise = esquemaDeEdicao.safeParse({
+  const analise = esquemaDeEdicao(e).safeParse({
     programaId: texto(formData, "programaId"),
     nome: texto(formData, "nome"),
     semanas: numero(formData, "semanas"),
@@ -162,10 +173,10 @@ export async function salvarPrograma(
     )
     .eq("id", dados.programaId);
 
-  if (error) return { erro: "Não deu para salvar o programa. Tente de novo." };
+  if (error) return { erro: e.falhaSalvarPrograma };
   // Zero linhas significa que o RLS recusou: o programa é de outro personal.
   // Sem esta checagem, a tela diria "salvo" sobre uma escrita que não houve.
-  if (count === 0) return { erro: "Programa não encontrado. Recarregue a página." };
+  if (count === 0) return { erro: e.programaNaoEncontrado };
 
   revalidatePath("/painel/treinos");
   return { salvo: true };
@@ -181,7 +192,7 @@ export async function salvarObjetivo(
   objetivo: string,
 ): Promise<{ ok: boolean }> {
   const analise = z
-    .object({ programaId: z.string().uuid(), objetivo: esquemaDoObjetivo })
+    .object({ programaId: z.string().uuid(), objetivo: esquemaDoObjetivo(await erros()) })
     .safeParse({ programaId, objetivo });
   if (!analise.success) return { ok: false };
 
@@ -275,15 +286,13 @@ export type EstadoDaCopia = {
   errosPorCampo?: { aluno?: string; nome?: string };
 };
 
-const esquemaDeCopia = z.object({
-  programaId: z.string().uuid("Programa inválido."),
-  alunoId: z.string().uuid("Escolha para quem copiar."),
-  nome: z
-    .string()
-    .trim()
-    .min(2, "Dê um nome ao programa novo.")
-    .max(80, "Nome muito longo."),
-});
+function esquemaDeCopia(e: Erros) {
+  return z.object({
+    programaId: z.string().uuid(e.programaInvalido),
+    alunoId: z.string().uuid(e.escolhaCopia),
+    nome: z.string().trim().min(2, e.nomeDaCopia).max(80, e.nomeLongo),
+  });
+}
 
 /**
  * Copia um programa inteiro para um aluno — o mesmo ou outro.
@@ -307,7 +316,8 @@ export async function duplicarPrograma(
   _anterior: EstadoDaCopia,
   formData: FormData,
 ): Promise<EstadoDaCopia> {
-  const analise = esquemaDeCopia.safeParse({
+  const e = await erros();
+  const analise = esquemaDeCopia(e).safeParse({
     programaId: String(formData.get("programaId") ?? ""),
     alunoId: String(formData.get("alunoId") ?? ""),
     nome: String(formData.get("nome") ?? ""),
@@ -346,9 +356,9 @@ export async function duplicarPrograma(
     // desta carteira. Os dois viram a mesma frase: a tela do personal está
     // velha, não há o que ele conserte sabendo a diferença.
     if (error.code === "P0002" || error.code === "42501") {
-      return { erro: "Esse programa ou esse aluno não está mais disponível." };
+      return { erro: e.indisponivel };
     }
-    return { erro: "Não conseguimos copiar agora. Tente de novo." };
+    return { erro: e.falhaCopiar };
   }
 
   revalidatePath("/painel/treinos");

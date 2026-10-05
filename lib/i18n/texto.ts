@@ -30,3 +30,12 @@ export type Plural = { um: string; outros: string };
 export function plural(n: number, formas: Plural, nFormatado?: string): string {
   return preencher(n === 1 ? formas.um : formas.outros, { n: nFormatado ?? n });
 }
+
+/**
+ * A forma certa para `n`, **sem** trocar nada — para a frase que tem outras
+ * chaves além de `{n}` e passa por `preencher` inteira depois. `plural` já
+ * troca, e `preencher` apaga a chave que não recebe.
+ */
+export function forma(n: number, formas: Plural): string {
+  return n === 1 ? formas.um : formas.outros;
+}

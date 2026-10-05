@@ -5,10 +5,13 @@ import { useRouter } from "next/navigation";
 import { Minus, Plus } from "lucide-react";
 
 import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
+import { usePainel } from "@/components/personal/idioma-do-painel";
 import { Button, Dialog } from "@/components/ui";
 import { MAXIMO_DE_DIAS, volumeDaSemana } from "@/lib/domain/divisao";
 import { primeiroNome } from "@/lib/domain/nome";
 import { proximaLetraLivre } from "@/lib/domain/treino";
+import type { TextosDoPainel } from "@/lib/i18n/painel";
+import { forma, partesEmVolta, plural, preencher } from "@/lib/i18n/texto";
 import type { DivisaoDeTreino as Divisao } from "@/lib/queries/divisao";
 import { cn } from "@/lib/utils";
 
@@ -58,6 +61,8 @@ export function DivisaoDeTreino({
   abrirNovo: boolean;
 }) {
   const router = useRouter();
+  const { t } = usePainel();
+  const q = t.treinos.quadro;
   const aluno = divisao.aluno!;
   const programa = divisao.programa;
 
@@ -156,7 +161,7 @@ export function DivisaoDeTreino({
       try {
         resultado = await salvarTreinoDaDivisao(paraSalvar(programa.id, dia));
       } catch {
-        resultado = { ok: false, erro: "Sem conexão com o servidor. Tente de novo." };
+        resultado = { ok: false, erro: q.semConexao };
       }
       if (!resultado.ok) {
         novosErros[dia.chave] = resultado;
@@ -199,13 +204,13 @@ export function DivisaoDeTreino({
         tom: "ok",
         texto:
           programa.status === "ativo"
-            ? `Treinos salvos. ${primeiroNome(aluno.name)} já vê a prescrição no app.`
-            : "Treinos salvos. O programa está arquivado: ative-o para o aluno ver.",
+            ? preencher(q.salvosAtivo, { nome: primeiroNome(aluno.name) })
+            : q.salvosArquivado,
       });
     } else {
       setAviso({
         tom: "erro",
-        texto: `${falhas} ${falhas === 1 ? "treino não foi salvo" : "treinos não foram salvos"} — o motivo está no cartão.`,
+        texto: plural(falhas, q.falhas),
       });
     }
   }
@@ -218,7 +223,7 @@ export function DivisaoDeTreino({
       if (!dia.id) continue;
       const { ok, erro } = await excluirTreinoDaDivisao(dia.id);
       if (!ok) {
-        setAviso({ tom: "erro", texto: erro ?? "Não deu para excluir o treino." });
+        setAviso({ tom: "erro", texto: erro ?? q.falhaExcluir });
         setOcupado(null);
         setExclusao(null);
         return;
@@ -234,7 +239,7 @@ export function DivisaoDeTreino({
   async function duplicar(dia: DiaDoQuadro) {
     if (!programa || !dia.id) return;
     if (dias.length >= MAXIMO_DE_DIAS) {
-      setAviso({ tom: "erro", texto: `A divisão já tem ${MAXIMO_DE_DIAS} treinos.` });
+      setAviso({ tom: "erro", texto: preencher(q.divisaoCheia, { n: MAXIMO_DE_DIAS }) });
       return;
     }
     setOcupado(dia.chave);
@@ -259,24 +264,24 @@ export function DivisaoDeTreino({
   return (
     <>
       <CabecalhoDaPagina
-        titulo="Divisão de treino"
-        subtitulo={`Monte o macrociclo de treinos de ${aluno.name}`}
+        titulo={t.treinos.titulo}
+        subtitulo={preencher(t.treinos.subtituloDe, { nome: aluno.name })}
         acoes={
           programa ? (
             <>
               <span aria-live="polite" className="hidden text-[12.5px] text-ink-4 lg:inline">
                 {salvando
-                  ? "Salvando…"
+                  ? t.comum.salvando
                   : temAlteracao
-                    ? `${alterados.length} ${alterados.length === 1 ? "treino alterado" : "treinos alterados"}`
-                    : "Tudo salvo"}
+                    ? plural(alterados.length, q.alterados)
+                    : q.tudoSalvo}
               </span>
               <Button size="sm" onClick={salvarTudo} disabled={!temAlteracao || salvando}>
                 {salvando
-                  ? "Salvando…"
+                  ? t.comum.salvando
                   : programa.status === "ativo"
-                    ? "Enviar para o aluno"
-                    : "Salvar rascunho"}
+                    ? q.enviar
+                    : q.rascunho}
               </Button>
             </>
           ) : undefined
@@ -316,7 +321,7 @@ export function DivisaoDeTreino({
 
         {/* ------------------------------------------------ o quadro --- */}
         <section
-          aria-label="Treinos da divisão"
+          aria-label={q.treinosDaDivisao}
           className="relative min-w-0 flex-1 overflow-hidden rounded-[12px] border border-border bg-surface"
         >
           {/* O pontilhado do protótipo, em `border`: fundo que diz "área de
@@ -335,12 +340,12 @@ export function DivisaoDeTreino({
                 className="absolute top-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-surface px-[18px] py-2.5 text-[13px] font-semibold text-brand shadow-cartao transition hover:bg-brand-soft disabled:bg-canvas disabled:text-ink-5"
               >
                 <Plus size={16} aria-hidden />
-                {noLimite ? `Limite de ${MAXIMO_DE_DIAS} treinos` : "Novo treino"}
+                {noLimite ? preencher(q.limite, { n: MAXIMO_DE_DIAS }) : q.novoTreino}
               </button>
 
               {programa.status !== "ativo" ? (
                 <p className="absolute top-5 left-5 z-10 rounded-full bg-warning-bg px-3 py-1 text-[11.5px] font-semibold text-warning">
-                  Arquivado · o aluno não vê
+                  {q.arquivado}
                 </p>
               ) : null}
 
@@ -370,10 +375,9 @@ export function DivisaoDeTreino({
                   </div>
                 ) : (
                   <div className="relative mx-auto mt-10 max-w-sm rounded-[12px] border border-border bg-surface p-5 text-center shadow-cartao">
-                    <p className="text-[14px] font-semibold text-ink">Nenhum treino neste programa</p>
+                    <p className="text-[14px] font-semibold text-ink">{q.nenhumTitulo}</p>
                     <p className="mt-1.5 text-[13px] leading-relaxed text-ink-3">
-                      Escolha a frequência à esquerda ou clique em <strong>Novo treino</strong> —
-                      cada treino vira um cartão aqui.
+                      <ComDestaque frase={q.nenhum} chave="novo" destaque={q.novoTreino} />
                     </p>
                   </div>
                 )}
@@ -384,7 +388,7 @@ export function DivisaoDeTreino({
                   type="button"
                   onClick={() => setZoom((z) => Math.max(ZOOM_MIN, +(z - 0.1).toFixed(2)))}
                   disabled={zoom <= ZOOM_MIN}
-                  aria-label="Diminuir o zoom"
+                  aria-label={q.menosZoom}
                   className="flex size-[30px] items-center justify-center rounded-[8px] text-ink-3 transition hover:bg-canvas disabled:opacity-35"
                 >
                   <Minus size={15} aria-hidden />
@@ -396,7 +400,7 @@ export function DivisaoDeTreino({
                   type="button"
                   onClick={() => setZoom((z) => Math.min(ZOOM_MAX, +(z + 0.1).toFixed(2)))}
                   disabled={zoom >= ZOOM_MAX}
-                  aria-label="Aumentar o zoom"
+                  aria-label={q.maisZoom}
                   className="flex size-[30px] items-center justify-center rounded-[8px] text-ink-3 transition hover:bg-canvas disabled:opacity-35"
                 >
                   <Plus size={15} aria-hidden />
@@ -406,18 +410,21 @@ export function DivisaoDeTreino({
                   onClick={() => setZoom(1)}
                   className="border-l border-border py-1 pr-2.5 pl-[11px] text-[12px] font-medium text-ink-3 transition hover:text-ink"
                 >
-                  Redefinir
+                  {q.redefinir}
                 </button>
               </div>
             </>
           ) : (
             <div className="relative mx-auto mt-16 max-w-sm rounded-[12px] border border-border bg-surface p-5 text-center shadow-cartao">
               <p className="text-[14px] font-semibold text-ink">
-                {primeiroNome(aluno.name)} ainda não tem programa
+                {preencher(q.semProgramaTitulo, { nome: primeiroNome(aluno.name) })}
               </p>
               <p className="mt-1.5 text-[13px] leading-relaxed text-ink-3">
-                Crie o primeiro na aba <strong>Novo</strong> do painel de macrociclos, à
-                esquerda. Os treinos aparecem aqui, um cartão por dia.
+                <ComDestaque
+                  frase={q.semPrograma}
+                  chave="novo"
+                  destaque={t.treinos.macro.abas.novo}
+                />
               </p>
             </div>
           )}
@@ -431,24 +438,31 @@ export function DivisaoDeTreino({
           if (!buscaPara) return;
           mudarDia(buscaPara, (d) => ({ ...d, itens: [...d.itens, itemNovo(exercicio)] }));
         }}
-        titulo={diaDaBusca ? `Adicionar a ${diaDaBusca.nome || `Treino ${diaDaBusca.label}`}` : undefined}
+        titulo={
+          diaDaBusca
+            ? preencher(q.adicionarA, {
+                nome: diaDaBusca.nome || preencher(t.comum.treino, { label: diaDaBusca.label }),
+              })
+            : undefined
+        }
       />
 
       <Dialog
         aberto={remocao !== null}
         aoFechar={() => setRemocao(null)}
-        titulo="Remover exercício já treinado"
+        titulo={q.remocaoTitulo}
         descricao={
           remocao
-            ? `${remocao.item.nome} tem ${remocao.item.seriesRegistradas} ${
-                remocao.item.seriesRegistradas === 1 ? "série registrada" : "séries registradas"
-              } pelo aluno. Ao salvar, esse histórico vai junto — não dá para desfazer.`
+            ? preencher(forma(remocao.item.seriesRegistradas, q.remocao), {
+                nome: remocao.item.nome,
+                n: remocao.item.seriesRegistradas,
+              })
             : undefined
         }
       >
         <div className="flex gap-2.5">
           <Button variant="secondary" block onClick={() => setRemocao(null)}>
-            Manter
+            {t.comum.manter}
           </Button>
           <Button
             variant="danger"
@@ -463,7 +477,7 @@ export function DivisaoDeTreino({
               setRemocao(null);
             }}
           >
-            Remover mesmo assim
+            {q.removerMesmoAssim}
           </Button>
         </div>
       </Dialog>
@@ -471,15 +485,15 @@ export function DivisaoDeTreino({
       <Dialog
         aberto={exclusao !== null}
         aoFechar={() => setExclusao(null)}
-        titulo={tituloDaExclusao(exclusao?.dias ?? [])}
-        descricao={exclusao ? textoDaExclusao(exclusao.dias) : undefined}
+        titulo={tituloDaExclusao(exclusao?.dias ?? [], t)}
+        descricao={exclusao ? textoDaExclusao(exclusao.dias, q) : undefined}
       >
         <div className="flex gap-2.5">
           <Button variant="secondary" block onClick={() => setExclusao(null)} disabled={ocupado === "exclusao"}>
-            Cancelar
+            {t.comum.cancelar}
           </Button>
           <Button variant="danger" block onClick={confirmarExclusao} disabled={ocupado === "exclusao"}>
-            {ocupado === "exclusao" ? "Excluindo…" : "Excluir"}
+            {ocupado === "exclusao" ? q.excluindo : q.excluir}
           </Button>
         </div>
       </Dialog>
@@ -487,14 +501,12 @@ export function DivisaoDeTreino({
       <Dialog
         aberto={descarte !== null}
         aoFechar={() => setDescarte(null)}
-        titulo="Sair sem salvar?"
-        descricao={`${alterados.length} ${
-          alterados.length === 1 ? "treino tem alterações" : "treinos têm alterações"
-        } que ainda não foram salvas. Se continuar, elas se perdem.`}
+        titulo={q.descarteTitulo}
+        descricao={plural(alterados.length, q.descarte)}
       >
         <div className="flex gap-2.5">
           <Button variant="secondary" block onClick={() => setDescarte(null)}>
-            Voltar e salvar
+            {q.voltarESalvar}
           </Button>
           <Button
             variant="danger"
@@ -505,7 +517,7 @@ export function DivisaoDeTreino({
               continuar?.();
             }}
           >
-            Descartar
+            {q.descartar}
           </Button>
         </div>
       </Dialog>
@@ -517,11 +529,26 @@ export function DivisaoDeTreino({
  * Conta só o que tem conteúdo: ao passar de 5x para 3x com um cartão em branco
  * no fim, "Excluir 2 treinos?" contaria como treino um espaço que nunca foi.
  */
-function tituloDaExclusao(dias: DiaDoQuadro[]): string {
+function tituloDaExclusao(dias: DiaDoQuadro[], t: TextosDoPainel): string {
+  const q = t.treinos.quadro;
   const reais = dias.filter((d) => !estaEmBranco(d));
-  if (reais.length > 1) return `Excluir ${reais.length} treinos?`;
+  if (reais.length > 1) return preencher(q.excluirVarios, { n: reais.length });
   const dia = reais[0] ?? dias[0];
-  return dia ? `Excluir “${dia.nome || `Treino ${dia.label}`}”?` : "Excluir treino?";
+  return dia
+    ? preencher(q.excluirUm, { nome: dia.nome || preencher(t.comum.treino, { label: dia.label }) })
+    : q.excluirTreino;
+}
+
+/** A frase com uma palavra em negrito no meio — o nome do botão que ela cita. */
+function ComDestaque({ frase, chave, destaque }: { frase: string; chave: string; destaque: string }) {
+  const [antes, depois] = partesEmVolta(frase, chave);
+  return (
+    <>
+      {antes}
+      <strong>{destaque}</strong>
+      {depois}
+    </>
+  );
 }
 
 /**
@@ -529,17 +556,14 @@ function tituloDaExclusao(dias: DiaDoQuadro[]): string {
  * prescrição e, por cascata, cada série que o aluno registrou nele. Um cartão
  * que nunca foi salvo só some da tela.
  */
-function textoDaExclusao(dias: DiaDoQuadro[]): string {
+function textoDaExclusao(dias: DiaDoQuadro[], q: TextosDoPainel["treinos"]["quadro"]): string {
   const salvos = dias.filter((d) => d.id);
   const series = salvos.reduce(
     (total, d) => total + d.itens.reduce((s, i) => s + i.seriesRegistradas, 0),
     0,
   );
-  if (!salvos.length) return "Estes cartões ainda não foram salvos: eles só somem da tela.";
-  const historico =
-    series > 0
-      ? ` e as ${series} ${series === 1 ? "série registrada" : "séries registradas"} pelo aluno`
-      : "";
-  // Concordância: "a prescrição some", "a prescrição e as séries somem".
-  return `A prescrição${historico} ${series > 0 ? "somem" : "some"} junto. Não dá para desfazer.`;
+  if (!salvos.length) return q.naoSalvos;
+  // Concordância: "a prescrição some", "a prescrição e as séries somem" — por
+  // isso são frases inteiras, e não um pedaço acrescentado.
+  return series > 0 ? plural(series, q.prescricaoESeries) : q.prescricaoSome;
 }

@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Plus, Search, X } from "lucide-react";
 
+import { usePainel } from "@/components/personal/idioma-do-painel";
 import { Dialog, Input, Select } from "@/components/ui";
 import type { ExercicioDisponivel } from "@/lib/queries/exercicios";
-import { EQUIPAMENTO, GRUPO_MUSCULAR } from "@/lib/rotulos";
 import type { Enums } from "@/types/database";
 
 import { buscarExerciciosAction } from "./actions";
@@ -20,7 +20,7 @@ export function BuscaDeExercicios({
   aberto,
   aoFechar,
   aoEscolher,
-  titulo = "Adicionar exercício",
+  titulo,
 }: {
   aberto: boolean;
   aoFechar: () => void;
@@ -34,6 +34,9 @@ export function BuscaDeExercicios({
   const [carregando, setCarregando] = useState(false);
   const [falhou, setFalhou] = useState(false);
   const requisicao = useRef(0);
+  const { t } = usePainel();
+  const b = t.treinos.busca;
+  const { grupo: GRUPO_MUSCULAR, equipamento: EQUIPAMENTO } = t.rotulos;
 
   useEffect(() => {
     if (!aberto) return;
@@ -69,8 +72,8 @@ export function BuscaDeExercicios({
     <Dialog
       aberto={aberto}
       aoFechar={aoFechar}
-      titulo={titulo}
-      descricao="Busque pelo nome ou filtre por grupo e equipamento."
+      titulo={titulo ?? b.titulo}
+      descricao={b.descricao}
       className="max-w-[560px]"
     >
       {/* O <dialog> nativo não usa portal: se um dia este diálogo morar dentro
@@ -91,8 +94,8 @@ export function BuscaDeExercicios({
             className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4"
           />
           <Input
-            aria-label="Buscar exercício"
-            placeholder="Supino, remada, agachamento…"
+            aria-label={b.buscar}
+            placeholder={b.exemplo}
             value={termo}
             onChange={(e) => setTermo(e.target.value)}
             className="pl-10"
@@ -102,11 +105,11 @@ export function BuscaDeExercicios({
 
         <div className="grid gap-3 sm:grid-cols-2">
           <Select
-            aria-label="Grupo muscular"
+            aria-label={b.grupo}
             value={grupo}
             onChange={(e) => setGrupo(e.target.value)}
           >
-            <option value="">Todos os grupos</option>
+            <option value="">{b.todosOsGrupos}</option>
             {Object.entries(GRUPO_MUSCULAR).map(([valor, rotulo]) => (
               <option key={valor} value={valor}>
                 {rotulo}
@@ -114,11 +117,11 @@ export function BuscaDeExercicios({
             ))}
           </Select>
           <Select
-            aria-label="Equipamento"
+            aria-label={b.equipamento}
             value={equipamento}
             onChange={(e) => setEquipamento(e.target.value)}
           >
-            <option value="">Todos os equipamentos</option>
+            <option value="">{b.todosOsEquipamentos}</option>
             {Object.entries(EQUIPAMENTO).map(([valor, rotulo]) => (
               <option key={valor} value={valor}>
                 {rotulo}
@@ -130,13 +133,13 @@ export function BuscaDeExercicios({
         <div className="max-h-[320px] overflow-y-auto rounded-card border border-border">
           {falhou ? (
             <p className="px-4 py-6 text-center text-[13px] font-semibold text-danger">
-              Não deu para buscar agora. Tente de novo.
+              {b.falhou}
             </p>
           ) : carregando && resultados.length === 0 ? (
-            <p className="px-4 py-6 text-center text-[13px] text-ink-4">Buscando…</p>
+            <p className="px-4 py-6 text-center text-[13px] text-ink-4">{b.buscando}</p>
           ) : resultados.length === 0 ? (
             <p className="px-4 py-6 text-center text-[13px] text-ink-4">
-              Nenhum exercício com esse filtro.
+              {b.nenhum}
             </p>
           ) : (
             <ul className="divide-y divide-border-soft">
@@ -154,7 +157,7 @@ export function BuscaDeExercicios({
                       <span className="block truncate text-[12px] text-ink-4">
                         {GRUPO_MUSCULAR[exercicio.muscle_group]} ·{" "}
                         {EQUIPAMENTO[exercicio.equipment]}
-                        {exercicio.source === "custom" ? " · seu exercício" : ""}
+                        {exercicio.source === "custom" ? b.seu : ""}
                       </span>
                     </span>
                     <Plus size={16} aria-hidden className="shrink-0 text-ink-4" />
@@ -170,7 +173,7 @@ export function BuscaDeExercicios({
           onClick={aoFechar}
           className="flex w-full items-center justify-center gap-1.5 text-[13px] font-semibold text-ink-4 transition hover:text-ink-2"
         >
-          <X size={14} aria-hidden /> Fechar
+          <X size={14} aria-hidden /> {t.comum.fechar}
         </button>
       </div>
     </Dialog>

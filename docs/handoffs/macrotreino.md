@@ -15,7 +15,7 @@
 | Agenda do aluno, já com o sugerido | `lib/queries/aluno.ts` → `lerAgendaDoAluno` |
 | Divisão de treino (programa inteiro de um aluno) | `lib/queries/divisao.ts` → `lerDivisaoDeTreino` |
 | Criar, editar, arquivar, ativar, duplicar, objetivo | `app/(personal)/painel/treinos/acoes-de-programa.ts` |
-| Textos das confirmações | `app/(personal)/painel/treinos/textos.ts` |
+| Textos das confirmações | `lib/i18n/painel/treinos.ts` (`macro`), nos três idiomas |
 | Migrations | `supabase/migrations/0011_*`, `0012_*`, `0037_*` (objetivo) |
 
 > **27/09:** `/painel/macrotreinos` deixou de ser tela e virou redirect para
