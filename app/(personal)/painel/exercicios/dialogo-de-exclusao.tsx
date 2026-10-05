@@ -2,7 +2,9 @@
 
 import { useActionState, useState } from "react";
 
+import { usePainel } from "@/components/personal/idioma-do-painel";
 import { Button, Dialog } from "@/components/ui";
+import { plural, preencher } from "@/lib/i18n/texto";
 import type { ExercicioProprio } from "@/lib/queries/exercicios";
 
 import { excluirExercicio, type EstadoExclusao } from "./actions";
@@ -28,6 +30,8 @@ export function DialogoDeExclusao({
   aoExcluir?: () => void;
 }) {
   const [estado, acao, enviando] = useActionState(excluirExercicio, INICIAL);
+  const { t } = usePainel();
+  const x = t.exercicios.exclusao;
 
   const [ultimoEstado, setUltimoEstado] = useState(estado);
   if (estado !== ultimoEstado) {
@@ -39,18 +43,13 @@ export function DialogoDeExclusao({
   if (!exercicio) return null;
 
   const emUso = exercicio.em_uso;
-  const treinos = emUso === 1 ? "treino" : "treinos";
 
   return (
     <Dialog
       aberto
       aoFechar={aoFechar}
-      titulo={`Excluir “${exercicio.name}”?`}
-      descricao={
-        emUso > 0
-          ? `Ele está prescrito em ${emUso} ${treinos}. Excluir tira o exercício desses treinos — as séries que o aluno já registrou nele saem do histórico junto.`
-          : "Ele não está em nenhum treino. Some da busca do editor e nada mais muda."
-      }
+      titulo={preencher(x.titulo, { nome: exercicio.name })}
+      descricao={emUso > 0 ? plural(emUso, x.emUso) : x.livre}
     >
       <form action={acao} className="space-y-4">
         <input type="hidden" name="id" value={exercicio.id} />
@@ -63,8 +62,7 @@ export function DialogoDeExclusao({
               className="mt-0.5 size-4 shrink-0 accent-danger"
             />
             <span className="text-[12.5px] leading-[1.5] text-ink-2">
-              Entendi que {emUso} {treinos} {emUso === 1 ? "perde" : "perdem"}{" "}
-              esse exercício.
+              {plural(emUso, x.entendi)}
             </span>
           </label>
         )}
@@ -80,10 +78,10 @@ export function DialogoDeExclusao({
 
         <div className="flex gap-2.5">
           <Button type="button" variant="secondary" block onClick={aoFechar}>
-            Manter
+            {t.comum.manter}
           </Button>
           <Button type="submit" variant="danger" block disabled={enviando}>
-            {enviando ? "Excluindo…" : "Excluir"}
+            {enviando ? x.excluindo : x.excluir}
           </Button>
         </div>
       </form>

@@ -9,6 +9,9 @@ import {
   LIMITE_DA_DESCRICAO,
   LIMITE_DA_SEGURANCA,
 } from "@/lib/domain/video";
+import type { TextosDoPainel } from "@/lib/i18n/painel";
+import { textosDoPainel } from "@/lib/i18n/painel/servidor";
+import { plural, preencher } from "@/lib/i18n/texto";
 import { createClient } from "@/lib/supabase/server";
 
 export type EstadoExercicio = {
@@ -40,33 +43,38 @@ const EQUIPAMENTOS = [
   "elastico", "cardio",
 ] as const;
 
-const esquema = z.object({
-  nome: z
-    .string()
-    .trim()
-    .min(3, "O nome precisa de pelo menos 3 caracteres.")
-    .max(80, "O nome ficou longo demais."),
-  grupo: z.enum(GRUPOS, { error: "Escolha o grupo muscular." }),
-  equipamento: z.enum(EQUIPAMENTOS, { error: "Escolha o equipamento." }),
-  descanso: z.coerce
-    .number({ error: "Informe o descanso." })
-    .int("O descanso é em segundos inteiros.")
-    .min(0, "O descanso não pode ser negativo.")
-    .max(600, "Descanso acima de 10 minutos não é prescrição, é intervalo."),
-  peso_corporal: z.coerce.boolean().default(false),
-  unilateral: z.coerce.boolean().default(false),
-  // O link é guardado como o personal colou (é o que ele reconhece se for
-  // editar); a conversão para embed acontece na leitura. Validar aqui é saber
-  // que a conversão vai dar certo.
-  video: z
-    .string()
-    .trim()
-    .max(500, "Link longo demais.")
-    .refine((v) => v === "" || enderecoDeEmbed(v) !== null, "Use um link do YouTube ou do Vimeo.")
-    .transform((v) => (v === "" ? null : v)),
-  descricao: textoOpcional(LIMITE_DA_DESCRICAO, `No máximo ${LIMITE_DA_DESCRICAO} caracteres.`),
-  seguranca: textoOpcional(LIMITE_DA_SEGURANCA, `No máximo ${LIMITE_DA_SEGURANCA} caracteres.`),
-});
+type Erros = TextosDoPainel["exercicios"]["erros"];
+
+async function erros(): Promise<Erros> {
+  return (await textosDoPainel()).t.exercicios.erros;
+}
+
+/* Montado por chamada: a mensagem de erro é do idioma de quem enviou. */
+function esquema(e: Erros) {
+  return z.object({
+    nome: z.string().trim().min(3, e.nomeCurto).max(80, e.nomeLongo),
+    grupo: z.enum(GRUPOS, { error: e.grupo }),
+    equipamento: z.enum(EQUIPAMENTOS, { error: e.equipamento }),
+    descanso: z.coerce
+      .number({ error: e.informeDescanso })
+      .int(e.descansoInteiro)
+      .min(0, e.descansoNegativo)
+      .max(600, e.descansoLongo),
+    peso_corporal: z.coerce.boolean().default(false),
+    unilateral: z.coerce.boolean().default(false),
+    // O link é guardado como o personal colou (é o que ele reconhece se for
+    // editar); a conversão para embed acontece na leitura. Validar aqui é saber
+    // que a conversão vai dar certo.
+    video: z
+      .string()
+      .trim()
+      .max(500, e.linkLongo)
+      .refine((v) => v === "" || enderecoDeEmbed(v) !== null, e.link)
+      .transform((v) => (v === "" ? null : v)),
+    descricao: textoOpcional(LIMITE_DA_DESCRICAO, preencher(e.textoLongo, { n: LIMITE_DA_DESCRICAO })),
+    seguranca: textoOpcional(LIMITE_DA_SEGURANCA, preencher(e.textoLongo, { n: LIMITE_DA_SEGURANCA })),
+  });
+}
 
 function lerFormulario(formData: FormData) {
   return {
@@ -103,7 +111,8 @@ export async function salvarExercicio(
     Object.entries(bruto).map(([k, v]) => [k, String(v)]),
   );
 
-  const analise = esquema.safeParse(bruto);
+  const e = await erros();
+  const analise = esquema(e).safeParse(bruto);
   if (!analise.success) {
     return { errosPorCampo: errosDe(analise.error), campos };
   }
@@ -139,11 +148,11 @@ export async function salvarExercicio(
     // Há unique em (trainer_id, name): o mesmo personal não repete nome.
     if (error.code === "23505") {
       return {
-        errosPorCampo: { nome: "Você já tem um exercício com esse nome." },
+        errosPorCampo: { nome: e.nomeRepetido },
         campos,
       };
     }
-    return { erro: "Não deu para salvar. Tente de novo.", campos };
+    return { erro: e.falhaSalvar, campos };
   }
 
   // Zero linhas sem erro: o id não é de um exercício deste personal (forjado,
@@ -151,7 +160,7 @@ export async function salvarExercicio(
   // o diálogo fecha dizendo "salvo" sobre uma escrita que não aconteceu — o
   // mesmo defeito que `salvarPrograma` já tratava, achado pela revisão do M2.
   if (count === 0 || !salvo?.length) {
-    return { erro: "Exercício não encontrado. Recarregue a página.", campos };
+    return { erro: e.naoEncontrado, campos };
   }
 
   revalidatePath("/painel/exercicios");
@@ -175,7 +184,8 @@ export async function excluirExercicio(
 ): Promise<EstadoExclusao> {
   const id = String(formData.get("id") ?? "");
   const confirmado = formData.get("confirmado") === "on";
-  if (!id) return { erro: "Exercício não informado." };
+  const e = await erros();
+  if (!id) return { erro: e.naoInformado };
 
   const { trainer } = await requireTrainer();
   const supabase = await createClient();
@@ -189,14 +199,12 @@ export async function excluirExercicio(
   // Contagem que falha não pode virar "zero": seria apagar sem o aviso que
   // existe justamente para proteger a prescrição.
   if (erroContagem) {
-    return { erro: "Não deu para conferir se o exercício está em uso." };
+    return { erro: e.falhaConferir };
   }
 
   const emUso = count ?? 0;
   if (emUso > 0 && !confirmado) {
-    return {
-      erro: `Esse exercício está em ${emUso} ${emUso === 1 ? "treino" : "treinos"}. Confirme para remover mesmo assim.`,
-    };
+    return { erro: plural(emUso, e.confirme) };
   }
 
   const { error } = await supabase
@@ -205,7 +213,7 @@ export async function excluirExercicio(
     .eq("id", id)
     .eq("trainer_id", trainer.id);
 
-  if (error) return { erro: "Não deu para excluir. Tente de novo." };
+  if (error) return { erro: e.falhaExcluir };
 
   revalidatePath("/painel/exercicios");
   return {};
