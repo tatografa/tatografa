@@ -685,8 +685,17 @@ Provar que funciona sem o Otávio ler código:
   `/app` e `/recuperar/nova-senha`, por segmento inteiro, e `\` ou caractere de
   controle derrubam o valor. **O que a análise achou e ficou para depois:** proteção
   contra senha vazada desligada (exige o plano Pro), lista de espera sem limite de
-  envio, funções `security invoker` do painel executáveis por `anon` (devolvem vazio),
-  páginas sem CSP e a 0045 pendente. Os 7 arquivos de prova sem dono no storage
+  envio, páginas sem CSP e a 0045 pendente.
+  **No mesmo dia, a pedido do Otávio, as funções do painel e do app deixaram de
+  aceitar o `anon`** (migration 0047). Onze funções tinham `grant ... to
+  authenticated` e mais nada — mas o Postgres dá `execute` a `PUBLIC` em toda função
+  nova, e o Supabase dá ao `anon`; o `grant` acrescentava, não restringia. Não vazava
+  (são `security invoker`, e para o `anon` nenhuma tabela devolve linha), era superfície
+  sem uso. **Função nova em `public` nasce com `revoke execute ... from public, anon`**
+  antes do `grant` — a 0020, a 0023 e a 0037 já faziam assim. Abertas ao visitante, de
+  propósito, só `convite_por_token` e `entrar_na_lista`. Vinte provas: onze de burla
+  (o `anon` em cada função), duas das portas públicas continuando e sete de caminho
+  legítimo, do personal e do aluno, com dado real. Os 7 arquivos de prova sem dono no storage
   (pastas `PROVA-DESCARTAVEL` e `bbbbbbbb-…`, de 13-14/09) foram apagados no mesmo
   dia: eram só linha em `storage.objects`, sem tamanho — nunca houve arquivo por trás,
   então liberar a trava `storage.allow_delete_query` na transação não deixa órfão.
