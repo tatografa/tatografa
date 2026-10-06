@@ -1,13 +1,10 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useState } from "react";
 
-import {
-  INTERVALOS,
-  type Intervalo,
-  linhaDoGrafico,
-  type SessaoDoExercicio,
-} from "@/lib/domain/progresso";
+import { CabecalhoDoGrafico, GraficoDeBarras } from "@/components/grafico-de-barras";
+import { rotulosVisiveis } from "@/lib/domain/grafico";
+import { INTERVALOS, type Intervalo, sessoesComCarga, type SessaoDoExercicio } from "@/lib/domain/progresso";
 import { tendenciaNoIdioma, textoDaSerieNoIdioma } from "@/lib/i18n/app/frases";
 import { preencher } from "@/lib/i18n/texto";
 import { cn } from "@/lib/utils";
@@ -15,25 +12,27 @@ import { cn } from "@/lib/utils";
 import { useIdioma } from "./idioma-do-app";
 
 /**
- * Coordenadas internas do SVG. O desenho escala com a largura da tela; estes
- * números são a proporção, não pixels.
+ * Até quantas barras o número cabe em cima de cada uma numa tela de 390px.
+ * Com mais, "102,5" encavala no vizinho: o número fica só na barra escolhida,
+ * na dica e no painel de séries embaixo.
  */
-const LARGURA = 360;
-const ALTURA = 150;
+const BARRAS_COM_NUMERO = 8;
 
 /**
- * O gráfico de carga por sessão. SVG à mão, sem biblioteca — decisão do brief
- * do M2, não do card.
+ * O gráfico de carga por sessão, no desenho de gráfico do produto
+ * (`GraficoDeBarras`, 06/10). Era uma linha até 06/10.
+ *
+ * **O eixo começa no zero**, ao contrário da linha, que escalava entre o mínimo
+ * e o máximo para a mudança aparecer. Em barra isso mentiria: a de 60 kg teria
+ * o dobro da de 55. O que mostra a diferença pequena agora é o número escrito
+ * em cima de cada barra e a pílula "+5 kg no período".
  *
  * O eixo é cronológico (mais antigo à esquerda), ao contrário das listas da
  * tela, que são mais-recente-primeiro: inverter o eixo inverteria o significado
- * de uma linha subindo, que é justamente o que esta tela existe para mostrar.
+ * de uma barra crescendo, que é justamente o que esta tela existe para mostrar.
  *
- * **Os pontos não são clicáveis no SVG.** As faixas de toque são botões HTML
- * sobrepostos, uma por sessão, ocupando a altura inteira do gráfico. Um
- * `<circle>` de raio grande o bastante para 44px se sobreporia ao vizinho já na
- * sexta sessão; a faixa vertical não se sobrepõe nunca, dá foco de teclado de
- * graça e continua sendo um botão de verdade para o leitor de tela.
+ * **Cada barra é um botão** que ocupa a coluna inteira: alvo de toque grande,
+ * foco de teclado de graça, e nome para o leitor de tela.
  */
 export function GraficoDeCarga({
   nome,
@@ -42,14 +41,13 @@ export function GraficoDeCarga({
   nome: string;
   sessoes: SessaoDoExercicio[];
 }) {
-  const idDoTitulo = useId();
   const [aberta, setAberta] = useState<string | null>(null);
   const { t, f } = useIdioma();
   const p = t.historico.progresso;
 
-  const linha = linhaDoGrafico(sessoes, LARGURA, ALTURA);
+  const comCarga = sessoesComCarga(sessoes);
 
-  if (!linha) {
+  if (!comCarga.length) {
     return (
       <p className="rounded-card bg-canvas-sunken p-4 text-[13px] leading-relaxed text-ink-3">
         {p.semCarga}
@@ -57,104 +55,63 @@ export function GraficoDeCarga({
     );
   }
 
-  const { pontos, minimo, maximo, caminho } = linha;
-  const selecionada = pontos.find((p) => p.sessao.sessaoId === aberta);
-  const larguraDaFaixa = 100 / pontos.length;
+  const selecionada = comCarga.find((s) => s.sessaoId === aberta);
+  const primeira = comCarga[0].cargaMaxima;
+  const ultima = comCarga[comCarga.length - 1].cargaMaxima;
+  const variacao = ultima - primeira;
+  const comNumero = comCarga.length <= BARRAS_COM_NUMERO;
+  const visiveis = rotulosVisiveis(comCarga.length, 4);
 
   return (
-    <div className="space-y-3">
-      {/* "mín" e "máx" escritos por extenso: sem eles, dois números nas pontas
-          de uma linha do tempo se leem como o primeiro e o último treino — e o
-          mínimo quase nunca é o da esquerda. */}
-      <div className="flex items-baseline justify-between font-mono text-[10px] tracking-[0.06em] text-ink-5">
-        <span>
-          {p.min} {f.carga(minimo)}
-        </span>
-        <span>
-          {p.max} {f.carga(maximo)}
-        </span>
-      </div>
-
-      <div className="relative">
-        {/* `overflow-visible`: a linha vai de borda a borda (doc 05), então o
-            primeiro e o último ponto ficam em cima da borda do viewBox e
-            seriam cortados pela metade. */}
-        <svg
-          viewBox={`0 0 ${LARGURA} ${ALTURA}`}
-          className="w-full overflow-visible"
-          role="img"
-          aria-labelledby={idDoTitulo}
-        >
-          <title id={idDoTitulo}>{tendenciaNoIdioma(nome, sessoes, p, f)}</title>
-
-          <path
-            d={caminho}
-            fill="none"
-            stroke="var(--color-brand)"
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-          />
-
-          {pontos.map((ponto) => {
-            const destacado = ponto.sessao.sessaoId === aberta;
-            return (
-              <circle
-                key={ponto.sessao.sessaoId}
-                cx={ponto.x}
-                cy={ponto.y}
-                r={destacado ? 6 : 4}
-                fill={destacado ? "var(--color-brand)" : "var(--color-surface)"}
-                stroke="var(--color-brand)"
-                strokeWidth={2.5}
-                vectorEffect="non-scaling-stroke"
-              />
-            );
-          })}
-        </svg>
-
-        {/* As faixas de toque. Uma por sessão, altura inteira, sem sobreposição. */}
-        <div className="absolute inset-0 flex">
-          {pontos.map((ponto) => (
-            <button
-              key={ponto.sessao.sessaoId}
-              type="button"
-              onClick={() =>
-                setAberta((atual) =>
-                  atual === ponto.sessao.sessaoId ? null : ponto.sessao.sessaoId,
-                )
+    <div className="space-y-4">
+      <CabecalhoDoGrafico
+        Titulo="h3"
+        compacto
+        titulo={p.graficoTitulo}
+        apoio={p.graficoApoio}
+        numero={f.numero(ultima)}
+        unidade="kg"
+        variacao={
+          comCarga.length > 1
+            ? {
+                sentido: variacao > 0 ? "sobe" : variacao < 0 ? "desce" : "neutro",
+                texto:
+                  variacao === 0
+                    ? p.semMudanca
+                    : preencher(p.noPeriodo, { sinal: variacao > 0 ? "+" : "−", carga: f.carga(Math.abs(variacao)) }),
               }
-              aria-pressed={ponto.sessao.sessaoId === aberta}
-              style={{ width: `${larguraDaFaixa}%` }}
-              className={cn(
-                "h-full rounded-[6px] transition",
-                "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
-                ponto.sessao.sessaoId === aberta && "bg-brand-tint",
-              )}
-            >
-              <span className="sr-only">
-                {f.dataCurta(ponto.sessao.concluidaEm)}: {f.carga(ponto.carga)}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
+            : undefined
+        }
+      />
 
-      <Datas pontos={pontos} />
+      <GraficoDeBarras
+        altura={180}
+        formatarMarca={f.numero}
+        descricao={tendenciaNoIdioma(nome, sessoes, p, f)}
+        barras={comCarga.map((sessao, i) => ({
+          chave: sessao.sessaoId,
+          valor: sessao.cargaMaxima,
+          rotulo: comNumero || sessao.sessaoId === aberta ? f.numero(sessao.cargaMaxima) : undefined,
+          eixo: visiveis.has(i) ? f.dataCurta(sessao.concluidaEm) : undefined,
+          dica: { titulo: f.dataCurta(sessao.concluidaEm), texto: f.carga(sessao.cargaMaxima) },
+          selecionada: sessao.sessaoId === aberta,
+          nome: `${f.dataCurta(sessao.concluidaEm)}: ${f.carga(sessao.cargaMaxima)}`,
+          aoEscolher: () => setAberta((atual) => (atual === sessao.sessaoId ? null : sessao.sessaoId)),
+        }))}
+      />
 
       {selecionada ? (
         <section
-          aria-label={preencher(p.seriesDe, { data: f.dataCurta(selecionada.sessao.concluidaEm) })}
+          aria-label={preencher(p.seriesDe, { data: f.dataCurta(selecionada.concluidaEm) })}
           className="rounded-card border border-border-soft bg-surface p-3.5"
         >
           {/* Sem o utilitário `eyebrow` aqui: ele deixa tudo em caixa alta e
               "57,5 KG" não é como se escreve quilo. */}
           <p className="font-mono text-[11px] font-semibold tracking-[0.06em] text-ink-4">
-            {f.dataCurta(selecionada.sessao.concluidaEm)} · {f.carga(selecionada.carga)}
+            {f.dataCurta(selecionada.concluidaEm)} · {f.carga(selecionada.cargaMaxima)}
           </p>
           <ul className="mt-2.5 space-y-1">
-            {selecionada.sessao.series.map((serie) => (
+            {selecionada.series.map((serie) => (
               <li
                 key={serie.set_number}
                 className="flex items-baseline justify-between text-[13px] tabular-nums"
@@ -166,41 +123,9 @@ export function GraficoDeCarga({
           </ul>
         </section>
       ) : (
-        // "Escolha", não "toque": o mesmo gráfico aparece na ficha do aluno no
-        // painel (M2-06), onde o personal está no computador com o mouse.
-        <p className="text-center text-[12px] text-ink-5">
-          {p.escolha}
-        </p>
+        // "Escolha", não "toque": o mesmo gráfico serve a quem usa mouse.
+        <p className="text-center text-[12px] text-ink-5">{p.escolha}</p>
       )}
-    </div>
-  );
-}
-
-/**
- * As datas do eixo horizontal.
- *
- * No máximo quatro rótulos: com doze sessões numa tela de 390px eles se
- * sobrepõem e viram borrão. O primeiro e o último sempre aparecem — são as
- * pontas que dão sentido à linha; a data exata de cada ponto sai no painel de
- * baixo, ao tocar.
- */
-function Datas({ pontos }: { pontos: { x: number; sessao: SessaoDoExercicio }[] }) {
-  const { f } = useIdioma();
-  if (!pontos.length) return null;
-
-  const passo = Math.max(1, Math.ceil((pontos.length - 1) / 3));
-  const visiveis = new Set<number>([0, pontos.length - 1]);
-  for (let i = 0; i < pontos.length; i += passo) visiveis.add(i);
-
-  return (
-    <div className="flex justify-between font-mono text-[10px] tracking-[0.04em] text-ink-5">
-      {[...visiveis]
-        .sort((a, b) => a - b)
-        .map((indice) => (
-          <span key={pontos[indice].sessao.sessaoId}>
-            {f.dataCurta(pontos[indice].sessao.concluidaEm)}
-          </span>
-        ))}
     </div>
   );
 }

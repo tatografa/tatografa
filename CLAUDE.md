@@ -699,6 +699,31 @@ Provar que funciona sem o Otávio ler código:
   (pastas `PROVA-DESCARTAVEL` e `bbbbbbbb-…`, de 13-14/09) foram apagados no mesmo
   dia: eram só linha em `storage.objects`, sem tamanho — nunca houve arquivo por trás,
   então liberar a trava `storage.allow_delete_query` na transação não deixa órfão.
+- **[2026-10-06, pedido do Otávio]** **Todo gráfico do produto segue um desenho só**
+  (`GraficoDeBarras` e `CabecalhoDoGrafico`, `components/grafico-de-barras.tsx`), o da
+  referência "Evolução mensal de alunos": barras em pílula com o número em cima, cinco
+  marcas redondas no eixo (`escalaDoGrafico`, `lib/domain/grafico.ts`), grade clara,
+  rótulos embaixo, dica escura no mouse e, no cabeçalho, o número grande com a pílula de
+  variação. Vale para os quatro gráficos: crescimento da carteira e atividade diária
+  (dashboard), carga por treino (app do aluno, com as miniaturas da lista) e o gráfico
+  por exercício do programa (perfil do aluno no painel). **Revê duas decisões:** a linha
+  do crescimento (18/09) e a linha de carga do aluno (02/09), que escalava entre o
+  mínimo e o máximo. **Barra começa no zero, sempre** — cortada, a de 60 kg teria o dobro
+  da de 55; a diferença pequena agora se lê pelo número em cima de cada barra e pela
+  pílula "+5 kg no período". O componente **não tem diretiva nem hook**: o dashboard o
+  usa como servidor (dica em CSS, zero JavaScript), o app como cliente, com cada barra
+  virando botão que abre as séries do dia.
+  **Pílula verde só onde subir é bom para qualquer um** (carteira e carga, o critério das
+  progressões de 18/09); queda e "sem mudança" ficam neutras, e a da atividade ("em 20
+  dias") não é variação — não há janela anterior guardada para comparar. **O que ficou
+  diferente da referência:** a fonte continua Inter (18/09) e as cores são os tokens que
+  passaram em AA; o número some de cima das barras quando elas não cabem (atividade em
+  coluna estreita, mais de 8 sessões no celular) e continua na dica e na descrição; com
+  pouco espaço o eixo mostra um rótulo sim, um não, decidido por container query. A
+  dica fica presa à barra, logo acima do número: no topo do gráfico ela cobria o
+  cabeçalho. **As capturas da landing do painel e do progresso foram refeitas** — a do
+  painel ainda mostrava "Precisam de atenção", que saiu em 05/10. axe-core sem violação
+  nos gráficos.
 - **[2026-10-02, do teste de campo]** **Os cinco botões do painel de macrociclos não
   faziam nada no caso comum** — Criar e ativar, Ativar (dois), Arquivar e Duplicar,
   desde o redesenho de 27/09. Todos passam por `FormularioSeguro`, que cancelava o envio,
@@ -1551,6 +1576,6 @@ Provar que funciona sem o Otávio ler código:
   por treino e outra a cada programa novo —, então agrupar por ele faria "a última vez que
   fiz supino" recomeçar do zero a cada macrotreino. `chaveDoExercicio` monta a chave;
   `lib/domain/recordes.ts` a trata como texto opaco.
-- **[2026-09-02]** Gráfico de evolução é **SVG à mão**, sem biblioteca. Um gráfico de linha
+- **[2026-09-02, desenho revisto em 2026-10-06]** Gráfico de evolução é **à mão**, sem biblioteca. Um gráfico de linha
   com pontos clicáveis não paga ~100 kB de dependência, e biblioteca genérica atrapalha o
   que o doc 05 pede: linha de borda a borda, datas na horizontal, mais recente primeiro.

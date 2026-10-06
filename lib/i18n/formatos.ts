@@ -155,6 +155,17 @@ export function formatos(idioma: Idioma) {
               new Date(diaLocalEmMs(`${mes.slice(0, 7)}-01`)),
             ),
           ),
+    /** O mês com o ano no eixo do gráfico: "nov/25", "Nov/25". */
+    mesComAno: (mes: string) =>
+      `${
+        pt
+          ? rotuloDoMes(mes)
+          : semPontoFinal(
+              new Intl.DateTimeFormat(locale, { timeZone: "UTC", month: "short" }).format(
+                new Date(diaLocalEmMs(`${mes.slice(0, 7)}-01`)),
+              ),
+            )
+      }/${mes.slice(2, 4)}`,
     /** "setembro de 2026" / "September 2026". Aceita os mesmos dois formatos. */
     mesPorExtenso: (mes: string) =>
       pt

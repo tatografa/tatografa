@@ -1,5 +1,5 @@
 import {
-  linhaDoGrafico,
+  sessoesComCarga,
   type ExercicioDoProgresso,
   type SerieNaSessao,
   type SessaoDoExercicio,
@@ -55,12 +55,12 @@ export function tendenciaNoIdioma(
   t: TextosDoHistorico["progresso"],
   f: Formatos,
 ): string {
-  const linha = linhaDoGrafico(sessoes, 100, 100);
-  if (!linha || linha.pontos.length === 0) return preencher(t.tendencia.semCarga, { nome });
+  const comCarga = sessoesComCarga(sessoes);
+  if (comCarga.length === 0) return preencher(t.tendencia.semCarga, { nome });
 
-  const primeiro = linha.pontos[0].carga;
-  const ultimo = linha.pontos[linha.pontos.length - 1].carga;
-  const quantos = linha.pontos.length;
+  const primeiro = comCarga[0].cargaMaxima;
+  const ultimo = comCarga[comCarga.length - 1].cargaMaxima;
+  const quantos = comCarga.length;
   if (quantos === 1) return preencher(t.tendencia.um, { nome, carga: f.carga(ultimo) });
 
   const treinos = plural(quantos, t.treinos);

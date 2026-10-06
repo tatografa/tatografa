@@ -5,22 +5,23 @@ import {
   LINHA_DO_CARTAO,
   LINHAS_DO_CARTAO,
 } from "@/components/personal/cartao-do-painel";
+import { CabecalhoDoGrafico, GraficoDeBarras } from "@/components/grafico-de-barras";
 import {
   DIAS_DA_ATIVIDADE,
   DIAS_DAS_PROGRESSOES,
   ehFimDeSemana,
   ganhoPercentual,
-  linhaDoCrescimento,
   LIMITE_DAS_PROGRESSOES,
   resumoDaAtividade,
   type DiaDaAtividade,
   type PontoDoMes,
   type Progressao,
 } from "@/lib/domain/dashboard";
+import { rotulosVisiveis } from "@/lib/domain/grafico";
 import type { Idioma } from "@/lib/domain/idioma";
 import { formatos, type Formatos } from "@/lib/i18n/formatos";
 import { TEXTOS_DO_PAINEL, type TextosDoPainel } from "@/lib/i18n/painel";
-import { plural, preencher } from "@/lib/i18n/texto";
+import { forma, plural, preencher } from "@/lib/i18n/texto";
 
 /**
  * A frase inteira do gráfico de crescimento, para o `aria-label` — a mesma conta
@@ -42,29 +43,13 @@ function crescimentoNoIdioma(pontos: PontoDoMes[], t: TextosDoPainel, f: Formato
 }
 
 /*
- * Os três gráficos do doc 06 §2.
+ * Os dois gráficos do doc 06 §2, no desenho de gráfico do produto
+ * (`GraficoDeBarras`, 06/10). Os dois são componentes de servidor: a dica do
+ * mouse é CSS, e nenhum JavaScript vai ao navegador por causa deles.
  *
- * **Os três são componentes de servidor, sem uma linha de JavaScript no
- * navegador.** A dica que aparece ao passar o mouse é CSS (`group-hover`), não
- * estado: um gráfico de leitura que não muda de filtro não paga o custo de
- * virar cliente — e no painel, que abre em toda navegação, isso é peso em toda
- * visita para um recurso que o teclado não usa.
- *
- * Por isso **o que o mouse revela nunca é a única via para o número**: cada
- * bloco imprime em texto o que o gráfico desenha (quantos alunos hoje, quantos
- * treinos na janela e em quantos dias, e a carga de cada progressão), e o SVG
- * leva a frase inteira no `aria-label`. Quem lê com leitor de tela ou com o
- * teclado recebe o conteúdo, não um retângulo mudo.
- *
- * Todos desenham em `brand` sobre `surface` — 5,38 de contraste, bem acima dos
- * 3:1 que a WCAG pede para objeto gráfico. O trilho e a linha de base ficam em
- * `border-strong`, que não alcança 3:1 e não precisa: eles não carregam
- * informação nenhuma, quem carrega é a barra.
+ * Barra em `brand` sobre `surface` dá 5,38 de contraste, acima dos 3:1 que a
+ * WCAG pede para objeto gráfico. A grade não carrega informação e fica clara.
  */
-
-/** Coordenadas internas do SVG: proporção, não pixels. */
-const LARGURA = 360;
-const ALTURA = 120;
 
 /* ------------------------------------------- evolução mensal de alunos --- */
 
@@ -72,79 +57,50 @@ export function CrescimentoDaCarteira({ pontos, idioma }: { pontos: PontoDoMes[]
   const t = TEXTOS_DO_PAINEL[idioma];
   const c = t.dashboard.crescimento;
   const f = formatos(idioma);
-  const linha = linhaDoCrescimento(pontos, LARGURA, ALTURA);
   const atual = pontos.length ? pontos[pontos.length - 1].total : 0;
   const doPrimeiro = pontos.length ? pontos[0].total : 0;
   const variacao = atual - doPrimeiro;
+  const maximo = Math.max(0, ...pontos.map((p) => p.total));
 
   return (
     <Bloco
-      titulo={c.titulo}
-      apoio={preencher(c.apoio, { n: pontos.length })}
-      // O acumulado, e não as entradas do mês: com um aluno novo em março e
-      // nenhum em abril, "novos por mês" desenharia uma queda onde ninguém saiu.
-      resumo={`${plural(atual, t.comum.alunos)} · ${
-        variacao === 0
-          ? c.semMudanca
-          : preencher(c.noPeriodo, { sinal: variacao > 0 ? "+" : "−", n: Math.abs(variacao) })
-      }`}
+      cabecalho={
+        <CabecalhoDoGrafico
+          titulo={c.titulo}
+          apoio={preencher(c.apoio, { n: pontos.length })}
+          numero={f.numero(atual)}
+          unidade={forma(atual, c.unidade)}
+          // O acumulado, e não as entradas do mês: com um aluno novo em março e
+          // nenhum em abril, "novos por mês" desenharia uma queda onde ninguém saiu.
+          variacao={{
+            sentido: variacao > 0 ? "sobe" : variacao < 0 ? "desce" : "neutro",
+            texto:
+              variacao === 0
+                ? c.semMudanca
+                : preencher(c.noPeriodo, { sinal: variacao > 0 ? "+" : "−", n: f.numero(Math.abs(variacao)) }),
+          }}
+        />
+      }
     >
-      {!linha || linha.maximo === 0 ? (
+      {maximo === 0 ? (
         <Vazio>{c.vazio}</Vazio>
       ) : (
-        <>
-          <div className="relative">
-            <svg
-              viewBox={`0 0 ${LARGURA} ${ALTURA}`}
-              className="w-full overflow-visible"
-              role="img"
-              aria-label={crescimentoNoIdioma(pontos, t, f)}
-            >
-              <path d={linha.area} fill="var(--color-brand-tint)" />
-              <path
-                d={linha.caminho}
-                fill="none"
-                stroke="var(--color-brand)"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                vectorEffect="non-scaling-stroke"
-              />
-              {linha.pontos.map((p) => (
-                <circle
-                  key={p.ponto.mes}
-                  cx={p.x}
-                  cy={p.y}
-                  r={3.5}
-                  fill="var(--color-surface)"
-                  stroke="var(--color-brand)"
-                  strokeWidth={2}
-                  vectorEffect="non-scaling-stroke"
-                />
-              ))}
-            </svg>
-
-            {/* As faixas do mouse: uma por mês, altura inteira, sem sobreposição. */}
-            <div className="absolute inset-0 flex" aria-hidden>
-              {pontos.map((ponto) => (
-                <div key={ponto.mes} className="group relative flex-1">
-                  <div className="h-full rounded-[6px] transition group-hover:bg-canvas-sunken/60" />
-                  <Dica>
-                    {f.mesPorExtenso(ponto.mes)} · {plural(ponto.total, t.comum.alunos)}
-                  </Dica>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <Eixo
-            rotulos={pontos.map((p) => f.mesCurto(p.mes))}
-            // Doze rótulos de três letras se encavalam numa coluna de metade da
-            // tela; um sim, um não mantém o começo, o meio e o fim legíveis.
-            passo={2}
-            alinhamento="pontos"
-          />
-        </>
+        <GraficoDeBarras
+          inteiro
+          altura={280}
+          formatarMarca={f.numero}
+          descricao={crescimentoNoIdioma(pontos, t, f)}
+          barras={pontos.map((ponto, i) => ({
+            chave: ponto.mes,
+            valor: ponto.total,
+            rotulo: f.numero(ponto.total),
+            eixo: f.mesComAno(ponto.mes),
+            // Doze rótulos "nov/25" só cabem a partir de uns 520px de gráfico;
+            // abaixo disso fica um sim, um não, sempre com o mês atual.
+            eixoSecundario: (pontos.length - 1 - i) % 2 === 1,
+            dica: { titulo: f.mesPorExtenso(ponto.mes), texto: plural(ponto.total, t.comum.alunos) },
+          }))}
+        />
       )}
     </Bloco>
   );
@@ -157,73 +113,54 @@ export function AtividadeDiaria({ dias, idioma }: { dias: DiaDaAtividade[]; idio
   const a = t.dashboard.atividade;
   const f = formatos(idioma);
   const { total, diasComTreino, melhorDia } = resumoDaAtividade(dias);
-  const maximo = Math.max(1, ...dias.map((d) => d.total));
+  // Trinta datas não cabem: de cinco em cinco, com o último dia sempre. Num
+  // cartão estreito, um sim, um não desses, senão os dois últimos se encavalam.
+  const visiveis = [...rotulosVisiveis(dias.length, 7)].sort((x, y) => x - y);
+  const secundarios = new Set(visiveis.filter((_, j) => j % 2 === 1 && j !== visiveis.length - 1));
 
   return (
     <Bloco
-      titulo={a.titulo}
-      apoio={preencher(a.apoio, { n: DIAS_DA_ATIVIDADE })}
-      resumo={preencher(a.resumo, {
-        treinos: plural(total, t.comum.treinos),
-        dias: plural(diasComTreino, t.comum.dias),
-      })}
+      cabecalho={
+        <CabecalhoDoGrafico
+          titulo={a.titulo}
+          apoio={preencher(a.apoio, { n: DIAS_DA_ATIVIDADE })}
+          numero={f.numero(total)}
+          unidade={forma(total, a.unidade)}
+          // Não há janela anterior guardada para comparar, então a pílula não é
+          // variação: é em quantos dias aqueles treinos aconteceram.
+          variacao={
+            total > 0
+              ? { sentido: "neutro", texto: preencher(a.emDias, { dias: plural(diasComTreino, t.comum.dias) }) }
+              : undefined
+          }
+        />
+      }
     >
       {total === 0 ? (
-        <Vazio>
-          {preencher(a.vazio, { n: DIAS_DA_ATIVIDADE })}
-        </Vazio>
+        <Vazio>{preencher(a.vazio, { n: DIAS_DA_ATIVIDADE })}</Vazio>
       ) : (
-        <>
-          <div
-            role="img"
-            aria-label={`${preencher(a.descricao, {
-              treinos: plural(total, t.comum.treinos),
-              dias: diasComTreino,
-              n: DIAS_DA_ATIVIDADE,
-            })}${
-              melhorDia
-                ? preencher(a.melhorDia, { dia: f.diaComSemana(melhorDia.dia), n: melhorDia.total })
-                : ""
-            }.`}
-            style={{ height: ALTURA }}
-            className="flex items-end gap-[2px] border-b border-border-strong"
-          >
-            {dias.map((dia) => (
-              <div
-                key={dia.dia}
-                className="group relative flex h-full flex-1 items-end"
-              >
-                <div
-                  style={{
-                    height:
-                      dia.total === 0 ? 2 : `${(dia.total / maximo) * 100}%`,
-                  }}
-                  className={`w-full rounded-t-[3px] transition ${
-                    dia.total === 0
-                      ? // O toco do dia vazio não é dado: é a marca de que
-                        // existe um dia ali. Quem diz "ninguém treinou" é o
-                        // buraco entre as barras e a frase acima delas.
-                        "bg-border-strong"
-                      : ehFimDeSemana(dia.dia)
-                        ? "bg-brand/55 group-hover:bg-brand"
-                        : "bg-brand group-hover:bg-brand-hover"
-                  }`}
-                />
-                <Dica>
-                  {f.diaComSemana(dia.dia)} · {plural(dia.total, t.comum.treinos)}
-                </Dica>
-              </div>
-            ))}
-          </div>
-
-          <Eixo
-            rotulos={dias.map((d) => f.diaCurto(d.dia))}
-            // Trinta datas não cabem: de cinco em cinco dá seis marcas, que é o
-            // que basta para localizar uma barra no mês.
-            passo={5}
-            alinhamento="barras"
-          />
-        </>
+        <GraficoDeBarras
+          inteiro
+          altura={200}
+          rotulosSoNoLargo
+          formatarMarca={f.numero}
+          descricao={`${preencher(a.descricao, {
+            treinos: plural(total, t.comum.treinos),
+            dias: diasComTreino,
+            n: DIAS_DA_ATIVIDADE,
+          })}${
+            melhorDia ? preencher(a.melhorDia, { dia: f.diaComSemana(melhorDia.dia), n: melhorDia.total }) : ""
+          }.`}
+          barras={dias.map((dia, i) => ({
+            chave: dia.dia,
+            valor: dia.total,
+            rotulo: dia.total > 0 ? f.numero(dia.total) : undefined,
+            eixo: visiveis.includes(i) ? f.diaCurto(dia.dia) : undefined,
+            eixoSecundario: secundarios.has(i),
+            suave: ehFimDeSemana(dia.dia),
+            dica: { titulo: f.diaComSemana(dia.dia), texto: plural(dia.total, t.comum.treinos) },
+          }))}
+        />
       )}
     </Bloco>
   );
@@ -304,106 +241,19 @@ export function TopDeProgressoes({
 
 /* ------------------------------------------------------------ pedaços --- */
 
-function Bloco({
-  titulo,
-  apoio,
-  resumo,
-  children,
-}: {
-  titulo: string;
-  apoio: string;
-  /**
-   * A resposta do bloco em palavras, na pílula ao lado do título — onde o
-   * protótipo põe o "+71% no ano". É ela que responde a pergunta sem o gráfico.
-   */
-  resumo: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <CartaoDoPainel
-      titulo={titulo}
-      apoio={apoio}
-      lateral={
-        <p className="rounded-full bg-canvas px-2.5 py-1 text-[12px] font-medium text-ink-2 tabular-nums">
-          {resumo}
-        </p>
-      }
-    >
-      <div className="space-y-2 p-[18px] pt-8">{children}</div>
-    </CartaoDoPainel>
-  );
-}
-
 /**
- * A dica do mouse. CSS puro: sem estado, sem cliente, sem hidratação.
+ * O cartão dos gráficos, no desenho da referência de 06/10: o cabeçalho é do
+ * próprio gráfico (título, número grande e pílula), e não o selo com fio dos
+ * outros blocos — o número grande é a resposta, e ele precisa de espaço.
  *
- * `aria-hidden` no pai e `pointer-events-none` aqui — ela repete, em cima do
- * gráfico, um número que já está no `aria-label` e no texto do bloco. Uma dica
- * que rouba o ponteiro faria a faixa vizinha parar de responder.
+ * Sem `overflow-hidden`: a dica das barras das pontas sai por cima da borda.
  */
-function Dica({ children }: { children: React.ReactNode }) {
+function Bloco({ cabecalho, children }: { cabecalho: React.ReactNode; children: React.ReactNode }) {
   return (
-    <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1.5 hidden -translate-x-1/2 whitespace-nowrap rounded-[7px] bg-ink px-2 py-1 font-mono text-[10.5px] text-surface group-hover:block">
+    <section className="min-w-0 space-y-4 rounded-[12px] border border-border bg-surface p-6">
+      {cabecalho}
       {children}
-    </span>
-  );
-}
-
-/**
- * Os rótulos do eixo horizontal, um a cada `passo`.
- *
- * Posicionados **na fração exata** do item que nomeiam, não distribuídos por
- * `justify-between`. Com trinta barras e sete rótulos, espaçar por igual põe
- * "09/09" debaixo de outra barra — e o eixo passa a apontar para o dia errado,
- * que é pior que não ter eixo. A conta muda com a forma: a barra ocupa uma
- * faixa e o rótulo vai no meio dela; o ponto da linha é uma coordenada e o
- * rótulo vai em cima dele.
- */
-function Eixo({
-  rotulos,
-  passo,
-  alinhamento,
-}: {
-  rotulos: string[];
-  passo: number;
-  alinhamento: "barras" | "pontos";
-}) {
-  const ultimo = rotulos.length - 1;
-  const fracao = (i: number) =>
-    alinhamento === "barras"
-      ? ((i + 0.5) / rotulos.length) * 100
-      : ultimo === 0
-        ? 50
-        : (i / ultimo) * 100;
-
-  return (
-    <div
-      aria-hidden
-      className="relative h-4 font-mono text-[10px] tracking-[0.04em] text-ink-5"
-    >
-      {rotulos
-        .map((rotulo, i) => ({ rotulo, i }))
-        .filter(({ i }) => i % passo === 0 || i === ultimo)
-        .map(({ rotulo, i }) => (
-          <span
-            key={`${rotulo}-${i}`}
-            style={{
-              left: `${fracao(i)}%`,
-              // As pontas encostam na borda do bloco: centrá-las jogaria metade
-              // do rótulo para fora do card.
-              transform:
-                i === 0
-                  ? "translateX(0)"
-                  : i === ultimo
-                    ? "translateX(-100%)"
-                    : "translateX(-50%)",
-            }}
-            className="absolute top-0 whitespace-nowrap"
-          >
-            {rotulo}
-          </span>
-        ))}
-    </div>
+    </section>
   );
 }
 

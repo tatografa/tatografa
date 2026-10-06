@@ -1,12 +1,12 @@
 "use client";
 
-import { ChevronDown, LineChart, Table2 } from "lucide-react";
+import { ChartColumn, ChevronDown, Table2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
 import { classesDeBotao } from "@/components/ui";
 import {
-  linhaDoGrafico,
+  sessoesComCarga,
   LIMITE_DE_SESSOES,
   recortarIntervalo,
   type Intervalo,
@@ -75,7 +75,7 @@ export function TelaProgresso({
         />
         <Aba
           ativa={modo === "grafico"}
-          Icone={LineChart}
+          Icone={ChartColumn}
           rotulo={p.grafico}
           aoEscolher={() => setModo("grafico")}
         />
@@ -242,38 +242,28 @@ function ListaDeGraficos({
   );
 }
 
-/** A prévia do doc 05: a mesma linha, sem eixo, sem ponto e sem interação. */
+/** Quantas barras cabem na prévia de 72px. */
+const BARRAS_DA_PREVIA = 8;
+
+/**
+ * A prévia do doc 05: o mesmo gráfico, sem eixo, sem número e sem interação —
+ * as últimas sessões em pílulas, do zero, na mesma escala entre si.
+ */
 function Previa({ sessoes }: { sessoes: SessaoDoExercicio[] }) {
-  const linha = linhaDoGrafico(sessoes, 72, 26, 3);
-  if (!linha) return <span aria-hidden className="w-[72px] shrink-0" />;
+  const barras = sessoesComCarga(sessoes).slice(-BARRAS_DA_PREVIA);
+  if (!barras.length) return <span aria-hidden className="w-[72px] shrink-0" />;
+  const maior = Math.max(...barras.map((b) => b.cargaMaxima));
 
   return (
-    <svg
-      viewBox="0 0 72 26"
-      aria-hidden
-      className="w-[72px] shrink-0 overflow-visible"
-    >
-      {/* Um treino só não faz linha: um `M` sozinho não desenha nada, e a
-          prévia ficaria vazia como a de um exercício de peso corporal. */}
-      {linha.pontos.length === 1 ? (
-        <circle
-          cx={linha.pontos[0].x}
-          cy={linha.pontos[0].y}
-          r={3}
-          fill="var(--color-brand)"
+    <span aria-hidden className="flex h-[26px] w-[72px] shrink-0 items-end justify-end gap-[3px]">
+      {barras.map((b) => (
+        <span
+          key={b.sessaoId}
+          className="w-[6px] rounded-full bg-brand"
+          style={{ height: `max(${maior > 0 ? (b.cargaMaxima / maior) * 100 : 0}%, 6px)` }}
         />
-      ) : (
-        <path
-          d={linha.caminho}
-          fill="none"
-          stroke="var(--color-brand)"
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          vectorEffect="non-scaling-stroke"
-        />
-      )}
-    </svg>
+      ))}
+    </span>
   );
 }
 

@@ -175,121 +175,24 @@ export function recortarIntervalo(
 
 // ------------------------------------------------------------- gráfico -----
 
-export type PontoDaLinha = {
-  x: number;
-  y: number;
-  sessao: SessaoDoExercicio;
-  /** A carga daquele ponto. Só entram sessões com carga registrada. */
-  carga: number;
-};
-
-export type LinhaDoGrafico = {
-  pontos: PontoDaLinha[];
-  minimo: number;
-  maximo: number;
-  /** `d` do `<path>`, já pronto. */
-  caminho: string;
-};
+export type SessaoComCarga = SessaoDoExercicio & { cargaMaxima: number };
 
 /**
- * As coordenadas da linha de carga.
+ * As sessões que entram no gráfico de carga, na ordem do eixo.
  *
  * **O eixo é cronológico: mais antigo à esquerda, mais recente à direita.** As
  * listas da tela são "mais recente primeiro" (o doc 05 pede isso do acordeão e
  * da lista de exercícios), mas inverter o eixo do gráfico inverteria o
- * significado de uma linha subindo — e o card avisa que erro aqui mente sobre a
- * evolução do aluno.
+ * significado de uma barra crescendo — e o card avisa que erro aqui mente sobre
+ * a evolução do aluno.
  *
- * `largura` vai de borda a borda: o primeiro ponto em x=0 e o último em
- * x=largura, sem margem lateral (doc 05). A folga vertical existe para o ponto
- * do topo não ficar cortado pela borda do SVG.
- *
- * Devolve `null` quando não há nenhuma sessão com carga — exercício de peso
- * corporal, que aparece na planilha e não no gráfico.
+ * Só entram sessões com carga. Lista vazia é exercício de peso corporal, que
+ * aparece na planilha e não no gráfico.
  */
-export function linhaDoGrafico(
-  sessoes: SessaoDoExercicio[],
-  largura: number,
-  altura: number,
-  folga = 10,
-): LinhaDoGrafico | null {
-  const comCarga = [...sessoes]
-    .filter((s): s is SessaoDoExercicio & { cargaMaxima: number } =>
-      s.cargaMaxima !== null,
-    )
+export function sessoesComCarga(sessoes: SessaoDoExercicio[]): SessaoComCarga[] {
+  return sessoes
+    .filter((s): s is SessaoComCarga => s.cargaMaxima !== null)
     .sort((a, b) => -ordemDecrescente(a, b));
-
-  if (!comCarga.length) return null;
-
-  const cargas = comCarga.map((s) => s.cargaMaxima);
-  const minimo = Math.min(...cargas);
-  const maximo = Math.max(...cargas);
-
-  const topo = folga;
-  const base = altura - folga;
-
-  const pontos = comCarga.map((sessao, indice) => ({
-    // Um ponto só fica no meio: dividir por `length - 1` seria dividir por zero,
-    // e encostá-lo numa das bordas sugeriria um começo ou um fim que não existe.
-    x:
-      comCarga.length === 1
-        ? largura / 2
-        : (indice / (comCarga.length - 1)) * largura,
-    // Carga sempre igual dá altura zero de escala: a linha vai para o meio, que
-    // é honesto — "não mudou" —, em vez de estourar numa divisão por zero.
-    y:
-      maximo === minimo
-        ? (topo + base) / 2
-        : base - ((sessao.cargaMaxima - minimo) / (maximo - minimo)) * (base - topo),
-    sessao,
-    carga: sessao.cargaMaxima,
-  }));
-
-  const caminho = pontos
-    .map((p, i) => `${i === 0 ? "M" : "L"}${arredondar(p.x)},${arredondar(p.y)}`)
-    .join(" ");
-
-  return { pontos, minimo, maximo, caminho };
-}
-
-function arredondar(valor: number): number {
-  return Math.round(valor * 100) / 100;
-}
-
-/**
- * A tendência em palavras, para o `aria-label` do SVG.
- *
- * Um gráfico sem isto é um retângulo mudo para quem usa leitor de tela, e a
- * evolução é justamente o que a tela existe para contar.
- */
-export function tendenciaEmPalavras(
-  nome: string,
-  sessoes: SessaoDoExercicio[],
-): string {
-  const linha = linhaDoGrafico(sessoes, 100, 100);
-  if (!linha || linha.pontos.length === 0) {
-    return `${nome}: sem carga registrada.`;
-  }
-
-  const primeiro = linha.pontos[0].carga;
-  const ultimo = linha.pontos[linha.pontos.length - 1].carga;
-  const treinos = linha.pontos.length;
-  const quantos = treinos === 1 ? "1 treino" : `${treinos} treinos`;
-
-  if (treinos === 1) {
-    return `${nome}: ${formatarCarga(ultimo)} num treino registrado.`;
-  }
-
-  const variacao = ultimo - primeiro;
-  if (variacao === 0) {
-    return `${nome}: ${formatarCarga(ultimo)} em ${quantos}, sem variação.`;
-  }
-
-  const direcao = variacao > 0 ? "alta" : "queda";
-  return (
-    `${nome}: de ${formatarCarga(primeiro)} a ${formatarCarga(ultimo)} em ` +
-    `${quantos}, ${direcao} de ${formatarCarga(Math.abs(variacao))}.`
-  );
 }
 
 /** "67,5 kg". */

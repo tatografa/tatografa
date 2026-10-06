@@ -1,9 +1,10 @@
 "use client";
 
-import { ChartLine, ChevronRight, Sheet } from "lucide-react";
+import { ChartColumn, ChevronRight, Sheet } from "lucide-react";
 import Link from "next/link";
 import { useId, useState } from "react";
 
+import { CabecalhoDoGrafico, GraficoDeBarras } from "@/components/grafico-de-barras";
 import {
   METRICAS_DO_GRAFICO,
   barrasDoExercicio,
@@ -77,7 +78,7 @@ export function ProgramaAtual({
             {(
               [
                 ["planilha", p.planilha, Sheet],
-                ["grafico", p.grafico, ChartLine],
+                ["grafico", p.grafico, ChartColumn],
               ] as const
             ).map(([valor, rotulo, Icone]) => (
               <button
@@ -384,9 +385,9 @@ function Grafico({ treinos, historico }: { treinos: TreinoDaDivisao[]; historico
 }
 
 /**
- * O gráfico de barras de um exercício, em SVG à mão (02/09: nada de biblioteca
- * para um gráfico). O número de cada barra vai escrito em cima dela, e a frase
- * inteira no `aria-label` — o `title` de hover não é a única via para o dado.
+ * O gráfico de um exercício, no desenho de gráfico do produto
+ * (`GraficoDeBarras`, 06/10). O número de cada barra vai escrito em cima dela,
+ * e a frase inteira na `descricao` — a dica do mouse não é a única via.
  */
 function BarrasDoExercicio({
   nome,
@@ -402,72 +403,54 @@ function BarrasDoExercicio({
   const barras = historico
     ? barrasDoExercicio(historico.sessoes, metrica, formatoDa(f, p.serieN))
     : [];
-  const L = 300;
-  const A = 190;
-  const base = 158;
-  const topo = 22;
-  const maior = Math.max(...barras.map((b) => b.valor), 0) || 1;
-  const faixa = (L - 20) / Math.max(barras.length, 1);
-  const largura = Math.min(faixa * 0.55, 34);
   const rotulo = p.metricas[metrica].toLowerCase();
+  const ultima = barras[barras.length - 1];
+  const variacao = barras.length > 1 ? ultima.valor - barras[0].valor : 0;
 
   return (
-    <div className="rounded-[10px] bg-canvas px-3.5 py-3">
-      {/* A unidade vai no cabeçalho porque em cima da barra só cabe o número —
-          e no peso corporal a "carga" são repetições. */}
-      <p className="mb-2 flex items-baseline justify-between gap-2">
-        <span className="text-[12.5px] font-semibold text-ink">{nome}</span>
-        {barras.length ? (
-          <span className="text-[11px] text-ink-4">{preencher(p.em, { unidade: barras[0].unidade })}</span>
-        ) : null}
-      </p>
+    <div className="space-y-2 rounded-[10px] bg-canvas px-3.5 py-3">
+      <CabecalhoDoGrafico
+        compacto
+        Titulo="p"
+        titulo={nome}
+        // A unidade vai no cabeçalho, ao lado do último valor, porque em cima da
+        // barra só cabe o número — e no peso corporal a "carga" são repetições.
+        numero={ultima ? f.numero(ultima.valor) : undefined}
+        unidade={ultima?.unidade}
+        variacao={
+          barras.length > 1
+            ? {
+                sentido: variacao > 0 ? "sobe" : variacao < 0 ? "desce" : "neutro",
+                texto:
+                  variacao === 0
+                    ? p.semMudanca
+                    : preencher(p.noPeriodo, {
+                        sinal: variacao > 0 ? "+" : "−",
+                        n: f.numero(Math.abs(variacao)),
+                        unidade: ultima.unidade,
+                      }),
+              }
+            : undefined
+        }
+      />
       {barras.length ? (
-        <svg
-          viewBox={`0 0 ${L} ${A}`}
-          role="img"
-          aria-label={preencher(p.barras, {
+        <GraficoDeBarras
+          compacto
+          altura={130}
+          formatarMarca={f.numero}
+          descricao={preencher(p.barras, {
             nome,
             metrica: rotulo,
             valores: barras.map((b) => preencher(p.barra, { texto: b.texto, data: b.data })).join("; "),
           })}
-          className="block h-auto w-full"
-        >
-          <line x1={10} y1={base} x2={L - 10} y2={base} className="stroke-border" strokeWidth={1} />
-          {barras.map((b, i) => {
-            const h = ((base - topo) * b.valor) / maior;
-            const x = 10 + i * faixa + (faixa - largura) / 2;
-            return (
-              <g key={`${b.data}-${i}`}>
-                <rect
-                  x={x}
-                  y={base - h}
-                  width={largura}
-                  height={Math.max(h, 1)}
-                  rx={Math.min(largura / 2, h / 2)}
-                  className="fill-brand"
-                >
-                  <title>{`${b.data} — ${b.texto}`}</title>
-                </rect>
-                <text
-                  x={x + largura / 2}
-                  y={base - h - 6}
-                  textAnchor="middle"
-                  className="fill-ink-2 text-[10px] font-bold"
-                >
-                  {f.numero(b.valor)}
-                </text>
-                <text
-                  x={10 + i * faixa + faixa / 2}
-                  y={base + 18}
-                  textAnchor="middle"
-                  className="fill-ink-4 text-[10.5px] font-semibold"
-                >
-                  {b.data}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
+          barras={barras.map((b, i) => ({
+            chave: `${b.data}-${i}`,
+            valor: b.valor,
+            rotulo: f.numero(b.valor),
+            eixo: b.data,
+            dica: { titulo: b.data, texto: b.texto },
+          }))}
+        />
       ) : (
         <p className="py-3 text-center text-[12px] text-ink-4 italic">{p.nenhumaExecucao}</p>
       )}
