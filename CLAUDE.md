@@ -686,7 +686,10 @@ Provar que funciona sem o Otávio ler código:
   controle derrubam o valor. **O que a análise achou e ficou para depois:** proteção
   contra senha vazada desligada (exige o plano Pro), lista de espera sem limite de
   envio, funções `security invoker` do painel executáveis por `anon` (devolvem vazio),
-  páginas sem CSP, 7 arquivos de prova sem dono no storage e a 0045 pendente.
+  páginas sem CSP e a 0045 pendente. Os 7 arquivos de prova sem dono no storage
+  (pastas `PROVA-DESCARTAVEL` e `bbbbbbbb-…`, de 13-14/09) foram apagados no mesmo
+  dia: eram só linha em `storage.objects`, sem tamanho — nunca houve arquivo por trás,
+  então liberar a trava `storage.allow_delete_query` na transação não deixa órfão.
 - **[2026-10-02, do teste de campo]** **Os cinco botões do painel de macrociclos não
   faziam nada no caso comum** — Criar e ativar, Ativar (dois), Arquivar e Duplicar,
   desde o redesenho de 27/09. Todos passam por `FormularioSeguro`, que cancelava o envio,
