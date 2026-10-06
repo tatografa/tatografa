@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { destinoSeguro } from "@/lib/domain/destino";
 import type { Idioma } from "@/lib/domain/idioma";
 import { erroDaSenha } from "@/lib/domain/senha";
 import { TEXTOS_DA_AUTENTICACAO } from "@/lib/i18n/autenticacao";
@@ -82,22 +83,6 @@ function errosDe(erro: z.ZodError): EstadoAuth["errosPorCampo"] {
     if (campo && !saida[campo]) saida[campo] = problema.message;
   }
   return saida;
-}
-
-/**
- * Só aceita caminho interno do painel ou do app como destino pós-login. Sem
- * isso, um `?proximo=https://site-falso` transforma o login em redirecionador
- * aberto. A comparação é por segmento inteiro: `/apple` não é `/app`.
- */
-function destinoSeguro(valor: FormDataEntryValue | null): string {
-  const caminho = typeof valor === "string" ? valor : "";
-  const interno = ["/painel", "/app"].some(
-    (raiz) =>
-      caminho === raiz ||
-      caminho.startsWith(`${raiz}/`) ||
-      caminho.startsWith(`${raiz}?`),
-  );
-  return interno ? caminho : "/painel";
 }
 
 export async function entrar(

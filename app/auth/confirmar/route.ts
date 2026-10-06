@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 
+import { destinoSeguro } from "@/lib/domain/destino";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -36,11 +37,4 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.redirect(new URL("/entrar?erro=link-invalido", origin));
-}
-
-/** Só caminho interno — um `proximo` externo viraria redirecionador aberto. */
-function destinoSeguro(valor: string | null): string {
-  return valor && valor.startsWith("/") && !valor.startsWith("//")
-    ? valor
-    : "/painel";
 }

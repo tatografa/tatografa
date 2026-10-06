@@ -667,6 +667,26 @@ Provar que funciona sem o Otávio ler código:
   uma vez. Isto também fecha a dívida de 17/09: a senha fraca não passa mais num POST
   direto. **Mudou lá, muda aqui** — e o inverso. Quem já tem senha mais simples continua
   entrando; a regra só vale ao criar ou trocar.
+- **[2026-10-06, da análise de segurança]** **Nona vez do mesmo formato: o `id` do aluno
+  se reescrevia pelo update** (migration 0046). A 0019 trancou o `insert` de `students`
+  nas duas pontas; o `update` continuava conferindo só o `trainer_id`. O personal pegava
+  uma linha da carteira sem nada pendurado e trocava o `id` pelo de outra conta — que
+  virava aluno dele sem convite. Valia contra toda conta sem linha de aluno (outro
+  personal, aluno excluído, cujas fotos de reavaliação continuam na pasta com o id
+  dele). Provado antes da correção. O gatilho `students_id_nao_muda` recusa trocar o
+  `id` para qualquer um — `students.id` **é** o id de `auth.users`, e nenhum fluxo o
+  troca. Nove provas: três de burla (personal em linha vazia, personal em linha com
+  histórico, aluno no próprio id) e seis de caminho legítimo (editar nome dos dois
+  lados, pausar e reativar, meta de peso da 0034).
+- **[2026-10-06, da análise de segurança]** **`/auth/confirmar` era redirecionador
+  aberto.** A checagem "começa com `/` e não com `//`" deixava passar `/\site.com`, que
+  o navegador lê como `https://site.com/`. Agora o link do e-mail e o login usam a
+  mesma regra (`destinoSeguro`, `lib/domain/destino.ts`): só debaixo de `/painel`,
+  `/app` e `/recuperar/nova-senha`, por segmento inteiro, e `\` ou caractere de
+  controle derrubam o valor. **O que a análise achou e ficou para depois:** proteção
+  contra senha vazada desligada (exige o plano Pro), lista de espera sem limite de
+  envio, funções `security invoker` do painel executáveis por `anon` (devolvem vazio),
+  páginas sem CSP, 7 arquivos de prova sem dono no storage e a 0045 pendente.
 - **[2026-10-02, do teste de campo]** **Os cinco botões do painel de macrociclos não
   faziam nada no caso comum** — Criar e ativar, Ativar (dois), Arquivar e Duplicar,
   desde o redesenho de 27/09. Todos passam por `FormularioSeguro`, que cancelava o envio,
