@@ -30,6 +30,14 @@ const INICIAL: EstadoDoAvatar = {};
  * arquivo. Um `capture="user"` forçava a câmera frontal e tirava o álbum do
  * caminho — pedido do Otávio (07/10). A foto do treino segue com
  * `capture="environment"` porque lá o momento é o do treino na academia.
+ *
+ * **`accept` lista os três tipos do bucket, não `image/*`.** O álbum do
+ * iPhone serve a foto em HEIC, e com `image/*` o Safari passa o arquivo cru
+ * — o `createImageBitmap` não decodifica, e o produto mostrava "Não
+ * conseguimos ler essa imagem". Com os três tipos listados, o iOS **converte
+ * HEIC em JPEG na própria entrega do arquivo** antes de ele chegar ao app.
+ * No feed o input usa `capture="environment"` + `image/*`, e aí o iOS
+ * converte sozinho — por isso aquela tela nunca sentiu o defeito.
  */
 export function FotoDePerfil({
   nome,
@@ -146,7 +154,7 @@ export function FotoDePerfil({
             <input
               ref={entrada}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               className="sr-only"
               onChange={(e) => aoEscolher(e.currentTarget.files?.[0] ?? undefined)}
             />

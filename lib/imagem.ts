@@ -25,40 +25,59 @@ const LADO_MAXIMO = 1600;
 const QUALIDADE = 0.82;
 
 export async function prepararFoto(arquivo: File): Promise<File> {
-  const bitmap = await carregar(arquivo);
+  const { imagem, revogar } = await carregar(arquivo);
+  try {
+    const largura0 =
+      imagem instanceof HTMLImageElement ? imagem.naturalWidth : imagem.width;
+    const altura0 =
+      imagem instanceof HTMLImageElement ? imagem.naturalHeight : imagem.height;
+    if (!largura0 || !altura0) throw new Error("imagem sem dimensões");
 
-  const escala = Math.min(1, LADO_MAXIMO / Math.max(bitmap.width, bitmap.height));
-  const largura = Math.round(bitmap.width * escala);
-  const altura = Math.round(bitmap.height * escala);
+    const escala = Math.min(1, LADO_MAXIMO / Math.max(largura0, altura0));
+    const largura = Math.round(largura0 * escala);
+    const altura = Math.round(altura0 * escala);
 
-  const canvas = document.createElement("canvas");
-  canvas.width = largura;
-  canvas.height = altura;
+    const canvas = document.createElement("canvas");
+    canvas.width = largura;
+    canvas.height = altura;
 
-  const contexto = canvas.getContext("2d");
-  if (!contexto) throw new Error("sem canvas");
+    const contexto = canvas.getContext("2d");
+    if (!contexto) throw new Error("sem canvas");
 
-  contexto.fillStyle = "#ffffff";
-  contexto.fillRect(0, 0, largura, altura);
-  contexto.drawImage(bitmap, 0, 0, largura, altura);
+    contexto.fillStyle = "#ffffff";
+    contexto.fillRect(0, 0, largura, altura);
+    contexto.drawImage(imagem, 0, 0, largura, altura);
 
-  const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, "image/jpeg", QUALIDADE),
-  );
-  if (!blob) throw new Error("sem blob");
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", QUALIDADE),
+    );
+    if (!blob) throw new Error("sem blob");
 
-  return new File([blob], "treino.jpg", { type: "image/jpeg" });
+    return new File([blob], "foto.jpg", { type: "image/jpeg" });
+  } finally {
+    // Só agora: o `drawImage` já leu os pixels.
+    revogar();
+  }
 }
 
 /**
  * `createImageBitmap` é o caminho rápido e não precisa de DOM, mas nem todo
  * navegador aceita todo formato por ele. O `<img>` com object URL é o plano B,
- * e é ele que costuma dar conta do HEIC no Safari.
+ * e é ele que costuma dar conta do HEIC convertido do Safari.
+ *
+ * Devolve a imagem **e** o `URL.revokeObjectURL` que o chamador precisa
+ * disparar — **depois** de desenhar no canvas. Revogar antes é o defeito
+ * clássico que faz o `drawImage` pintar o fundo branco e nenhum pixel: o
+ * HTMLImageElement já teve `onload`, mas o Safari só termina de decodificar
+ * no primeiro `drawImage` que o lê, e aí o blob já não está mais lá.
  */
-async function carregar(arquivo: File): Promise<ImageBitmap | HTMLImageElement> {
+async function carregar(
+  arquivo: File,
+): Promise<{ imagem: ImageBitmap | HTMLImageElement; revogar: () => void }> {
   if (typeof createImageBitmap === "function") {
     try {
-      return await createImageBitmap(arquivo);
+      const imagem = await createImageBitmap(arquivo);
+      return { imagem, revogar: () => imagem.close?.() };
     } catch {
       // Cai no plano B.
     }
@@ -66,13 +85,20 @@ async function carregar(arquivo: File): Promise<ImageBitmap | HTMLImageElement> 
 
   const url = URL.createObjectURL(arquivo);
   try {
-    return await new Promise<HTMLImageElement>((resolve, reject) => {
+    const imagem = await new Promise<HTMLImageElement>((resolve, reject) => {
       const img = new Image();
       img.onload = () => resolve(img);
       img.onerror = () => reject(new Error("imagem ilegível"));
       img.src = url;
     });
-  } finally {
+    // `img.decode()` força o Safari a terminar de decodificar antes de o
+    // chamador desenhar; sem ele, aparelho antigo pintou canvas em branco.
+    if (typeof imagem.decode === "function") {
+      try { await imagem.decode(); } catch { /* alguns formatos não implementam */ }
+    }
+    return { imagem, revogar: () => URL.revokeObjectURL(url) };
+  } catch (erro) {
     URL.revokeObjectURL(url);
+    throw erro;
   }
 }
