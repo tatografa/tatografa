@@ -30,6 +30,7 @@ export function IdentidadeDoAluno({
   aluno,
   resumo,
   pesoInicial,
+  avatarUrl,
   ehVoce,
   idioma = "pt",
 }: {
@@ -42,6 +43,8 @@ export function IdentidadeDoAluno({
    * ele nunca respondeu uma reavaliação: aí o cadastro é o que existe.
    */
   pesoInicial: number | null;
+  /** URL assinada do avatar do aluno; nula = sem foto, mostra as iniciais. */
+  avatarUrl: string | null;
   /** A linha do personal que treina a si mesmo: ele não pausa o próprio app. */
   ehVoce: boolean;
 }) {
@@ -103,12 +106,21 @@ export function IdentidadeDoAluno({
         className="space-y-4 rounded-[12px] border border-border bg-surface p-6"
       >
         <div className="flex flex-col items-center gap-2 text-center">
-          <span
-            aria-hidden
-            className="flex size-[72px] items-center justify-center rounded-full bg-brand-soft text-[24px] font-bold text-brand"
-          >
-            {iniciaisDe(aluno.name)}
-          </span>
+          {avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={avatarUrl}
+              alt=""
+              className="size-[72px] rounded-full object-cover"
+            />
+          ) : (
+            <span
+              aria-hidden
+              className="flex size-[72px] items-center justify-center rounded-full bg-brand-soft text-[24px] font-bold text-brand"
+            >
+              {iniciaisDe(aluno.name)}
+            </span>
+          )}
           <h1 className="text-[18px] leading-tight font-bold tracking-[-0.01em] text-ink">
             {aluno.name}
           </h1>

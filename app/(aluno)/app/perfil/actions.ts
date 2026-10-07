@@ -103,3 +103,114 @@ export async function salvarPerfil(
   revalidatePath("/app", "layout");
   return { sucesso: true };
 }
+
+
+/* ------------------------------------------------------- foto de perfil --- */
+
+/**
+ * Os tipos que o bucket `avatares` aceita (migration 0048) e a extensão de
+ * cada um. Repetidos aqui como mensagem em português antes de subir o arquivo
+ * — a lista do bucket é a que vale, porque um cliente adulterado não passa
+ * pelo formulário.
+ */
+const EXTENSAO_DO_AVATAR: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+
+/** O mesmo teto do bucket (migration 0048). */
+const LIMITE_DO_AVATAR = 2 * 1024 * 1024;
+
+export type EstadoDoAvatar = { erro?: string; sucesso?: boolean };
+
+/**
+ * O aluno troca ou adiciona a foto de perfil.
+ *
+ * A **ordem importa**: sobe o arquivo novo, atualiza `students.avatar_path`,
+ * **só depois** apaga o antigo. Ao contrário, se o update falhar o aluno fica
+ * sem foto nenhuma — e o passo que o aluno executa é trocar, não apagar.
+ *
+ * O nome do arquivo leva um sufixo aleatório a cada troca para o navegador
+ * não servir a foto velha do cache quando a URL assinada for a mesma por
+ * segundos. Nome fixo (`<id>/avatar.jpg`) parece mais limpo e seria o pior
+ * dos mundos: a URL assinada aponta para a mesma chave, e o navegador mostra
+ * a foto antiga até o cache expirar.
+ */
+export async function salvarFotoDePerfil(
+  _anterior: EstadoDoAvatar,
+  formData: FormData,
+): Promise<EstadoDoAvatar> {
+  const { t } = await textosDoApp();
+  const m = t.perfil.perfil.foto;
+
+  const arquivo = formData.get("foto");
+  if (!(arquivo instanceof File) || arquivo.size === 0) {
+    return { erro: m.naoLeu };
+  }
+  if (!EXTENSAO_DO_AVATAR[arquivo.type]) return { erro: m.tipo };
+  if (arquivo.size > LIMITE_DO_AVATAR) return { erro: m.tamanho };
+
+  const { student } = await requireStudent();
+  const supabase = await createClient();
+
+  // A primeira pasta do caminho é o id do dono — é o que a policy de escrita
+  // confere, sem consultar tabela nenhuma. Nome aleatório contra cache.
+  const nomeNovo = `${student.id}/${crypto.randomUUID()}.${EXTENSAO_DO_AVATAR[arquivo.type]}`;
+
+  const { error: erroDoUpload } = await supabase.storage
+    .from("avatares")
+    .upload(nomeNovo, await arquivo.arrayBuffer(), {
+      contentType: arquivo.type,
+      upsert: false,
+    });
+  if (erroDoUpload) return { erro: m.falha };
+
+  const antigo = student.avatar_path;
+  const { error } = await supabase
+    .from("students")
+    .update({ avatar_path: nomeNovo })
+    .eq("id", student.id);
+
+  if (error) {
+    // Rollback do upload: evita arquivo órfão no bucket.
+    await supabase.storage.from("avatares").remove([nomeNovo]);
+    return { erro: m.falha };
+  }
+
+  if (antigo && antigo !== nomeNovo) {
+    await supabase.storage.from("avatares").remove([antigo]);
+  }
+
+  // `layout` para o cabeçalho do perfil e o avatar da ficha do personal
+  // envelhecerem juntos.
+  revalidatePath("/app", "layout");
+  revalidatePath(`/painel/alunos/${student.id}`);
+  return { sucesso: true };
+}
+
+/**
+ * O aluno apaga a foto. **Ordem invertida da troca**: zera a coluna primeiro,
+ * depois apaga o arquivo. Se o remove do storage falhar, o produto já mostra
+ * as iniciais e o arquivo vira órfão — menos ruim do que o aluno ver a foto
+ * velha porque o storage apagou e o update não.
+ */
+export async function apagarFotoDePerfil(): Promise<EstadoDoAvatar> {
+  const { t } = await textosDoApp();
+  const m = t.perfil.perfil.foto;
+  const { student } = await requireStudent();
+  if (!student.avatar_path) return { sucesso: true };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("students")
+    .update({ avatar_path: null })
+    .eq("id", student.id);
+  if (error) return { erro: m.falha };
+
+  await supabase.storage.from("avatares").remove([student.avatar_path]);
+
+  revalidatePath("/app", "layout");
+  revalidatePath(`/painel/alunos/${student.id}`);
+  return { sucesso: true };
+}

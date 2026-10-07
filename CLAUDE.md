@@ -699,6 +699,49 @@ Provar que funciona sem o Otávio ler código:
   (pastas `PROVA-DESCARTAVEL` e `bbbbbbbb-…`, de 13-14/09) foram apagados no mesmo
   dia: eram só linha em `storage.objects`, sem tamanho — nunca houve arquivo por trás,
   então liberar a trava `storage.allow_delete_query` na transação não deixa órfão.
+- **[2026-10-07, pedido do Otávio]** **O aluno põe foto no perfil, e ela aparece
+  para o personal.** Era a quarta coluna com a intenção escrita no schema e
+  nenhuma tela preenchendo (depois de `posts.session_id`, `trainers.phone` e
+  `workout_sessions.notes`). `students.avatar_url` virou `students.avatar_path`
+  (migration 0048): a coluna guarda o CAMINHO do arquivo no bucket, não a URL,
+  padrão de `posts.photo_path` e dos três caminhos de `assessments` — bucket
+  privado só se lê por URL assinada, e o path é o que fica fixo. **Bucket próprio
+  `avatares`**, não `treinos`: lá a leitura passa por `posts.photo_path` + visibilidade
+  do post, aqui a foto é identidade do aluno. Limite de 2 MB (metade do `treinos`),
+  JPEG/PNG/WebP. Policy de escrita: dono só escreve na própria pasta (`<student_id>/…`,
+  mesma trava de `treinos`). Policy de leitura: dono, personal do dono, colega de
+  turma do dono — a mesma turma do `pode_ver_post` com visibilidade pública (14/09).
+  **O CAMINHO guarda o nome aleatório por versão** (`crypto.randomUUID`), não um
+  nome fixo como `<id>/avatar.jpg`: a URL assinada vive uma hora, e com nome fixo
+  o navegador serviria a foto velha do cache até a assinatura expirar.
+  **Dois defeitos achados ao escrever a policy, e os dois na mesma política de
+  leitura** (migration 0049, **pendente** — como a 0045, o MCP do Supabase deu
+  timeouts repetidos no `drop policy / create policy` e a função helper
+  `private.turma_do_aluno` ficou criada mas a policy ainda é a antiga):
+  **(1)** `exists (select 1 from students s where s.id::text = (storage.foldername(name))[1])`
+  resolveu o `name` solto como `students.name` — a tabela daquele `from` tem
+  coluna `name` —, e a policy virou `storage.foldername(student.name)[1]`, que
+  lê a coluna errada. Nem o personal via a foto do aluno. **(2)** Mesmo com a
+  qualificação certa, o colega de turma não veria: `students_select` devolve
+  ao aluno **só a própria linha**, então `exists ... from students` dentro da
+  policy some para ele. O helper `private.turma_do_aluno(text)` resolve as duas:
+  é `security definer`, aceita texto (nome de pasta pode ser qualquer coisa,
+  `cast ... as uuid` estouraria), devolve nulo em id torto e o `trainer_id` do
+  dono em id válido. **Lição:** nome de coluna que colide com a tabela do `from`
+  dentro de uma policy é bomba silenciosa — o planner não avisa.
+  **Aplicar a 0049 pelo SQL Editor** antes de o aluno trocar a foto; sem ela, só
+  o próprio aluno enxerga a foto (o personal fica com as iniciais).
+  **Onde a foto aparece hoje**: cabeçalho do perfil do aluno no app e o `IdentidadeDoAluno`
+  da ficha do aluno no painel (`avatarUrl` chega pronta, URL assinada por `urlDoAvatar`
+  em `lib/queries/avatar.ts`). Deixei de fora, por escopo: a home do aluno, a tabela
+  de alunos do painel, os cartões de atividade e o pé da barra do painel — todas
+  ainda com as iniciais. **Troca é imediata e sem botão "Salvar"**: `prepararFoto` encolhe
+  a foto no aparelho (o mesmo do feed e da reavaliação), a prévia local aparece e
+  o formulário escondido envia na hora com `requestSubmit`. **A ordem importa**: sobe
+  o novo, atualiza `avatar_path`, **só depois** apaga o antigo; se o update falha, o
+  upload é desfeito; se o remove falha, sobra arquivo órfão (menos ruim que ficar sem
+  foto). **Remover é confirmação em folha de baixo**, pelo mesmo motivo das três fotos
+  da reavaliação (15/09): tirar foto do perfil é decisão com peso.
 - **[2026-10-06, pedido do Otávio]** **Todo gráfico do produto segue um desenho só**
   (`GraficoDeBarras` e `CabecalhoDoGrafico`, `components/grafico-de-barras.tsx`), o da
   referência "Evolução mensal de alunos": barras em pílula com o número em cima, cinco

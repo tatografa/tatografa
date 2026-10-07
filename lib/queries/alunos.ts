@@ -110,6 +110,7 @@ export type AlunoDaFicha = Pick<
   | "state"
   | "biological_profile"
   | "weight_goal_kg"
+  | "avatar_path"
 >;
 
 /** Os dois números do topo da ficha (doc 06 §4). */
@@ -165,7 +166,7 @@ export async function lerAluno(id: string): Promise<AlunoDaFicha | null> {
   const { data, error } = await supabase
     .from("students")
     .select(
-      "id, name, email, goal, experience_level, status, created_at, onboarded_at, weight_kg, height_cm, birth_date, phone, city, state, biological_profile, weight_goal_kg",
+      "id, name, email, goal, experience_level, status, created_at, onboarded_at, weight_kg, height_cm, birth_date, phone, city, state, biological_profile, weight_goal_kg, avatar_path",
     )
     .eq("id", id)
     .maybeSingle();

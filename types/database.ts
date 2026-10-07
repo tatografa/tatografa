@@ -550,7 +550,7 @@ export type Database = {
       }
       students: {
         Row: {
-          avatar_url: string | null
+          avatar_path: string | null
           biological_profile:
             | Database["public"]["Enums"]["biological_profile"]
             | null
@@ -574,7 +574,7 @@ export type Database = {
           weight_kg: number | null
         }
         Insert: {
-          avatar_url?: string | null
+          avatar_path?: string | null
           biological_profile?:
             | Database["public"]["Enums"]["biological_profile"]
             | null
@@ -598,7 +598,7 @@ export type Database = {
           weight_kg?: number | null
         }
         Update: {
-          avatar_url?: string | null
+          avatar_path?: string | null
           biological_profile?:
             | Database["public"]["Enums"]["biological_profile"]
             | null

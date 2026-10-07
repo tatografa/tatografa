@@ -57,6 +57,8 @@ export type FichaDoAlunoProps = {
   /** Os controles do post são componentes cliente com Server Action; a página os monta. */
   curtir: (post: PostDaCarteira) => React.ReactNode;
   responder: (post: PostDaCarteira) => React.ReactNode;
+  /** URL assinada do avatar do aluno. Nula = iniciais. */
+  avatarUrl: string | null;
   /** Para os rótulos "Hoje"/"Ontem"; parâmetro para a tela abrir com data fixa. */
   /** A linha do personal que treina a si mesmo (13/09): não oferece pausar. */
   ehVoce?: boolean;
@@ -97,6 +99,7 @@ export function FichaDoAluno({
   reavaliacoes,
   observacoes,
   resumo,
+  avatarUrl,
   curtir,
   responder,
   ehVoce = false,
@@ -147,6 +150,7 @@ export function FichaDoAluno({
               aluno={aluno}
               resumo={resumo}
               pesoInicial={pesoInicial}
+              avatarUrl={avatarUrl}
               ehVoce={ehVoce}
             />
           </div>

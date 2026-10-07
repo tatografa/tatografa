@@ -4,6 +4,23 @@ import type { Idioma } from "@/lib/domain/idioma";
 const pt = {
   perfil: {
     treinaCom: "Treina com {nome}",
+    foto: {
+      titulo: "Sua foto",
+      apoio: "Aparece aqui e para o seu personal.",
+      escolher: "Trocar foto",
+      adicionar: "Adicionar foto",
+      remover: "Remover foto",
+      preparando: "Preparando…",
+      removendo: "Removendo…",
+      enviando: "Enviando…",
+      previa: "Prévia da nova foto",
+      tipo: "A foto precisa ser JPEG, PNG ou WebP.",
+      tamanho: "A foto está grande demais. Tente uma com menos de 2 MB.",
+      naoLeu: "Não conseguimos ler essa imagem.",
+      falha: "Não conseguimos trocar a foto agora. Tente de novo.",
+      confirmarRemover: "Remover a sua foto?",
+      removerTexto: "Você volta a aparecer com as iniciais do nome. Pode trocar de novo quando quiser.",
+    },
     reavaliacao: "Reavaliação",
     reavaliacaoApoio: "Medidas, fotos e a comparação com a anterior",
     sairTexto:
@@ -136,6 +153,23 @@ export type TextosDoPerfil = typeof pt;
 const en: TextosDoPerfil = {
   perfil: {
     treinaCom: "Trains with {nome}",
+    foto: {
+      titulo: "Your photo",
+      apoio: "Shows up here and for your trainer.",
+      escolher: "Change photo",
+      adicionar: "Add photo",
+      remover: "Remove photo",
+      preparando: "Preparing…",
+      removendo: "Removing…",
+      enviando: "Uploading…",
+      previa: "Preview of the new photo",
+      tipo: "The photo must be JPEG, PNG or WebP.",
+      tamanho: "The photo is too large. Try one under 2 MB.",
+      naoLeu: "We couldn't read that image.",
+      falha: "We couldn't change the photo right now. Try again.",
+      confirmarRemover: "Remove your photo?",
+      removerTexto: "You'll go back to showing your initials. You can change it again whenever you like.",
+    },
     reavaliacao: "Reassessment",
     reavaliacaoApoio: "Measurements, photos and the comparison with the previous one",
     sairTexto:
@@ -270,6 +304,23 @@ const en: TextosDoPerfil = {
 const es: TextosDoPerfil = {
   perfil: {
     treinaCom: "Entrena con {nome}",
+    foto: {
+      titulo: "Tu foto",
+      apoio: "Aparece aquí y para tu personal.",
+      escolher: "Cambiar foto",
+      adicionar: "Agregar foto",
+      remover: "Quitar foto",
+      preparando: "Preparando…",
+      removendo: "Quitando…",
+      enviando: "Subiendo…",
+      previa: "Vista previa de la nueva foto",
+      tipo: "La foto tiene que ser JPEG, PNG o WebP.",
+      tamanho: "La foto es demasiado grande. Prueba una de menos de 2 MB.",
+      naoLeu: "No pudimos leer esa imagen.",
+      falha: "No pudimos cambiar la foto ahora. Inténtalo de nuevo.",
+      confirmarRemover: "¿Quitar tu foto?",
+      removerTexto: "Vuelves a aparecer con las iniciales del nombre. Puedes cambiarla de nuevo cuando quieras.",
+    },
     reavaliacao: "Reevaluación",
     reavaliacaoApoio: "Medidas, fotos y la comparación con la anterior",
     sairTexto:

@@ -9,7 +9,10 @@ import { requireStudent } from "@/lib/auth/session";
 import { textosDoApp } from "@/lib/i18n/app/servidor";
 import { preencher } from "@/lib/i18n/texto";
 
+import { urlDoAvatar } from "@/lib/queries/avatar";
+
 import { FormularioDePerfil } from "./formulario-de-perfil";
+import { FotoDePerfil } from "./foto-de-perfil";
 
 /**
  * Perfil do aluno: ver, **corrigir** e sair.
@@ -31,26 +34,23 @@ export default async function PerfilDoAluno() {
     requireStudent(),
     textosDoApp(),
   ]);
+  const avatarUrl = await urlDoAvatar(student.avatar_path);
   const p = t.perfil.perfil;
 
   return (
     <div className="space-y-4">
-      <header className="flex items-center gap-3">
-        <span
-          aria-hidden
-          className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-canvas-sunken text-[18px] font-bold text-ink-2"
-        >
-          {student.name.trim().charAt(0).toUpperCase()}
-        </span>
-        <div className="min-w-0">
-          <h1 className="truncate text-[21px] font-extrabold tracking-[-0.02em] text-ink">
-            {student.name}
-          </h1>
-          <p className="truncate text-[13px] text-ink-4">
-            {preencher(p.treinaCom, { nome: personal.name })}
-          </p>
-        </div>
+      <header className="space-y-1">
+        <h1 className="truncate text-[21px] font-extrabold tracking-[-0.02em] text-ink">
+          {student.name}
+        </h1>
+        <p className="truncate text-[13px] text-ink-4">
+          {preencher(p.treinaCom, { nome: personal.name })}
+        </p>
       </header>
+
+      <Card>
+        <FotoDePerfil nome={student.name} avatarUrl={avatarUrl} />
+      </Card>
 
       <Card>
         <FormularioDePerfil aluno={student} />

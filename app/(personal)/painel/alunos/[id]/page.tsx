@@ -5,6 +5,7 @@ import {
   ResponderDoPainel,
 } from "@/app/(personal)/painel/social/controles-do-post";
 import { FichaDoAluno } from "@/components/personal/ficha-do-aluno";
+import { urlDoAvatar } from "@/lib/queries/avatar";
 import { requireTrainer } from "@/lib/auth/session";
 import { textosDoPainel } from "@/lib/i18n/painel/servidor";
 import { montarAtividade } from "@/lib/domain/atividade";
@@ -68,9 +69,10 @@ export default async function AlunoDoPainel(
   const { itens } = montarAtividade(sessoes, posts);
   const semPost = itens.flatMap((i) => (i.tipo === "sessao" && !i.post ? [i.sessao.id] : []));
 
-  const [treinos, blocos] = await Promise.all([
+  const [treinos, blocos, avatarUrl] = await Promise.all([
     programa ? lerTreinosDoPrograma(programa.id) : Promise.resolve([]),
     treinosDasSessoes(semPost, idioma),
+    urlDoAvatar(aluno.avatar_path),
   ]);
 
   return (
@@ -90,6 +92,7 @@ export default async function AlunoDoPainel(
       reavaliacoes={reavaliacoes}
       observacoes={observacoes}
       resumo={resumo}
+      avatarUrl={avatarUrl}
       curtir={(post) => (
         <CurtirDoPainel postId={post.id} curtidas={post.curtidas} curtiPor={post.curtiPor} />
       )}
