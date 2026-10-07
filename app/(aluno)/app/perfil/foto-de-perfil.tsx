@@ -25,9 +25,11 @@ const INICIAL: EstadoDoAvatar = {};
  * tabela. O `accept="image/*"` aceita tudo que o navegador decodifica porque
  * é a conversão que normaliza; o bucket (3 tipos) é a trava do servidor.
  *
- * **`capture="user"`** abre a câmera frontal direto no celular, e no desktop
- * o navegador ignora e cai no seletor. Avatar não é foto de treino: faz
- * sentido abrir pela selfie.
+ * **Sem `capture`**, de propósito: no celular o navegador pergunta se o aluno
+ * quer tirar uma foto nova ou escolher do álbum, e no PC abre o seletor de
+ * arquivo. Um `capture="user"` forçava a câmera frontal e tirava o álbum do
+ * caminho — pedido do Otávio (07/10). A foto do treino segue com
+ * `capture="environment"` porque lá o momento é o do treino na academia.
  */
 export function FotoDePerfil({
   nome,
@@ -145,7 +147,6 @@ export function FotoDePerfil({
               ref={entrada}
               type="file"
               accept="image/*"
-              capture="user"
               className="sr-only"
               onChange={(e) => aoEscolher(e.currentTarget.files?.[0] ?? undefined)}
             />
