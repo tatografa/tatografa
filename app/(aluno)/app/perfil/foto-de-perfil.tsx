@@ -1,7 +1,7 @@
 "use client";
 
 import { Camera, Trash2 } from "lucide-react";
-import { useActionState, useEffect, useRef, useState } from "react";
+import { startTransition, useActionState, useEffect, useRef, useState } from "react";
 
 import { useIdioma } from "@/components/aluno/idioma-do-app";
 import { Button } from "@/components/ui";
@@ -52,7 +52,6 @@ export function FotoDePerfil({
   const [salvar, acaoSalvar, salvando] = useActionState(salvarFotoDePerfil, INICIAL);
   const [remover, acaoRemover, removendo] = useActionState(apagarFotoDePerfil, INICIAL);
 
-  const formSalvar = useRef<HTMLFormElement>(null);
   const entrada = useRef<HTMLInputElement>(null);
   const [previa, setPrevia] = useState<string | null>(null);
   const [preparando, setPreparando] = useState(false);
@@ -75,23 +74,16 @@ export function FotoDePerfil({
         if (anterior) URL.revokeObjectURL(anterior);
         return URL.createObjectURL(reduzida);
       });
-      const transferencia = new DataTransfer();
-      transferencia.items.add(reduzida);
-      if (entrada.current) entrada.current.files = transferencia.files;
-      // Envia imediatamente: trocar foto é um gesto só, não precisa de botão
-      // "Salvar" depois. Mesmo padrão do compositor do feed quando o aluno
-      // confirma.
-      formSalvar.current?.requestSubmit();
-    } catch (erro) {
+      // A foto reduzida vai direto para a ação. Antes ia por um <form> escondido
+      // com requestSubmit — e o campo de arquivo morava fora dele, sem `name`:
+      // o servidor recebia o formulário vazio e respondia "não lemos a imagem".
+      // Envia na hora: trocar foto é um gesto só, sem botão "Salvar".
+      const dados = new FormData();
+      dados.set("foto", reduzida);
+      startTransition(() => acaoSalvar(dados));
+    } catch {
       if (entrada.current) entrada.current.value = "";
-      // Diagnóstico vai à tela: o álbum do iPhone vem servindo foto que o
-      // `prepararFoto` não decodifica, e sem o detalhe do arquivo (nome, tipo,
-      // tamanho) e do erro lançado o produto só diz "não lemos" — e eu fico
-      // chutando. Sai assim que a causa aparecer.
-      const tipo = arquivo.type || "sem tipo";
-      const kb = Math.round(arquivo.size / 1024);
-      const mensagem = erro instanceof Error ? erro.message : String(erro);
-      setErroLocal(`${m.naoLeu} [${arquivo.name} · ${tipo} · ${kb} kB · ${mensagem}]`);
+      setErroLocal(m.naoLeu);
     } finally {
       setPreparando(false);
     }
@@ -183,14 +175,6 @@ export function FotoDePerfil({
           </p>
         ) : null}
       </div>
-
-      {/*
-        Form escondido: o input de arquivo mora na label acima e dispara o
-        requestSubmit() daqui depois que `prepararFoto` troca o arquivo pelo
-        reduzido. Sem este form intermediário, o envio sairia com o arquivo
-        original e passaria do limite da Server Action no primeiro iPhone.
-      */}
-      <form ref={formSalvar} action={acaoSalvar} className="hidden" />
 
       {confirmandoRemover ? (
         <ConfirmaRemover

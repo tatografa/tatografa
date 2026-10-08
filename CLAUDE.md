@@ -742,6 +742,16 @@ Provar que funciona sem o Otávio ler código:
   upload é desfeito; se o remove falha, sobra arquivo órfão (menos ruim que ficar sem
   foto). **Remover é confirmação em folha de baixo**, pelo mesmo motivo das três fotos
   da reavaliação (15/09): tirar foto do perfil é decisão com peso.
+- **[2026-10-08, do teste de campo]** **A foto do perfil nunca chegou ao servidor.** O
+  envio passava por um `<form>` escondido com `requestSubmit`, e o campo de arquivo
+  morava **fora** dele, sem `name`: a ação recebia o formulário vazio e respondia "Não
+  conseguimos ler essa imagem" — **a mesma frase** que o aparelho usa quando não
+  decodifica a foto. Dois consertos foram atrás do HEIC do iPhone (o `accept` e o
+  `decode()`, que ficam: não fazem mal) antes de o bucket mostrar **zero arquivos**.
+  Agora a foto reduzida vai num `FormData` direto para a ação, e o servidor responde
+  "não conseguimos trocar a foto" quando nada chega. **A lição:** a mesma mensagem em
+  dois lugares que falham por motivos diferentes esconde de onde vem o erro — e
+  conferir o que chegou ao banco vem antes de teorizar sobre o formato do arquivo.
 - **[2026-10-06, pedido do Otávio]** **Todo gráfico do produto segue um desenho só**
   (`GraficoDeBarras` e `CabecalhoDoGrafico`, `components/grafico-de-barras.tsx`), o da
   referência "Evolução mensal de alunos": barras em pílula com o número em cima, cinco

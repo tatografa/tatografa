@@ -145,8 +145,10 @@ export async function salvarFotoDePerfil(
   const m = t.perfil.perfil.foto;
 
   const arquivo = formData.get("foto");
+  // Arquivo que não chega é defeito do envio, não da foto: "não lemos a imagem"
+  // aqui repetia a frase do aparelho e escondeu de onde vinha o erro (08/10).
   if (!(arquivo instanceof File) || arquivo.size === 0) {
-    return { erro: m.naoLeu };
+    return { erro: m.falha };
   }
   if (!EXTENSAO_DO_AVATAR[arquivo.type]) return { erro: m.tipo };
   if (arquivo.size > LIMITE_DO_AVATAR) return { erro: m.tamanho };
