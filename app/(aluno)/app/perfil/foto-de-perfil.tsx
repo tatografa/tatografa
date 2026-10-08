@@ -82,9 +82,16 @@ export function FotoDePerfil({
       // "Salvar" depois. Mesmo padrão do compositor do feed quando o aluno
       // confirma.
       formSalvar.current?.requestSubmit();
-    } catch {
+    } catch (erro) {
       if (entrada.current) entrada.current.value = "";
-      setErroLocal(m.naoLeu);
+      // Diagnóstico vai à tela: o álbum do iPhone vem servindo foto que o
+      // `prepararFoto` não decodifica, e sem o detalhe do arquivo (nome, tipo,
+      // tamanho) e do erro lançado o produto só diz "não lemos" — e eu fico
+      // chutando. Sai assim que a causa aparecer.
+      const tipo = arquivo.type || "sem tipo";
+      const kb = Math.round(arquivo.size / 1024);
+      const mensagem = erro instanceof Error ? erro.message : String(erro);
+      setErroLocal(`${m.naoLeu} [${arquivo.name} · ${tipo} · ${kb} kB · ${mensagem}]`);
     } finally {
       setPreparando(false);
     }
