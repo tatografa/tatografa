@@ -31,3 +31,17 @@ export function iniciaisDe(nome: string): string {
 export function primeiroNome(nome: string): string {
   return nome.trim().split(/\s+/)[0] ?? nome;
 }
+
+/**
+ * A confirmação de excluir aluno: o personal digita o primeiro nome. Sem
+ * diferença de maiúscula nem de acento — a trava é contra o clique por engano
+ * no aluno errado, não um teste de ortografia, e "Otavio" para "Otávio" já
+ * prova que se leu o nome. Neutra porque a tela acende o botão com ela e a
+ * ação confere de novo.
+ */
+export function confereNome(digitado: string, nome: string): boolean {
+  const simples = (s: string) =>
+    s.normalize("NFD").replace(/\p{Diacritic}/gu, "").trim().toLocaleLowerCase("pt-BR");
+  const alvo = simples(primeiroNome(nome));
+  return alvo.length > 0 && simples(digitado) === alvo;
+}

@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useId, useMemo, useState } from "react";
 
 import { Avatar } from "@/components/avatar";
+import { AcoesDoAluno } from "@/components/personal/acoes-do-aluno";
 import { IndicadoresDaCarteiraNoTopo } from "@/components/personal/indicadores-da-carteira";
 import { StatusDoAluno } from "@/components/personal/status-do-aluno";
 import { comoPorcentagem } from "@/lib/domain/atencao";
@@ -250,6 +251,9 @@ export function TabelaDeAlunos({
                   <Coluna ordem={ordem} campo="aderencia" aoOrdenar={ordenarPor}>
                     {a.colunas.aderencia}
                   </Coluna>
+                  <th scope="col" className="w-14 px-3 py-3.5">
+                    <span className="sr-only">{a.acoes.coluna}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -422,6 +426,21 @@ function Linha({
           {aluno.aderencia === null ? a.semOQueMedir : a.nestaSemana}
         </span>
       </Celula>
+
+      {/*
+        Sem menu na linha do personal que treina a si mesmo (13/09): inativar
+        trancaria o app em que ele treina, e excluir apagaria o próprio
+        histórico. A ficha já esconde "Pausar acesso" pelo mesmo motivo.
+      */}
+      {/* `flex justify-end` e não `text-right`: os diálogos do menu nascem
+          dentro desta célula e herdariam o alinhamento. */}
+      <td className="px-3 py-3 align-middle">
+        {ehVoce ? null : (
+          <div className="flex flex-col items-end">
+            <AcoesDoAluno alunoId={aluno.id} nome={aluno.name} status={aluno.status} />
+          </div>
+        )}
+      </td>
     </tr>
   );
 }

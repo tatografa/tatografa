@@ -58,6 +58,27 @@ const pt = {
     filtrando: "Tente outro nome, ou use “Limpar filtros”.",
     texto: "Use “Convidar aluno” aqui em cima: você gera um link e manda pelo WhatsApp.",
   },
+  acoes: {
+    coluna: "Ações",
+    abrir: "Ações para {nome}",
+    reativar: "Reativar acesso",
+    inativar: "Inativar acesso",
+    excluir: "Excluir aluno",
+    excluirTitulo: "Excluir {nome}?",
+    excluirTexto:
+      "Isto apaga {nome} da sua carteira e tudo o que existe sobre a pessoa no Reps Club: programas, treinos e cada série registrada, posts e comentários, reavaliações, agenda, as suas anotações e todas as fotos. Não dá para desfazer.",
+    excluirAlternativa:
+      "Se a ideia é só parar o acesso por um tempo, use “Inativar acesso”: nada se perde e você reativa quando quiser.",
+    digite: "Para confirmar, digite {nome}",
+    excluindo: "Excluindo…",
+    confirmarExclusao: "Excluir para sempre",
+    erros: {
+      nome: "O nome digitado não confere.",
+      voce: "Você não pode excluir a sua própria linha de aluno.",
+      fotos: "Não conseguimos apagar as fotos agora, e por isso nada foi excluído. Tente de novo.",
+      falha: "Não conseguimos excluir agora. Tente de novo.",
+    },
+  },
 };
 
 export type TextosDosAlunos = typeof pt;
@@ -119,6 +140,27 @@ const en: TextosDosAlunos = {
     filtrando: "Try another name, or use “Clear filters”.",
     texto: "Use “Invite client” up here: you generate a link and send it on WhatsApp.",
   },
+  acoes: {
+    coluna: "Actions",
+    abrir: "Actions for {nome}",
+    reativar: "Reactivate access",
+    inativar: "Deactivate access",
+    excluir: "Delete client",
+    excluirTitulo: "Delete {nome}?",
+    excluirTexto:
+      "This removes {nome} from your client list along with everything about them in Reps Club: programs, workouts and every logged set, posts and comments, reassessments, schedule, your notes and all photos. This can't be undone.",
+    excluirAlternativa:
+      "If you only want to stop access for a while, use “Deactivate access”: nothing is lost and you can reactivate whenever you want.",
+    digite: "To confirm, type {nome}",
+    excluindo: "Deleting…",
+    confirmarExclusao: "Delete forever",
+    erros: {
+      nome: "The name you typed doesn't match.",
+      voce: "You can't delete your own client row.",
+      fotos: "We couldn't delete the photos right now, so nothing was deleted. Try again.",
+      falha: "We couldn't delete right now. Try again.",
+    },
+  },
 };
 
 const es: TextosDosAlunos = {
@@ -177,6 +219,27 @@ const es: TextosDosAlunos = {
     titulo: "Todavía no hay alumnos",
     filtrando: "Prueba otro nombre, o usa “Limpiar filtros”.",
     texto: "Usa “Invitar alumno” aquí arriba: generas un enlace y lo mandas por WhatsApp.",
+  },
+  acoes: {
+    coluna: "Acciones",
+    abrir: "Acciones para {nome}",
+    reativar: "Reactivar acceso",
+    inativar: "Desactivar acceso",
+    excluir: "Eliminar alumno",
+    excluirTitulo: "¿Eliminar a {nome}?",
+    excluirTexto:
+      "Esto quita a {nome} de tu cartera y borra todo lo que hay sobre esa persona en Reps Club: programas, entrenamientos y cada serie registrada, publicaciones y comentarios, reevaluaciones, agenda, tus notas y todas las fotos. No se puede deshacer.",
+    excluirAlternativa:
+      "Si solo quieres cortar el acceso por un tiempo, usa “Desactivar acceso”: no se pierde nada y lo reactivas cuando quieras.",
+    digite: "Para confirmar, escribe {nome}",
+    excluindo: "Eliminando…",
+    confirmarExclusao: "Eliminar para siempre",
+    erros: {
+      nome: "El nombre escrito no coincide.",
+      voce: "No puedes eliminar tu propia fila de alumno.",
+      fotos: "No pudimos borrar las fotos ahora, así que no se eliminó nada. Inténtalo de nuevo.",
+      falha: "No pudimos eliminar ahora. Inténtalo de nuevo.",
+    },
   },
 };
 

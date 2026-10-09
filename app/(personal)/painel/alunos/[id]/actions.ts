@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { requireTrainer } from "@/lib/auth/session";
+import { confereNome } from "@/lib/domain/nome";
 import { LIMITE_DA_OBSERVACAO } from "@/lib/domain/observacao";
 import { textosDoPainel } from "@/lib/i18n/painel/servidor";
 import { preencher } from "@/lib/i18n/texto";
@@ -204,4 +205,94 @@ export async function mudarAcessoDoAluno(
   revalidatePath("/painel/alunos");
   revalidatePath("/painel");
   return {};
+}
+
+export type EstadoDaExclusaoDoAluno = { erro?: string; excluido?: boolean };
+
+/**
+ * Exclui o aluno da carteira e tudo o que existe sobre ele (pedido do Otávio,
+ * 09/10). A linha de `students` leva por cascata programas, sessões, séries,
+ * posts, comentários, curtidas, reavaliações, agenda e anotações — a política
+ * de privacidade promete exatamente isso para "exclusão da conta".
+ *
+ * **As fotos saem antes da linha.** Arquivo não está na cascata do banco: é
+ * objeto no storage, e quem libera o personal a apagá-lo (0051) é a pasta
+ * pertencer a um aluno dele — depois do delete ela não pertence a ninguém.
+ * Se alguma foto falha, nada é excluído: aluno sem fotos e com histórico é
+ * recuperável, histórico apagado com fotos órfãs não é.
+ *
+ * O nome digitado é conferido aqui também, contra o nome do banco: a ação é um
+ * endereço que aceita POST de qualquer lugar, e a trava da tela só vale na tela.
+ *
+ * **O que fica:** o login do aluno em `auth.users`. Apagar conta de
+ * autenticação exige a chave de serviço, que não mora na Vercel (13/09); sem
+ * linha de aluno, quem entrar com aquele e-mail cai em "sem perfil".
+ */
+export async function excluirAluno(
+  _anterior: EstadoDaExclusaoDoAluno,
+  formData: FormData,
+): Promise<EstadoDaExclusaoDoAluno> {
+  const e = (await textosDoPainel()).t.alunos.acoes.erros;
+  const analise = z
+    .object({ alunoId: z.string().uuid(), confirmacao: z.string() })
+    .safeParse({
+      alunoId: formData.get("alunoId"),
+      confirmacao: formData.get("confirmacao") ?? "",
+    });
+  if (!analise.success) return { erro: e.falha };
+
+  const { trainer } = await requireTrainer();
+  const { alunoId, confirmacao } = analise.data;
+
+  // Quem treina a si mesmo (13/09) apagaria o próprio histórico de treino.
+  if (alunoId === trainer.id) return { erro: e.voce };
+
+  const supabase = await createClient();
+  const { data: aluno } = await supabase
+    .from("students")
+    .select("name, avatar_path")
+    .eq("id", alunoId)
+    .eq("trainer_id", trainer.id)
+    .maybeSingle();
+  if (!aluno) return { erro: e.falha };
+
+  if (!confereNome(confirmacao, aluno.name)) return { erro: e.nome };
+
+  const [{ data: posts, error: erroPosts }, { data: reavaliacoes, error: erroReav }] =
+    await Promise.all([
+      supabase.from("posts").select("photo_path").eq("student_id", alunoId),
+      supabase
+        .from("assessments")
+        .select("photo_front_path, photo_side_path, photo_back_path")
+        .eq("student_id", alunoId),
+    ]);
+  if (erroPosts || erroReav) return { erro: e.fotos };
+
+  const porBucket: [string, string[]][] = [
+    ["avatares", aluno.avatar_path ? [aluno.avatar_path] : []],
+    ["treinos", (posts ?? []).flatMap((p) => (p.photo_path ? [p.photo_path] : []))],
+    [
+      "reavaliacoes",
+      (reavaliacoes ?? []).flatMap((r) =>
+        [r.photo_front_path, r.photo_side_path, r.photo_back_path].filter(
+          (c): c is string => Boolean(c),
+        ),
+      ),
+    ],
+  ];
+  for (const [bucket, caminhos] of porBucket) {
+    if (!caminhos.length) continue;
+    const { error } = await supabase.storage.from(bucket).remove(caminhos);
+    if (error) return { erro: e.fotos };
+  }
+
+  const { error, count } = await supabase
+    .from("students")
+    .delete({ count: "exact" })
+    .eq("id", alunoId)
+    .eq("trainer_id", trainer.id);
+  if (error || count === 0) return { erro: e.falha };
+
+  revalidatePath("/painel", "layout");
+  return { excluido: true };
 }

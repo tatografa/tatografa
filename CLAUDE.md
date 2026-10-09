@@ -776,6 +776,33 @@ Provar que funciona sem o Otávio ler código:
   **De quebra:** no feed do painel o nome de quem **comenta** só era procurado entre os
   autores dos posts, e o colega que comentava o post de outro aparecia como "Aluno"; agora
   nome e foto saem de todos os que aparecem na tela.
+- **[2026-10-09, pedido do Otávio]** **A carteira ganhou um ⋮ no fim de cada linha:
+  inativar ou reativar o acesso, e excluir o aluno** (`AcoesDoAluno`). Inativar é a
+  mesma `mudarAcessoDoAluno` da ficha, com a mesma confirmação; reativar não pergunta.
+  A linha "Você" não tem menu, pelo mesmo motivo de a ficha esconder "Pausar acesso".
+  **Excluir apaga a linha de `students`, e a cascata leva todo o resto** — programas,
+  sessões, séries, posts, comentários, reavaliações, agenda e anotações —, que é o que
+  a política de privacidade promete para a exclusão da conta. **Pede o primeiro nome
+  digitado** (`confereNome`, sem maiúscula nem acento), conferido também na ação: é a
+  única ação do painel que não se desfaz, e o menu fica a um clique da linha vizinha. O
+  diálogo do aluno ativo aponta "Inativar acesso" como a alternativa que não apaga nada.
+  **As fotos saem antes da linha** (migration 0051): as três pastas `<student_id>/…`
+  só aceitavam delete do dono, e a exclusão deixaria fotos do corpo de alguém num
+  bucket que mais ninguém lê nem apaga. A política nova deixa o personal apagar a pasta
+  de um aluno **dele** (`turma_do_aluno`), o que não é poder novo — quem apaga o aluno
+  inteiro pode apagar as fotos. Depois do delete a pasta não é de ninguém e a política
+  não alcança mais; por isso a ordem, e por isso foto que falha cancela tudo. Quinze
+  provas (outro personal e colega recusados, pasta torta, cascata vazia). **Dois
+  limites:** o storage só apaga o que quem pede consegue **ler**, então foto de treino
+  sem post (órfã de antes) fica; e **o login em `auth.users` fica** — apagar conta de
+  autenticação pede a chave de serviço, que não mora na Vercel. Sem linha de aluno a
+  pessoa cai em "sem perfil" e, enquanto o login existir, o mesmo e-mail não recebe
+  convite novo; para apagar de vez, o Otávio remove em Authentication → Users.
+  **O menu vai para o `<body>` por portal**, com posição fixa medida no clique: dentro
+  da tabela a rolagem horizontal o cortaria na última linha, e o `@container` da página
+  vira o referencial de `position: fixed`. E a célula do ⋮ alinha com flex, não com
+  `text-right`: os diálogos nascem dentro dela e herdavam o alinhamento — só apareceu
+  no screenshot.
 - **[2026-10-06, pedido do Otávio]** **Todo gráfico do produto segue um desenho só**
   (`GraficoDeBarras` e `CabecalhoDoGrafico`, `components/grafico-de-barras.tsx`), o da
   referência "Evolução mensal de alunos": barras em pílula com o número em cima, cinco
