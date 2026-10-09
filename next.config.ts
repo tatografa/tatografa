@@ -1,5 +1,36 @@
 import type { NextConfig } from "next";
 
+const emDesenvolvimento = process.env.NODE_ENV !== "production";
+
+/*
+ * O que a página pode carregar, e de onde. O que ela tranca de verdade:
+ * script de outro domínio (um `<script src>` injetado não roda), a página
+ * dentro de iframe alheio, `<object>`, `<base>` trocado e formulário postando
+ * para fora.
+ *
+ * `'unsafe-inline'` em script e estilo é o preço de não usar nonce: o Next
+ * injeta scripts inline para hidratar, e nonce obrigaria toda página a ser
+ * dinâmica. Sem `dangerouslySetInnerHTML` no projeto, o inline que sobra é o
+ * do próprio Next.
+ *
+ * O Supabase entra em imagem (URL assinada das fotos) e em conexão; o iframe
+ * só abre YouTube sem cookie e Vimeo, os mesmos de `lib/domain/video.ts`.
+ */
+const POLITICA_DE_CONTEUDO = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${emDesenvolvimento ? " 'unsafe-eval'" : ""}`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://*.supabase.co",
+  "media-src 'self' data: blob:",
+  "font-src 'self' data:",
+  `connect-src 'self' https://*.supabase.co wss://*.supabase.co${emDesenvolvimento ? " ws:" : ""}`,
+  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com",
+  "frame-ancestors 'none'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join("; ");
+
 const nextConfig: NextConfig = {
   /*
    * O indicador do Next (o "N" preto, só em desenvolvimento) nasce no canto
@@ -49,6 +80,17 @@ const nextConfig: NextConfig = {
             key: "Referrer-Policy",
             value: "strict-origin-when-cross-origin",
           },
+          { key: "Content-Security-Policy", value: POLITICA_DE_CONTEUDO },
+          // Nada do produto usa câmera por API, microfone, localização nem
+          // pagamento: a foto entra pelo seletor de arquivo, que não pede isso.
+          {
+            key: "Permissions-Policy",
+            value:
+              "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+          },
+          // Sem `includeSubDomains`: os subdomínios do VPS (n8n, easypanel…)
+          // não são deste app, e a regra valeria para eles também.
+          { key: "Strict-Transport-Security", value: "max-age=63072000" },
         ],
       },
       {

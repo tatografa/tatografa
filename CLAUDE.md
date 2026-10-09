@@ -866,6 +866,37 @@ Provar que funciona sem o Otávio ler código:
   Remada na polia alta sentado, Coice no Smith, Elevação pélvica unilateral na máquina,
   Levantamento terra sumô com halter, Crucifixo inverso na máquina unilateral). O que
   falta se acha com `select name from exercises_catalog where video_url is null`.
+- **[2026-10-09, pedido do Otávio]** **Revisão geral de segurança: um furo real, e ele
+  morava na conversa entre uma policy de storage e uma coluna solta** (migration 0054).
+  A leitura do bucket `treinos` libera o arquivo para quem pode ver **um** post que
+  aponte para ele — e nada prendia `posts.photo_path` à pasta do autor. Um aluno criava
+  (ou editava) um post dele, só para o personal, apontando para a foto de um colega, e
+  passava a ler aquela foto — inclusive a que o colega publicou só para o personal.
+  Provado antes (0 → 1 arquivo legível). Exigia saber o caminho, que é aleatório, mas
+  ele está em toda URL assinada que o colega já viu. Agora é `check`: o caminho começa
+  pelo id do dono da linha e não tem outra barra (sem `../`); o mesmo para
+  `students.avatar_path`. **Décima vez do formato de sempre, com outra cara:** coluna
+  que uma policy **de outra tabela** usa como chave precisa de trava na tabela dela.
+  Também na 0054: a `entrar_na_lista(text)` antiga perdeu o `execute` (o `drop` segue
+  na 0045) e a lista ganhou teto — acima de 60 inscrições na última hora a função
+  ignora em silêncio, com a resposta de sempre. Onze provas (quatro de burla, cinco de
+  caminho legítimo, a versão antiga recusando o `anon` e o teto segurando a 61ª).
+  **E o site ganhou CSP, `Permissions-Policy` e HSTS** (`next.config.ts`). A CSP tranca
+  script de outro domínio, iframe só de YouTube sem cookie e Vimeo (os de
+  `enderecoDeEmbed`), página dentro de iframe alheio, `<object>`, `<base>` e formulário
+  postando para fora; `'unsafe-inline'` fica porque o Next hidrata com script inline e
+  nonce tornaria toda página dinâmica. **Domínio novo de imagem, vídeo ou API entra na
+  CSP no mesmo commit** — senão a tela quebra só em produção. HSTS **sem
+  `includeSubDomains`**: os subdomínios do VPS não são deste app.
+  **O que a revisão conferiu e estava certo:** RLS em toda tabela, toda policy `to
+  authenticated` e por relacionamento, os três buckets privados, nenhuma chave de
+  serviço no código nem no git, toda Server Action com `requireTrainer()` ou
+  `requireStudent()` (menos a lista, que é pública), redirecionamento só por
+  `destinoSeguro`, nenhum `dangerouslySetInnerHTML`. **De propósito, não mudou:** o
+  aluno ainda grava série numa sessão já concluída — é a fila do aparelho sendo
+  esvaziada depois do "Concluir" (02/09). **Fica com o Otávio:** a proteção contra
+  senha vazada (plano Pro), aplicar a 0045 pelo SQL Editor e apagar em Authentication
+  o login de aluno excluído.
 - **[2026-10-06, pedido do Otávio]** **Todo gráfico do produto segue um desenho só**
   (`GraficoDeBarras` e `CabecalhoDoGrafico`, `components/grafico-de-barras.tsx`), o da
   referência "Evolução mensal de alunos": barras em pílula com o número em cima, cinco
