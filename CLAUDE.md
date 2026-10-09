@@ -845,6 +845,27 @@ Provar que funciona sem o Otávio ler código:
   (pílula de 64 + 24 de distância + 16) para o fim da página não ficar atrás dela; a
   execução e o resumo continuam cobrindo a pílula. Sombra nova em token
   (`shadow-menu`).
+- **[2026-10-09, pedido do Otávio]** **Descanso de 120 segundos em todo exercício**
+  (migration 0052): o padrão do catálogo e dos exercícios próprios, **e** o descanso já
+  prescrito em todo treino — mudar só o padrão deixaria os treinos montados nos 60 de
+  antes, e mudar só a prescrição faria o próximo exercício acrescentado voltar aos 60. O
+  padrão das três colunas e o campo do cadastro também passaram a 120. O personal
+  continua mudando exercício por exercício no quadro.
+- **[2026-10-09, pedido do Otávio]** **Todo exercício do catálogo ganha um vídeo de
+  demonstração do YouTube**, e entra por migration (conteúdo do catálogo vem do Otávio,
+  27/09). **Parte 1 (0053): 197 dos 501**, começando pelos 19 que já estavam em algum
+  treino. **Como o link foi escolhido:** busca "<nome> como fazer" restrita ao YouTube e o
+  primeiro vídeo de demonstração cujo título casa com o exercício, de preferência em
+  português (onde não havia, inglês ou espanhol). **O vídeo foi escolhido pelo título, não
+  assistido** — o YouTube não abre desta sessão (rede bloqueada) —, e o Otávio troca pelo
+  painel o que não servir. A migration casa pelo **nome**, não pelo id (id gerado não se
+  escreve em migration), e é idempotente. **Falta a parte 2** (304 exercícios: o resto de
+  ombros, panturrilha, peito, posterior, quadríceps, trapézio e tríceps, mais 12 que a
+  busca em português não achou — Rosca Waiter, Rosca com kettlebell, Barra fixa com
+  pegada mista, Puxada frontal na barra guiada, Rack pull, Remada Kroc, Remada Yates,
+  Remada na polia alta sentado, Coice no Smith, Elevação pélvica unilateral na máquina,
+  Levantamento terra sumô com halter, Crucifixo inverso na máquina unilateral). O que
+  falta se acha com `select name from exercises_catalog where video_url is null`.
 - **[2026-10-06, pedido do Otávio]** **Todo gráfico do produto segue um desenho só**
   (`GraficoDeBarras` e `CabecalhoDoGrafico`, `components/grafico-de-barras.tsx`), o da
   referência "Evolução mensal de alunos": barras em pílula com o número em cima, cinco
