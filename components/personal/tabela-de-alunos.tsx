@@ -182,7 +182,7 @@ export function TabelaDeAlunos({
           <SlidersHorizontal size={15} aria-hidden />
           {a.filtros}
           {ligados > 0 ? (
-            <span className="rounded-full bg-brand px-1.5 text-[11px] leading-[18px] text-white tabular-nums">
+            <span className="rounded-full bg-ink px-1.5 text-[11px] leading-[18px] text-white tabular-nums">
               {ligados}
               <span className="sr-only">{a.ligados}</span>
             </span>
@@ -202,7 +202,7 @@ export function TabelaDeAlunos({
               <button
                 type="button"
                 onClick={() => setFiltros((atual) => ({ ...SEM_FILTRO, busca: atual.busca }))}
-                className="text-[13px] font-semibold text-brand transition hover:text-brand-hover"
+                className="text-[13px] font-semibold text-ink transition hover:text-ink-2"
               >
                 {a.limpar}
               </button>
@@ -304,7 +304,7 @@ function GrupoDeChips<V extends string>({
             className={cn(
               "min-h-8 rounded-[8px] border px-3 text-[12.5px] font-semibold transition",
               o.valor === valor
-                ? "border-brand bg-brand text-white"
+                ? "border-ink bg-ink text-white"
                 : "border-border bg-surface text-ink-2 hover:border-border-strong",
             )}
           >

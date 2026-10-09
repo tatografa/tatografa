@@ -63,7 +63,7 @@ export default async function PainelLayout({
   if (!(await aceiteEstaEmDia(trainer.id))) {
     const traducao = oQueMudouDoPersonalNoIdioma(idioma);
     return (
-      <div lang={langDe(idioma)} className="min-h-dvh bg-canvas">
+      <div lang={langDe(idioma)} data-painel className="min-h-dvh bg-canvas">
         <PortaoDeAceite
           versao={VERSAO_DOS_DOCUMENTOS}
           oQueMudou={traducao?.oQueMudou ?? O_QUE_MUDOU.personal}
@@ -86,7 +86,7 @@ export default async function PainelLayout({
 
   return (
     <ProvedorDoPainel idioma={idioma} textos={t}>
-    <div lang={langDe(idioma)} className="flex min-h-dvh items-start gap-[11px] bg-canvas-sunken p-[13px]">
+    <div lang={langDe(idioma)} data-painel className="flex min-h-dvh items-start gap-[11px] bg-canvas-sunken p-[13px]">
       <NavegacaoLateral
         nome={trainer.name}
         foto={foto}

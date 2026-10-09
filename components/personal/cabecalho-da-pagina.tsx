@@ -75,7 +75,7 @@ export function CabecalhoDaPagina({
       {voltar ? (
         <Link
           href={voltar.href}
-          className="-mt-1 mb-5 inline-flex min-h-8 items-center gap-1.5 text-[13px] font-medium text-brand transition hover:text-brand-hover"
+          className="-mt-1 mb-5 inline-flex min-h-8 items-center gap-1.5 text-[13px] font-medium text-ink transition hover:text-ink-2"
         >
           <ArrowLeft size={14} aria-hidden />
           {voltar.rotulo}

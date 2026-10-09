@@ -803,6 +803,22 @@ Provar que funciona sem o Otávio ler código:
   vira o referencial de `position: fixed`. E a célula do ⋮ alinha com flex, não com
   `text-right`: os diálogos nascem dentro dela e herdavam o alinhamento — só apareceu
   no screenshot.
+- **[2026-10-09, pedido do Otávio]** **No painel do personal todo botão é preto; o
+  vermelho fica para o que é alerta.** O `Button` é um só para os dois lados, então a
+  troca é por escopo e não por variante nova: o layout do painel leva `data-painel`, e
+  a variante `painel:` (`@custom-variant` em `globals.css`, com `:where` para ficar na
+  especificidade da classe) pinta `primary` e `danger` de `ink`, com hover em
+  `ink-hover` e a sombra `shadow-cta-ink`. **O app do aluno continua vermelho** — foi o
+  pedido, e lá o vermelho é a marca na tela de academia. **O `danger` também ficou
+  preto**, porque o pedido foi "todos os botões vermelhos": a ação destrutiva passa a
+  se distinguir pelo texto e pela confirmação, não pela cor. Os botões escritos à mão
+  (chips selecionados, "Agendar sessão", enviar comentário, "Novo treino", "Editar", os
+  botões de texto e o "Excluir" dos menus) foram trocados um a um. **Ficaram vermelhos,
+  de propósito, os indicadores:** o "hoje" do calendário, o número de "precisam de
+  atenção", o último treino atrasado, o selo PERSONAL, as barras de gráfico, de volume
+  e de meta, os avatares e as mensagens de erro. **Componente novo no painel com cor de
+  ação usa `ink`, não `brand`.** As capturas da landing mostram o painel com botões
+  vermelhos e precisam ser refeitas (regra de 01/10).
 - **[2026-10-06, pedido do Otávio]** **Todo gráfico do produto segue um desenho só**
   (`GraficoDeBarras` e `CabecalhoDoGrafico`, `components/grafico-de-barras.tsx`), o da
   referência "Evolução mensal de alunos": barras em pílula com o número em cima, cinco

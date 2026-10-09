@@ -153,7 +153,7 @@ function Linha({
             <button
               type="submit"
               disabled={apagando}
-              className="text-[12.5px] font-semibold text-danger transition hover:underline disabled:opacity-60"
+              className="text-[12.5px] font-semibold text-ink transition hover:underline disabled:opacity-60"
             >
               {apagando ? t.comum.apagando : o.simApagar}
             </button>

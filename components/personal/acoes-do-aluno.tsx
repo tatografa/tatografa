@@ -281,8 +281,10 @@ function ItemDoMenu({
       {...props}
       className={cn(
         "flex w-full items-center gap-2.5 rounded-[8px] px-3 py-2.5 text-left text-[13px] font-medium transition focus-visible:outline-none disabled:opacity-60",
+        // Preto e não vermelho, como todo botão do painel desde 09/10; o peso a
+        // mais é o que sobra para separar "Excluir" das outras linhas.
         perigo
-          ? "text-danger hover:bg-danger-bg focus:bg-danger-bg"
+          ? "font-semibold text-ink hover:bg-canvas focus:bg-canvas"
           : "text-ink-2 hover:bg-canvas focus:bg-canvas",
         className,
       )}

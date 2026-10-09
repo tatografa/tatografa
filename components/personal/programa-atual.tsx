@@ -107,7 +107,7 @@ export function ProgramaAtual({
           <p className="mb-3.5 text-[13px] font-medium text-ink-4">{p.nenhum}</p>
           <Link
             href={`/painel/treinos?aluno=${alunoId}&novo=1`}
-            className="inline-block rounded-[9px] bg-brand px-4 py-2 text-[12.5px] font-semibold text-white transition hover:bg-brand-hover"
+            className="inline-block rounded-[9px] bg-ink px-4 py-2 text-[12.5px] font-semibold text-white transition hover:bg-ink-hover"
           >
             {p.montar}
           </Link>
@@ -126,7 +126,7 @@ export function ProgramaAtual({
           <div className="border-t border-border-soft px-[18px] py-3">
             <Link
               href={`/painel/treinos?aluno=${alunoId}&programa=${programa.id}`}
-              className="text-[12.5px] font-semibold text-brand transition hover:text-brand-hover"
+              className="text-[12.5px] font-semibold text-ink transition hover:text-ink-2"
             >
               {p.abrir}
             </Link>
@@ -270,7 +270,7 @@ function HistoricoDoExercicio({
                   onClick={() => aoMudarModo(valor)}
                   className={cn(
                     "rounded-full px-2.5 py-1 text-[11.5px] font-semibold transition",
-                    modo === valor ? "bg-brand text-white" : "bg-surface text-ink-3 hover:text-ink",
+                    modo === valor ? "bg-ink text-white" : "bg-surface text-ink-3 hover:text-ink",
                   )}
                 >
                   {rotulo}
@@ -336,7 +336,7 @@ function Grafico({ treinos, historico }: { treinos: TreinoDaDivisao[]; historico
               className={cn(
                 "rounded-full border px-2.5 py-[5px] text-[11.5px] font-semibold transition",
                 metrica === m.valor
-                  ? "border-brand bg-brand text-white"
+                  ? "border-ink bg-ink text-white"
                   : "border-border text-ink-3 hover:text-ink",
               )}
             >

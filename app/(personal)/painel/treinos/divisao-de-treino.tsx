@@ -338,7 +338,7 @@ export function DivisaoDeTreino({
                 type="button"
                 onClick={adicionarDia}
                 disabled={noLimite}
-                className="absolute top-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-surface px-[18px] py-2.5 text-[13px] font-semibold text-brand shadow-cartao transition hover:bg-brand-soft disabled:bg-canvas disabled:text-ink-5"
+                className="absolute top-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-surface px-[18px] py-2.5 text-[13px] font-semibold text-ink shadow-cartao transition hover:bg-canvas-sunken disabled:bg-canvas disabled:text-ink-5"
               >
                 <Plus size={16} aria-hidden />
                 {noLimite ? preencher(q.limite, { n: MAXIMO_DE_DIAS }) : q.novoTreino}

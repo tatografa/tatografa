@@ -156,7 +156,7 @@ export function TelaDeExercicios({
                 className={cn(
                   "flex size-9 shrink-0 items-center justify-center rounded-[10px] border transition",
                   filtrosAbertos || equipamento || origem !== "todos"
-                    ? "border-brand bg-brand-soft text-brand"
+                    ? "border-ink bg-canvas-sunken text-ink"
                     : "border-border text-ink-4 hover:text-ink",
                 )}
               >
@@ -207,7 +207,7 @@ export function TelaDeExercicios({
               <button
                 type="button"
                 onClick={() => setModo({ tipo: "criar" })}
-                className="inline-flex items-center gap-[5px] text-[12px] font-semibold text-brand transition hover:text-brand-hover"
+                className="inline-flex items-center gap-[5px] text-[12px] font-semibold text-ink transition hover:text-ink-2"
               >
                 <Plus size={14} aria-hidden /> {x.adicionar}
               </button>
@@ -257,7 +257,7 @@ export function TelaDeExercicios({
                                   className={cn(
                                     "flex w-full items-center gap-2 rounded-[8px] border-l-2 px-2.5 py-2 text-left text-[12.5px] transition",
                                     ativo
-                                      ? "border-brand bg-brand-soft font-semibold text-brand"
+                                      ? "border-ink bg-canvas-sunken font-semibold text-ink"
                                       : "border-transparent font-medium text-ink-2 hover:bg-canvas",
                                   )}
                                 >
@@ -382,7 +382,7 @@ function DetalheDoExercicio({
               <button
                 type="button"
                 onClick={aoEditar}
-                className="flex items-center justify-center gap-[7px] rounded-[8px] border-[1.5px] border-brand py-[11px] text-[13px] font-semibold text-brand transition hover:bg-brand-soft"
+                className="flex items-center justify-center gap-[7px] rounded-[8px] border-[1.5px] border-ink py-[11px] text-[13px] font-semibold text-ink transition hover:bg-canvas-sunken"
               >
                 <Pencil size={15} aria-hidden /> {x.editar}
               </button>
@@ -604,7 +604,7 @@ function FormularioDoExercicio({
                 className={cn(
                   "rounded-[9px] border-[1.5px] px-[13px] py-[7px] text-[12px] font-semibold transition",
                   grupo === g
-                    ? "border-brand bg-brand text-white"
+                    ? "border-ink bg-ink text-white"
                     : "border-border text-ink-3 hover:border-border-strong hover:text-ink",
                 )}
               >

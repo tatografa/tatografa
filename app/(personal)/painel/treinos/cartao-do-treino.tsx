@@ -580,7 +580,7 @@ function MenuDoCartao({
               setAberto(false);
               aoExcluir();
             }}
-            className="flex w-full items-center gap-[9px] px-[13px] py-2.5 text-left text-[12.5px] font-semibold text-danger transition hover:bg-danger-bg"
+            className="flex w-full items-center gap-[9px] px-[13px] py-2.5 text-left text-[12.5px] font-semibold text-ink transition hover:bg-canvas"
           >
             <Trash2 size={14} aria-hidden /> {c.excluir}
           </button>

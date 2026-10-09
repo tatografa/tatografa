@@ -107,7 +107,7 @@ export function ResponderDoPainel({ postId, aluno }: { postId: string; aluno: st
           disabled={enviando}
           aria-label={c.enviarResposta}
           title={c.enviar}
-          className="flex size-[38px] shrink-0 items-center justify-center rounded-[9px] bg-brand text-white transition hover:bg-brand-hover disabled:opacity-50"
+          className="flex size-[38px] shrink-0 items-center justify-center rounded-[9px] bg-ink text-white transition hover:bg-ink-hover disabled:opacity-50"
         >
           <SendHorizontal size={15} aria-hidden />
         </button>

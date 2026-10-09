@@ -170,7 +170,7 @@ export function PainelLateral({
                         className={cn(
                           "flex-1 rounded-[9px] border-[1.5px] py-2 text-[12.5px] font-semibold transition",
                           ativo
-                            ? "border-brand bg-brand text-white"
+                            ? "border-ink bg-ink text-white"
                             : "border-border text-ink-3 hover:border-border-strong hover:text-ink",
                         )}
                       >
@@ -217,7 +217,7 @@ export function PainelLateral({
                 type="button"
                 onClick={aoAdicionarDia}
                 disabled={noLimite}
-                className="mt-[11px] inline-flex items-center gap-[7px] text-[12.5px] font-semibold text-brand transition hover:text-brand-hover disabled:text-ink-5"
+                className="mt-[11px] inline-flex items-center gap-[7px] text-[12.5px] font-semibold text-ink transition hover:text-ink-2 disabled:text-ink-5"
               >
                 <Plus size={15} aria-hidden />
                 {noLimite
@@ -486,7 +486,7 @@ function PainelDeMacrociclos({
                         <input type="hidden" name="id" value={p.id} />
                         <BotaoDeFormulario
                           rotulo={preencher(m.ativarX, { nome: p.name })}
-                          className="text-brand hover:bg-brand-soft"
+                          className="text-ink hover:bg-canvas-sunken"
                         >
                           <Zap size={14} aria-hidden />
                         </BotaoDeFormulario>

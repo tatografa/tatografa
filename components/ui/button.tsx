@@ -7,14 +7,18 @@ type Size = "sm" | "md" | "lg";
 
 const variants: Record<Variant, string> = {
   // A elevação (shadow-cta + subida de 1px) é o que marca a ação primária.
+  // No painel o botão é preto (`painel:`, 09/10); o app do aluno segue vermelho.
   primary:
-    "bg-brand text-white shadow-cta hover:bg-brand-hover hover:-translate-y-px active:translate-y-0",
+    "bg-brand text-white shadow-cta hover:bg-brand-hover hover:-translate-y-px active:translate-y-0 painel:bg-ink painel:shadow-cta-ink painel:hover:bg-ink-hover",
   secondary:
     "bg-surface text-ink border-[1.5px] border-border hover:bg-canvas-sunken hover:-translate-y-px active:translate-y-0",
   ghost: "bg-transparent text-ink-2 hover:bg-canvas-sunken hover:text-ink",
   // `danger` usa o mesmo vermelho da marca (doc 04). O que separa os dois é a
   // ausência de elevação: ação destrutiva não deve convidar ao clique.
-  danger: "bg-danger text-white hover:bg-brand-hover",
+  // No painel, preto também: o pedido foi "todos os botões vermelhos", e o que
+  // marca a ação destrutiva passa a ser o texto e a confirmação, não a cor.
+  danger:
+    "bg-danger text-white hover:bg-brand-hover painel:bg-ink painel:hover:bg-ink-hover",
 };
 
 const sizes: Record<Size, string> = {

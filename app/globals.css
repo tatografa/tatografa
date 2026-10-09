@@ -1,6 +1,14 @@
 @import "tailwindcss";
 
 /*
+ * O painel do personal (pedido do Otávio, 09/10): botão é preto, e vermelho
+ * fica para o que é alerta. A marca é `data-painel` no layout do painel, e
+ * `:where` deixa a variante com a especificidade da classe — ela vence a cor
+ * de base pela ordem, sem `!important`. O app do aluno continua vermelho.
+ */
+@custom-variant painel (&:where([data-painel], [data-painel] *));
+
+/*
  * Reps Club — tokens de design.
  * Fonte: handoff_claude_code/04-design-tokens.md
  * Regra: nenhum hex solto em componente. Sempre um token daqui.
@@ -47,6 +55,8 @@
   --color-ink-3: #5e5e59;
   --color-ink-4: #666661;
   --color-ink-5: #6b6b66;
+  /* Hover do botão preto do painel. Branco sobre ele: 14,4:1. */
+  --color-ink-hover: #2b2b2b;
   --color-surface: #ffffff;
   --color-canvas: #f4f4f2;
   --color-canvas-sunken: #ededea;
@@ -110,6 +120,7 @@
   /* Sombra é exceção, não padrão. Card comum se separa por borda ou fundo. */
   --shadow-brand: 0 8px 20px rgba(255, 42, 42, 0.4);
   --shadow-cta: 0 10px 22px rgba(255, 42, 42, 0.28);
+  --shadow-cta-ink: 0 10px 22px rgba(10, 10, 10, 0.22);
   --shadow-halo: 0 12px 40px rgba(255, 42, 42, 0.4);
   --shadow-toast: 0 12px 30px rgba(0, 0, 0, 0.25);
   /* Divisão de treino (27/09): o cartão que flutua sobre o quadro pontilhado

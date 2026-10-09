@@ -138,7 +138,7 @@ export function FichaDoAluno({
           */
           <Link
             href={`/painel/agenda?aluno=${aluno.id}`}
-            className="inline-flex min-h-9 items-center gap-2 rounded-input bg-brand px-3.5 text-[13px] font-semibold text-white shadow-botao transition hover:bg-brand-hover"
+            className="inline-flex min-h-9 items-center gap-2 rounded-input bg-ink px-3.5 text-[13px] font-semibold text-white transition hover:bg-ink-hover"
           >
             <CalendarPlus size={15} aria-hidden />
             {t.ficha.agendar}
@@ -327,7 +327,7 @@ function RodapeDaSessao({
         </p>
         <Link
           href={`/painel/alunos/${alunoId}/sessoes/${sessao.id}`}
-          className="inline-flex items-center gap-0.5 text-[12.5px] font-semibold text-brand transition hover:text-brand-hover"
+          className="inline-flex items-center gap-0.5 text-[12.5px] font-semibold text-ink transition hover:text-ink-2"
         >
           {a.serieASerie}
           <ChevronRight size={13} aria-hidden />
@@ -418,7 +418,7 @@ function Reavaliacoes({
         {enviadas.length > 0 && (
           <Link
             href={`/painel/reavaliacoes/${alunoId}`}
-            className="text-[12.5px] font-semibold text-brand transition hover:underline"
+            className="text-[12.5px] font-semibold text-ink transition hover:underline"
           >
             {enviadas.length > 1 ? preencher(r.verAs, { n: enviadas.length }) : r.abrir}
             {ultima?.temFoto ? r.comFotos : ""}
@@ -455,7 +455,7 @@ function Reavaliacoes({
           <Card>
             <p className="text-[13px] text-ink-4">
               {antes}
-              <Link href="/painel/agenda" className="font-semibold text-brand hover:underline">
+              <Link href="/painel/agenda" className="font-semibold text-ink hover:underline">
                 {r.agenda}
               </Link>
               {depois}
