@@ -26,14 +26,15 @@ type Aba = {
 };
 
 /**
- * As quatro abas, na ordem do protótipo A6 ("Treinar integrado"): "Treinar" na
- * ponta direita, onde o polegar direito alcança sem esticar.
+ * As quatro abas, com "Treinar" primeiro — é a ação pela qual o aluno abre o
+ * app na academia. O protótipo A6 a punha na ponta direita; a ordem mudou a
+ * pedido do Otávio (09/10).
  */
 const ABAS: Aba[] = [
+  { rotulo: "treinar", href: "/app" },
   { rotulo: "progresso", href: "/app/progresso", sePausa: true },
   { rotulo: "feed", href: "/app/feed", sePausa: true },
   { rotulo: "perfil", href: "/app/perfil" },
-  { rotulo: "treinar", href: "/app" },
 ];
 
 const ICONES: Record<Rotulo, React.ComponentType<{ size?: number; strokeWidth?: number; "aria-hidden"?: boolean }>> = {

@@ -831,7 +831,8 @@ Provar que funciona sem o Otávio ler código:
   cronômetro. **Número dentro de linha em Inter é Inter.**
 - **[2026-10-09, pedido do Otávio]** **O menu de baixo do app é a pílula do protótipo
   A6 ("Treinar integrado").** Escura, flutuando 24px acima da borda, só com ícones —
-  Progresso, Feed, Perfil e **"Treinar" na ponta direita**, onde o polegar alcança.
+  **Treinar, Progresso, Feed e Perfil, nessa ordem** (pedido do Otávio, 09/10: o
+  protótipo punha o Treinar na ponta direita).
   **A aba aberta é um círculo vermelho que desliza até ela, e só ela fica vermelha** —
   o Treinar também, fora da própria tela, fica cinza como as outras. A primeira versão
   (mesmo dia) deixava o Treinar sempre vermelho e marcava a aba atual com um círculo
