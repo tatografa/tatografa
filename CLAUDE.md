@@ -829,6 +829,19 @@ Provar que funciona sem o Otávio ler código:
   Ficam em mono os rótulos em caixa alta (o `eyebrow` e os labels de formulário), o
   `Badge`, a data dos comentários, o contador de caracteres, a barra de baixo e o
   cronômetro. **Número dentro de linha em Inter é Inter.**
+- **[2026-10-09, pedido do Otávio]** **O menu de baixo do app é a pílula do protótipo
+  A6 ("Treinar integrado").** Escura, flutuando 24px acima da borda, só com ícones —
+  Progresso, Feed e Perfil — e **"Treinar" num círculo vermelho na ponta direita**, onde
+  o polegar alcança: é a ação pela qual o aluno abre o app na academia. A aba atual é
+  um círculo branco que **desliza** entre as três comuns; em "Treinar" ele encolhe e
+  some no lugar da última, e o próprio Treinar ganha um anel branco. **Os rótulos
+  escritos saíram**, como no protótipo: o nome vai no `aria-label`, e o custo aceito é
+  a leitura de relance para quem não reconhece o ícone. O haltere é desenhado deitado,
+  não o `Dumbbell` inclinado do lucide. Pausado continua igual: Progresso e Feed
+  apagados, Treinar e Perfil abertos. O conteúdo do app ganhou 104px de folga embaixo
+  (pílula de 64 + 24 de distância + 16) para o fim da página não ficar atrás dela; a
+  execução e o resumo continuam cobrindo a pílula. Sombra nova em token
+  (`shadow-menu`).
 - **[2026-10-06, pedido do Otávio]** **Todo gráfico do produto segue um desenho só**
   (`GraficoDeBarras` e `CabecalhoDoGrafico`, `components/grafico-de-barras.tsx`), o da
   referência "Evolução mensal de alunos": barras em pílula com o número em cima, cinco

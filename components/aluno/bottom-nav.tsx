@@ -1,22 +1,24 @@
 "use client";
 
-import { Dumbbell, TrendingUp, User, Users } from "lucide-react";
+import { TrendingUp, User, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
 import { useIdioma } from "./idioma-do-app";
 
+type Rotulo = "treinar" | "progresso" | "feed" | "perfil";
+
 type Aba = {
   /** A chave do rótulo no dicionário — e o que identifica a aba ativa. */
-  rotulo: "treinar" | "progresso" | "feed" | "perfil";
-  href?: string;
-  Icone: typeof Dumbbell;
+  rotulo: Rotulo;
+  href: string;
   /**
-   * Some quando o acesso está pausado.
+   * Fica apagada quando o acesso está pausado.
    *
-   * **"Treinar" não some, embora leve à tela de aviso**, e Perfil também não:
+   * **"Treinar" não apaga, embora leve à tela de aviso**, e Perfil também não:
    * desativar as quatro deixaria o aluno pausado sem como voltar ao aviso
    * depois de abrir o perfil — barra inteira apagada é beco sem saída, não
    * informação.
@@ -25,25 +27,27 @@ type Aba = {
 };
 
 /**
- * As quatro abas do doc 05, todas com destino.
- *
- * Feed ficou sem `href` em duas etapas — primeiro por não ter rota, depois por
- * não ter como publicar, que é o que o estado vazio da aba promete. `href`
- * segue opcional no tipo porque a barra vai ter item sem destino de novo
- * quando a próxima tela chegar antes da sua rota: um link que leva a 404, ou
- * uma aba que promete o que não existe, é pior que um item visivelmente
- * indisponível.
- *
- * Perfil ganhou destino porque é onde mora o **sair**, e sem ele a conta de
- * aluno não tinha saída: o proxy devolve para `/app` quem tenta abrir uma tela
- * de entrada já logado. Achado do primeiro teste de campo.
+ * As três abas comuns, na ordem do protótipo A6 ("Treinar integrado"): o
+ * círculo branco desliza entre elas, e "Treinar" mora à parte, na ponta, onde o
+ * polegar direito alcança sem esticar.
  */
-const ABAS: Aba[] = [
-  { rotulo: "treinar", href: "/app", Icone: Dumbbell },
-  { rotulo: "progresso", href: "/app/progresso", Icone: TrendingUp, sePausa: true },
-  { rotulo: "feed", href: "/app/feed", Icone: Users, sePausa: true },
-  { rotulo: "perfil", href: "/app/perfil", Icone: User },
+const LATERAIS: Aba[] = [
+  { rotulo: "progresso", href: "/app/progresso", sePausa: true },
+  { rotulo: "feed", href: "/app/feed", sePausa: true },
+  { rotulo: "perfil", href: "/app/perfil" },
 ];
+
+const TREINAR: Aba = { rotulo: "treinar", href: "/app" };
+
+const ICONES: Record<Exclude<Rotulo, "treinar">, typeof User> = {
+  progresso: TrendingUp,
+  feed: Users,
+  perfil: User,
+};
+
+/** Lado do botão e o espaço entre eles: o passo do círculo que desliza. */
+const LADO = 52;
+const VAO = 6;
 
 /**
  * Qual aba acende: a de **prefixo mais longo** que casa com a rota.
@@ -53,78 +57,133 @@ const ABAS: Aba[] = [
  * específica. O prefixo termina em "/" de propósito: um `startsWith("/app")`
  * cru acenderia a aba numa rota futura chamada `/apps`.
  */
-function abaAtiva(caminho: string): string | null {
+function abaAtiva(caminho: string): Rotulo | null {
   let escolhida: Aba | null = null;
-  for (const aba of ABAS) {
-    if (!aba.href) continue;
+  for (const aba of [TREINAR, ...LATERAIS]) {
     const casa = caminho === aba.href || caminho.startsWith(`${aba.href}/`);
     if (!casa) continue;
-    if (!escolhida || aba.href.length > (escolhida.href?.length ?? 0)) {
-      escolhida = aba;
-    }
+    if (!escolhida || aba.href.length > escolhida.href.length) escolhida = aba;
   }
   return escolhida?.rotulo ?? null;
 }
 
+/**
+ * O menu de baixo no desenho do protótipo A6: uma pílula escura flutuando sobre
+ * a tela, só com ícones, e "Treinar" sempre em vermelho na ponta — é a ação
+ * pela qual o aluno abre o app na academia.
+ *
+ * **Sem os rótulos escritos**, como no protótipo: o nome de cada aba vai no
+ * `aria-label`, que é o que o leitor de tela anuncia, e os quatro ícones são os
+ * de sempre do produto. A troca custa a leitura de relance para quem não
+ * reconhece o ícone — pedido do Otávio (09/10).
+ *
+ * **O círculo branco lembra onde estava.** Em "Treinar" ele some encolhendo no
+ * lugar da última aba comum, e volta dali: assim o movimento sempre parte de
+ * onde o olho já estava. A lembrança é estado do componente — o layout do app
+ * não desmonta entre uma tela e outra — ajustado durante a renderização, o
+ * padrão do projeto.
+ */
 export function BottomNav({ naTurma = true }: { naTurma?: boolean }) {
   const caminho = usePathname();
-  const ativaAgora = abaAtiva(caminho);
+  const ativa = abaAtiva(caminho);
   const { t } = useIdioma();
+
+  const indice = LATERAIS.findIndex((a) => a.rotulo === ativa);
+  const [ultimo, setUltimo] = useState(indice >= 0 ? indice : 0);
+  if (indice >= 0 && indice !== ultimo) setUltimo(indice);
+  const mostraCirculo = indice >= 0;
 
   return (
     <nav
       aria-label={t.comum.nav.rotulo}
-      className={cn(
-        "fixed inset-x-0 bottom-0 z-20 border-t border-border-soft bg-surface",
-        // A barra é fixa na janela, mas o app tem largura máxima: sem o
-        // `mx-auto` interno os ícones espalhariam pela tela toda no desktop.
-        "pb-[env(safe-area-inset-bottom)]",
-      )}
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-20 flex justify-center pb-[calc(24px+env(safe-area-inset-bottom))]"
     >
-      <ul className="mx-auto flex max-w-[440px] items-stretch">
-        {ABAS.map(({ rotulo, href, Icone, sePausa }) => {
-          const ativa = rotulo === ativaAgora;
+      <ul className="pointer-events-auto relative flex gap-1.5 rounded-full bg-dark-surface p-1.5 shadow-menu">
+        <li
+          aria-hidden
+          className="absolute top-1.5 left-1.5 size-[52px] rounded-full bg-surface transition-[transform,opacity] duration-400 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
+          style={{
+            transform: `translateX(${ultimo * (LADO + VAO)}px) scale(${mostraCirculo ? 1 : 0.6})`,
+            opacity: mostraCirculo ? 1 : 0,
+          }}
+        />
+
+        {LATERAIS.map(({ rotulo, href, sePausa }) => {
+          const Icone = ICONES[rotulo as keyof typeof ICONES];
+          const atual = rotulo === ativa;
           const pausada = !naTurma && sePausa === true;
-          const destino = pausada ? undefined : href;
-          const conteudo = (
-            <>
-              <Icone size={16} aria-hidden />
-              <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.06em]">
-                {t.comum.nav[rotulo]}
-              </span>
-            </>
+          const nome = t.comum.nav[rotulo];
+          const classe = cn(
+            "relative z-10 flex size-[52px] items-center justify-center rounded-full transition-colors duration-250 focus-visible:outline-surface",
+            atual ? "text-ink" : "text-dark-muted",
           );
 
           return (
-            <li key={rotulo} className="flex-1">
-              {destino ? (
-                <Link
-                  href={destino}
-                  aria-current={ativa ? "page" : undefined}
-                  // 64px de altura: alvo de toque bem acima dos 44px mínimos.
-                  className={cn(
-                    "flex h-16 flex-col items-center justify-center gap-1 transition",
-                    ativa ? "text-brand" : "text-ink-5 hover:text-ink-3",
-                  )}
-                >
-                  {conteudo}
-                </Link>
-              ) : (
+            <li key={rotulo}>
+              {pausada ? (
                 <span
+                  role="link"
                   aria-disabled="true"
-                  // Dois motivos diferentes para o mesmo cinza: "em breve" é
-                  // promessa, "pausado" é estado. Um título só faria a aba
-                  // desativada mentir num dos dois casos.
-                  title={pausada ? t.comum.nav.pausada : t.comum.nav.emBreve}
-                  className="flex h-16 flex-col items-center justify-center gap-1 text-ink-5 opacity-45"
+                  aria-label={nome}
+                  title={t.comum.nav.pausada}
+                  className={cn(classe, "opacity-45")}
                 >
-                  {conteudo}
+                  <Icone size={22} strokeWidth={2} aria-hidden />
                 </span>
+              ) : (
+                <Link
+                  href={href}
+                  aria-label={nome}
+                  aria-current={atual ? "page" : undefined}
+                  className={cn(classe, !atual && "hover:text-dark-text")}
+                >
+                  <Icone size={22} strokeWidth={2} aria-hidden />
+                </Link>
               )}
             </li>
           );
         })}
+
+        <li>
+          <Link
+            href={TREINAR.href}
+            aria-label={t.comum.nav.treinar}
+            aria-current={ativa === "treinar" ? "page" : undefined}
+            className={cn(
+              "relative z-10 flex size-[52px] items-center justify-center rounded-full bg-brand text-white transition-shadow duration-250 focus-visible:outline-surface",
+              // O anel branco é o "você está aqui" do Treinar: o fundo já é
+              // vermelho sempre, então o que marca a aba atual é o contorno.
+              ativa === "treinar"
+                ? "shadow-[inset_0_0_0_2px_var(--color-surface)]"
+                : "shadow-[inset_0_0_0_0_var(--color-surface)]",
+            )}
+          >
+            <Haltere />
+          </Link>
+        </li>
       </ul>
     </nav>
+  );
+}
+
+/**
+ * O haltere deitado do protótipo. O `Dumbbell` do lucide é inclinado e, na
+ * ponta da pílula, lia como uma ferramenta; deitado ele é uma barra com anilhas.
+ */
+function Haltere() {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M6.5 6v12M17.5 6v12M3.5 9v6M20.5 9v6M6.5 12h11" />
+    </svg>
   );
 }

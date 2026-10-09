@@ -74,11 +74,11 @@ export default async function AlunoLayout({
     <div lang={langDe(idioma)} className="min-h-dvh bg-canvas">
       <AvisoDeOffline />
       {/*
-       * O padding de baixo reserva a altura da bottom nav (64px) mais a área
-       * segura do aparelho: sem isso o último card fica embaixo da barra em
-       * iPhone com faixa inferior.
+       * O padding de baixo reserva o menu flutuante — 64px de pílula, 24px dela
+       * até a borda e 16px de folga — mais a área segura do aparelho: sem isso
+       * o último card fica embaixo do menu em iPhone com faixa inferior.
        */}
-      <div className="mx-auto min-h-dvh max-w-[440px] bg-canvas px-5 pt-4 pb-[calc(64px+env(safe-area-inset-bottom)+16px)]">
+      <div className="mx-auto min-h-dvh max-w-[440px] bg-canvas px-5 pt-4 pb-[calc(104px+env(safe-area-inset-bottom))]">
         {tambemEPersonal ? <BarraDeVoltaAoPainel t={t.comum.barraDoPainel} /> : null}
         {children}
       </div>

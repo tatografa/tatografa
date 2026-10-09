@@ -127,6 +127,8 @@
      e o menu que abre em cima dele, medidos no protótipo. */
   --shadow-cartao: 0 4px 18px rgba(10, 10, 10, 0.06);
   --shadow-flutuante: 0 10px 30px rgba(10, 10, 10, 0.12);
+  /* O menu de baixo do app do aluno (protótipo A6): pílula escura flutuando. */
+  --shadow-menu: 0 12px 32px rgba(21, 21, 23, 0.28), 0 2px 6px rgba(21, 21, 23, 0.16);
 
   /* Landing (01/10): as capturas flutuam sobre o herói escuro e sobre o cinza
      dos pilares, medidas no protótipo. */
