@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import { useId, useMemo, useState } from "react";
 
+import { Avatar } from "@/components/avatar";
 import { IndicadoresDaCarteiraNoTopo } from "@/components/personal/indicadores-da-carteira";
 import { StatusDoAluno } from "@/components/personal/status-do-aluno";
 import { comoPorcentagem } from "@/lib/domain/atencao";
@@ -340,12 +341,11 @@ function Linha({
     <tr className="group relative border-b border-border-soft last:border-0 transition hover:bg-canvas">
       <Celula>
         <span className="flex items-center gap-3">
-          <span
-            aria-hidden
-            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-soft text-[12.5px] font-semibold text-brand"
-          >
-            {iniciaisDe(aluno.name)}
-          </span>
+          <Avatar
+            foto={aluno.foto}
+            iniciais={iniciaisDe(aluno.name)}
+            className="size-9 bg-brand-soft text-[12.5px] font-semibold text-brand"
+          />
           <span className="min-w-0">
             <span className="flex items-center gap-1.5">
               <Link

@@ -118,7 +118,12 @@ export function FichaDoAluno({
   const pesoInicial = [...reavaliacoes].reverse().find((r) => r.peso !== null)?.peso ?? null;
 
   const { itens, sessoesDeFora } = montarAtividade(sessoes, posts);
-  const autor = { id: aluno.id, nome: aluno.name, iniciais: iniciaisDe(aluno.name) };
+  const autor = {
+    id: aluno.id,
+    nome: aluno.name,
+    iniciais: iniciaisDe(aluno.name),
+    foto: avatarUrl,
+  };
   const nome = primeiroNome(aluno.name);
 
   return (

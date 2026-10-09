@@ -18,9 +18,12 @@
 -- no banco, e um `cast ... as uuid` numa pasta criada à mão estouraria a
 -- policy inteira.
 --
--- **Pendente** (igual à 0045): o MCP do Supabase deu timeouts persistentes no
--- `drop policy / create policy` desta migration, embora a `turma_do_aluno`
--- tenha sido criada. Aplicar pelo SQL Editor do Supabase.
+-- **Aplicada em dois tempos.** A função entrou em 07/10; a política, só em
+-- 09/10: o `drop policy` pede a confirmação de destrutivo que a sessão remota
+-- não consegue dar (como na 0045), e `alter policy` troca a expressão sem
+-- apagar nada — passou de primeira. Nove provas: dono, personal, colega e o
+-- personal-aluno lendo; outro personal, personal sem aluno e anon recusados;
+-- pasta com nome torto sem estourar.
 
 create function private.turma_do_aluno(p_id text) returns uuid
   language plpgsql
@@ -46,23 +49,15 @@ grant execute on function private.turma_do_aluno(text) to authenticated;
 comment on function private.turma_do_aluno(text) is
   'Trainer_id do aluno dono da pasta de avatar. security definer para o personal e o colega de turma passarem pela policy sem precisar ler students.';
 
-drop policy "avatares: dono, personal ou colega de turma" on storage.objects;
-
-create policy "avatares: dono, personal ou colega de turma"
-  on storage.objects for select to authenticated
+alter policy "avatares: dono, personal ou colega de turma" on storage.objects
   using (
     bucket_id = 'avatares'
     and (
-      (storage.foldername(name))[1] = (select auth.uid())::text
+      (storage.foldername(objects.name))[1] = (select auth.uid())::text
+      or private.turma_do_aluno((storage.foldername(objects.name))[1]) = (select auth.uid())
       or (
-        private.turma_do_aluno((storage.foldername(name))[1]) is not null
-        and (
-          private.turma_do_aluno((storage.foldername(name))[1]) = (select auth.uid())
-          or (
-            private.minha_turma() is not null
-            and private.turma_do_aluno((storage.foldername(name))[1]) = private.minha_turma()
-          )
-        )
+        private.minha_turma() is not null
+        and private.turma_do_aluno((storage.foldername(objects.name))[1]) = private.minha_turma()
       )
     )
   );

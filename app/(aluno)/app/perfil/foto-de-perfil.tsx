@@ -69,7 +69,9 @@ export function FotoDePerfil({
 
     setPreparando(true);
     try {
-      const reduzida = await prepararFoto(arquivo);
+      // 512px: o maior círculo do produto tem 80px, e 3x cobre tela de alta
+      // densidade. Em 1600px cada círculo da carteira baixaria ~300 kB.
+      const reduzida = await prepararFoto(arquivo, 512);
       setPrevia((anterior) => {
         if (anterior) URL.revokeObjectURL(anterior);
         return URL.createObjectURL(reduzida);

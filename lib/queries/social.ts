@@ -3,6 +3,7 @@ import "server-only";
 import { resumoDoExercicioNoPost, type PeriodoDoSocial, type SerieDoPost } from "@/lib/domain/feed";
 import type { Idioma } from "@/lib/domain/idioma";
 import { iniciaisDe } from "@/lib/domain/nome";
+import { fotosDe } from "@/lib/queries/avatar";
 import { chaveDoExercicio, exerciciosPorReferencia } from "@/lib/queries/exercicios";
 import { type ComentarioDoPost } from "@/lib/queries/feed";
 import { formatos } from "@/lib/i18n/formatos";
@@ -18,7 +19,7 @@ const MINUTOS_DA_URL = 60;
 
 export type PostDaCarteira = {
   id: string;
-  aluno: { id: string; nome: string; iniciais: string };
+  aluno: { id: string; nome: string; iniciais: string; foto: string | null };
   legenda: string | null;
   fotoUrl: string | null;
   visibilidade: Enums<"post_visibility">;
@@ -94,10 +95,7 @@ export async function lerPostsDaCarteira(
 
   const sessoes = [...new Set(posts.map((p) => p.session_id).filter((id) => id !== null))];
 
-  const [alunos, curtidas, minhasCurtidas, comentarios, urls, treinos] = await Promise.all([
-    // Sem RPC aqui, ao contrário do feed do aluno: `students_select` já devolve
-    // ao personal a carteira inteira (`trainer_id = auth.uid()`).
-    supabase.from("students").select("id, name").in("id", autores),
+  const [curtidas, minhasCurtidas, comentarios, urls, treinos] = await Promise.all([
     supabase.from("post_likes").select("post_id").in("post_id", ids),
     supabase
       .from("post_likes")
@@ -115,8 +113,22 @@ export async function lerPostsDaCarteira(
     treinosDasSessoes(sessoes, idioma),
   ]);
 
-  if (alunos.error) throw alunos.error;
   if (comentarios.error) throw comentarios.error;
+
+  // Nome e foto de **todos** os que aparecem: quem postou e quem comentou. Só
+  // os autores dos posts deixava o colega que comenta o post de outro como
+  // "Aluno". O personal entra no lote das fotos: os comentários dele levam a
+  // da linha de aluno de si mesmo, quando ele treina pelo app (13/09).
+  const pessoas = [
+    ...new Set([...autores, ...(comentarios.data ?? []).map((c) => c.author_id)]),
+  ];
+  const [alunos, fotos] = await Promise.all([
+    // Sem RPC aqui, ao contrário do feed do aluno: `students_select` já devolve
+    // ao personal a carteira inteira (`trainer_id = auth.uid()`).
+    supabase.from("students").select("id, name").in("id", pessoas),
+    fotosDe([...pessoas, trainerId]),
+  ]);
+  if (alunos.error) throw alunos.error;
 
   const nomePor = new Map((alunos.data ?? []).map((a) => [a.id, a.name]));
   const urlPor = new Map(
@@ -138,6 +150,7 @@ export async function lerPostsDaCarteira(
       id: c.id,
       autorNome: nome,
       autorIniciais: iniciaisDe(nome),
+      autorFoto: fotos.get(c.author_id) ?? null,
       doPersonal,
       meu: doPersonal,
       texto: c.body,
@@ -152,7 +165,12 @@ export async function lerPostsDaCarteira(
     const doPost = porPost.get(p.id) ?? [];
     return {
       id: p.id,
-      aluno: { id: p.student_id, nome, iniciais: iniciaisDe(nome) },
+      aluno: {
+        id: p.student_id,
+        nome,
+        iniciais: iniciaisDe(nome),
+        foto: fotos.get(p.student_id) ?? null,
+      },
       legenda: p.caption,
       fotoUrl: p.photo_path ? (urlPor.get(p.photo_path) ?? null) : null,
       visibilidade: p.visibility,

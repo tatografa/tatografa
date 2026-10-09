@@ -9,7 +9,7 @@ import { requireStudent } from "@/lib/auth/session";
 import { textosDoApp } from "@/lib/i18n/app/servidor";
 import { preencher } from "@/lib/i18n/texto";
 
-import { urlDoAvatar } from "@/lib/queries/avatar";
+import { fotoDe, urlDoAvatar } from "@/lib/queries/avatar";
 
 import { FormularioDePerfil } from "./formulario-de-perfil";
 import { FotoDePerfil } from "./foto-de-perfil";
@@ -34,7 +34,10 @@ export default async function PerfilDoAluno() {
     requireStudent(),
     textosDoApp(),
   ]);
-  const avatarUrl = await urlDoAvatar(student.avatar_path);
+  const [avatarUrl, fotoDoPersonal] = await Promise.all([
+    urlDoAvatar(student.avatar_path),
+    fotoDe(personal.id),
+  ]);
   const p = t.perfil.perfil;
 
   return (
@@ -69,6 +72,7 @@ export default async function PerfilDoAluno() {
       */}
       <CardDoPersonal
         nome={personal.name}
+        foto={fotoDoPersonal}
         telefone={personal.phone}
         rotulo={t.comum.cardDoPersonal.seuPersonal}
       />

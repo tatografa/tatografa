@@ -3,6 +3,7 @@
 import { Globe, KeyRound, LogOut, Pencil, ShieldCheck } from "lucide-react";
 import { useActionState, useState } from "react";
 
+import { Avatar } from "@/components/avatar";
 import { BotaoSair } from "@/components/botao-sair";
 import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 import { usePainel } from "@/components/personal/idioma-do-painel";
@@ -37,6 +38,7 @@ import { AjusteDeAlerta } from "./ajuste-de-alerta";
 export function TelaDeConfiguracoes({
   idioma,
   nome,
+  foto,
   email,
   telefone,
   diasParaAlerta,
@@ -44,6 +46,7 @@ export function TelaDeConfiguracoes({
   /** O seletor de idioma, montado no servidor pela página. */
   idioma: React.ReactNode;
   nome: string;
+  foto: string | null;
   email: string;
   telefone: string | null;
   diasParaAlerta: number;
@@ -69,6 +72,7 @@ export function TelaDeConfiguracoes({
       <div className="@container space-y-4">
         <Perfil
           nome={nome}
+          foto={foto}
           email={email}
           telefone={telefone}
           editando={editando}
@@ -126,12 +130,14 @@ const PERFIL_INICIAL: EstadoDoPerfil = {};
 
 function Perfil({
   nome,
+  foto,
   email,
   telefone,
   editando,
   aoFechar,
 }: {
   nome: string;
+  foto: string | null;
   email: string;
   telefone: string | null;
   editando: boolean;
@@ -152,12 +158,11 @@ function Perfil({
   return (
     <Cartao titulo={p.titulo}>
       <div className="flex flex-col gap-6 p-5 @min-[640px]:flex-row @min-[640px]:items-start">
-        <span
-          aria-hidden
-          className="flex size-20 shrink-0 items-center justify-center rounded-full bg-brand text-[26px] font-bold text-white"
-        >
-          {iniciaisDe(nome)}
-        </span>
+        <Avatar
+          foto={foto}
+          iniciais={iniciaisDe(nome)}
+          className="size-20 bg-brand text-[26px] font-bold text-white"
+        />
 
         {editando ? (
           <form action={acao} noValidate className="min-w-0 flex-1 space-y-4">

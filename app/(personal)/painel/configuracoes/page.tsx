@@ -1,4 +1,5 @@
 import { requireTrainer } from "@/lib/auth/session";
+import { fotoDe } from "@/lib/queries/avatar";
 import { createClient } from "@/lib/supabase/server";
 
 import { EscolhaDeIdioma } from "@/components/escolha-de-idioma";
@@ -17,9 +18,12 @@ import { TelaDeConfiguracoes } from "./tela-de-configuracoes";
 export default async function Configuracoes() {
   const { trainer } = await requireTrainer();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const [
+    {
+      data: { user },
+    },
+    foto,
+  ] = await Promise.all([supabase.auth.getUser(), fotoDe(trainer.id)]);
 
   // O seletor de idioma é o mesmo do perfil do aluno, e é componente servidor:
   // vai pronto para a tela, que é cliente.
@@ -27,6 +31,7 @@ export default async function Configuracoes() {
     <TelaDeConfiguracoes
       idioma={<EscolhaDoIdiomaDoPainel />}
       nome={trainer.name}
+      foto={foto}
       email={user?.email ?? trainer.email}
       telefone={trainer.phone}
       diasParaAlerta={trainer.dias_para_alerta}

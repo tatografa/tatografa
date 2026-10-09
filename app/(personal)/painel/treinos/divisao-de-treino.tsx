@@ -306,6 +306,7 @@ export function DivisaoDeTreino({
         <PainelLateral
           alunos={divisao.alunos}
           aluno={aluno}
+          foto={divisao.fotoDoAluno}
           programas={divisao.programas}
           programa={programa}
           dias={dias.map((d) => ({ chave: d.chave, label: d.label, nome: d.nome }))}

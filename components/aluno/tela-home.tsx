@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CalendarCheck, CalendarClock } from "lucide-react";
 
+import { Avatar } from "@/components/avatar";
 import { classesDeBotao } from "@/components/ui";
 import { FUSO } from "@/lib/domain/fuso";
 import type { Idioma } from "@/lib/domain/idioma";
@@ -20,6 +21,8 @@ import { primeiroNome } from "@/lib/domain/nome";
 
 export type TelaHomeProps = {
   nomeDoAluno: string;
+  /** URL assinada da foto de perfil; nula = a inicial do nome. */
+  fotoDoAluno: string | null;
   nomeDoPersonal: string;
   macrotreino: MacrotreinoDoAluno | null;
   totalDeTreinos: number;
@@ -70,6 +73,7 @@ export type ProximaSessao = {
  */
 export function TelaHome({
   nomeDoAluno,
+  fotoDoAluno,
   nomeDoPersonal,
   macrotreino,
   totalDeTreinos,
@@ -88,7 +92,13 @@ export function TelaHome({
         <h1 className="text-[22px] font-extrabold tracking-[-0.02em] text-ink">
           {saudacao(t)}, {primeiroNome(nomeDoAluno)}
         </h1>
-        <Avatar nome={nomeDoAluno} />
+        {/* Avatar do doc 05. Sem foto, a inicial do nome — um círculo cinza
+            vazio pareceria imagem quebrada. */}
+        <Avatar
+          foto={fotoDoAluno}
+          iniciais={nomeDoAluno.trim().charAt(0).toUpperCase()}
+          className="size-[38px] bg-canvas-sunken text-[15px] font-bold text-ink-2"
+        />
       </header>
 
       <Indicadores indicadores={indicadores} t={t} />
@@ -352,18 +362,4 @@ function SemTreino({ nomeDoPersonal, t }: { nomeDoPersonal: string; t: TextosDoA
   );
 }
 
-/**
- * Avatar do doc 05. Não há foto ainda (upload é fase posterior), então a
- * inicial do nome — um círculo cinza vazio pareceria imagem quebrada.
- */
-function Avatar({ nome }: { nome: string }) {
-  return (
-    <span
-      aria-hidden
-      className="flex size-[38px] shrink-0 items-center justify-center rounded-full bg-canvas-sunken text-[15px] font-bold text-ink-2"
-    >
-      {nome.trim().charAt(0).toUpperCase()}
-    </span>
-  );
-}
 

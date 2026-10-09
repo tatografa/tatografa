@@ -7,6 +7,7 @@ import { formatos } from "@/lib/i18n/formatos";
 import { pareceUuid } from "@/lib/domain/id";
 import { volumeDaSessao } from "@/lib/domain/treino";
 import { iniciaisDe } from "@/lib/domain/nome";
+import { fotosDe } from "@/lib/queries/avatar";
 import { createClient } from "@/lib/supabase/server";
 import type { Enums } from "@/types/database";
 
@@ -24,8 +25,10 @@ export type AbaDoFeed = "publico" | "personal";
 export type AutorDoPost = {
   id: string;
   nome: string;
-  /** Iniciais para o avatar: não há upload de foto de perfil ainda. */
+  /** Iniciais para o avatar quando não há foto. */
   iniciais: string;
+  /** URL assinada da foto de perfil, ou nula. */
+  foto: string | null;
 };
 
 export type PostDoFeed = {
@@ -103,7 +106,7 @@ export async function lerFeed(
 
   // Tudo em lote, em paralelo: uma consulta por tipo de dado, nunca uma por
   // post. São quatro idas ao servidor para trinta posts.
-  const [nomes, curtidas, minhasCurtidas, comentarios, urls, treinos] = await Promise.all([
+  const [nomes, curtidas, minhasCurtidas, comentarios, urls, treinos, fotos] = await Promise.all([
     // RPC e não `from("students")`: `students_select` devolve ao aluno **só a
     // própria linha**, então buscar direto trazia um nome e deixava todo colega
     // como "Aluno". `nomes_no_feed` (migration 0020) devolve só `(id, name)` e
@@ -122,6 +125,7 @@ export async function lerFeed(
           .createSignedUrls(caminhos, MINUTOS_DA_URL * 60)
       : Promise.resolve({ data: [] as { path: string | null; signedUrl: string }[] }),
     resumosDasSessoes(sessoes),
+    fotosDe(autores),
   ]);
 
   if (nomes.error) throw nomes.error;
@@ -149,7 +153,12 @@ export async function lerFeed(
     const nome = nomePor.get(p.student_id) ?? FEED[idioma].aluno;
     return {
       id: p.id,
-      autor: { id: p.student_id, nome, iniciais: iniciaisDe(nome) },
+      autor: {
+        id: p.student_id,
+        nome,
+        iniciais: iniciaisDe(nome),
+        foto: fotos.get(p.student_id) ?? null,
+      },
       meu: p.student_id === alunoId,
       legenda: p.caption,
       fotoUrl: p.photo_path ? (urlPor.get(p.photo_path) ?? null) : null,
@@ -168,6 +177,7 @@ export type ComentarioDoPost = {
   id: string;
   autorNome: string;
   autorIniciais: string;
+  autorFoto: string | null;
   /** O personal da turma comentando — vira selo, como no card do feed. */
   doPersonal: boolean;
   meu: boolean;
@@ -241,9 +251,17 @@ export async function lerPost(
     ...new Set((comentarios.data ?? []).map((c) => c.author_id)),
   ].filter((id) => id !== personal.id);
 
-  const { data: nomesDosComentarios } = autoresDeComentario.length
-    ? await supabase.rpc("nomes_no_feed", { p_ids: autoresDeComentario })
-    : { data: [] };
+  // A foto do personal é a da linha de aluno de si mesmo (13/09), e sai da
+  // mesma função que a dos colegas.
+  const [{ data: nomesDosComentarios }, fotos] = await Promise.all([
+    autoresDeComentario.length
+      ? supabase.rpc("nomes_no_feed", { p_ids: autoresDeComentario })
+      : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+    fotosDe([
+      post.student_id,
+      ...(comentarios.data ?? []).map((c) => c.author_id),
+    ]),
+  ]);
 
   const nomePor = new Map<string, string>([
     ...(nomes.data ?? []).map((a) => [a.id, a.name] as const),
@@ -259,6 +277,7 @@ export async function lerPost(
       id: post.student_id,
       nome: nomeDoAutor,
       iniciais: iniciaisDe(nomeDoAutor),
+      foto: fotos.get(post.student_id) ?? null,
     },
     meu: post.student_id === alunoId,
     legenda: post.caption,
@@ -278,6 +297,7 @@ export async function lerPost(
         id: c.id,
         autorNome: nome,
         autorIniciais: iniciaisDe(nome),
+        autorFoto: fotos.get(c.author_id) ?? null,
         doPersonal: c.author_id === personal.id,
         meu: c.author_id === alunoId,
         texto: c.body,

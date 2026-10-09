@@ -1,6 +1,8 @@
 import { ImageOff, Lock, MessageCircle, Users } from "lucide-react";
 import Link from "next/link";
 
+import { Avatar } from "@/components/avatar";
+
 import type { Idioma } from "@/lib/domain/idioma";
 import { TEXTOS_DO_PAINEL } from "@/lib/i18n/painel";
 import { plural, preencher } from "@/lib/i18n/texto";
@@ -40,7 +42,7 @@ export function CartaoDeAtividade({
   idioma?: Idioma;
   /** O nome do `<article>` para leitor de tela. */
   rotulo: string;
-  autor: { id: string; nome: string; iniciais: string };
+  autor: { id: string; nome: string; iniciais: string; foto: string | null };
   /** No feed o nome leva ao perfil; no próprio perfil seria um link para si. */
   linkDoAutor?: boolean;
   rotuloDoDia: string;
@@ -66,12 +68,11 @@ export function CartaoDeAtividade({
       className="flex flex-col gap-3 rounded-[12px] border border-border bg-surface p-4"
     >
       <header className="flex items-center gap-2.5">
-        <span
-          aria-hidden
-          className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-brand-soft text-[12px] font-semibold text-brand"
-        >
-          {autor.iniciais}
-        </span>
+        <Avatar
+          foto={autor.foto}
+          iniciais={autor.iniciais}
+          className="size-[34px] bg-brand-soft text-[12px] font-semibold text-brand"
+        />
         {linkDoAutor ? (
           <Link
             href={`/painel/alunos/${autor.id}`}
@@ -176,15 +177,14 @@ export function CartaoDeAtividade({
               <ul className="flex flex-col gap-2.5">
                 {conversa.comentarios.map((c) => (
                   <li key={c.id} className="flex gap-[9px]">
-                    <span
-                      aria-hidden
+                    <Avatar
+                      foto={c.autorFoto}
+                      iniciais={c.autorIniciais}
                       className={cn(
-                        "flex size-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold",
+                        "size-7 text-[11px] font-semibold",
                         c.doPersonal ? "bg-ink text-white" : "bg-canvas text-ink-3",
                       )}
-                    >
-                      {c.autorIniciais}
-                    </span>
+                    />
                     <div className="min-w-0 flex-1">
                       <p className="flex flex-wrap items-center gap-[7px]">
                         <span className="text-[12.5px] font-bold text-ink">{c.autorNome}</span>

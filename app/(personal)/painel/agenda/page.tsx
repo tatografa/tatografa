@@ -9,6 +9,7 @@ import {
   proximaSessaoDoPersonal,
 } from "@/lib/queries/agenda";
 import { listarAlunos } from "@/lib/queries/alunos";
+import { fotosDe } from "@/lib/queries/avatar";
 import { lerReavaliacoesDaCarteira } from "@/lib/queries/reavaliacao";
 
 import { TelaAgenda } from "./tela-agenda";
@@ -52,6 +53,8 @@ export default async function Agenda({ searchParams }: PageProps<"/painel/agenda
     proximaSessaoDoPersonal(trainer.id),
   ]);
 
+  const fotos = await fotosDe(alunos.map((a) => a.id));
+
   /*
    * A ficha do aluno manda `?aluno=<id>` no botão "Agendar sessão", e o diálogo
    * abre já com ele escolhido. O id é conferido contra a carteira **que o RLS
@@ -73,6 +76,7 @@ export default async function Agenda({ searchParams }: PageProps<"/painel/agenda
       semMarcacao={semMarcacao}
       alunos={alunos}
       alunoInicial={alunoInicial}
+      fotos={fotos}
       reavaliacoes={reavaliacoes}
       indicadores={indicadores}
       proxima={proxima}

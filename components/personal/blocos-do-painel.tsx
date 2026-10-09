@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { History } from "lucide-react";
 
+import { Avatar } from "@/components/avatar";
 import {
   CartaoDoPainel,
   LINHA_DO_CARTAO,
@@ -124,12 +125,11 @@ export function AtividadeRecente({
                 href={`/painel/alunos/${sessao.aluno.id}/sessoes/${sessao.id}`}
                 className={`flex items-center gap-3 transition hover:bg-canvas ${LINHA_DO_CARTAO}`}
               >
-                <span
-                  aria-hidden
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-canvas-sunken text-[11px] font-semibold text-ink-3"
-                >
-                  {iniciaisDe(sessao.aluno.nome)}
-                </span>
+                <Avatar
+                  foto={sessao.aluno.foto}
+                  iniciais={iniciaisDe(sessao.aluno.nome)}
+                  className="size-8 bg-canvas-sunken text-[11px] font-semibold text-ink-3"
+                />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-2">
                     <p className="min-w-0 truncate text-[13px] font-medium text-ink">

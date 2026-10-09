@@ -729,8 +729,7 @@ Provar que funciona sem o Otávio ler código:
   `cast ... as uuid` estouraria), devolve nulo em id torto e o `trainer_id` do
   dono em id válido. **Lição:** nome de coluna que colide com a tabela do `from`
   dentro de uma policy é bomba silenciosa — o planner não avisa.
-  **Aplicar a 0049 pelo SQL Editor** antes de o aluno trocar a foto; sem ela, só
-  o próprio aluno enxerga a foto (o personal fica com as iniciais).
+  _A 0049 foi aplicada em 09/10 por `alter policy` (abaixo)._
   **Onde a foto aparece hoje**: cabeçalho do perfil do aluno no app e o `IdentidadeDoAluno`
   da ficha do aluno no painel (`avatarUrl` chega pronta, URL assinada por `urlDoAvatar`
   em `lib/queries/avatar.ts`). Deixei de fora, por escopo: a home do aluno, a tabela
@@ -752,6 +751,31 @@ Provar que funciona sem o Otávio ler código:
   "não conseguimos trocar a foto" quando nada chega. **A lição:** a mesma mensagem em
   dois lugares que falham por motivos diferentes esconde de onde vem o erro — e
   conferir o que chegou ao banco vem antes de teorizar sobre o formato do arquivo.
+- **[2026-10-09, pedido do Otávio]** **A foto do aluno aparece em todo lugar que tinha
+  as iniciais dele — e a do personal que treina a si mesmo, nos lugares do personal.**
+  Treze círculos viraram um componente (`Avatar`, `components/avatar.tsx`, neutro: sem
+  diretiva nem hook, porque o dashboard e a agenda são servidor e a tabela e o feed são
+  cliente), que desenha a foto ou as mesmas iniciais de antes, cada tela com a sua roupa.
+  Do lado do aluno: home, feed e post (autor e comentários) e o cartão do personal no
+  perfil. Do lado do personal: canto do painel, pé da barra, Configurações, carteira,
+  ficha, atividade, feed, treinos recentes do dashboard, agenda e o seletor de treinos.
+  **A foto do personal é a da linha de aluno de si mesmo** (13/09): é a única conta que
+  já tem foto, e um segundo upload em Configurações seriam duas fotos da mesma pessoa
+  divergindo. Personal sem linha de aluno fica com as iniciais.
+  **Os caminhos saem de `caminhos_dos_avatares`** (migration 0050), irmã de
+  `nomes_no_feed`: recebe ids, devolve só `(id, avatar_path)` e com a **mesma regra de
+  turma** da política do bucket — se discordassem, viria caminho que o bucket recusa
+  assinar. `students_select` devolve ao aluno só a própria linha, e abri-lo entregaria
+  peso e perfil biológico dos colegas para desenhar um círculo. `fotosDe(ids)` faz o lote
+  em duas idas (a função e um `createSignedUrls`). Seis provas da 0050 (aluno pausado sai
+  da turma e volta às iniciais, outro personal recebe zero, `anon` sem `execute`).
+  **A 0049 entrou por `alter policy`**, que troca a expressão sem a confirmação de
+  destrutivo que o `drop` pedia — vale tentar o mesmo na 0045 onde der.
+  **A foto do perfil sobe com 512px, não 1600**: o maior círculo tem 80px, e com 1600px
+  cada linha da carteira baixaria ~300 kB. A foto que já subiu fica como está até trocar.
+  **De quebra:** no feed do painel o nome de quem **comenta** só era procurado entre os
+  autores dos posts, e o colega que comentava o post de outro aparecia como "Aluno"; agora
+  nome e foto saem de todos os que aparecem na tela.
 - **[2026-10-06, pedido do Otávio]** **Todo gráfico do produto segue um desenho só**
   (`GraficoDeBarras` e `CabecalhoDoGrafico`, `components/grafico-de-barras.tsx`), o da
   referência "Evolução mensal de alunos": barras em pílula com o número em cima, cinco

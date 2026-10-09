@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CalendarClock, ChevronLeft, ChevronRight, Dumbbell, Ruler, User } from "lucide-react";
 
+import { Avatar } from "@/components/avatar";
 import { CabecalhoDaPagina } from "@/components/personal/cabecalho-da-pagina";
 import { NumeroDoTopo } from "@/components/personal/numero-do-topo";
 import {
@@ -82,6 +83,7 @@ export function TelaAgenda({
   semMarcacao,
   alunos,
   alunoInicial,
+  fotos,
   reavaliacoes,
   indicadores,
   proxima,
@@ -97,6 +99,8 @@ export function TelaAgenda({
   semMarcacao: SessaoAgendada[];
   alunos: AlunoDaLista[];
   alunoInicial?: string | null;
+  /** Foto de cada aluno da carteira, por id; quem não tem fica nas iniciais. */
+  fotos: Map<string, string>;
   reavaliacoes: ReavaliacaoNaCarteira[];
   indicadores: IndicadoresDaAgenda;
   proxima: SessaoAgendada | null;
@@ -201,7 +205,12 @@ export function TelaAgenda({
 
           {/* ------------------------------------------------ a coluna --- */}
           <div className="flex min-w-0 flex-col gap-4">
-            <ProximaSessao sessao={proxima} agora={agora} l={l} />
+            <ProximaSessao
+              sessao={proxima}
+              foto={proxima ? fotos.get(proxima.alunoId) : undefined}
+              agora={agora}
+              l={l}
+            />
 
             {/*
               O que ficou para trás vem antes do resto: sessão passada sem
@@ -220,6 +229,7 @@ export function TelaAgenda({
                     <li key={s.id} className={cn("space-y-1.5", LINHA_DO_CARTAO)}>
                       <LinhaDeAluno
                         nome={s.alunoNome}
+                        foto={fotos.get(s.alunoId)}
                         detalhe={`${f.diaDaAgenda(s.dia)} · ${f.horaDaAgenda(s.inicio)}`}
                       />
                       <MarcarSessao sessao={s} />
@@ -240,6 +250,7 @@ export function TelaAgenda({
                     <li key={r.id} className={cn("flex items-center justify-between gap-2", LINHA_DO_CARTAO)}>
                       <LinhaDeAluno
                         nome={r.aluno.nome}
+                        foto={fotos.get(r.aluno.id)}
                         detalhe={preencher(a.liberada, { dia: f.diaNaFrase(r.liberadaEm) })}
                       />
                       <BotaoCancelar id={r.id} aluno={r.aluno.nome} />
@@ -264,6 +275,7 @@ export function TelaAgenda({
                       >
                         <LinhaDeAluno
                           nome={r.aluno.nome}
+                          foto={fotos.get(r.aluno.id)}
                           detalhe={preencher(a.respondida, {
                             dia: r.enviadaEm ? f.diaNaFrase(r.enviadaEm) : "",
                           })}
@@ -671,10 +683,12 @@ function GradeDoMes({
 
 function ProximaSessao({
   sessao,
+  foto,
   agora,
   l,
 }: {
   sessao: SessaoAgendada | null;
+  foto?: string;
   agora: string;
   l: Lingua;
 }) {
@@ -683,7 +697,7 @@ function ProximaSessao({
     <CartaoDoPainel titulo={p.titulo} Icone={CalendarClock}>
       {sessao ? (
         <div className="space-y-3 px-[18px] py-4">
-          <LinhaDeAluno nome={sessao.alunoNome} detalhe={l.f.duracaoEmMinutos(sessao.duracaoMin)} grande />
+          <LinhaDeAluno nome={sessao.alunoNome} foto={foto} detalhe={l.f.duracaoEmMinutos(sessao.duracaoMin)} grande />
           <div>
             <p className="text-[12px] text-ink-5">{p.horario}</p>
             <p className="text-[13.5px] font-semibold text-ink">{quandoAcontece(sessao, agora, l)}</p>
@@ -716,18 +730,27 @@ function ProximaSessao({
   );
 }
 
-function LinhaDeAluno({ nome, detalhe, grande = false }: { nome: string; detalhe: string; grande?: boolean }) {
+function LinhaDeAluno({
+  nome,
+  foto,
+  detalhe,
+  grande = false,
+}: {
+  nome: string;
+  foto?: string;
+  detalhe: string;
+  grande?: boolean;
+}) {
   return (
     <div className="flex min-w-0 items-center gap-2.5">
-      <span
-        aria-hidden
+      <Avatar
+        foto={foto}
+        iniciais={iniciaisDe(nome)}
         className={cn(
-          "flex shrink-0 items-center justify-center rounded-full bg-brand-soft font-semibold text-brand",
+          "bg-brand-soft font-semibold text-brand",
           grande ? "size-10 text-[13px]" : "size-8 text-[11px]",
         )}
-      >
-        {iniciaisDe(nome)}
-      </span>
+      />
       <div className="min-w-0">
         <p className={cn("truncate font-semibold text-ink", grande ? "text-[14.5px]" : "text-[13px]")}>{nome}</p>
         <p className="truncate text-[12px] text-ink-4">{detalhe}</p>

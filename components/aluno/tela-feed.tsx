@@ -3,6 +3,7 @@
 import { Heart, Lock, MessageCircle, Plus, Users } from "lucide-react";
 import Link from "next/link";
 
+import { Avatar } from "@/components/avatar";
 import { Carregando, Esqueleto } from "@/components/esqueleto";
 import { Badge } from "@/components/ui";
 import { plural, preencher } from "@/lib/i18n/texto";
@@ -160,12 +161,11 @@ function CardDePost({
       className="block overflow-hidden rounded-card-lg border border-border-soft bg-surface transition hover:border-border-strong"
     >
       <div className="flex items-center gap-2.5 px-3.5 py-3">
-        <span
-          aria-hidden
-          className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-canvas-sunken font-mono text-[11px] font-bold text-ink-2"
-        >
-          {post.autor.iniciais}
-        </span>
+        <Avatar
+          foto={post.autor.foto}
+          iniciais={post.autor.iniciais}
+          className="size-[34px] bg-canvas-sunken font-mono text-[11px] font-bold text-ink-2"
+        />
 
         <div className="min-w-0 flex-1">
           <p className="flex items-center gap-1.5 text-[13px] font-bold text-ink">

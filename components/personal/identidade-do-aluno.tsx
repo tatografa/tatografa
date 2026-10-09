@@ -1,5 +1,6 @@
 import { Flame, MessageCircle, Zap } from "lucide-react";
 
+import { Avatar } from "@/components/avatar";
 import { AcessoDoAluno } from "@/components/personal/acesso-do-aluno";
 import { StatusDoAluno } from "@/components/personal/status-do-aluno";
 import { diaLocal } from "@/lib/domain/fuso";
@@ -106,21 +107,11 @@ export function IdentidadeDoAluno({
         className="space-y-4 rounded-[12px] border border-border bg-surface p-6"
       >
         <div className="flex flex-col items-center gap-2 text-center">
-          {avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={avatarUrl}
-              alt=""
-              className="size-[72px] rounded-full object-cover"
-            />
-          ) : (
-            <span
-              aria-hidden
-              className="flex size-[72px] items-center justify-center rounded-full bg-brand-soft text-[24px] font-bold text-brand"
-            >
-              {iniciaisDe(aluno.name)}
-            </span>
-          )}
+          <Avatar
+            foto={avatarUrl}
+            iniciais={iniciaisDe(aluno.name)}
+            className="size-[72px] bg-brand-soft text-[24px] font-bold text-brand"
+          />
           <h1 className="text-[18px] leading-tight font-bold tracking-[-0.01em] text-ink">
             {aluno.name}
           </h1>

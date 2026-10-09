@@ -24,7 +24,10 @@ const LADO_MAXIMO = 1600;
 /** Qualidade do JPEG. Acima de 0,85 o arquivo cresce sem diferença visível. */
 const QUALIDADE = 0.82;
 
-export async function prepararFoto(arquivo: File): Promise<File> {
+export async function prepararFoto(
+  arquivo: File,
+  ladoMaximo: number = LADO_MAXIMO,
+): Promise<File> {
   const { imagem, revogar } = await carregar(arquivo);
   try {
     const largura0 =
@@ -33,7 +36,7 @@ export async function prepararFoto(arquivo: File): Promise<File> {
       imagem instanceof HTMLImageElement ? imagem.naturalHeight : imagem.height;
     if (!largura0 || !altura0) throw new Error("imagem sem dimensões");
 
-    const escala = Math.min(1, LADO_MAXIMO / Math.max(largura0, altura0));
+    const escala = Math.min(1, ladoMaximo / Math.max(largura0, altura0));
     const largura = Math.round(largura0 * escala);
     const altura = Math.round(altura0 * escala);
 

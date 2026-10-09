@@ -1,6 +1,7 @@
 import { TelaHome } from "@/components/aluno/tela-home";
 import { requireStudent } from "@/lib/auth/session";
 import { textosDoApp } from "@/lib/i18n/app/servidor";
+import { urlDoAvatar } from "@/lib/queries/avatar";
 import { lerAgendaDoAluno, lerIndicadoresDoAluno } from "@/lib/queries/aluno";
 import { sessaoAbertaDoAluno } from "@/lib/queries/execucao";
 import { proximaSessaoDoAluno } from "@/lib/queries/agenda";
@@ -18,6 +19,7 @@ export default async function HomeDoAluno() {
     reavaliacaoAberta,
     proxima,
     { idioma, f },
+    fotoDoAluno,
   ] = await Promise.all([
     lerAgendaDoAluno(student.id),
     lerIndicadoresDoAluno(student.id),
@@ -25,11 +27,13 @@ export default async function HomeDoAluno() {
     temReavaliacaoAberta(student.id),
     proximaSessaoDoAluno(student.id),
     textosDoApp(),
+    urlDoAvatar(student.avatar_path),
   ]);
 
   return (
     <TelaHome
       nomeDoAluno={student.name}
+      fotoDoAluno={fotoDoAluno}
       nomeDoPersonal={personal.name}
       macrotreino={macrotreino}
       totalDeTreinos={treinos.length}

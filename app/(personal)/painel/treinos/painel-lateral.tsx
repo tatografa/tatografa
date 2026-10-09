@@ -12,6 +12,7 @@ import {
   Zap,
 } from "lucide-react";
 
+import { Avatar } from "@/components/avatar";
 import { usePainel } from "@/components/personal/idioma-do-painel";
 import { Badge, Button, Dialog, Input, Select } from "@/components/ui";
 import { MAXIMO_DE_DIAS } from "@/lib/domain/divisao";
@@ -46,6 +47,7 @@ export type DiaDoPainel = { chave: string; label: string; nome: string };
 export function PainelLateral({
   alunos,
   aluno,
+  foto,
   programas,
   programa,
   dias,
@@ -60,6 +62,7 @@ export function PainelLateral({
 }: {
   alunos: AlunoDaDivisao[];
   aluno: AlunoDaDivisao;
+  foto: string | null;
   programas: ProgramaDaDivisao[];
   programa: ProgramaDaDivisao | null;
   dias: DiaDoPainel[];
@@ -89,12 +92,11 @@ export function PainelLateral({
             {l.aluno}
           </label>
           <div className="relative">
-            <span
-              aria-hidden
-              className="pointer-events-none absolute top-1/2 left-3 flex size-[26px] -translate-y-1/2 items-center justify-center rounded-full bg-brand-soft text-[11px] font-semibold text-brand"
-            >
-              {iniciaisDe(aluno.name)}
-            </span>
+            <Avatar
+              foto={foto}
+              iniciais={iniciaisDe(aluno.name)}
+              className="pointer-events-none absolute top-1/2 left-3 size-[26px] -translate-y-1/2 bg-brand-soft text-[11px] font-semibold text-brand"
+            />
             {/* `<select>` nativo com a roupa do protótipo: a lista suspensa
                 desenhada à mão teria de reimplementar teclado, busca por letra
                 e leitor de tela — e a nativa já faz os três. */}

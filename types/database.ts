@@ -879,6 +879,13 @@ export type Database = {
         Args: { p_mesocycle_id: string }
         Returns: undefined
       }
+      caminhos_dos_avatares: {
+        Args: { p_ids: string[] }
+        Returns: {
+          avatar_path: string
+          id: string
+        }[]
+      }
       entrar_na_lista:
         | { Args: { p_email: string }; Returns: undefined }
         | { Args: { p_email: string; p_perfil: string }; Returns: undefined }

@@ -1,6 +1,7 @@
 import { Lock } from "lucide-react";
 import Link from "next/link";
 
+import { Avatar } from "@/components/avatar";
 import { Badge } from "@/components/ui";
 import type { Idioma } from "@/lib/domain/idioma";
 import { TEXTOS_DO_APP } from "@/lib/i18n/app";
@@ -50,12 +51,11 @@ export function TelaDoPost({
 
       <article className="overflow-hidden rounded-card-lg border border-border-soft bg-surface">
         <div className="flex items-center gap-2.5 px-3.5 py-3">
-          <span
-            aria-hidden
-            className="flex size-[38px] shrink-0 items-center justify-center rounded-full bg-canvas-sunken font-mono text-[12px] font-bold text-ink-2"
-          >
-            {post.autor.iniciais}
-          </span>
+          <Avatar
+            foto={post.autor.foto}
+            iniciais={post.autor.iniciais}
+            className="size-[38px] bg-canvas-sunken font-mono text-[12px] font-bold text-ink-2"
+          />
 
           <div className="min-w-0 flex-1">
             <h1 className="flex items-center gap-1.5 text-[14px] font-bold text-ink">
@@ -129,12 +129,11 @@ export function TelaDoPost({
                 key={comentario.id}
                 className="flex gap-2.5 rounded-card border border-border-soft bg-surface px-3.5 py-3"
               >
-                <span
-                  aria-hidden
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-canvas-sunken font-mono text-[10.5px] font-bold text-ink-2"
-                >
-                  {comentario.autorIniciais}
-                </span>
+                <Avatar
+                  foto={comentario.autorFoto}
+                  iniciais={comentario.autorIniciais}
+                  className="size-8 bg-canvas-sunken font-mono text-[10.5px] font-bold text-ink-2"
+                />
                 <div className="min-w-0 flex-1">
                   <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[12.5px] font-bold text-ink">
                     <span className="truncate">

@@ -20,6 +20,7 @@ import { semanaAtual, volumeDaSessao } from "@/lib/domain/treino";
 import { createClient } from "@/lib/supabase/server";
 
 import { listarAlunos, type AlunoDaLista } from "./alunos";
+import { fotosDe } from "./avatar";
 import { seriesDasSessoes, type SerieComSessao } from "./historico";
 import { listarProgramasPorAluno, type Macrotreino } from "./macrotreinos";
 import { contarReavaliacoesPendentes } from "./reavaliacao";
@@ -37,7 +38,7 @@ export type IndicadoresDoPainel = {
 /** Uma linha de "Atividade recente" (doc 06 §2). */
 export type SessaoRecente = {
   id: string;
-  aluno: { id: string; nome: string };
+  aluno: { id: string; nome: string; foto: string | null };
   /** Nulo se o personal apagou o treino depois — a sessão continua valendo. */
   treino: { label: string; name: string } | null;
   finished_at: string;
@@ -144,6 +145,8 @@ export type AlunoNaTabela = AlunoDaLista & {
    * e no navegador usaria o relógio do aparelho.
    */
   semana_do_programa: number | null;
+  /** URL assinada da foto de perfil, ou nula para as iniciais. */
+  foto: string | null;
 };
 
 /**
@@ -169,11 +172,13 @@ export async function lerAlunosDaCarteira(): Promise<AlunoNaTabela[]> {
   ]);
 
   const programaPor = new Map(programas.map((p) => [p.aluno.id, p.ativo]));
+  const fotos = await fotosDe(alunos.map((a) => a.id));
 
   return alunos.map((aluno) => {
     const programa = programaPor.get(aluno.id) ?? null;
     return {
       ...aluno,
+      foto: fotos.get(aluno.id) ?? null,
       programa,
       aderencia: aderenciaDoAluno(
         sessoesPorAluno.get(aluno.id) ?? 0,
@@ -226,16 +231,15 @@ export async function lerAtividadeRecente(
   if (error) throw error;
   if (!sessoes?.length) return [];
 
-  const [alunos, treinos, series] = await Promise.all([
-    supabase
-      .from("students")
-      .select("id, name")
-      .in("id", [...new Set(sessoes.map((s) => s.student_id))]),
+  const idsDosAlunos = [...new Set(sessoes.map((s) => s.student_id))];
+  const [alunos, treinos, series, fotos] = await Promise.all([
+    supabase.from("students").select("id, name").in("id", idsDosAlunos),
     supabase
       .from("workouts")
       .select("id, label, name")
       .in("id", [...new Set(sessoes.map((s) => s.workout_id))]),
     seriesDasSessoes(sessoes.map((s) => s.id)),
+    fotosDe(idsDosAlunos),
   ]);
 
   if (alunos.error) throw alunos.error;
@@ -264,6 +268,7 @@ export async function lerAtividadeRecente(
         aluno: {
           id: sessao.student_id,
           nome: nomePor.get(sessao.student_id) ?? "Aluno",
+          foto: fotos.get(sessao.student_id) ?? null,
         },
         treino: treino ? { label: treino.label, name: treino.name } : null,
         finished_at: sessao.finished_at,

@@ -184,10 +184,11 @@ export async function salvarFotoDePerfil(
     await supabase.storage.from("avatares").remove([antigo]);
   }
 
-  // `layout` para o cabeçalho do perfil e o avatar da ficha do personal
-  // envelhecerem juntos.
+  // A foto aparece no app inteiro e em quase toda tela do painel (carteira,
+  // feed, agenda, ficha) — e, para o personal que treina a si mesmo, no canto
+  // e na barra do painel. Os dois layouts envelhecem juntos.
   revalidatePath("/app", "layout");
-  revalidatePath(`/painel/alunos/${student.id}`);
+  revalidatePath("/painel", "layout");
   return { sucesso: true };
 }
 
@@ -213,6 +214,6 @@ export async function apagarFotoDePerfil(): Promise<EstadoDoAvatar> {
   await supabase.storage.from("avatares").remove([student.avatar_path]);
 
   revalidatePath("/app", "layout");
-  revalidatePath(`/painel/alunos/${student.id}`);
+  revalidatePath("/painel", "layout");
   return { sucesso: true };
 }

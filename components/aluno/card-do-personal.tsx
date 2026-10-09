@@ -1,5 +1,6 @@
 import { MessageCircle } from "lucide-react";
 
+import { Avatar } from "@/components/avatar";
 import { Card } from "@/components/ui";
 import { iniciaisDe } from "@/lib/domain/nome";
 import { linkDoWhatsApp } from "@/lib/domain/telefone";
@@ -18,10 +19,16 @@ import { linkDoWhatsApp } from "@/lib/domain/telefone";
  */
 export function CardDoPersonal({
   nome,
+  foto = null,
   telefone,
   rotulo,
 }: {
   nome: string;
+  /**
+   * A foto da linha de aluno do próprio personal, quando ele treina pelo app
+   * (13/09). Aluno pausado sai da turma e não a enxerga — fica nas iniciais.
+   */
+  foto?: string | null;
   telefone: string | null;
   /** "Seu personal trainer", no idioma do app. */
   rotulo: string;
@@ -30,12 +37,11 @@ export function CardDoPersonal({
 
   return (
     <Card className="flex items-center gap-3">
-      <span
-        aria-hidden
-        className="flex size-[38px] shrink-0 items-center justify-center rounded-full bg-ink text-[15px] font-bold text-white"
-      >
-        {iniciaisDe(nome)}
-      </span>
+      <Avatar
+        foto={foto}
+        iniciais={iniciaisDe(nome)}
+        className="size-[38px] bg-ink text-[15px] font-bold text-white"
+      />
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-[13px] font-bold text-ink">{nome}</p>

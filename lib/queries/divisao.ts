@@ -1,6 +1,7 @@
 import "server-only";
 
 import { pareceUuid } from "@/lib/domain/id";
+import { fotoDe } from "@/lib/queries/avatar";
 import { createClient } from "@/lib/supabase/server";
 import type { Enums } from "@/types/database";
 
@@ -62,6 +63,8 @@ export type DivisaoDeTreino = {
   alunos: AlunoDaDivisao[];
   /** Nulo só quando a carteira está vazia. */
   aluno: AlunoDaDivisao | null;
+  /** A foto do aluno escolhido, ao lado do seletor; nula para as iniciais. */
+  fotoDoAluno: string | null;
   /** Do aluno escolhido: o ativo primeiro, depois do mais novo ao mais velho. */
   programas: ProgramaDaDivisao[];
   /** Nulo quando o aluno não tem programa nenhum. */
@@ -100,7 +103,7 @@ export async function lerDivisaoDeTreino({
   const carteira = (alunos ?? []).sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 
   const vazio = { programas: [], programa: null, treinos: [] };
-  if (!carteira.length) return { alunos: [], aluno: null, ...vazio };
+  if (!carteira.length) return { alunos: [], aluno: null, fotoDoAluno: null, ...vazio };
 
   // Sem aluno na URL, o primeiro ativo: é a quem o personal monta treino. O
   // arquivado continua na lista para consulta, mas não abre a tela.
@@ -109,12 +112,15 @@ export async function lerDivisaoDeTreino({
     carteira.find((a) => a.status === "ativo") ??
     carteira[0];
 
-  const { data: linhas, error: erroProgramas } = await supabase
-    .from("mesocycles")
-    .select("id, name, total_weeks, started_at, status, goal, created_at")
-    .eq("student_id", aluno.id)
-    .order("started_at", { ascending: false })
-    .order("created_at", { ascending: false });
+  const [{ data: linhas, error: erroProgramas }, fotoDoAluno] = await Promise.all([
+    supabase
+      .from("mesocycles")
+      .select("id, name, total_weeks, started_at, status, goal, created_at")
+      .eq("student_id", aluno.id)
+      .order("started_at", { ascending: false })
+      .order("created_at", { ascending: false }),
+    fotoDe(aluno.id),
+  ]);
 
   if (erroProgramas) throw erroProgramas;
 
@@ -130,11 +136,12 @@ export async function lerDivisaoDeTreino({
     programas[0] ??
     null;
 
-  if (!programa) return { alunos: carteira, aluno, ...vazio };
+  if (!programa) return { alunos: carteira, aluno, fotoDoAluno, ...vazio };
 
   return {
     alunos: carteira,
     aluno,
+    fotoDoAluno,
     programas,
     programa,
     treinos: await lerTreinosDoPrograma(programa.id),

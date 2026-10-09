@@ -2,6 +2,7 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
 
+import { Avatar } from "@/components/avatar";
 import { BotaoSair } from "@/components/botao-sair";
 import { ProvedorDoPainel } from "@/components/personal/idioma-do-painel";
 import { NavegacaoLateral } from "@/components/personal/navegacao-lateral";
@@ -20,6 +21,7 @@ import { oQueMudouDoPersonalNoIdioma } from "@/lib/legal/por-idioma";
 import { iniciaisDe } from "@/lib/domain/nome";
 import { COOKIE_DA_BARRA_RECOLHIDA } from "@/lib/domain/painel";
 import { contarAlunos } from "@/lib/queries/alunos";
+import { fotoDe } from "@/lib/queries/avatar";
 
 import { aceitarAtualizacaoDoPersonal } from "../acoes-de-aceite";
 
@@ -77,7 +79,9 @@ export default async function PainelLayout({
   // (`head + count`), não a carteira inteira: o layout roda em toda navegação
   // do painel, e trazer as linhas para contá-las seria pagar a leitura mais
   // cara do produto pela informação mais barata dele.
-  const alunos = await contarAlunos();
+  // A foto do personal é a da linha de aluno de si mesmo (13/09); quem não
+  // treina pelo app continua com as iniciais.
+  const [alunos, foto] = await Promise.all([contarAlunos(), fotoDe(trainer.id)]);
   const recolhida = (await cookies()).get(COOKIE_DA_BARRA_RECOLHIDA)?.value === "1";
 
   return (
@@ -85,6 +89,7 @@ export default async function PainelLayout({
     <div lang={langDe(idioma)} className="flex min-h-dvh items-start gap-[11px] bg-canvas-sunken p-[13px]">
       <NavegacaoLateral
         nome={trainer.name}
+        foto={foto}
         alunos={alunos}
         recolhidaInicial={recolhida}
         sair={
@@ -114,9 +119,13 @@ export default async function PainelLayout({
           href="/painel/configuracoes"
           aria-label={preencher(t.comum.nav.suaContaDe, { nome: trainer.name })}
           title={trainer.name}
-          className="absolute top-[25px] right-7 z-10 flex size-10 items-center justify-center rounded-full bg-ink text-[13px] font-semibold text-white transition hover:opacity-85"
+          className="absolute top-[25px] right-7 z-10 rounded-full transition hover:opacity-85"
         >
-          {iniciaisDe(trainer.name)}
+          <Avatar
+            foto={foto}
+            iniciais={iniciaisDe(trainer.name)}
+            className="size-10 bg-ink text-[13px] font-semibold text-white"
+          />
         </Link>
 
         {children}

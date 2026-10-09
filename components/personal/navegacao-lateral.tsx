@@ -15,6 +15,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { Avatar } from "@/components/avatar";
 import { Logo } from "@/components/logo";
 import { COOKIE_DA_BARRA_RECOLHIDA } from "@/lib/domain/painel";
 import { iniciaisDe } from "@/lib/domain/nome";
@@ -63,11 +64,14 @@ const NAVEGACAO = [
  */
 export function NavegacaoLateral({
   nome,
+  foto,
   alunos,
   sair,
   recolhidaInicial,
 }: {
   nome: string;
+  /** URL assinada da foto do personal, ou nula para as iniciais. */
+  foto: string | null;
   /** Vai no marcador de "Alunos", como no protótipo. */
   alunos: number;
   /** O botão de sair, recebido pronto: ele serve aos dois lados do produto. */
@@ -185,12 +189,11 @@ export function NavegacaoLateral({
               colapsada ? "" : "flex-1"
             }`}
           >
-            <span
-              aria-hidden
-              className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-[12px] font-bold text-white"
-            >
-              {iniciaisDe(nome)}
-            </span>
+            <Avatar
+              foto={foto}
+              iniciais={iniciaisDe(nome)}
+              className="size-9 bg-ink text-[12px] font-bold text-white"
+            />
             {!colapsada && (
               <span className="min-w-0" aria-hidden>
                 <span className="block truncate text-[13px] font-semibold text-ink">{nome}</span>
