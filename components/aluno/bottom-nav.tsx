@@ -3,7 +3,6 @@
 import { TrendingUp, User, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -27,22 +26,21 @@ type Aba = {
 };
 
 /**
- * As três abas comuns, na ordem do protótipo A6 ("Treinar integrado"): o
- * círculo branco desliza entre elas, e "Treinar" mora à parte, na ponta, onde o
- * polegar direito alcança sem esticar.
+ * As quatro abas, na ordem do protótipo A6 ("Treinar integrado"): "Treinar" na
+ * ponta direita, onde o polegar direito alcança sem esticar.
  */
-const LATERAIS: Aba[] = [
+const ABAS: Aba[] = [
   { rotulo: "progresso", href: "/app/progresso", sePausa: true },
   { rotulo: "feed", href: "/app/feed", sePausa: true },
   { rotulo: "perfil", href: "/app/perfil" },
+  { rotulo: "treinar", href: "/app" },
 ];
 
-const TREINAR: Aba = { rotulo: "treinar", href: "/app" };
-
-const ICONES: Record<Exclude<Rotulo, "treinar">, typeof User> = {
+const ICONES: Record<Rotulo, React.ComponentType<{ size?: number; strokeWidth?: number; "aria-hidden"?: boolean }>> = {
   progresso: TrendingUp,
   feed: Users,
   perfil: User,
+  treinar: Haltere,
 };
 
 /** Lado do botão e o espaço entre eles: o passo do círculo que desliza. */
@@ -59,7 +57,7 @@ const VAO = 6;
  */
 function abaAtiva(caminho: string): Rotulo | null {
   let escolhida: Aba | null = null;
-  for (const aba of [TREINAR, ...LATERAIS]) {
+  for (const aba of ABAS) {
     const casa = caminho === aba.href || caminho.startsWith(`${aba.href}/`);
     if (!casa) continue;
     if (!escolhida || aba.href.length > escolhida.href.length) escolhida = aba;
@@ -69,29 +67,24 @@ function abaAtiva(caminho: string): Rotulo | null {
 
 /**
  * O menu de baixo no desenho do protótipo A6: uma pílula escura flutuando sobre
- * a tela, só com ícones, e "Treinar" sempre em vermelho na ponta — é a ação
- * pela qual o aluno abre o app na academia.
+ * a tela, só com ícones.
+ *
+ * **O vermelho é a aba aberta, e só ela** — inclusive "Treinar", que fora da
+ * própria tela fica cinza como as outras. A primeira versão deixava o Treinar
+ * vermelho sempre e marcava a aba atual com um círculo branco, e o Otávio leu
+ * dois destaques ao mesmo tempo (09/10). Agora o círculo vermelho desliza para
+ * a aba escolhida.
  *
  * **Sem os rótulos escritos**, como no protótipo: o nome de cada aba vai no
- * `aria-label`, que é o que o leitor de tela anuncia, e os quatro ícones são os
- * de sempre do produto. A troca custa a leitura de relance para quem não
- * reconhece o ícone — pedido do Otávio (09/10).
- *
- * **O círculo branco lembra onde estava.** Em "Treinar" ele some encolhendo no
- * lugar da última aba comum, e volta dali: assim o movimento sempre parte de
- * onde o olho já estava. A lembrança é estado do componente — o layout do app
- * não desmonta entre uma tela e outra — ajustado durante a renderização, o
- * padrão do projeto.
+ * `aria-label`, que é o que o leitor de tela anuncia. A troca custa a leitura
+ * de relance para quem não reconhece o ícone — pedido do Otávio (09/10).
  */
 export function BottomNav({ naTurma = true }: { naTurma?: boolean }) {
   const caminho = usePathname();
   const ativa = abaAtiva(caminho);
   const { t } = useIdioma();
 
-  const indice = LATERAIS.findIndex((a) => a.rotulo === ativa);
-  const [ultimo, setUltimo] = useState(indice >= 0 ? indice : 0);
-  if (indice >= 0 && indice !== ultimo) setUltimo(indice);
-  const mostraCirculo = indice >= 0;
+  const indice = ABAS.findIndex((a) => a.rotulo === ativa);
 
   return (
     <nav
@@ -99,23 +92,22 @@ export function BottomNav({ naTurma = true }: { naTurma?: boolean }) {
       className="pointer-events-none fixed inset-x-0 bottom-0 z-20 flex justify-center pb-[calc(24px+env(safe-area-inset-bottom))]"
     >
       <ul className="pointer-events-auto relative flex gap-1.5 rounded-full bg-dark-surface p-1.5 shadow-menu">
-        <li
-          aria-hidden
-          className="absolute top-1.5 left-1.5 size-[52px] rounded-full bg-surface transition-[transform,opacity] duration-400 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
-          style={{
-            transform: `translateX(${ultimo * (LADO + VAO)}px) scale(${mostraCirculo ? 1 : 0.6})`,
-            opacity: mostraCirculo ? 1 : 0,
-          }}
-        />
+        {indice >= 0 ? (
+          <li
+            aria-hidden
+            className="absolute top-1.5 left-1.5 size-[52px] rounded-full bg-brand transition-transform duration-400 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
+            style={{ transform: `translateX(${indice * (LADO + VAO)}px)` }}
+          />
+        ) : null}
 
-        {LATERAIS.map(({ rotulo, href, sePausa }) => {
-          const Icone = ICONES[rotulo as keyof typeof ICONES];
+        {ABAS.map(({ rotulo, href, sePausa }) => {
+          const Icone = ICONES[rotulo];
           const atual = rotulo === ativa;
           const pausada = !naTurma && sePausa === true;
           const nome = t.comum.nav[rotulo];
           const classe = cn(
             "relative z-10 flex size-[52px] items-center justify-center rounded-full transition-colors duration-250 focus-visible:outline-surface",
-            atual ? "text-ink" : "text-dark-muted",
+            atual ? "text-white" : "text-dark-muted",
           );
 
           return (
@@ -143,24 +135,6 @@ export function BottomNav({ naTurma = true }: { naTurma?: boolean }) {
             </li>
           );
         })}
-
-        <li>
-          <Link
-            href={TREINAR.href}
-            aria-label={t.comum.nav.treinar}
-            aria-current={ativa === "treinar" ? "page" : undefined}
-            className={cn(
-              "relative z-10 flex size-[52px] items-center justify-center rounded-full bg-brand text-white transition-shadow duration-250 focus-visible:outline-surface",
-              // O anel branco é o "você está aqui" do Treinar: o fundo já é
-              // vermelho sempre, então o que marca a aba atual é o contorno.
-              ativa === "treinar"
-                ? "shadow-[inset_0_0_0_2px_var(--color-surface)]"
-                : "shadow-[inset_0_0_0_0_var(--color-surface)]",
-            )}
-          >
-            <Haltere />
-          </Link>
-        </li>
       </ul>
     </nav>
   );
@@ -170,15 +144,15 @@ export function BottomNav({ naTurma = true }: { naTurma?: boolean }) {
  * O haltere deitado do protótipo. O `Dumbbell` do lucide é inclinado e, na
  * ponta da pílula, lia como uma ferramenta; deitado ele é uma barra com anilhas.
  */
-function Haltere() {
+function Haltere({ size = 22, strokeWidth = 2 }: { size?: number; strokeWidth?: number }) {
   return (
     <svg
-      width="22"
-      height="22"
+      width={size}
+      height={size}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden

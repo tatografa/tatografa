@@ -831,10 +831,12 @@ Provar que funciona sem o Otávio ler código:
   cronômetro. **Número dentro de linha em Inter é Inter.**
 - **[2026-10-09, pedido do Otávio]** **O menu de baixo do app é a pílula do protótipo
   A6 ("Treinar integrado").** Escura, flutuando 24px acima da borda, só com ícones —
-  Progresso, Feed e Perfil — e **"Treinar" num círculo vermelho na ponta direita**, onde
-  o polegar alcança: é a ação pela qual o aluno abre o app na academia. A aba atual é
-  um círculo branco que **desliza** entre as três comuns; em "Treinar" ele encolhe e
-  some no lugar da última, e o próprio Treinar ganha um anel branco. **Os rótulos
+  Progresso, Feed, Perfil e **"Treinar" na ponta direita**, onde o polegar alcança.
+  **A aba aberta é um círculo vermelho que desliza até ela, e só ela fica vermelha** —
+  o Treinar também, fora da própria tela, fica cinza como as outras. A primeira versão
+  (mesmo dia) deixava o Treinar sempre vermelho e marcava a aba atual com um círculo
+  branco: eram dois destaques ao mesmo tempo, e o Otávio leu o vermelho como "o que
+  está aberto". **Os rótulos
   escritos saíram**, como no protótipo: o nome vai no `aria-label`, e o custo aceito é
   a leitura de relance para quem não reconhece o ícone. O haltere é desenhado deitado,
   não o `Dumbbell` inclinado do lucide. Pausado continua igual: Progresso e Feed
