@@ -645,7 +645,7 @@ function FormularioDoExercicio({
               name="descanso"
               type="number"
               inputMode="numeric"
-              defaultValue={exercicio?.default_rest_seconds ?? campos?.descanso ?? "60"}
+              defaultValue={exercicio?.default_rest_seconds ?? campos?.descanso ?? "120"}
               aria-invalid={erros.descanso ? true : undefined}
               className={cn(CAMPO, erros.descanso && "border-danger")}
             />
