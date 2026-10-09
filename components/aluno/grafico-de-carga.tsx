@@ -107,7 +107,7 @@ export function GraficoDeCarga({
         >
           {/* Sem o utilitário `eyebrow` aqui: ele deixa tudo em caixa alta e
               "57,5 KG" não é como se escreve quilo. */}
-          <p className="font-mono text-[11px] font-semibold tracking-[0.06em] text-ink-4">
+          <p className="text-[11px] font-semibold text-ink-4 tabular-nums">
             {f.dataCurta(selecionada.concluidaEm)} · {f.carga(selecionada.cargaMaxima)}
           </p>
           <ul className="mt-2.5 space-y-1">

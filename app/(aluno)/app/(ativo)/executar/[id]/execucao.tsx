@@ -281,7 +281,7 @@ function ExecucaoMontada({
           {exercicio.rir_target ? (
             <p className="mt-2.5 inline-block rounded-[8px] border border-dark-border px-2.5 py-1.5 text-[11px] font-medium text-dark-muted">
               {rirNoIdioma(exercicio.rir_target, t.execucao.rir)}{" "}
-              <span className="font-mono">(RIR {exercicio.rir_target})</span>
+              <span>(RIR {exercicio.rir_target})</span>
             </p>
           ) : null}
 
@@ -646,7 +646,7 @@ function SerieAtiva({
        */
       className="grid grid-cols-[18px_1fr_1fr_48px] items-center gap-1 rounded-card-lg border-[1.5px] border-brand-on-dark bg-brand-tint px-2 py-3.5"
     >
-      <span className="font-mono text-[13px] font-bold text-brand-on-dark">
+      <span className="text-[13px] font-bold text-brand-on-dark tabular-nums">
         {numero}
       </span>
 
@@ -722,7 +722,7 @@ function SerieRegistrada({
   if (!serie) {
     return (
       <div className="grid grid-cols-[26px_1fr_1fr_40px] items-center gap-2 rounded-card bg-dark-surface px-3 py-3">
-        <span className="font-mono text-[13px] font-bold text-dark-muted">
+        <span className="text-[13px] font-bold text-dark-muted tabular-nums">
           {numero}
         </span>
         <span className="text-center text-[15px] font-semibold text-dark-muted">
@@ -764,7 +764,7 @@ function SerieRegistrada({
         "opacity-50 transition active:opacity-80",
       )}
     >
-      <span className="font-mono text-[13px] font-bold text-dark-text-2">
+      <span className="text-[13px] font-bold text-dark-text-2 tabular-nums">
         {numero}
       </span>
       <span className="text-center text-[15px] font-semibold text-dark-text-2">

@@ -164,7 +164,7 @@ function CardDePost({
         <Avatar
           foto={post.autor.foto}
           iniciais={post.autor.iniciais}
-          className="size-[34px] bg-canvas-sunken font-mono text-[11px] font-bold text-ink-2"
+          className="size-[34px] bg-canvas-sunken text-[11px] font-bold text-ink-2"
         />
 
         <div className="min-w-0 flex-1">

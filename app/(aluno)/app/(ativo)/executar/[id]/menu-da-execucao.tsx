@@ -193,7 +193,7 @@ function Historico({ ultima }: { ultima: UltimaVez | undefined }) {
             key={numero}
             className="flex items-center gap-3 rounded-[11px] bg-dark-surface px-3 py-2.5"
           >
-            <span className="font-mono text-[12px] font-bold text-dark-muted">
+            <span className="text-[12px] font-bold text-dark-muted tabular-nums">
               {numero}
             </span>
             <span className="text-[14.5px] font-semibold text-dark-text tabular-nums">

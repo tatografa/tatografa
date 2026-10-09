@@ -819,6 +819,16 @@ Provar que funciona sem o Otávio ler código:
   e de meta, os avatares e as mensagens de erro. **Componente novo no painel com cor de
   ação usa `ink`, não `brand`.** As capturas da landing mostram o painel com botões
   vermelhos e precisam ser refeitas (regra de 01/10).
+- **[2026-10-09, pedido do Otávio]** **A mono do app do aluno voltou para o lugar dela.**
+  O Otávio notou "fontes diferentes": eram oito usos da JetBrains Mono fora da regra
+  (rótulo, selo, cronômetro, metadado) — as iniciais do avatar no feed e no post (a mesma
+  pessoa saía em Inter na home e no painel), o "(RIR 0-2)" no meio de uma frase em Inter,
+  o número da série e do exercício ao lado de "60 kg" e "10 reps" em Inter, o "3/4" do
+  histórico e a legenda "12/09 · 57,5 kg" do gráfico. Todos viraram Inter; número que
+  precisa alinhar em coluna usa **`tabular-nums`**, que é o que a mono dava de útil ali.
+  Ficam em mono os rótulos em caixa alta (o `eyebrow` e os labels de formulário), o
+  `Badge`, a data dos comentários, o contador de caracteres, a barra de baixo e o
+  cronômetro. **Número dentro de linha em Inter é Inter.**
 - **[2026-10-06, pedido do Otávio]** **Todo gráfico do produto segue um desenho só**
   (`GraficoDeBarras` e `CabecalhoDoGrafico`, `components/grafico-de-barras.tsx`), o da
   referência "Evolução mensal de alunos": barras em pílula com o número em cima, cinco

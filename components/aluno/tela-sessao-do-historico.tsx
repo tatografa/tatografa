@@ -123,7 +123,7 @@ function BlocoDoExercicio({
         <p className="min-w-0 flex-1 truncate text-[14px] font-semibold text-ink">
           {exercicio.nome}
         </p>
-        <p className="shrink-0 font-mono text-[11px] font-bold text-ink-5">
+        <p className="shrink-0 text-[11px] font-bold text-ink-5 tabular-nums">
           {exercicio.feitas}/{exercicio.sets_prescritos}
         </p>
       </div>
@@ -168,7 +168,7 @@ function LinhaDaSerie({
     <div className="grid grid-cols-[22px_1fr] items-center gap-3 rounded-[10px] bg-canvas-sunken px-2.5 py-1.5">
       {/* O número vem de `set_number`, a posição prescrita: a série 3 é a
           terceira mesmo que a 2 tenha sido pulada. */}
-      <span className="font-mono text-[11px] font-bold text-ink-5">
+      <span className="text-[11px] font-bold text-ink-5 tabular-nums">
         {serie.set_number}
       </span>
       {serie.estado === "feita" ? (

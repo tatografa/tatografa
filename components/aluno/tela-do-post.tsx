@@ -54,7 +54,7 @@ export function TelaDoPost({
           <Avatar
             foto={post.autor.foto}
             iniciais={post.autor.iniciais}
-            className="size-[38px] bg-canvas-sunken font-mono text-[12px] font-bold text-ink-2"
+            className="size-[38px] bg-canvas-sunken text-[12px] font-bold text-ink-2"
           />
 
           <div className="min-w-0 flex-1">
@@ -132,7 +132,7 @@ export function TelaDoPost({
                 <Avatar
                   foto={comentario.autorFoto}
                   iniciais={comentario.autorIniciais}
-                  className="size-8 bg-canvas-sunken font-mono text-[10.5px] font-bold text-ink-2"
+                  className="size-8 bg-canvas-sunken text-[10.5px] font-bold text-ink-2"
                 />
                 <div className="min-w-0 flex-1">
                   <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[12.5px] font-bold text-ink">

@@ -85,7 +85,7 @@ function LinhaDoExercicio({ exercicio, t }: { exercicio: ExercicioPrescrito; t: 
         (handoff, item 4) — contar aqui de novo daria outro número se uma linha
         órfã tivesse sido pulada.
       */}
-      <span className="font-mono text-[12px] font-bold text-ink-5">
+      <span className="text-[12px] font-bold text-ink-5 tabular-nums">
         {exercicio.position + 1}
       </span>
 
