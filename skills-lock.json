@@ -6,6 +6,12 @@
       "sourceType": "github",
       "skillPath": "skills/career-transitions/SKILL.md",
       "computedHash": "b6c9db12a31127b619916888679886f5db3bb7997863425d4dbe470b66520b91"
+    },
+    "tiktok-scraper": {
+      "source": "apidojo-io/social-media-skills",
+      "sourceType": "github",
+      "skillPath": "skills/tiktok-scraper/SKILL.md",
+      "computedHash": "77308b6352d5b3341202ccf13d8997d675346a67496151f32e91d0fa164e8f34"
     }
   }
 }
