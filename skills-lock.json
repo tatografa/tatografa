@@ -6,12 +6,6 @@
       "sourceType": "github",
       "skillPath": "skills/career-transitions/SKILL.md",
       "computedHash": "b6c9db12a31127b619916888679886f5db3bb7997863425d4dbe470b66520b91"
-    },
-    "tiktok-research": {
-      "source": "bradautomates/head-of-content",
-      "sourceType": "github",
-      "skillPath": ".claude/skills/tiktok-research/SKILL.md",
-      "computedHash": "b1d1372f93a44247fedeb2e6fa7c5bef1f9857fa91c8a81aa39d61811c2e6cd2"
     }
   }
 }
