@@ -1,0 +1,427 @@
+<title>Quem Declarou Voto</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: placar de urna (13 x 22) no topo, filtros fixos, lista densa de declarações, checagens e método no fim. */
+:root {
+  --bg: #f3f5f8;
+  --surface: #ffffff;
+  --ink: #12161d;
+  --muted: #586172;
+  --line: #d9dee6;
+  --lula: #c42b3c;
+  --lula-soft: #fbe8ea;
+  --flavio: #1c5bbd;
+  --flavio-soft: #e5edfa;
+  --ok: #1d7a4b;
+  --ok-soft: #e2f3ea;
+  --warn: #8f6200;
+  --warn-soft: #fbf0d6;
+  --quiet: #6b7382;
+  --quiet-soft: #eceff3;
+  --focus: #12161d;
+  --on-cand: #ffffff;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1217; --surface: #171b22; --ink: #e8ecf2; --muted: #9aa3b3; --line: #2a303b;
+    --lula: #ff6574; --lula-soft: #3a1c22; --flavio: #6fa3ff; --flavio-soft: #172642;
+    --ok: #52c98d; --ok-soft: #133024; --warn: #e6b74a; --warn-soft: #33290f;
+    --quiet: #9aa3b3; --quiet-soft: #232934; --focus: #e8ecf2; --on-cand: #10141a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1217; --surface: #171b22; --ink: #e8ecf2; --muted: #9aa3b3; --line: #2a303b;
+  --lula: #ff6574; --lula-soft: #3a1c22; --flavio: #6fa3ff; --flavio-soft: #172642;
+  --ok: #52c98d; --ok-soft: #133024; --warn: #e6b74a; --warn-soft: #33290f;
+  --quiet: #9aa3b3; --quiet-soft: #232934; --focus: #e8ecf2; --on-cand: #10141a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 15px/1.5 var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 10; background: var(--bg);
+}
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.wrap {
+  max-width: 1180px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Cabeçalho */
+header.top { padding-block: 40px 24px; display: grid; gap: 28px; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: end; }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+h1 { font: 800 clamp(34px, 5.6vw, 58px)/1 var(--display); letter-spacing: -.02em; margin: 0 0 14px; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 62ch; }
+.lede strong { color: var(--ink); font-weight: 600; }
+
+.placar { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.urna {
+  display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; align-items: center;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.tecla {
+  grid-row: span 2; width: 52px; height: 52px; border-radius: 8px;
+  display: grid; place-items: center; font: 800 24px/1 var(--display); color: var(--on-cand);
+}
+.urna.lula .tecla { background: var(--lula); }
+.urna.flavio .tecla { background: var(--flavio); }
+.urna .nome { font: 600 13px/1.2 var(--body); color: var(--muted); }
+.urna .total { font: 800 30px/1 var(--display); font-variant-numeric: tabular-nums; }
+.urna .total small { display: block; font: 500 12px/1 var(--mono); color: var(--muted); margin-top: 4px; letter-spacing: .02em; }
+.barra { grid-column: 1 / -1; height: 8px; border-radius: 99px; overflow: hidden; display: flex; background: var(--quiet-soft); }
+.barra span { display: block; height: 100%; transition: width .25s ease; }
+.barra .l { background: var(--lula); }
+.barra .f { background: var(--flavio); }
+.barra-legenda { grid-column: 1 / -1; display: flex; justify-content: space-between; font: 500 12px/1 var(--mono); color: var(--muted); }
+
+/* Filtros */
+.filtros {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border-block: 1px solid var(--line);
+}
+.filtros .wrap { padding-block: 12px; display: grid; gap: 10px; }
+.linha { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.rotulo { font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); min-width: 84px; }
+.busca { position: relative; flex: 1 1 220px; max-width: 340px; }
+.busca input {
+  width: 100%; font: 400 15px/1 var(--body); color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+  padding: 10px 12px;
+}
+.busca input::placeholder { color: var(--muted); }
+.seg { display: inline-flex; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 3px; gap: 2px; }
+.seg button, .chip {
+  font: 500 13px/1 var(--body); color: var(--ink); background: transparent; border: 0;
+  border-radius: 6px; padding: 8px 12px; cursor: pointer; white-space: nowrap;
+}
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.seg button[data-cand="Lula"][aria-pressed="true"] { background: var(--lula); color: var(--on-cand); }
+.seg button[data-cand="Flávio Bolsonaro"][aria-pressed="true"] { background: var(--flavio); color: var(--on-cand); }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 7px 12px; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.chip .n { font: 500 11px/1 var(--mono); opacity: .7; margin-left: 4px; }
+select {
+  font: 500 13px/1 var(--body); color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
+}
+.status { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; }
+.status p { margin: 0; font: 500 13px/1.3 var(--body); color: var(--muted); }
+.status p b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.limpar { font: 500 13px/1 var(--body); color: var(--ink); background: none; border: 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 6px 0; }
+
+/* Lista */
+main { padding-block: 20px 8px; }
+.lista { list-style: none; margin: 0; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.cab, .item {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1.15fr) minmax(0, 1.9fr) minmax(0, .8fr) 112px minmax(0, .9fr);
+  gap: 14px; align-items: start; padding: 14px 16px;
+}
+.cab { font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); padding-block: 12px; background: var(--surface); }
+.item + .item { border-top: 1px solid var(--line); }
+.num {
+  width: 36px; height: 36px; border-radius: 7px; display: grid; place-items: center;
+  font: 800 16px/1 var(--display); color: var(--on-cand);
+}
+.num.l { background: var(--lula); }
+.num.f { background: var(--flavio); }
+.quem b { display: block; font: 600 15px/1.3 var(--body); }
+.quem span { display: block; font: 400 13px/1.35 var(--body); color: var(--muted); margin-top: 2px; }
+.como { color: var(--ink); min-width: 0; }
+.como.vazio { color: var(--muted); font-style: italic; }
+.seg-col { font: 500 13px/1.35 var(--body); color: var(--muted); }
+.seg-col.mi { color: var(--ink); }
+.pill { display: inline-block; font: 600 12px/1 var(--body); padding: 6px 9px; border-radius: 99px; white-space: nowrap; }
+.pill.Confirmado { background: var(--ok-soft); color: var(--ok); }
+.pill.Lista { background: var(--warn-soft); color: var(--warn); }
+.pill.Indireto { background: var(--quiet-soft); color: var(--quiet); }
+.fontes { display: flex; flex-wrap: wrap; gap: 4px 10px; font: 400 13px/1.35 var(--body); min-width: 0; }
+.fontes a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; overflow-wrap: anywhere; }
+.fontes a:hover { text-decoration-color: currentColor; }
+.fontes .txt { color: var(--muted); overflow-wrap: anywhere; }
+.vazio-lista { padding: 40px 16px; text-align: center; color: var(--muted); }
+.vazio-lista button { margin-top: 10px; }
+
+/* Checagens */
+section.checagens { padding-block: 36px 8px; }
+h2 { font: 800 26px/1.1 var(--display); letter-spacing: -.01em; margin: 0 0 6px; text-wrap: balance; }
+.sub { margin: 0 0 18px; color: var(--muted); max-width: 70ch; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card b { font: 600 15px/1.3 var(--body); }
+.card p { margin: 0; font-size: 14px; color: var(--muted); }
+.tag { justify-self: start; font: 600 11px/1 var(--mono); letter-spacing: .04em; text-transform: uppercase; padding: 5px 8px; border-radius: 5px; }
+.tag.boato { background: var(--warn-soft); color: var(--warn); }
+.tag.nao { background: var(--quiet-soft); color: var(--quiet); }
+
+/* Método */
+footer { padding-block: 36px 56px; }
+.metodo { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px 32px; }
+.metodo h3 { font: 600 14px/1.3 var(--body); margin: 0 0 4px; }
+.metodo p { margin: 0; color: var(--muted); font-size: 14px; max-width: 60ch; }
+.metodo code { font: 500 12.5px/1 var(--mono); background: var(--quiet-soft); padding: 2px 5px; border-radius: 4px; color: var(--ink); }
+
+@media (max-width: 900px) {
+  header.top { grid-template-columns: minmax(0, 1fr); padding-block: 28px 20px; }
+  .cab { display: none; }
+  .filtros { position: static; backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--bg); }
+  .item { grid-template-columns: 40px minmax(0, 1fr) auto; gap: 6px 12px; }
+  .item .num { grid-row: span 2; }
+  .item .quem { grid-column: 2; }
+  .item .pill-col { grid-column: 3; grid-row: 1; }
+  .item .como, .item .seg-col, .item .fontes { grid-column: 2 / -1; }
+  .item .seg-col::before { content: "Seguidores: "; color: var(--muted); }
+  .rotulo { min-width: 0; width: 100%; }
+}
+@media (max-width: 520px) {
+  .placar { grid-template-columns: minmax(0, 1fr); }
+  .busca { max-width: none; }
+  .seg { width: 100%; }
+  .seg button { flex: 1; padding-inline: 6px; }
+}
+@media (prefers-reduced-motion: reduce) { .barra span { transition: none; } }
+</style>
+
+<header class="wrap top">
+  <div>
+    <p class="eyebrow">2º turno · 25 de outubro de 2026 · levantamento de 18/10</p>
+    <h1>Quem declarou voto</h1>
+    <p class="lede">Artistas, influenciadores e atletas com <strong>mais de 100 mil seguidores no Instagram, 50 mil no X ou 100 mil no TikTok</strong> que declararam voto ou apoio a Lula ou a Flávio Bolsonaro. Cada nome traz a forma da declaração, o nível de confiança e a fonte.</p>
+  </div>
+  <div class="placar" aria-live="polite">
+    <div class="urna lula">
+      <div class="tecla" aria-hidden="true">13</div>
+      <div class="nome">Lula</div>
+      <div class="total"><span id="tot-lula">0</span><small id="conf-lula"></small></div>
+    </div>
+    <div class="urna flavio">
+      <div class="tecla" aria-hidden="true">22</div>
+      <div class="nome">Flávio Bolsonaro</div>
+      <div class="total"><span id="tot-flavio">0</span><small id="conf-flavio"></small></div>
+    </div>
+    <div class="barra" role="img" id="barra" aria-label="Proporção de nomes por candidato nos filtros atuais"><span class="l" id="bl"></span><span class="f" id="bf"></span></div>
+    <div class="barra-legenda"><span id="pl">0%</span><span>nos filtros atuais</span><span id="pf">0%</span></div>
+  </div>
+</header>
+
+<div class="filtros">
+  <div class="wrap">
+    <div class="linha">
+      <label class="busca" for="q"><input id="q" type="search" placeholder="Buscar nome, área ou fonte" aria-label="Buscar nome, área ou fonte" autocomplete="off"></label>
+      <div class="seg" role="group" aria-label="Candidato">
+        <button type="button" id="c-todos" data-cand="todos" aria-pressed="true">Todos</button>
+        <button type="button" id="c-lula" data-cand="Lula" aria-pressed="false">13 · Lula</button>
+        <button type="button" id="c-flavio" data-cand="Flávio Bolsonaro" aria-pressed="false">22 · Flávio</button>
+      </div>
+      <select id="faixa" aria-label="Alcance">
+        <option value="todas">Qualquer alcance</option>
+        <option value="milhoes">Milhões de seguidores</option>
+        <option value="acima_do_corte">Acima do corte (estimado)</option>
+        <option value="a_verificar">Alcance a verificar</option>
+      </select>
+    </div>
+    <div class="linha" role="group" aria-label="Área">
+      <span class="rotulo">Área</span>
+      <div class="linha" id="cats"></div>
+    </div>
+    <div class="linha" role="group" aria-label="Confiança">
+      <span class="rotulo">Confiança</span>
+      <div class="linha" id="confs"></div>
+    </div>
+    <div class="status">
+      <p id="contagem" aria-live="polite"></p>
+      <button type="button" class="limpar" id="limpar">Limpar filtros</button>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <ul class="lista" id="lista">
+    <li class="cab" aria-hidden="true"><span></span><span>Nome</span><span>Como e quando declarou</span><span>Seguidores</span><span>Confiança</span><span>Fonte</span></li>
+  </ul>
+</main>
+
+<section class="wrap checagens" id="checagens">
+  <h2>Boatos e quem não declarou</h2>
+  <p class="sub">Vídeos falsos ou antigos que circularam como declaração de voto, e famosos cobrados que não se posicionaram. Nenhum deles entra na contagem acima.</p>
+  <div class="cards" id="cards"></div>
+</section>
+
+<footer class="wrap" id="metodo">
+  <h2>Método</h2>
+  <p class="sub">Levantamento feito por buscas na web em 18/10/2026, cruzando reportagens, listas de veículos e o agregador Quem Apoia Quem.</p>
+  <div class="metodo">
+    <div><h3>Confirmado</h3><p>Há reportagem ou registro específico da declaração: vídeo, post, fala em show, ato ou vídeo de campanha.</p></div>
+    <div><h3>Só em listas</h3><p>O nome aparece em listas de veículos ou do agregador, mas a reportagem específica não foi encontrada.</p></div>
+    <div><h3>Sinal indireto</h3><p>Gesto ou aparição, como fazer o "22" ou posar com o candidato, sem declaração explícita de voto. Fica fora do filtro padrão.</p></div>
+    <div><h3>Seguidores</h3><p>Os perfis não puderam ser abertos em tempo real. "Milhões" vale para nomes de alcance notório; números exatos só quando a fonte publicou. Confira os marcados "a verificar".</p></div>
+    <div><h3>Fora da lista</h3><p>Políticos com mandato ou candidatos, e estrangeiros, que não votam no Brasil.</p></div>
+    <div><h3>Dados</h3><p>A mesma base está no Supabase, projeto <code>eleicoes2026</code>, tabelas <code>apoios</code> e <code>checagens</code>, com leitura pública.</p></div>
+  </div>
+</footer>
+
+<script>
+const DADOS = /*__DADOS__*/null;
+const ORDEM_CONF = { Confirmado: 0, Lista: 1, Indireto: 2 };
+const NOME_CONF = { Confirmado: "Confirmado", Lista: "Só em listas", Indireto: "Sinal indireto" };
+const CATEGORIAS = ["Música", "Atores e audiovisual", "Influência, TV e ex-BBB", "Esporte", "Religião", "Empresários"];
+const PADRAO = { cand: "todos", cats: [], confs: ["Confirmado", "Lista"], faixa: "todas", q: "" };
+const CHAVE = "quem-declarou-voto:filtros";
+
+const $ = (id) => document.getElementById(id);
+const norm = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+const apoios = DADOS.apoios
+  .map((a) => ({ ...a, busca: norm([a.nome, a.area, a.categoria, a.como_quando, a.fonte_texto].join(" ")) }))
+  .sort((a, b) => ORDEM_CONF[a.confianca] - ORDEM_CONF[b.confianca] || a.nome.localeCompare(b.nome, "pt-BR"));
+
+let estado = carregar();
+
+function carregar() {
+  let salvo = {};
+  try { salvo = JSON.parse(localStorage.getItem(CHAVE) || "{}") || {}; } catch (e) { salvo = {}; }
+  const e = { ...PADRAO, ...salvo };
+  const h = location.hash.replace("#", "");
+  if (h === "lula") e.cand = "Lula";
+  if (h === "flavio") e.cand = "Flávio Bolsonaro";
+  return e;
+}
+function salvar() {
+  try { localStorage.setItem(CHAVE, JSON.stringify(estado)); } catch (e) { /* armazenamento indisponível */ }
+}
+
+function passa(a, ignorar) {
+  if (ignorar !== "cand" && estado.cand !== "todos" && a.candidato !== estado.cand) return false;
+  if (ignorar !== "cats" && estado.cats.length && !estado.cats.includes(a.categoria)) return false;
+  if (ignorar !== "confs" && !estado.confs.includes(a.confianca)) return false;
+  if (estado.faixa !== "todas" && a.faixa_seguidores !== estado.faixa) return false;
+  if (estado.q && !a.busca.includes(norm(estado.q))) return false;
+  return true;
+}
+
+function montarChips() {
+  const base = apoios.filter((a) => passa(a, "cats"));
+  $("cats").innerHTML = CATEGORIAS.map((c, i) => {
+    const n = base.filter((a) => a.categoria === c).length;
+    const on = estado.cats.includes(c);
+    return `<button type="button" class="chip" id="cat-${i}" data-cat="${esc(c)}" aria-pressed="${on}">${esc(c)}<span class="n">${n}</span></button>`;
+  }).join("");
+  const baseConf = apoios.filter((a) => passa(a, "confs"));
+  $("confs").innerHTML = Object.keys(ORDEM_CONF).map((c) => {
+    const n = baseConf.filter((a) => a.confianca === c).length;
+    const on = estado.confs.includes(c);
+    return `<button type="button" class="chip" id="conf-${c}" data-conf="${c}" aria-pressed="${on}">${NOME_CONF[c]}<span class="n">${n}</span></button>`;
+  }).join("");
+}
+
+function linha(a) {
+  const l = a.candidato === "Lula";
+  const fontes = a.fontes.length
+    ? a.fontes.map((f) => `<a href="${esc(f.url)}" target="_blank" rel="noopener noreferrer">${esc(f.titulo)}</a>`).join("")
+    : `<span class="txt">${esc(a.fonte_texto || "—")}</span>`;
+  const sub = [a.area, a.categoria].filter(Boolean).filter((v, i, arr) => arr.indexOf(v) === i).join(" · ");
+  return `<li class="item">
+    <span class="num ${l ? "l" : "f"}" title="${esc(a.candidato)}" aria-label="${esc(a.candidato)}">${l ? "13" : "22"}</span>
+    <div class="quem"><b>${esc(a.nome)}</b><span>${esc(sub)}</span></div>
+    <div class="como${a.como_quando ? "" : " vazio"}">${esc(a.como_quando || "Sem detalhe da declaração")}</div>
+    <div class="seg-col${a.faixa_seguidores === "milhoes" ? " mi" : ""}">${esc(a.seguidores)}</div>
+    <div class="pill-col"><span class="pill ${a.confianca}">${NOME_CONF[a.confianca]}</span></div>
+    <div class="fontes">${fontes}</div>
+  </li>`;
+}
+
+function render() {
+  const vis = apoios.filter((a) => passa(a));
+  const nl = vis.filter((a) => a.candidato === "Lula");
+  const nf = vis.filter((a) => a.candidato !== "Lula");
+  const conf = (arr) => arr.filter((a) => a.confianca === "Confirmado").length;
+  $("tot-lula").textContent = nl.length;
+  $("tot-flavio").textContent = nf.length;
+  $("conf-lula").textContent = `${conf(nl)} confirmados`;
+  $("conf-flavio").textContent = `${conf(nf)} confirmados`;
+  const tot = nl.length + nf.length;
+  const pl = tot ? Math.round((nl.length / tot) * 100) : 0;
+  $("bl").style.width = tot ? `${pl}%` : "0";
+  $("bf").style.width = tot ? `${100 - pl}%` : "0";
+  $("pl").textContent = tot ? `${pl}% Lula` : "—";
+  $("pf").textContent = tot ? `${100 - pl}% Flávio` : "—";
+  $("barra").setAttribute("aria-label", tot ? `${pl}% Lula, ${100 - pl}% Flávio Bolsonaro nos filtros atuais` : "Nenhum nome nos filtros atuais");
+
+  document.querySelectorAll(".seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.cand === estado.cand)));
+  $("faixa").value = estado.faixa;
+  if ($("q").value !== estado.q) $("q").value = estado.q;
+  montarChips();
+
+  $("contagem").innerHTML = `<b>${vis.length}</b> de ${apoios.length} nomes`;
+  const cab = $("lista").firstElementChild.outerHTML;
+  $("lista").innerHTML = cab + (vis.length
+    ? vis.map(linha).join("")
+    : `<li class="vazio-lista">Nenhum nome com esses filtros.<br><button type="button" class="limpar" data-acao="limpar">Limpar filtros</button></li>`);
+  salvar();
+}
+
+function montarChecagens() {
+  $("cards").innerHTML = DADOS.checagens.map((c) => {
+    const boato = c.tipo.startsWith("Boato");
+    const fonte = c.fontes.map((f) => `<a href="${esc(f.url)}" target="_blank" rel="noopener noreferrer">${esc(f.titulo)}</a>`).join(" · ");
+    return `<article class="card">
+      <span class="tag ${boato ? "boato" : "nao"}">${boato ? "Boato ou vídeo falso" : "Não declarou"}</span>
+      <b>${esc(c.nome)}</b>
+      <p>${esc(c.situacao)}</p>
+      ${fonte ? `<p class="fontes">${fonte}</p>` : ""}
+    </article>`;
+  }).join("");
+}
+
+document.querySelector(".seg").addEventListener("click", (ev) => {
+  const b = ev.target.closest("button[data-cand]");
+  if (!b) return;
+  estado.cand = b.dataset.cand;
+  render();
+});
+$("cats").addEventListener("click", (ev) => {
+  const b = ev.target.closest("button[data-cat]");
+  if (!b) return;
+  const c = b.dataset.cat;
+  estado.cats = estado.cats.includes(c) ? estado.cats.filter((x) => x !== c) : [...estado.cats, c];
+  render();
+});
+$("confs").addEventListener("click", (ev) => {
+  const b = ev.target.closest("button[data-conf]");
+  if (!b) return;
+  const c = b.dataset.conf;
+  estado.confs = estado.confs.includes(c) ? estado.confs.filter((x) => x !== c) : [...estado.confs, c];
+  render();
+});
+$("faixa").addEventListener("change", (ev) => { estado.faixa = ev.target.value; render(); });
+let t;
+$("q").addEventListener("input", (ev) => { clearTimeout(t); t = setTimeout(() => { estado.q = ev.target.value.trim(); render(); }, 120); });
+function limpar() { estado = { ...PADRAO, cats: [], confs: [...PADRAO.confs] }; render(); }
+$("limpar").addEventListener("click", limpar);
+$("lista").addEventListener("click", (ev) => { if (ev.target.closest("[data-acao='limpar']")) limpar(); });
+
+montarChecagens();
+render();
+</script>

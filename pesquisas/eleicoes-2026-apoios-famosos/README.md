@@ -6,6 +6,18 @@ Varredura feita em **18/10/2026**, a uma semana do 2º turno (25/10/2026) entre 
 
 A versão em planilha está em [`apoios.csv`](apoios.csv).
 
+## Página e banco de dados
+
+- **Página com filtros:** https://claude.ai/artifact/YD6LcXzNHjjrcHi8yYAbsv (fonte em `pagina/modelo.html`; `pagina/index.html` é gerado com os dados embutidos).
+- **Supabase:** projeto `eleicoes2026` (organização REP, região São Paulo), API em `https://goikjqylhgsmrokfsxli.supabase.co`.
+  - `public.apoios`: os 163 nomes, com candidato, categoria, forma da declaração, faixa de seguidores, confiança e fontes (`jsonb`).
+  - `public.checagens`: boatos, vídeos falsos e quem não declarou.
+  - `public.resumo_apoios`: view com a contagem por candidato, confiança e categoria.
+  - Leitura pública (RLS com `select` para `anon`). Escrita só pelo painel ou pela service role.
+- **Esquema:** `supabase/migrations/20261018140000_apoios.sql`. **Dados:** `supabase/seed.sql`.
+
+**Para atualizar:** edite as tabelas deste README e rode `python3 scripts/gerar.py`. O script regenera `apoios.csv`, `supabase/seed.sql` e `pagina/index.html`. Depois aplique o `seed.sql` no Supabase (SQL Editor do painel ou `supabase db execute`) e republique a página.
+
 ## Como ler esta lista
 
 **Confiança da declaração**
