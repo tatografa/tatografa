@@ -1,0 +1,31 @@
+{
+  "name": "tatografa",
+  "version": "1.0.0",
+  "description": "Criação de vídeos com animações 3D usando Three.js e Remotion",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "remotion studio",
+    "studio": "remotion studio",
+    "render": "remotion render",
+    "render:cubo": "remotion render Cubo3D out/cubo.mp4",
+    "still": "remotion still",
+    "upgrade": "remotion upgrade",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@react-three/drei": "10.7.9",
+    "@react-three/fiber": "9.8.2",
+    "@remotion/three": "4.0.542",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.542",
+    "three": "0.187.0"
+  },
+  "devDependencies": {
+    "@remotion/cli": "4.0.542",
+    "@types/react": "19.2.0",
+    "@types/react-dom": "19.2.0",
+    "@types/three": "0.187.0",
+    "typescript": "5.9.3"
+  }
+}
