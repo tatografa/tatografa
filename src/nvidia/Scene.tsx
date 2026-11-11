@@ -1,63 +1,74 @@
 import {
   AbsoluteFill,
   Audio,
-  Img,
   interpolate,
   Sequence,
   spring,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import {
-  AUDIO_DELAY,
-  NVIDIA_GREEN,
-  Scene as SceneType,
-  sceneAudio,
-  sceneBg,
-} from "./data";
+import { AUDIO_DELAY, NVIDIA_GREEN, Scene as SceneType, sceneAudio } from "./data";
 import { Core3D } from "./Core3D";
-
-const FONT = "'Arial', 'Liberation Sans', 'DejaVu Sans', sans-serif";
+import { Background } from "./visuals/Background";
+import { GpuVisual } from "./visuals/GpuVisual";
+import { MapVisual } from "./visuals/MapVisual";
+import { NeuralVisual } from "./visuals/NeuralVisual";
+import { AiFlowVisual } from "./visuals/AiFlowVisual";
+import { ChartVisual } from "./visuals/ChartVisual";
+import { DataCenterVisual } from "./visuals/DataCenterVisual";
+import { WorldVisual } from "./visuals/WorldVisual";
+import { FONT } from "./visuals/common";
 
 const formatNumber = (n: number) =>
-  n.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  n.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+const Visual: React.FC<{ scene: SceneType }> = ({ scene }) => {
+  switch (scene.visual) {
+    case "core":
+    case "cta":
+      return <Core3D />;
+    case "gpu":
+      return <GpuVisual />;
+    case "map":
+      return <MapVisual />;
+    case "neural":
+      return <NeuralVisual />;
+    case "aiflow":
+      return <AiFlowVisual />;
+    case "chart":
+      return <ChartVisual />;
+    case "datacenter":
+      return <DataCenterVisual />;
+    case "world":
+      return <WorldVisual />;
+    default:
+      return null;
+  }
+};
 
 export const Scene: React.FC<{ scene: SceneType; durationInFrames: number }> = ({
   scene,
   durationInFrames,
 }) => {
   const frame = useCurrentFrame();
-  const { fps, width, height } = useVideoConfig();
+  const { fps } = useVideoConfig();
 
-  // ---- Fundo: Ken Burns (zoom + leve pan) ----
-  const kb = interpolate(frame, [0, durationInFrames], [1.12, 1.26], {
-    extrapolateRight: "clamp",
-  });
-  const panX = interpolate(frame, [0, durationInFrames], [-16, 16]);
-
-  // Fade de entrada/saída da cena inteira
   const fadeIn = interpolate(frame, [0, 10], [0, 1], { extrapolateRight: "clamp" });
-  const fadeOut = interpolate(
-    frame,
-    [durationInFrames - 10, durationInFrames],
-    [1, 0],
-    { extrapolateLeft: "clamp" },
-  );
+  const fadeOut = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], {
+    extrapolateLeft: "clamp",
+  });
   const sceneOpacity = Math.min(fadeIn, fadeOut);
 
-  // ---- Destaque central: entrada com mola ----
-  const inSpring = spring({ frame: frame - 6, fps, config: { damping: 14, mass: 0.7 } });
+  const inSpring = spring({ frame: frame - 8, fps, config: { damping: 14, mass: 0.7 } });
   const highlightScale = interpolate(inSpring, [0, 1], [0.6, 1]);
   const highlightY = interpolate(inSpring, [0, 1], [40, 0]);
 
-  // ---- Contador numérico ----
-  const counterProgress = interpolate(frame, [8, 8 + fps * 1.3], [0, 1], {
+  const counterProgress = interpolate(frame, [10, 10 + fps * 1.4], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
   const counterValue = (scene.counterTo ?? 0) * counterProgress;
 
-  // ---- Legenda (parte de baixo) ----
   const capSpring = spring({ frame: frame - 8, fps, config: { damping: 18 } });
   const capY = interpolate(capSpring, [0, 1], [50, 0]);
   const capOpacity = interpolate(capSpring, [0, 1], [0, 1]);
@@ -65,36 +76,23 @@ export const Scene: React.FC<{ scene: SceneType; durationInFrames: number }> = (
   const highlightLines = scene.highlight.split("\n");
 
   return (
-    <AbsoluteFill style={{ opacity: sceneOpacity, backgroundColor: "#05070d" }}>
-      {/* Fundo */}
-      <AbsoluteFill>
-        <Img
-          src={sceneBg(scene)}
-          style={{
-            width,
-            height,
-            objectFit: "cover",
-            transform: `scale(${kb}) translateX(${panX}px)`,
-          }}
-        />
-      </AbsoluteFill>
+    <AbsoluteFill style={{ opacity: sceneOpacity }}>
+      {/* fundo animado */}
+      <Background seed={scene.id * 13 + 3} grid={scene.visual !== "chart"} />
 
-      {/* Escurecimento para legibilidade */}
+      {/* visual principal da cena */}
+      <Visual scene={scene} />
+
+      {/* vinheta para legibilidade */}
       <AbsoluteFill
         style={{
           background:
-            "linear-gradient(180deg, rgba(5,7,13,0.55) 0%, rgba(5,7,13,0.15) 35%, rgba(5,7,13,0.45) 65%, rgba(5,7,13,0.92) 100%)",
+            "linear-gradient(180deg, rgba(5,7,13,0.55) 0%, rgba(5,7,13,0.0) 28%, rgba(5,7,13,0.0) 55%, rgba(5,7,13,0.85) 100%)",
+          pointerEvents: "none",
         }}
       />
 
-      {/* Núcleo 3D (hook e encerramento) */}
-      {scene.kind === "core3d" && (
-        <AbsoluteFill style={{ opacity: 0.9 }}>
-          <Core3D />
-        </AbsoluteFill>
-      )}
-
-      {/* Barra de marca no topo */}
+      {/* barra de marca no topo */}
       <div
         style={{
           position: "absolute",
@@ -107,33 +105,44 @@ export const Scene: React.FC<{ scene: SceneType; durationInFrames: number }> = (
           letterSpacing: 8,
           fontSize: 30,
           fontWeight: 800,
-          opacity: 0.85,
+          opacity: 0.9,
         }}
       >
-        <span style={{ color: NVIDIA_GREEN }}>●</span> A HISTÓRIA DA NVIDIA
+        <span style={{ color: NVIDIA_GREEN }}>●</span> THE STORY OF NVIDIA
       </div>
 
-      {/* Destaque central */}
-      <AbsoluteFill
+      {/* destaque + subtítulo (banda central-baixa, com backing escuro) */}
+      <div
         style={{
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "0 70px",
-          transform: `translateY(${highlightY}px)`,
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: "60%",
+          transform: `translateY(calc(-50% + ${highlightY}px))`,
+          textAlign: "center",
+          padding: "0 60px",
         }}
       >
-        <div style={{ transform: `scale(${highlightScale})`, textAlign: "center" }}>
-          {scene.kind === "counter" ? (
+        <div
+          style={{
+            position: "absolute",
+            inset: "-40px -0px",
+            background:
+              "radial-gradient(60% 120% at 50% 50%, rgba(5,7,13,0.78) 0%, rgba(5,7,13,0) 75%)",
+            zIndex: -1,
+          }}
+        />
+        <div style={{ transform: `scale(${highlightScale})`, display: "inline-block" }}>
+          {scene.counterTo != null ? (
             <div
               style={{
                 fontFamily: FONT,
-                fontSize: 150,
+                fontSize: 160,
                 fontWeight: 900,
                 color: NVIDIA_GREEN,
                 lineHeight: 1,
-                WebkitTextStroke: "2px rgba(0,0,0,0.55)",
-                textShadow:
-                  "0 6px 28px rgba(0,0,0,0.85), 0 0 55px rgba(118,185,0,0.4)",
+                WebkitTextStroke: "2px rgba(0,0,0,0.5)",
+                textShadow: "0 6px 28px rgba(0,0,0,0.9), 0 0 55px rgba(118,185,0,0.4)",
               }}
             >
               {scene.counterPrefix}
@@ -146,11 +155,11 @@ export const Scene: React.FC<{ scene: SceneType; durationInFrames: number }> = (
                 key={i}
                 style={{
                   fontFamily: FONT,
-                  fontSize: line.length > 10 ? 110 : 150,
+                  fontSize: line.length > 10 ? 104 : 150,
                   fontWeight: 900,
                   color: "white",
                   lineHeight: 1.02,
-                  textShadow: "0 10px 50px rgba(0,0,0,0.6)",
+                  textShadow: "0 8px 40px rgba(0,0,0,0.85)",
                 }}
               >
                 {line}
@@ -161,22 +170,22 @@ export const Scene: React.FC<{ scene: SceneType; durationInFrames: number }> = (
           {scene.sub && (
             <div
               style={{
-                marginTop: 26,
+                marginTop: 22,
                 fontFamily: FONT,
                 fontSize: 40,
                 fontWeight: 700,
                 color: "white",
-                opacity: 0.92,
-                textShadow: "0 4px 20px rgba(0,0,0,0.7)",
+                opacity: 0.95,
+                textShadow: "0 4px 20px rgba(0,0,0,0.9)",
               }}
             >
               {scene.sub}
             </div>
           )}
         </div>
-      </AbsoluteFill>
+      </div>
 
-      {/* Legenda (o que é falado) */}
+      {/* legenda (narração) */}
       <div
         style={{
           position: "absolute",
@@ -189,7 +198,7 @@ export const Scene: React.FC<{ scene: SceneType; durationInFrames: number }> = (
       >
         <div
           style={{
-            background: "rgba(5,7,13,0.66)",
+            background: "rgba(5,7,13,0.68)",
             border: `2px solid rgba(118,185,0,0.55)`,
             borderRadius: 22,
             padding: "22px 28px",
@@ -199,14 +208,13 @@ export const Scene: React.FC<{ scene: SceneType; durationInFrames: number }> = (
             fontWeight: 700,
             color: "white",
             lineHeight: 1.25,
-            backdropFilter: "blur(2px)",
           }}
         >
           {scene.caption}
         </div>
       </div>
 
-      {/* Áudio da narração desta cena (começa alguns quadros após o corte) */}
+      {/* narração da cena */}
       <Sequence from={AUDIO_DELAY}>
         <Audio src={sceneAudio(scene)} volume={1} />
       </Sequence>
