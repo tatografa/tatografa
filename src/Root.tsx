@@ -1,27 +1,32 @@
 import { Composition } from "remotion";
 import { Cubo3D } from "./Cubo3D";
-
-// Formato do vídeo
-const FPS = 30;
-const DURACAO_SEGUNDOS = 6;
-const LARGURA = 1920;
-const ALTURA = 1080;
+import { NvidiaReels } from "./nvidia/NvidiaReels";
+import { FPS, HEIGHT, TOTAL_FRAMES, WIDTH } from "./nvidia/data";
 
 /**
- * Componente raiz: aqui você registra cada "Composition" (um vídeo).
- * Cada Composition vira um item na barra lateral do Remotion Studio e
- * pode ser renderizada pelo nome (o `id`) via linha de comando.
+ * Componente raiz: cada <Composition> é um vídeo.
  */
 export const RemotionRoot: React.FC = () => {
   return (
     <>
+      {/* Reels vertical: História da NVIDIA (60s) */}
+      <Composition
+        id="NvidiaReels"
+        component={NvidiaReels}
+        durationInFrames={TOTAL_FRAMES}
+        fps={FPS}
+        width={WIDTH}
+        height={HEIGHT}
+      />
+
+      {/* Exemplo original: cubo 3D girando */}
       <Composition
         id="Cubo3D"
         component={Cubo3D}
-        durationInFrames={FPS * DURACAO_SEGUNDOS}
+        durationInFrames={FPS * 6}
         fps={FPS}
-        width={LARGURA}
-        height={ALTURA}
+        width={1920}
+        height={1080}
         defaultProps={{
           texto: "Tatografa 3D",
           corDoCubo: "#4f7cff",
