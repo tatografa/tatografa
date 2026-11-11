@@ -1,11 +1,11 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
     "career-transitions": {
       "source": "refoundai/lenny-skills",
       "sourceType": "github",
       "skillPath": "skills/career-transitions/SKILL.md",
-      "computedHash": "b6c9db12a31127b619916888679886f5db3bb7997863425d4dbe470b66520b91"
+      "computedHash": "464297d075deb57471e825d6d2cc577b0cc62f5f3a467ad88bf96d967b1e7b6c"
     }
   }
 }
