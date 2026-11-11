@@ -19,7 +19,12 @@ export type VisualKind =
   | "chart"
   | "datacenter"
   | "world"
-  | "cta";
+  | "cta"
+  | "countdown"
+  | "rain"
+  | "code"
+  | "chat"
+  | "spotlight";
 
 export type Scene = {
   id: number;
@@ -32,6 +37,10 @@ export type Scene = {
   counterTo?: number;
   counterPrefix?: string;
   counterSuffix?: string;
+  /** casas decimais do contador (padrão 1) */
+  counterDecimals?: number;
+  /** rótulo do chip no visual "aiflow" (padrão "AI") */
+  label?: string;
 };
 
 export const SCENES: Scene[] = [
@@ -123,10 +132,14 @@ export const SCENES: Scene[] = [
   },
 ];
 
-export const sceneFrames = (s: Scene) =>
-  Math.round(s.audioSec * FPS) + TAIL_FRAMES + (s.id === SCENES.length ? OUTRO_EXTRA : 0);
+/** Duração de uma cena em quadros: fala + respiro (+ hold extra se for a última). */
+export const sceneFrames = (s: Scene, isLast: boolean, tail: number = TAIL_FRAMES) =>
+  Math.round(s.audioSec * FPS) + tail + (isLast ? OUTRO_EXTRA : 0);
 
-export const TOTAL_FRAMES = SCENES.reduce((acc, s) => acc + sceneFrames(s), 0);
+export const totalFrames = (scenes: Scene[], tail: number = TAIL_FRAMES) =>
+  scenes.reduce((acc, s, i) => acc + sceneFrames(s, i === scenes.length - 1, tail), 0);
+
+export const TOTAL_FRAMES = totalFrames(SCENES);
 
 export const musicFile = () => staticFile("assets/musica.mp3");
 export const sceneAudio = (s: Scene) => staticFile(s.audio);

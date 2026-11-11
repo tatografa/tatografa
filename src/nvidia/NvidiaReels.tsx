@@ -6,14 +6,22 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { musicFile, SCENES, sceneFrames, TOTAL_FRAMES } from "./data";
+import { musicFile, Scene as SceneType, sceneFrames, TAIL_FRAMES } from "./data";
 import { Scene } from "./Scene";
 
-export const NvidiaReels: React.FC = () => {
+export type NvidiaReelsProps = {
+  scenes: SceneType[];
+  /** texto da barra de marca no topo */
+  brand: string;
+  /** quadros de respiro após cada fala */
+  tail?: number;
+};
+
+export const NvidiaReels: React.FC<NvidiaReelsProps> = ({ scenes, brand, tail = TAIL_FRAMES }) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
-  // Fade da música: entra no começo, abaixa sob a voz, sai no fim.
+  // Música: entra, abaixa sob a voz, sai no fim. Em loop se o vídeo for maior que a faixa.
   const musicVol = interpolate(
     frame,
     [0, 20, 40, durationInFrames - 35, durationInFrames - 5],
@@ -25,21 +33,18 @@ export const NvidiaReels: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#05070d" }}>
-      {/* Trilha de fundo única, por cima de todas as cenas */}
-      <Audio src={musicFile()} volume={musicVol} />
+      <Audio src={musicFile()} volume={musicVol} loop />
 
-      {SCENES.map((scene) => {
-        const dur = sceneFrames(scene);
+      {scenes.map((scene, i) => {
+        const dur = sceneFrames(scene, i === scenes.length - 1, tail);
         const from = cursor;
         cursor += dur;
         return (
           <Sequence key={scene.id} from={from} durationInFrames={dur}>
-            <Scene scene={scene} durationInFrames={dur} />
+            <Scene scene={scene} durationInFrames={dur} brand={brand} />
           </Sequence>
         );
       })}
     </AbsoluteFill>
   );
 };
-
-export const nvidiaDuration = TOTAL_FRAMES;

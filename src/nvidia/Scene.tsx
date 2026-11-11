@@ -17,10 +17,15 @@ import { AiFlowVisual } from "./visuals/AiFlowVisual";
 import { ChartVisual } from "./visuals/ChartVisual";
 import { DataCenterVisual } from "./visuals/DataCenterVisual";
 import { WorldVisual } from "./visuals/WorldVisual";
+import { CountdownVisual } from "./visuals/CountdownVisual";
+import { RainVisual } from "./visuals/RainVisual";
+import { CodeVisual } from "./visuals/CodeVisual";
+import { ChatVisual } from "./visuals/ChatVisual";
+import { SpotlightVisual } from "./visuals/SpotlightVisual";
 import { FONT } from "./visuals/common";
 
-const formatNumber = (n: number) =>
-  n.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const formatNumber = (n: number, decimals: number) =>
+  n.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 
 const Visual: React.FC<{ scene: SceneType }> = ({ scene }) => {
   switch (scene.visual) {
@@ -34,21 +39,32 @@ const Visual: React.FC<{ scene: SceneType }> = ({ scene }) => {
     case "neural":
       return <NeuralVisual />;
     case "aiflow":
-      return <AiFlowVisual />;
+      return <AiFlowVisual label={scene.label} />;
     case "chart":
       return <ChartVisual />;
     case "datacenter":
       return <DataCenterVisual />;
     case "world":
       return <WorldVisual />;
+    case "countdown":
+      return <CountdownVisual />;
+    case "rain":
+      return <RainVisual />;
+    case "code":
+      return <CodeVisual />;
+    case "chat":
+      return <ChatVisual />;
+    case "spotlight":
+      return <SpotlightVisual />;
     default:
       return null;
   }
 };
 
-export const Scene: React.FC<{ scene: SceneType; durationInFrames: number }> = ({
+export const Scene: React.FC<{ scene: SceneType; durationInFrames: number; brand: string }> = ({
   scene,
   durationInFrames,
+  brand,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -108,7 +124,7 @@ export const Scene: React.FC<{ scene: SceneType; durationInFrames: number }> = (
           opacity: 0.9,
         }}
       >
-        <span style={{ color: NVIDIA_GREEN }}>●</span> THE STORY OF NVIDIA
+        <span style={{ color: NVIDIA_GREEN }}>●</span> {brand}
       </div>
 
       {/* destaque + subtítulo (banda central-baixa, com backing escuro) */}
@@ -137,7 +153,7 @@ export const Scene: React.FC<{ scene: SceneType; durationInFrames: number }> = (
             <div
               style={{
                 fontFamily: FONT,
-                fontSize: 160,
+                fontSize: (scene.counterTo ?? 0) >= 100000 ? 132 : 160,
                 fontWeight: 900,
                 color: NVIDIA_GREEN,
                 lineHeight: 1,
@@ -146,7 +162,7 @@ export const Scene: React.FC<{ scene: SceneType; durationInFrames: number }> = (
               }}
             >
               {scene.counterPrefix}
-              {formatNumber(counterValue)}
+              {formatNumber(counterValue, scene.counterDecimals ?? 1)}
               {scene.counterSuffix}
             </div>
           ) : (

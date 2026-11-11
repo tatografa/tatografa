@@ -2,7 +2,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import { GREEN, rng } from "./common";
 
 /** Um chip central recebendo fluxos de dados de todas as direções. */
-export const AiFlowVisual: React.FC = () => {
+export const AiFlowVisual: React.FC<{ label?: string }> = ({ label = "AI" }) => {
   const frame = useCurrentFrame();
   const { width, height, fps } = useVideoConfig();
   const t = frame / fps;
@@ -77,7 +77,7 @@ export const AiFlowVisual: React.FC = () => {
         {/* die central */}
         <rect x={cx - 55} y={cy - 55} width={110} height={110} rx={10} fill={GREEN} opacity={0.9}
           style={{ filter: `drop-shadow(0 0 ${18 + Math.sin(t * 4) * 8}px ${GREEN})` }} />
-        <text x={cx} y={cy + 12} textAnchor="middle" fontSize={34} fontWeight={900} fill="#05070d" fontFamily="sans-serif">AI</text>
+        <text x={cx} y={cy + 11} textAnchor="middle" fontSize={label.length > 2 ? 26 : 34} fontWeight={900} fill="#05070d" fontFamily="sans-serif">{label}</text>
       </svg>
     </AbsoluteFill>
   );
