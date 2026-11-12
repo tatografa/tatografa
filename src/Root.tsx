@@ -3,6 +3,7 @@ import { Cubo3D } from "./Cubo3D";
 import { NvidiaReels } from "./nvidia/NvidiaReels";
 import { FPS, HEIGHT, SCENES, TAIL_FRAMES, TOTAL_FRAMES, WIDTH } from "./nvidia/data";
 import { SCENES_P2, TAIL_P2, TOTAL_FRAMES_P2 } from "./nvidia/data-part2";
+import { SCENES_P3, TAIL_P3, TOTAL_FRAMES_P3 } from "./nvidia/data-part3";
 
 /**
  * Componente raiz: cada <Composition> é um vídeo.
@@ -30,6 +31,17 @@ export const RemotionRoot: React.FC = () => {
         width={WIDTH}
         height={HEIGHT}
         defaultProps={{ scenes: SCENES_P2, brand: "THE STORY OF NVIDIA · PART 2", tail: TAIL_P2 }}
+      />
+
+      {/* Reels vertical: A história da NVIDIA — Parte 3 (charts e ícones) */}
+      <Composition
+        id="NvidiaReelsPart3"
+        component={NvidiaReels}
+        durationInFrames={TOTAL_FRAMES_P3}
+        fps={FPS}
+        width={WIDTH}
+        height={HEIGHT}
+        defaultProps={{ scenes: SCENES_P3, brand: "THE STORY OF NVIDIA · PART 3", tail: TAIL_P3 }}
       />
 
       {/* Exemplo original: cubo 3D girando */}

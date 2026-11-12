@@ -24,7 +24,15 @@ export type VisualKind =
   | "rain"
   | "code"
   | "chat"
-  | "spotlight";
+  | "spotlight"
+  | "donut"
+  | "waffle"
+  | "supply"
+  | "stock"
+  | "rivals"
+  | "crash"
+  | "risks"
+  | "future";
 
 export type Scene = {
   id: number;

@@ -41,7 +41,7 @@ export const NvidiaReels: React.FC<NvidiaReelsProps> = ({ scenes, brand, tail = 
         cursor += dur;
         return (
           <Sequence key={scene.id} from={from} durationInFrames={dur}>
-            <Scene scene={scene} durationInFrames={dur} brand={brand} />
+            <Scene scene={scene} durationInFrames={dur} brand={brand} index={i} count={scenes.length} />
           </Sequence>
         );
       })}
