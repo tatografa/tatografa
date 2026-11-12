@@ -18,7 +18,7 @@ const THUMBS: (ThumbProps & { id: string })[] = [
     bigNumber: "$4T",
     numberLabel: "FROM A DINER",
     accent: GREEN,
-    motif: "chips",
+
   },
   {
     id: "ThumbPart2",
@@ -27,7 +27,7 @@ const THUMBS: (ThumbProps & { id: string })[] = [
     bigNumber: "30",
     numberLabel: "DAYS LEFT",
     accent: RED,
-    motif: "chips",
+
   },
   {
     id: "ThumbPart3",
@@ -36,7 +36,7 @@ const THUMBS: (ThumbProps & { id: string })[] = [
     bigNumber: "$130B",
     numberLabel: "A YEAR",
     accent: GREEN,
-    motif: "chart",
+
   },
 ];
 
