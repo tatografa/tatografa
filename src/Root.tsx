@@ -10,6 +10,13 @@ import { Thumbnail, ThumbProps } from "./nvidia/Thumbnail";
 const GREEN = "#76B900";
 const RED = "#ff3b3b";
 
+/** Foto real (Wikimedia Commons, CC BY 4.0) + logo oficial, usados em todas as thumbs. */
+const REAL = {
+  photo: "assets/jensen-portrait.jpg",
+  photoCredit: "Photo: Peter Dasilva · CC BY 4.0",
+  logoSrc: "assets/nvidia-logo-white.svg",
+};
+
 /** Thumbnails da série: uma por episódio. */
 const THUMBS: (ThumbProps & { id: string })[] = [
   {
@@ -19,7 +26,7 @@ const THUMBS: (ThumbProps & { id: string })[] = [
     bigNumber: "$4T",
     numberLabel: "FROM A DINER",
     accent: GREEN,
-
+    ...REAL,
   },
   {
     id: "ThumbPart2",
@@ -28,7 +35,7 @@ const THUMBS: (ThumbProps & { id: string })[] = [
     bigNumber: "30",
     numberLabel: "DAYS LEFT",
     accent: RED,
-
+    ...REAL,
   },
   {
     id: "ThumbPart3",
@@ -37,7 +44,7 @@ const THUMBS: (ThumbProps & { id: string })[] = [
     bigNumber: "$130B",
     numberLabel: "A YEAR",
     accent: GREEN,
-
+    ...REAL,
   },
   {
     id: "ThumbPart4",
@@ -46,6 +53,7 @@ const THUMBS: (ThumbProps & { id: string })[] = [
     bigNumber: "60",
     numberLabel: "DIRECT REPORTS",
     accent: GREEN,
+    ...REAL,
   },
 ];
 
