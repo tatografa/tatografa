@@ -39,6 +39,14 @@ const THUMBS: (ThumbProps & { id: string })[] = [
     accent: GREEN,
 
   },
+  {
+    id: "ThumbPart4",
+    part: 4,
+    headline: ["THE MAN", "WHO RUNS", "NVIDIA"],
+    bigNumber: "60",
+    numberLabel: "DIRECT REPORTS",
+    accent: GREEN,
+  },
 ];
 
 /**
