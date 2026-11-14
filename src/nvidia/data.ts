@@ -32,7 +32,14 @@ export type VisualKind =
   | "rivals"
   | "crash"
   | "risks"
-  | "future";
+  | "future"
+  | "timeline"
+  | "napkin"
+  | "orgchart"
+  | "inbox"
+  | "quote"
+  | "deal"
+  | "blocked";
 
 export type Scene = {
   id: number;

@@ -30,6 +30,13 @@ import { RivalsVisual } from "./visuals/RivalsVisual";
 import { CrashVisual } from "./visuals/CrashVisual";
 import { RisksVisual } from "./visuals/RisksVisual";
 import { FutureVisual } from "./visuals/FutureVisual";
+import { TimelineVisual } from "./visuals/TimelineVisual";
+import { NapkinVisual } from "./visuals/NapkinVisual";
+import { OrgChartVisual } from "./visuals/OrgChartVisual";
+import { InboxVisual } from "./visuals/InboxVisual";
+import { QuoteVisual } from "./visuals/QuoteVisual";
+import { DealVisual } from "./visuals/DealVisual";
+import { BlockedVisual } from "./visuals/BlockedVisual";
 import { FONT } from "./visuals/common";
 
 const formatNumber = (n: number, decimals: number) =>
@@ -80,6 +87,20 @@ const Visual: React.FC<{ scene: SceneType }> = ({ scene }) => {
       return <RisksVisual />;
     case "future":
       return <FutureVisual />;
+    case "timeline":
+      return <TimelineVisual />;
+    case "napkin":
+      return <NapkinVisual />;
+    case "orgchart":
+      return <OrgChartVisual />;
+    case "inbox":
+      return <InboxVisual />;
+    case "quote":
+      return <QuoteVisual />;
+    case "deal":
+      return <DealVisual />;
+    case "blocked":
+      return <BlockedVisual />;
     default:
       return null;
   }

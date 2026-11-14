@@ -4,6 +4,7 @@ import { NvidiaReels } from "./nvidia/NvidiaReels";
 import { FPS, HEIGHT, SCENES, TAIL_FRAMES, TOTAL_FRAMES, WIDTH } from "./nvidia/data";
 import { SCENES_P2, TAIL_P2, TOTAL_FRAMES_P2 } from "./nvidia/data-part2";
 import { SCENES_P3, TAIL_P3, TOTAL_FRAMES_P3 } from "./nvidia/data-part3";
+import { SCENES_P4, TAIL_P4, TOTAL_FRAMES_P4 } from "./nvidia/data-part4";
 import { Thumbnail, ThumbProps } from "./nvidia/Thumbnail";
 
 const GREEN = "#76B900";
@@ -77,6 +78,17 @@ export const RemotionRoot: React.FC = () => {
         width={WIDTH}
         height={HEIGHT}
         defaultProps={{ scenes: SCENES_P3, brand: "THE STORY OF NVIDIA · PART 3", tail: TAIL_P3 }}
+      />
+
+      {/* Reels vertical: A história da NVIDIA — Parte 4 (Jensen Huang) */}
+      <Composition
+        id="NvidiaReelsPart4"
+        component={NvidiaReels}
+        durationInFrames={TOTAL_FRAMES_P4}
+        fps={FPS}
+        width={WIDTH}
+        height={HEIGHT}
+        defaultProps={{ scenes: SCENES_P4, brand: "THE STORY OF NVIDIA · PART 4", tail: TAIL_P4 }}
       />
 
       {/* Thumbnails — vertical 1080x1920 (capa de Shorts/Reels) */}
