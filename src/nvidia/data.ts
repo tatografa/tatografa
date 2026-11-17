@@ -39,7 +39,17 @@ export type VisualKind =
   | "inbox"
   | "quote"
   | "deal"
-  | "blocked";
+  | "blocked"
+  // Bitcoin
+  | "btccoin"
+  | "crisis"
+  | "whitepaper"
+  | "ledger"
+  | "genesis"
+  | "firsttx"
+  | "pizza"
+  | "vanish"
+  | "growth";
 
 export type Scene = {
   id: number;

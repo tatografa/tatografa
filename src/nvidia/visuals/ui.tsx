@@ -1,5 +1,6 @@
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { FONT, GREEN } from "./common";
+import { FONT } from "./common";
+import { useAccent } from "../theme";
 
 /** Painel com cabeçalho (kicker + título) e corpo. */
 export const Panel: React.FC<{
@@ -12,6 +13,7 @@ export const Panel: React.FC<{
   delay?: number;
   children?: React.ReactNode;
 }> = ({ x, y, w, h, kicker, title, delay = 0, children }) => {
+  const GREEN = useAccent();
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const s = spring({ frame: frame - delay, fps, config: { damping: 16 } });
@@ -26,7 +28,7 @@ export const Panel: React.FC<{
         padding: "26px 30px",
         borderRadius: 28,
         background: "linear-gradient(180deg, rgba(14,20,30,0.92) 0%, rgba(8,12,19,0.92) 100%)",
-        border: "1.5px solid rgba(118,185,0,0.35)",
+        border: `1.5px solid ${GREEN}59`,
         boxShadow: "0 24px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05)",
         opacity: s,
         transform: `translateY(${interpolate(s, [0, 1], [30, 0])}px)`,
@@ -51,8 +53,11 @@ export const Panel: React.FC<{
 export const BigNumber: React.FC<{ children: React.ReactNode; size?: number; color?: string }> = ({
   children,
   size = 120,
-  color = GREEN,
-}) => (
+  color,
+}) => {
+  const accent = useAccent();
+  color = color ?? accent;
+  return (
   <div
     style={{
       fontFamily: FONT,
@@ -66,15 +71,19 @@ export const BigNumber: React.FC<{ children: React.ReactNode; size?: number; col
   >
     {children}
   </div>
-);
+  );
+};
 
 /** Etiqueta arredondada. */
 export const Pill: React.FC<{ children: React.ReactNode; color?: string; bg?: string; size?: number }> = ({
   children,
   color = "#05070d",
-  bg = GREEN,
+  bg,
   size = 26,
-}) => (
+}) => {
+  const accent = useAccent();
+  bg = bg ?? accent;
+  return (
   <span
     style={{
       display: "inline-flex",
@@ -92,7 +101,8 @@ export const Pill: React.FC<{ children: React.ReactNode; color?: string; bg?: st
   >
     {children}
   </span>
-);
+  );
+};
 
 /** Linha de legenda: ícone + nome + valor + barra animada. */
 export const LegendRow: React.FC<{

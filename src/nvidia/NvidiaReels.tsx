@@ -8,6 +8,7 @@ import {
 } from "remotion";
 import { musicFile, Scene as SceneType, sceneFrames, TAIL_FRAMES } from "./data";
 import { Scene } from "./Scene";
+import { AccentProvider, NVIDIA_GREEN } from "./theme";
 
 export type NvidiaReelsProps = {
   scenes: SceneType[];
@@ -15,9 +16,16 @@ export type NvidiaReelsProps = {
   brand: string;
   /** quadros de respiro após cada fala */
   tail?: number;
+  /** cor de destaque da série (verde NVIDIA, laranja Bitcoin, …) */
+  accent?: string;
 };
 
-export const NvidiaReels: React.FC<NvidiaReelsProps> = ({ scenes, brand, tail = TAIL_FRAMES }) => {
+export const NvidiaReels: React.FC<NvidiaReelsProps> = ({
+  scenes,
+  brand,
+  tail = TAIL_FRAMES,
+  accent = NVIDIA_GREEN,
+}) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
@@ -32,6 +40,7 @@ export const NvidiaReels: React.FC<NvidiaReelsProps> = ({ scenes, brand, tail = 
   let cursor = 0;
 
   return (
+    <AccentProvider accent={accent}>
     <AbsoluteFill style={{ backgroundColor: "#05070d" }}>
       <Audio src={musicFile()} volume={musicVol} loop />
 
@@ -46,5 +55,6 @@ export const NvidiaReels: React.FC<NvidiaReelsProps> = ({ scenes, brand, tail = 
         );
       })}
     </AbsoluteFill>
+    </AccentProvider>
   );
 };

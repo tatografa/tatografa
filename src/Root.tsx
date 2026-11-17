@@ -5,6 +5,8 @@ import { FPS, HEIGHT, SCENES, TAIL_FRAMES, TOTAL_FRAMES, WIDTH } from "./nvidia/
 import { SCENES_P2, TAIL_P2, TOTAL_FRAMES_P2 } from "./nvidia/data-part2";
 import { SCENES_P3, TAIL_P3, TOTAL_FRAMES_P3 } from "./nvidia/data-part3";
 import { SCENES_P4, TAIL_P4, TOTAL_FRAMES_P4 } from "./nvidia/data-part4";
+import { SCENES_BTC1, TAIL_BTC1, TOTAL_FRAMES_BTC1 } from "./bitcoin/data-part1";
+import { BITCOIN_ORANGE } from "./nvidia/theme";
 import { Thumbnail, ThumbProps } from "./nvidia/Thumbnail";
 
 const GREEN = "#76B900";
@@ -105,6 +107,22 @@ export const RemotionRoot: React.FC = () => {
         width={WIDTH}
         height={HEIGHT}
         defaultProps={{ scenes: SCENES_P4, brand: "THE STORY OF NVIDIA · PART 4", tail: TAIL_P4 }}
+      />
+
+      {/* Reels vertical: Bitcoin — Parte 1 (como nasceu) */}
+      <Composition
+        id="BitcoinReelsPart1"
+        component={NvidiaReels}
+        durationInFrames={TOTAL_FRAMES_BTC1}
+        fps={FPS}
+        width={WIDTH}
+        height={HEIGHT}
+        defaultProps={{
+          scenes: SCENES_BTC1,
+          brand: "THE STORY OF BITCOIN · PART 1",
+          tail: TAIL_BTC1,
+          accent: BITCOIN_ORANGE,
+        }}
       />
 
       {/* Thumbnails — vertical 1080x1920 (capa de Shorts/Reels) */}

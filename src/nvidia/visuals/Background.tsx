@@ -1,5 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
-import { BG, GREEN, rng } from "./common";
+import { BG, rng } from "./common";
+import { useAccent } from "../theme";
 
 /**
  * Fundo animado comum a todas as cenas: gradiente verde pulsante,
@@ -10,6 +11,7 @@ export const Background: React.FC<{ seed?: number; grid?: boolean }> = ({
   seed = 7,
   grid = true,
 }) => {
+  const GREEN = useAccent();
   const frame = useCurrentFrame();
   const { width, height, fps } = useVideoConfig();
   const t = frame / fps;
@@ -31,7 +33,7 @@ export const Background: React.FC<{ seed?: number; grid?: boolean }> = ({
       {/* brilho radial pulsante */}
       <AbsoluteFill
         style={{
-          background: `radial-gradient(60% 45% at 50% 42%, rgba(118,185,0,${0.22 * glow}) 0%, rgba(118,185,0,0.06) 40%, rgba(5,7,13,0) 70%)`,
+          background: `radial-gradient(60% 45% at 50% 42%, ${GREEN}${Math.round(0.22 * glow * 255).toString(16).padStart(2, "0")} 0%, ${GREEN}10 40%, rgba(5,7,13,0) 70%)`,
         }}
       />
 

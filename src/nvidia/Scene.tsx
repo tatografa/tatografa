@@ -7,7 +7,8 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { AUDIO_DELAY, NVIDIA_GREEN, Scene as SceneType, sceneAudio } from "./data";
+import { AUDIO_DELAY, Scene as SceneType, sceneAudio } from "./data";
+import { useAccent } from "./theme";
 import { Core3D } from "./Core3D";
 import { Background } from "./visuals/Background";
 import { GpuVisual } from "./visuals/GpuVisual";
@@ -37,6 +38,15 @@ import { InboxVisual } from "./visuals/InboxVisual";
 import { QuoteVisual } from "./visuals/QuoteVisual";
 import { DealVisual } from "./visuals/DealVisual";
 import { BlockedVisual } from "./visuals/BlockedVisual";
+import { BtcCoin3D } from "../bitcoin/visuals/BtcCommon";
+import { CrisisVisual } from "../bitcoin/visuals/CrisisVisual";
+import { WhitepaperVisual } from "../bitcoin/visuals/WhitepaperVisual";
+import { LedgerVisual } from "../bitcoin/visuals/LedgerVisual";
+import { GenesisVisual } from "../bitcoin/visuals/GenesisVisual";
+import { FirstTxVisual } from "../bitcoin/visuals/FirstTxVisual";
+import { PizzaVisual } from "../bitcoin/visuals/PizzaVisual";
+import { VanishVisual } from "../bitcoin/visuals/VanishVisual";
+import { GrowthVisual } from "../bitcoin/visuals/GrowthVisual";
 import { FONT } from "./visuals/common";
 
 const formatNumber = (n: number, decimals: number) =>
@@ -101,6 +111,24 @@ const Visual: React.FC<{ scene: SceneType }> = ({ scene }) => {
       return <DealVisual />;
     case "blocked":
       return <BlockedVisual />;
+    case "btccoin":
+      return <BtcCoin3D />;
+    case "crisis":
+      return <CrisisVisual />;
+    case "whitepaper":
+      return <WhitepaperVisual />;
+    case "ledger":
+      return <LedgerVisual />;
+    case "genesis":
+      return <GenesisVisual />;
+    case "firsttx":
+      return <FirstTxVisual />;
+    case "pizza":
+      return <PizzaVisual />;
+    case "vanish":
+      return <VanishVisual />;
+    case "growth":
+      return <GrowthVisual />;
     default:
       return null;
   }
@@ -108,6 +136,7 @@ const Visual: React.FC<{ scene: SceneType }> = ({ scene }) => {
 
 /** Legenda com trechos *entre asteriscos* destacados em verde. */
 const Caption: React.FC<{ text: string }> = ({ text }) => {
+  const NVIDIA_GREEN = useAccent();
   const parts = text.split(/(\*[^*]+\*)/g).filter(Boolean);
   return (
     <>
@@ -125,7 +154,9 @@ const Caption: React.FC<{ text: string }> = ({ text }) => {
 };
 
 /** Barra de progresso segmentada (estilo stories). */
-const StoryProgress: React.FC<{ index: number; count: number; progress: number }> = ({ index, count, progress }) => (
+const StoryProgress: React.FC<{ index: number; count: number; progress: number }> = ({ index, count, progress }) => {
+  const NVIDIA_GREEN = useAccent();
+  return (
   <div style={{ position: "absolute", top: 40, left: 40, right: 40, display: "flex", gap: 8 }}>
     {Array.from({ length: count }, (_, i) => (
       <div key={i} style={{ flex: 1, height: 7, borderRadius: 4, background: "rgba(255,255,255,0.18)", overflow: "hidden" }}>
@@ -140,7 +171,8 @@ const StoryProgress: React.FC<{ index: number; count: number; progress: number }
       </div>
     ))}
   </div>
-);
+  );
+};
 
 export const Scene: React.FC<{
   scene: SceneType;
@@ -151,6 +183,7 @@ export const Scene: React.FC<{
 }> = ({ scene, durationInFrames, brand, index, count }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const NVIDIA_GREEN = useAccent();
 
   const fadeIn = interpolate(frame, [0, 10], [0, 1], { extrapolateRight: "clamp" });
   const fadeOut = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], {
@@ -251,7 +284,7 @@ export const Scene: React.FC<{
                   color: NVIDIA_GREEN,
                   lineHeight: 1,
                   WebkitTextStroke: "2px rgba(0,0,0,0.5)",
-                  textShadow: "0 6px 28px rgba(0,0,0,0.9), 0 0 55px rgba(118,185,0,0.4)",
+                  textShadow: `0 6px 28px rgba(0,0,0,0.9), 0 0 55px ${NVIDIA_GREEN}66`,
                 }}
               >
                 {scene.counterPrefix}
@@ -312,7 +345,7 @@ export const Scene: React.FC<{
         <div
           style={{
             background: "rgba(5,7,13,0.72)",
-            border: `2px solid rgba(118,185,0,0.55)`,
+            border: `2px solid ${NVIDIA_GREEN}8c`,
             borderRadius: 24,
             padding: "22px 28px",
             textAlign: "center",
