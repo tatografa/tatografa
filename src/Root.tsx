@@ -57,6 +57,17 @@ const THUMBS: (ThumbProps & { id: string })[] = [
     accent: GREEN,
     ...REAL,
   },
+  // Bitcoin: logo oficial (domínio público) + silhueta anônima do Satoshi
+  {
+    id: "ThumbBtc1",
+    part: 1,
+    headline: ["HOW BITCOIN", "WAS BORN"],
+    bigNumber: "9",
+    numberLabel: "PAGES THAT CHANGED MONEY",
+    accent: BITCOIN_ORANGE,
+    logoSrc: "assets/bitcoin-logo.svg",
+    figure: "satoshi",
+  },
 ];
 
 /**
