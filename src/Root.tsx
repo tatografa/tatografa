@@ -6,6 +6,7 @@ import { SCENES_P2, TAIL_P2, TOTAL_FRAMES_P2 } from "./nvidia/data-part2";
 import { SCENES_P3, TAIL_P3, TOTAL_FRAMES_P3 } from "./nvidia/data-part3";
 import { SCENES_P4, TAIL_P4, TOTAL_FRAMES_P4 } from "./nvidia/data-part4";
 import { SCENES_BTC1, TAIL_BTC1, TOTAL_FRAMES_BTC1 } from "./bitcoin/data-part1";
+import { SCENES_BTC2, TAIL_BTC2, TOTAL_FRAMES_BTC2 } from "./bitcoin/data-part2";
 import { BITCOIN_ORANGE } from "./nvidia/theme";
 import { Thumbnail, ThumbProps } from "./nvidia/Thumbnail";
 
@@ -64,6 +65,16 @@ const THUMBS: (ThumbProps & { id: string })[] = [
     headline: ["HOW BITCOIN", "WAS BORN"],
     bigNumber: "9",
     numberLabel: "PAGES THAT CHANGED MONEY",
+    accent: BITCOIN_ORANGE,
+    logoSrc: "assets/bitcoin-logo.svg",
+    figure: "satoshi",
+  },
+  {
+    id: "ThumbBtc2",
+    part: 2,
+    headline: ["HOW BITCOIN", "WORKS"],
+    bigNumber: "21M",
+    numberLabel: "COINS. NOT ONE MORE.",
     accent: BITCOIN_ORANGE,
     logoSrc: "assets/bitcoin-logo.svg",
     figure: "satoshi",
@@ -132,6 +143,22 @@ export const RemotionRoot: React.FC = () => {
           scenes: SCENES_BTC1,
           brand: "THE STORY OF BITCOIN · PART 1",
           tail: TAIL_BTC1,
+          accent: BITCOIN_ORANGE,
+        }}
+      />
+
+      {/* Reels vertical: Bitcoin — Parte 2 (como funciona) */}
+      <Composition
+        id="BitcoinReelsPart2"
+        component={NvidiaReels}
+        durationInFrames={TOTAL_FRAMES_BTC2}
+        fps={FPS}
+        width={WIDTH}
+        height={HEIGHT}
+        defaultProps={{
+          scenes: SCENES_BTC2,
+          brand: "THE STORY OF BITCOIN · PART 2",
+          tail: TAIL_BTC2,
           accent: BITCOIN_ORANGE,
         }}
       />

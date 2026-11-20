@@ -49,7 +49,15 @@ export type VisualKind =
   | "firsttx"
   | "pizza"
   | "vanish"
-  | "growth";
+  | "growth"
+  | "blockchain"
+  | "anatomy"
+  | "tamper"
+  | "mining"
+  | "reward"
+  | "cap"
+  | "halving"
+  | "keys";
 
 export type Scene = {
   id: number;

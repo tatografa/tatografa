@@ -47,6 +47,14 @@ import { FirstTxVisual } from "../bitcoin/visuals/FirstTxVisual";
 import { PizzaVisual } from "../bitcoin/visuals/PizzaVisual";
 import { VanishVisual } from "../bitcoin/visuals/VanishVisual";
 import { GrowthVisual } from "../bitcoin/visuals/GrowthVisual";
+import { BlockchainVisual } from "../bitcoin/visuals/BlockchainVisual";
+import { BlockAnatomyVisual } from "../bitcoin/visuals/BlockAnatomyVisual";
+import { TamperVisual } from "../bitcoin/visuals/TamperVisual";
+import { MiningVisual } from "../bitcoin/visuals/MiningVisual";
+import { RewardVisual } from "../bitcoin/visuals/RewardVisual";
+import { CapVisual } from "../bitcoin/visuals/CapVisual";
+import { HalvingVisual } from "../bitcoin/visuals/HalvingVisual";
+import { KeysVisual } from "../bitcoin/visuals/KeysVisual";
 import { FONT } from "./visuals/common";
 
 const formatNumber = (n: number, decimals: number) =>
@@ -129,6 +137,22 @@ const Visual: React.FC<{ scene: SceneType }> = ({ scene }) => {
       return <VanishVisual />;
     case "growth":
       return <GrowthVisual />;
+    case "blockchain":
+      return <BlockchainVisual />;
+    case "anatomy":
+      return <BlockAnatomyVisual />;
+    case "tamper":
+      return <TamperVisual />;
+    case "mining":
+      return <MiningVisual />;
+    case "reward":
+      return <RewardVisual />;
+    case "cap":
+      return <CapVisual />;
+    case "halving":
+      return <HalvingVisual />;
+    case "keys":
+      return <KeysVisual />;
     default:
       return null;
   }
