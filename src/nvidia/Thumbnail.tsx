@@ -30,7 +30,7 @@ const GENESIS_HASH = "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a
  * Desenhada no sistema de coordenadas do layout vertical (pico do capuz em
  * 540,560) e reposicionada com translate/scale.
  */
-const SatoshiFigure: React.FC<{ cx: number; top: number; k: number; accent: string }> = ({ cx, top, k, accent }) => (
+export const SatoshiFigure: React.FC<{ cx: number; top: number; k: number; accent: string }> = ({ cx, top, k, accent }) => (
   <g transform={`translate(${cx} ${top}) scale(${k}) translate(-540 -560)`}>
     <defs>
       <linearGradient id="hoodie" x1="0" y1="0" x2="1" y2="1">

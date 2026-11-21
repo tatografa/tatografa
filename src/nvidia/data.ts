@@ -57,7 +57,13 @@ export type VisualKind =
   | "reward"
   | "cap"
   | "halving"
-  | "keys";
+  | "keys"
+  | "hood"
+  | "profile"
+  | "team"
+  | "suspect"
+  | "untouched"
+  | "noleader";
 
 export type Scene = {
   id: number;

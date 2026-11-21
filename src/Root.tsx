@@ -7,6 +7,7 @@ import { SCENES_P3, TAIL_P3, TOTAL_FRAMES_P3 } from "./nvidia/data-part3";
 import { SCENES_P4, TAIL_P4, TOTAL_FRAMES_P4 } from "./nvidia/data-part4";
 import { SCENES_BTC1, TAIL_BTC1, TOTAL_FRAMES_BTC1 } from "./bitcoin/data-part1";
 import { SCENES_BTC2, TAIL_BTC2, TOTAL_FRAMES_BTC2 } from "./bitcoin/data-part2";
+import { SCENES_BTC3, TAIL_BTC3, TOTAL_FRAMES_BTC3 } from "./bitcoin/data-part3";
 import { BITCOIN_ORANGE } from "./nvidia/theme";
 import { Thumbnail, ThumbProps } from "./nvidia/Thumbnail";
 
@@ -75,6 +76,16 @@ const THUMBS: (ThumbProps & { id: string })[] = [
     headline: ["HOW BITCOIN", "WORKS"],
     bigNumber: "21M",
     numberLabel: "COINS. NOT ONE MORE.",
+    accent: BITCOIN_ORANGE,
+    logoSrc: "assets/bitcoin-logo.svg",
+    figure: "satoshi",
+  },
+  {
+    id: "ThumbBtc3",
+    part: 3,
+    headline: ["WHO IS", "SATOSHI?"],
+    bigNumber: "1.1M",
+    numberLabel: "BTC NEVER MOVED",
     accent: BITCOIN_ORANGE,
     logoSrc: "assets/bitcoin-logo.svg",
     figure: "satoshi",
@@ -159,6 +170,22 @@ export const RemotionRoot: React.FC = () => {
           scenes: SCENES_BTC2,
           brand: "THE STORY OF BITCOIN · PART 2",
           tail: TAIL_BTC2,
+          accent: BITCOIN_ORANGE,
+        }}
+      />
+
+      {/* Reels vertical: Bitcoin — Parte 3 (quem é Satoshi) */}
+      <Composition
+        id="BitcoinReelsPart3"
+        component={NvidiaReels}
+        durationInFrames={TOTAL_FRAMES_BTC3}
+        fps={FPS}
+        width={WIDTH}
+        height={HEIGHT}
+        defaultProps={{
+          scenes: SCENES_BTC3,
+          brand: "THE STORY OF BITCOIN · PART 3",
+          tail: TAIL_BTC3,
           accent: BITCOIN_ORANGE,
         }}
       />

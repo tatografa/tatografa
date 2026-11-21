@@ -55,6 +55,12 @@ import { RewardVisual } from "../bitcoin/visuals/RewardVisual";
 import { CapVisual } from "../bitcoin/visuals/CapVisual";
 import { HalvingVisual } from "../bitcoin/visuals/HalvingVisual";
 import { KeysVisual } from "../bitcoin/visuals/KeysVisual";
+import { HoodVisual } from "../bitcoin/visuals/HoodVisual";
+import { ProfileVisual } from "../bitcoin/visuals/ProfileVisual";
+import { TeamVisual } from "../bitcoin/visuals/TeamVisual";
+import { SuspectVisual } from "../bitcoin/visuals/SuspectVisual";
+import { UntouchedVisual } from "../bitcoin/visuals/UntouchedVisual";
+import { NoLeaderVisual } from "../bitcoin/visuals/NoLeaderVisual";
 import { FONT } from "./visuals/common";
 
 const formatNumber = (n: number, decimals: number) =>
@@ -153,6 +159,18 @@ const Visual: React.FC<{ scene: SceneType }> = ({ scene }) => {
       return <HalvingVisual />;
     case "keys":
       return <KeysVisual />;
+    case "hood":
+      return <HoodVisual />;
+    case "profile":
+      return <ProfileVisual />;
+    case "team":
+      return <TeamVisual />;
+    case "suspect":
+      return <SuspectVisual who={scene.label ?? "dorian"} />;
+    case "untouched":
+      return <UntouchedVisual />;
+    case "noleader":
+      return <NoLeaderVisual />;
     default:
       return null;
   }
