@@ -63,7 +63,16 @@ export type VisualKind =
   | "team"
   | "suspect"
   | "untouched"
-  | "noleader";
+  | "noleader"
+  | "breakline"
+  | "peaknow"
+  | "streak"
+  | "goldtest"
+  | "rates"
+  | "etfout"
+  | "liquidation"
+  | "minecost"
+  | "history";
 
 export type Scene = {
   id: number;

@@ -61,6 +61,17 @@ import { TeamVisual } from "../bitcoin/visuals/TeamVisual";
 import { SuspectVisual } from "../bitcoin/visuals/SuspectVisual";
 import { UntouchedVisual } from "../bitcoin/visuals/UntouchedVisual";
 import { NoLeaderVisual } from "../bitcoin/visuals/NoLeaderVisual";
+import {
+  BreakLineVisual,
+  EtfOutVisual,
+  GoldTestVisual,
+  HistoryVisual,
+  LiquidationVisual,
+  MineCostVisual,
+  PeakNowVisual,
+  RatesVisual,
+  StreakVisual,
+} from "../bitcoin/visuals/CrashVisuals";
 import { FONT } from "./visuals/common";
 
 const formatNumber = (n: number, decimals: number) =>
@@ -171,6 +182,24 @@ const Visual: React.FC<{ scene: SceneType }> = ({ scene }) => {
       return <UntouchedVisual />;
     case "noleader":
       return <NoLeaderVisual />;
+    case "breakline":
+      return <BreakLineVisual />;
+    case "peaknow":
+      return <PeakNowVisual />;
+    case "streak":
+      return <StreakVisual />;
+    case "goldtest":
+      return <GoldTestVisual />;
+    case "rates":
+      return <RatesVisual />;
+    case "etfout":
+      return <EtfOutVisual />;
+    case "liquidation":
+      return <LiquidationVisual />;
+    case "minecost":
+      return <MineCostVisual />;
+    case "history":
+      return <HistoryVisual />;
     default:
       return null;
   }
