@@ -1,11 +1,29 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
     "career-transitions": {
       "source": "refoundai/lenny-skills",
       "sourceType": "github",
       "skillPath": "skills/career-transitions/SKILL.md",
-      "computedHash": "b6c9db12a31127b619916888679886f5db3bb7997863425d4dbe470b66520b91"
+      "computedHash": "464297d075deb57471e825d6d2cc577b0cc62f5f3a467ad88bf96d967b1e7b6c"
+    },
+    "higgsfield-faceless-video": {
+      "source": "higgsfield-ai/skills",
+      "sourceType": "github",
+      "skillPath": "higgsfield-faceless-video/SKILL.md",
+      "computedHash": "95c4288e64c35e561f8bf6afea57ff52289b8da4c71a519144d9de8a4e2fa125"
+    },
+    "higgsfield-video-explainer": {
+      "source": "higgsfield-ai/skills",
+      "sourceType": "github",
+      "skillPath": "higgsfield-video-explainer/SKILL.md",
+      "computedHash": "22e3132222b7120768530d385d1513bf678be59677f9363a5177adbbe323a518"
+    },
+    "higgsfield-youtube-thumbnail": {
+      "source": "higgsfield-ai/skills",
+      "sourceType": "github",
+      "skillPath": "higgsfield-youtube-thumbnail/SKILL.md",
+      "computedHash": "e95fdabc5eb58b61ef75cc844ccde91e0162082a907d5164d260ba201cab2b71"
     }
   }
 }
