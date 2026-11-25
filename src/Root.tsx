@@ -5,6 +5,7 @@ import { FPS, HEIGHT, SCENES, TAIL_FRAMES, TOTAL_FRAMES, WIDTH } from "./nvidia/
 import { SCENES_P2, TAIL_P2, TOTAL_FRAMES_P2 } from "./nvidia/data-part2";
 import { SCENES_P3, TAIL_P3, TOTAL_FRAMES_P3 } from "./nvidia/data-part3";
 import { SCENES_P4, TAIL_P4, TOTAL_FRAMES_P4 } from "./nvidia/data-part4";
+import { SCENES_P5, TAIL_P5, TOTAL_FRAMES_P5 } from "./nvidia/data-part5";
 import { SCENES_BTC1, TAIL_BTC1, TOTAL_FRAMES_BTC1 } from "./bitcoin/data-part1";
 import { SCENES_BTC2, TAIL_BTC2, TOTAL_FRAMES_BTC2 } from "./bitcoin/data-part2";
 import { SCENES_BTC3, TAIL_BTC3, TOTAL_FRAMES_BTC3 } from "./bitcoin/data-part3";
@@ -57,6 +58,15 @@ const THUMBS: (ThumbProps & { id: string })[] = [
     headline: ["THE MAN", "WHO RUNS", "NVIDIA"],
     bigNumber: "60",
     numberLabel: "DIRECT REPORTS",
+    accent: GREEN,
+    ...REAL,
+  },
+  {
+    id: "ThumbPart5",
+    part: 5,
+    headline: ["HE QUIT.", "THEN HE", "CAME BACK"],
+    bigNumber: "11",
+    numberLabel: "DAYS OUT",
     accent: GREEN,
     ...REAL,
   },
@@ -162,6 +172,17 @@ export const RemotionRoot: React.FC = () => {
         width={WIDTH}
         height={HEIGHT}
         defaultProps={{ scenes: SCENES_P4, brand: "THE STORY OF NVIDIA · PART 4", tail: TAIL_P4 }}
+      />
+
+      {/* Reels vertical: A história da NVIDIA — Parte 5 (a saída e a volta de Jensen) */}
+      <Composition
+        id="NvidiaReelsPart5"
+        component={NvidiaReels}
+        durationInFrames={TOTAL_FRAMES_P5}
+        fps={FPS}
+        width={WIDTH}
+        height={HEIGHT}
+        defaultProps={{ scenes: SCENES_P5, brand: "THE STORY OF NVIDIA · PART 5", tail: TAIL_P5 }}
       />
 
       {/* Reels vertical: Bitcoin — Parte 1 (como nasceu) */}

@@ -12,6 +12,15 @@ export const NVIDIA_GREEN = "#76B900";
 
 export type VisualKind =
   | "core"
+  | "filing"
+  | "headlines"
+  | "interim"
+  | "plunge"
+  | "noreturn"
+  | "pressure"
+  | "reinstated"
+  | "surge"
+  | "probe"
   | "map"
   | "gpu"
   | "neural"

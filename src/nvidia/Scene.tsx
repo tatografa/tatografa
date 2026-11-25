@@ -73,6 +73,17 @@ import {
   StreakVisual,
 } from "../bitcoin/visuals/CrashVisuals";
 import { FONT } from "./visuals/common";
+import {
+  FilingVisual,
+  HeadlinesVisual,
+  InterimVisual,
+  NoReturnVisual,
+  PlungeVisual,
+  PressureVisual,
+  ProbeVisual,
+  ReinstatedVisual,
+  SurgeVisual,
+} from "./visuals/Part5Visuals";
 
 const formatNumber = (n: number, decimals: number) =>
   n.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
@@ -82,6 +93,24 @@ const Visual: React.FC<{ scene: SceneType }> = ({ scene }) => {
     case "core":
     case "cta":
       return <Core3D />;
+    case "filing":
+      return <FilingVisual />;
+    case "headlines":
+      return <HeadlinesVisual />;
+    case "interim":
+      return <InterimVisual />;
+    case "plunge":
+      return <PlungeVisual />;
+    case "noreturn":
+      return <NoReturnVisual />;
+    case "pressure":
+      return <PressureVisual />;
+    case "reinstated":
+      return <ReinstatedVisual />;
+    case "surge":
+      return <SurgeVisual />;
+    case "probe":
+      return <ProbeVisual />;
     case "gpu":
       return <GpuVisual />;
     case "map":
