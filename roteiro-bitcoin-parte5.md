@@ -28,3 +28,8 @@ Arquivos de trabalho: `out/btc5/` (não versionado) — `ledger.json` guarda tod
 ## Notas
 - O roteiro original tinha 26–30 palavras por bloco, mas a voz "Arthur" estoura a janela de 9s; as falas foram encurtadas para 22–27 palavras (a skill proíbe acelerar o áudio).
 - A narração diz "Mount Gox" para a pronúncia correta; a legenda mostra "Mt. Gox".
+
+## Entrega
+- Vídeo: `out/BitcoinReelsPart5.mp4` — 75s, 1440x2560 (9:16), legendas queimadas, título "PART 5 · FORTUNES MADE & LOST" nos primeiros 4s.
+- Thumbnails: `ThumbBtc5` / `ThumbBtc5Wide` — "FORTUNES MADE & LOST · 8,000 BTC IN A LANDFILL".
+- Custo Higgsfield: ~186 créditos (1 imagem de estilo, 14 takes de voz, 8 clipes minimax_h3 de 10s).
