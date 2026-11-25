@@ -35,3 +35,18 @@ O roteiro **atribui** as alegações ("reports", "alleged") e não afirma nada a
 ## Notas
 - **"11 dias":** de 12/nov (anúncio da renúncia) a 23/nov (anúncio da volta). As fontes variam ("mais de uma semana", "duas semanas", "15 dias"); The Hill usa 11 dias, que bate com as datas dos dois 8-K.
 - **Sem rosto gerado por IA:** cenas usam iniciais e ícones; a thumbnail usa a foto licenciada (CC BY 4.0) já usada na série.
+
+## Versão Higgsfield (`out/NvidiaReelsPart5_HF.mp4`, 60s)
+Feita com a skill `higgsfield-faceless-video`, como o Bitcoin Parte 5: imagem de estilo (colagem em papel escuro, acento verde),
+voz seed_audio "Arthur", 6 cenas minimax_h3 de 6s esticadas para 10s em câmera lenta (para caber no limite de 90 créditos),
+música `musica.mp3`, legendas a partir do roteiro e título "THE STORY OF NVIDIA · PART 5 / THE EXIT & THE RETURN" nos 4s iniciais.
+Custo: ~84 créditos (saldo 782,78 → 698,88). Job IDs em `out/nv5hf/ledger.json` (não versionado).
+
+| # | Narração (EN) |
+|---|---------------|
+| 1 | Part five: the exit and the return. NVIDIA's founder quit after thirty-three years, and eleven days later, he was back. Here's what happened. |
+| 2 | On November twelfth, Jensen Huang resigned as CEO. NVIDIA gave no reason, but reports of affairs followed, including one with an alleged Chinese spy. |
+| 3 | Colette Kress became interim CEO. Investors panicked: within a week, NVIDIA's stock fell as much as nineteen percent, wiping out eight hundred fifty billion dollars. |
+| 4 | The board said it would not bring him back. Then Washington stepped in. President Trump said he pushed the board to reverse course. |
+| 5 | On November twenty-third, the board voted unanimously to reinstate him. The stock jumped thirty-one percent in one day, its best day since two thousand three. |
+| 6 | But the investigations are still going. Was bringing him back the right call? Tell me in the comments, and follow for more. |
