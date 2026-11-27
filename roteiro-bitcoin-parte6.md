@@ -27,3 +27,7 @@ Arquivos de trabalho: `out/btc6/` (não versionado) — `ledger.json` com os job
 - **Corretoras ficaram de fora do ranking de propósito:** Coinbase e Binance têm centenas de milhares de BTC, mas são moedas dos clientes, e a Coinbase também é custodiante de ETFs (inclusive do IBIT). Contar as duas coisas seria duplicar.
 - **Strategy × IBIT:** a diferença é pequena (~850 mil × ~790 mil) e já se inverteu antes. Se demorar a publicar, confira de novo.
 - **A narração 6 foi refeita:** a primeira versão era cortada no fim da janela de 9s.
+
+## Entrega
+- Vídeo: `out/BitcoinReelsPart6.mp4` — 60s, 1440x2560 (9:16), legendas queimadas, título + selos do ranking.
+- Custo Higgsfield: ~83 créditos (saldo 698,88 → 615,68): 7 takes de voz + 6 clipes minimax_h3 de 6s (imagem de estilo reaproveitada).
