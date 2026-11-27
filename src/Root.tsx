@@ -122,6 +122,16 @@ const THUMBS: (ThumbProps & { id: string })[] = [
     logoSrc: "assets/bitcoin-logo.svg",
     figure: "satoshi",
   },
+  {
+    id: "ThumbBtc6",
+    part: 6,
+    headline: ["WHO OWNS", "THE MOST", "BITCOIN?"],
+    bigNumber: "1.1M",
+    numberLabel: "BTC · STILL #1",
+    accent: BITCOIN_ORANGE,
+    logoSrc: "assets/bitcoin-logo.svg",
+    figure: "satoshi",
+  },
 ];
 
 /**
